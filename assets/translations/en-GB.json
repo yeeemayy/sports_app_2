@@ -1,0 +1,55 @@
+{
+  "anchor": {
+    "detail": {
+      "live": "LIVE",
+      "offline": "Offline",
+      "loading": "Loading stream...",
+      "tab": {
+        "chats": "Chats",
+        "info": "Information"
+      },
+      "chats": {
+        "placeholder": "Chat coming soon"
+      },
+      "info": {
+        "title": "Title",
+        "notice": "Notice",
+        "notice_banner_label": "Notice",
+        "followers": "Followers",
+        "match_id": "Match ID",
+        "updated": "Last Updated"
+      },
+      "video": {
+        "buffering": "Buffering...",
+        "error": "Stream failed to load, check your connection",
+        "retry": "Retry"
+      },
+      "error": {
+        "load_failed": "Failed to load anchor info"
+      }
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "event": "Event",
+    "news": "News",
+    "data": "Data",
+    "profile": "Profile"
+  },
+  "home": {
+    "tab": {
+      "recommended": "Recommended",
+      "basketball": "Basketball",
+      "football": "Football"
+    },
+    "section": {
+      "live_events": "Live Events",
+      "live_events_count": "{count} matches",
+      "anchor_rankings": "Anchor Rankings",
+      "anchor_live": "Anchor Live"
+    },
+    "error": {
+      "load_failed": "Failed to load, please try again"
+    }
+  }
+}

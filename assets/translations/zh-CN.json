@@ -1,0 +1,55 @@
+{
+  "anchor": {
+    "detail": {
+      "live": "直播中",
+      "offline": "已下线",
+      "loading": "正在加载直播...",
+      "tab": {
+        "chats": "聊天",
+        "info": "资讯"
+      },
+      "chats": {
+        "placeholder": "聊天功能即将上线"
+      },
+      "info": {
+        "title": "标题",
+        "notice": "公告",
+        "notice_banner_label": "主播公告",
+        "followers": "关注",
+        "match_id": "赛事编号",
+        "updated": "更新时间"
+      },
+      "video": {
+        "buffering": "缓冲中...",
+        "error": "直播加载失败，请检查网络",
+        "retry": "重试"
+      },
+      "error": {
+        "load_failed": "加载主播信息失败"
+      }
+    }
+  },
+  "nav": {
+    "home": "主页",
+    "event": "赛事",
+    "news": "新闻",
+    "data": "数据",
+    "profile": "个人"
+  },
+  "home": {
+    "tab": {
+      "recommended": "推荐",
+      "basketball": "篮球",
+      "football": "足球"
+    },
+    "section": {
+      "live_events": "赛事直播",
+      "live_events_count": "{count}场",
+      "anchor_rankings": "主播排行榜",
+      "anchor_live": "主播直播"
+    },
+    "error": {
+      "load_failed": "加载失败，请稍后再试"
+    }
+  }
+}
