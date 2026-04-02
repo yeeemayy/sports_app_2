@@ -9,7 +9,18 @@
         "info": "Information"
       },
       "chats": {
-        "placeholder": "Chat coming soon"
+        "connecting": "Connecting to chat...",
+        "empty": "No messages yet",
+        "login_to_chat": "Login to chat",
+        "retry": "Retry",
+        "input": {
+          "hint": "Say something..."
+        },
+        "send": "Send",
+        "joined_room": "{name} has entered the live room",
+        "error": {
+          "connect_failed": "Connection failed, please retry"
+        }
       },
       "info": {
         "title": "Title",
@@ -50,6 +61,81 @@
     },
     "error": {
       "load_failed": "Failed to load, please try again"
+    }
+  },
+  "session": {
+    "expired_title": "Session Expired",
+    "expired_description": "Your session has expired. Please log in again.",
+    "ok": "OK"
+  },
+  "common": {
+    "ok": "OK",
+    "error": {
+      "unexpected": "An unexpected error occurred, please try again"
+    }
+  },
+  "profile": {
+    "edit_button": "Edit Profile",
+    "toggle_language": "Change Language",
+    "language_zh_cn": "简体中文",
+    "language_en_gb": "English (UK)",
+    "privacy_policy": "Privacy Policy",
+    "terms_of_use": "Terms of Use",
+    "section_settings": "Settings",
+    "section_legal": "Legal",
+    "logout": "Log Out",
+    "logout_confirm_title": "Log Out",
+    "logout_confirm_message": "Are you sure you want to log out?",
+    "logout_confirm_cancel": "Cancel"
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "submit": "Login",
+      "forgot_password": "Forgot password?",
+      "no_account": "Don't have an account?",
+      "register": "Register",
+      "login": "Login",
+      "error_title": "Login Failed"
+    },
+    "register": {
+      "title": "Register",
+      "submit": "Create Account",
+      "have_account": "Already have an account?",
+      "register": "Register",
+      "login": "Login"
+    },
+    "forgot": {
+      "title": "Reset Password",
+      "submit": "Reset Password",
+      "success": "Password reset successfully",
+      "go_to_login": "Go to Login"
+    },
+    "field": {
+      "select_country_region": "Select Country/Region",
+      "search_country_region": "Search Country/Region",
+      "telephone": "Phone Number",
+      "telephone_hint": "Enter phone number",
+      "password": "Password",
+      "password_hint": "Password (6-15 characters)",
+      "new_password": "New Password",
+      "new_password_hint": "Password (6-15 characters)",
+      "confirm_password": "Confirm Password",
+      "confirm_password_hint": "Confirm password",
+      "nickname": "Username",
+      "nickname_hint": "Enter username (6-15 alphanumeric characters)",
+      "sms_code": "Verification Code"
+    },
+    "otp": {
+      "send": "Send Code",
+      "resend_countdown": "Resend in {seconds} s"
+    },
+    "validation": {
+      "telephone_required": "Please enter your phone number",
+      "password_required": "Please enter your password",
+      "nickname_required": "Please enter a nickname",
+      "sms_required": "Please enter the verification code",
+      "confirm_password_mismatch": "Passwords do not match"
     }
   }
 }

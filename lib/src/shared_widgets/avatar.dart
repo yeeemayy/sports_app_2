@@ -29,8 +29,7 @@ class AnchorAvatar extends StatelessWidget {
                 highlightColor: Colors.grey.shade100,
                 child: const ColoredBox(color: Colors.grey),
               ),
-              errorWidget: (context, url, error) =>
-                  ColoredBox(color: Colors.grey.shade200),
+              errorWidget: (context, url, error) => ColoredBox(color: Colors.grey.shade200),
             ),
           ),
         ),
@@ -43,6 +42,22 @@ class AnchorAvatar extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class AvatarFallback extends StatelessWidget {
+  final double size;
+  final double iconSize;
+
+  const AvatarFallback({super.key, this.size = 100, this.iconSize = 48});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      color: Colors.grey.shade200,
+      child: Icon(Icons.person, size: iconSize, color: Colors.grey.shade400),
     );
   }
 }

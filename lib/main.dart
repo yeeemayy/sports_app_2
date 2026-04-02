@@ -1,3 +1,4 @@
+import 'package:country_code_picker/country_code_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -22,23 +23,43 @@ void main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Sports App',
-      localizationsDelegates: context.localizationDelegates,
+      localizationsDelegates:[
+        CountryLocalizations.delegate,
+        ...context.localizationDelegates],
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink),
         scaffoldBackgroundColor: Colors.white,
-        appBarTheme: AppBarTheme(backgroundColor: Colors.white),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.white,
+          elevation: 0.5,
+          surfaceTintColor: Colors.white,
+          shadowColor: Colors.grey.shade100,
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(foregroundColor: Colors.pink),
+        ),
+        filledButtonTheme: FilledButtonThemeData(
+          style: TextButton.styleFrom(backgroundColor: Colors.pink, foregroundColor: Colors.white, minimumSize: Size(0, 48)),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            backgroundColor: Colors.white,
+            side: BorderSide(color: Colors.pink),
+            foregroundColor: Colors.pink,
+          ),
+        ),
       ),
-      routerConfig: appRouter,
+      routerConfig: ref.watch(appRouterProvider),
     );
   }
 }

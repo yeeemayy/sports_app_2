@@ -1,7 +1,75 @@
+import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sports_app/src/core/services/api_client.dart';
+import 'package:sports_app/src/core/services/token_holder_service.dart';
+import 'package:sports_app/src/core/utils/session_expired_interceptor.dart';
+import 'package:sports_app/src/features/auth/data/auth_storage_service.dart';
+import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:sports_app/src/routes/app_router.dart';
+import 'package:sports_app/src/shared_widgets/custom_status_dialog.dart';
 
 part 'api_service.g.dart';
 
 @Riverpod(keepAlive: true)
-ApiClient apiService(ApiServiceRef ref) => ApiClient();
+ApiClient apiService(ApiServiceRef ref) {
+  final holder = ref.watch(tokenHolderProvider);
+
+  final interceptor = SessionExpiredInterceptor(
+    reLoginCallback: (Dio dio) async {
+      final storage = ref.read(authStorageServiceProvider.notifier);
+      final credentials = await storage.readCredentials();
+      if (credentials == null) return null;
+
+      try {
+        final response = await dio.post(
+          '/auth/login',
+          data: {
+            'telephone': credentials.telephone,
+            'password': credentials.password,
+          },
+          options: Options(extra: {'_skipSessionRetry': true}),
+        );
+        final json = response.data as Map<String, dynamic>;
+        if (json['code'] != 1) return null;
+
+        final token = (json['data'] as Map<String, dynamic>)['token'] as String;
+        holder.value = token;
+        await storage.writeToken(token);
+        return token;
+      } catch (_) {
+        return null;
+      }
+    },
+    onExpiredCallback: () async {
+      final storage = ref.read(authStorageServiceProvider.notifier);
+      await storage.deleteToken();
+      await storage.deleteCredentials();
+      holder.value = null;
+      ref.read(authNotifierProvider.notifier).clearSession();
+
+      final context = navigatorKey.currentContext;
+      if (context == null || !context.mounted) return;
+
+      await showCustomStatusDialog(
+        context: context,
+        title: 'session.expired_title'.tr(),
+        description: 'session.expired_description'.tr(),
+        buttonText: 'session.ok'.tr(),
+        dialogType: DialogType.fail,
+        showCloseButton: false,
+        // onButtonPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+        onButtonPressed: () => context.go('/home'),
+      );
+
+      // final navContext = navigatorKey.currentContext;
+      // if (navContext != null && navContext.mounted) {
+      //   GoRouter.of(navContext).go('/home');
+      // }
+    },
+  );
+
+  return ApiClient(holder, interceptor);
+}

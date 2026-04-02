@@ -7,11 +7,38 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sports_app/src/core/config/env_config.dart';
 import 'package:sports_app/src/core/utils/logger_interceptor.dart';
+import 'package:sports_app/src/core/utils/session_expired_interceptor.dart';
+
+typedef ApiClientException = DioException;
+typedef ApiClientResponse<T> = Response<T>;
+
+extension ApiClientExceptionX on ApiClientException {
+  /// Returns a single error message from the response.
+  /// Checks for 'error' or 'message' fields.
+  String? get responseMessage {
+    final data = response?.data;
+    if (data is Map<String, dynamic>) {
+      return (data['msg']) as String?;
+    }
+    return null;
+  }
+
+  /// Returns the best available error message.
+  String get displayMessage {
+    return responseMessage ?? 'An unexpected error occurred';
+  }
+}
+
+/// Mutable holder for the current auth token.
+/// Updated by AuthNotifier on login/logout; read by _TokenInterceptor.
+class TokenHolder {
+  String? value;
+}
 
 class ApiClient {
   late final Dio httpClient;
 
-  ApiClient() {
+  ApiClient(TokenHolder tokenHolder, SessionExpiredInterceptor sessionExpiredInterceptor) {
     httpClient = Dio(
       BaseOptions(
         baseUrl: EnvConfig.baseUrl,
@@ -21,11 +48,31 @@ class ApiClient {
       ),
     );
 
+    httpClient.interceptors.add(_TokenInterceptor(tokenHolder));
     httpClient.interceptors.add(_SigningInterceptor(EnvConfig.secretKey));
+
+    // Provide the Dio instance so the interceptor can retry requests.
+    sessionExpiredInterceptor.setDio(httpClient);
+    httpClient.interceptors.add(sessionExpiredInterceptor);
 
     if (kDebugMode) {
       httpClient.interceptors.add(LoggerInterceptor());
     }
+  }
+}
+
+class _TokenInterceptor extends Interceptor {
+  final TokenHolder _holder;
+
+  _TokenInterceptor(this._holder);
+
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    final token = _holder.value;
+    if (token != null && token.isNotEmpty) {
+      options.headers['token'] = token;
+    }
+    handler.next(options);
   }
 }
 

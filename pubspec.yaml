@@ -54,12 +54,17 @@ dependencies:
   # Crypto (HMAC-SHA256 request signing)
   crypto: ^3.0.6
 
+  # Secure token persistence
+  flutter_secure_storage: ^9.2.4
+
   # UI
+  country_code_picker: ^3.4.1
   shimmer: ^3.0.0
   cached_network_image_ce: ^4.6.4
   video_player: ^2.9.2
   marquee: ^2.3.0
   url_launcher: ^6.3.2
+  rongcloud_im_wrapper_plugin: ^5.32.5
 
 dev_dependencies:
   flutter_test:

@@ -12,6 +12,7 @@ import 'package:sports_app/src/features/home/presentation/providers/banner_provi
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 import 'package:sports_app/src/features/anchor/domain/models/anchor_detail_model.dart';
+import 'package:sports_app/src/features/anchor/presentation/anchor_chats_tab.dart';
 import 'package:sports_app/src/features/anchor/presentation/providers/anchor_detail_providers.dart';
 
 class AnchorDetailScreen extends ConsumerStatefulWidget {
@@ -274,7 +275,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [_buildChatsTab(), _buildInfoTab(detail)],
+              children: [AnchorChatsTab(anchorId: widget.anchorId), _buildInfoTab(detail)],
             ),
           ),
         ],
@@ -321,10 +322,6 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
         Tab(text: 'anchor.detail.tab.info'.tr()),
       ],
     );
-  }
-
-  Widget _buildChatsTab() {
-    return Center(child: Text('anchor.detail.chats.placeholder'.tr()));
   }
 
   Widget _buildInfoTab(AnchorDetailModel detail) {

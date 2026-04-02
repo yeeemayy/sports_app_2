@@ -9,7 +9,18 @@
         "info": "资讯"
       },
       "chats": {
-        "placeholder": "聊天功能即将上线"
+        "connecting": "连接聊天室中...",
+        "empty": "暂无消息",
+        "login_to_chat": "登录后发言",
+        "retry": "重试",
+        "input": {
+          "hint": "说点什么..."
+        },
+        "send": "发送",
+        "joined_room": "{name} 来到了直播间",
+        "error": {
+          "connect_failed": "连接失败，请重试"
+        }
       },
       "info": {
         "title": "标题",
@@ -50,6 +61,81 @@
     },
     "error": {
       "load_failed": "加载失败，请稍后再试"
+    }
+  },
+  "session": {
+    "expired_title": "登录已过期",
+    "expired_description": "您的登录已过期，请重新登录。",
+    "ok": "确定"
+  },
+  "common": {
+    "ok": "确定",
+    "error": {
+      "unexpected": "发生未知错误，请稍后再试"
+    }
+  },
+  "profile": {
+    "edit_button": "编辑资料",
+    "toggle_language": "切换语言",
+    "language_zh_cn": "简体中文",
+    "language_en_gb": "English (UK)",
+    "privacy_policy": "隐私政策",
+    "terms_of_use": "用户协议",
+    "section_settings": "设置",
+    "section_legal": "法律",
+    "logout": "退出登录",
+    "logout_confirm_title": "退出登录",
+    "logout_confirm_message": "确定要退出登录吗？",
+    "logout_confirm_cancel": "取消"
+  },
+  "auth": {
+    "login": {
+      "title": "账号登录",
+      "submit": "登录",
+      "forgot_password": "忘记密码？",
+      "no_account": "还没有账号？",
+      "register": "立即注册",
+      "login": "登录",
+      "error_title": "登录失败"
+    },
+    "register": {
+      "title": "账号注册",
+      "submit": "注册",
+      "have_account": "已有账号？",
+      "register": "注册",
+      "login": "去登录"
+    },
+    "forgot": {
+      "title": "重置密码",
+      "submit": "重置密码",
+      "success": "密码重置成功",
+      "go_to_login": "去登录"
+    },
+    "field": {
+      "select_country_region": "选择国家/地区",
+      "search_country_region": "搜索国家/地区",
+      "telephone": "手机号",
+      "telephone_hint": "输入手机号",
+      "password": "密码",
+      "password_hint": "密码（6-15位字符）",
+      "new_password": "新密码",
+      "new_password_hint": "密码（6-15位字符）",
+      "confirm_password": "确认密码",
+      "confirm_password_hint": "确认密码",
+      "nickname": "用户名",
+      "nickname_hint": "输入用户名（6-15位数字和字母）",
+      "sms_code": "验证码"
+    },
+    "otp": {
+      "send": "获取验证码",
+      "resend_countdown": "{seconds} 秒后重发"
+    },
+    "validation": {
+      "telephone_required": "请输入手机号",
+      "password_required": "请输入密码",
+      "nickname_required": "请输入昵称",
+      "sms_required": "请输入验证码",
+      "confirm_password_mismatch": "两次密码输入不一致"
     }
   }
 }

@@ -1,5 +1,14 @@
 PODS:
   - Flutter (1.0.0)
+  - flutter_secure_storage (6.0.0):
+    - Flutter
+  - rongcloud_im_wrapper_plugin (0.0.1):
+    - Flutter
+    - RongCloudIM/ChatRoom (= 5.36.1)
+    - RongCloudIM/IMLibCore (= 5.36.1)
+  - RongCloudIM/ChatRoom (5.36.1):
+    - RongCloudIM/IMLibCore
+  - RongCloudIM/IMLibCore (5.36.1)
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -11,13 +20,23 @@ PODS:
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
+  - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
+  - rongcloud_im_wrapper_plugin (from `.symlinks/plugins/rongcloud_im_wrapper_plugin/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
 
+SPEC REPOS:
+  trunk:
+    - RongCloudIM
+
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
+  flutter_secure_storage:
+    :path: ".symlinks/plugins/flutter_secure_storage/ios"
+  rongcloud_im_wrapper_plugin:
+    :path: ".symlinks/plugins/rongcloud_im_wrapper_plugin/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   url_launcher_ios:
@@ -27,6 +46,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_secure_storage: d33dac7ae2ea08509be337e775f6b59f1ff45f12
+  rongcloud_im_wrapper_plugin: 122785178bc74392864b1201228339fd6c461e1c
+  RongCloudIM: 26e1b912d72d34c86508bc37b84d6315b30aca48
   shared_preferences_foundation: 5086985c1d43c5ba4d5e69a4e8083a389e2909e6
   url_launcher_ios: bb13df5870e8c4234ca12609d04010a21be43dfa
   video_player_avfoundation: 7993f492ae0bd77edaea24d9dc051d8bb2cd7c86

@@ -1,26 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'anchor_repository.dart';
+part of 'otp_timer_notifier.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$anchorRepositoryHash() => r'261eb7a44221a4c348caf061e171455b5ba7d19b';
+String _$otpTimerNotifierHash() => r'e6d16db3f6bf99af3df1bf5fe7fbde02d73dad25';
 
-/// See also [AnchorRepository].
-@ProviderFor(AnchorRepository)
-final anchorRepositoryProvider =
-    NotifierProvider<AnchorRepository, void>.internal(
-      AnchorRepository.new,
-      name: r'anchorRepositoryProvider',
+/// See also [OtpTimerNotifier].
+@ProviderFor(OtpTimerNotifier)
+final otpTimerNotifierProvider =
+    AutoDisposeNotifierProvider<OtpTimerNotifier, int>.internal(
+      OtpTimerNotifier.new,
+      name: r'otpTimerNotifierProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$anchorRepositoryHash,
+          : _$otpTimerNotifierHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$AnchorRepository = Notifier<void>;
+typedef _$OtpTimerNotifier = AutoDisposeNotifier<int>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

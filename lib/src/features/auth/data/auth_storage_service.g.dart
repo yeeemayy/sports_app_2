@@ -1,26 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'anchor_repository.dart';
+part of 'auth_storage_service.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$anchorRepositoryHash() => r'261eb7a44221a4c348caf061e171455b5ba7d19b';
+String _$authStorageServiceHash() =>
+    r'98c022b215739c9ce6437c39eb1de05bc7c7f6e1';
 
-/// See also [AnchorRepository].
-@ProviderFor(AnchorRepository)
-final anchorRepositoryProvider =
-    NotifierProvider<AnchorRepository, void>.internal(
-      AnchorRepository.new,
-      name: r'anchorRepositoryProvider',
+/// See also [AuthStorageService].
+@ProviderFor(AuthStorageService)
+final authStorageServiceProvider =
+    NotifierProvider<AuthStorageService, void>.internal(
+      AuthStorageService.new,
+      name: r'authStorageServiceProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$anchorRepositoryHash,
+          : _$authStorageServiceHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$AnchorRepository = Notifier<void>;
+typedef _$AuthStorageService = Notifier<void>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
