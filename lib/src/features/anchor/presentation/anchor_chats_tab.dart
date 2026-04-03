@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:rongcloud_im_wrapper_plugin/rongcloud_im_wrapper_plugin.dart';
 import 'package:sports_app/src/features/anchor/domain/models/im_token_model.dart';
 import 'package:sports_app/src/features/anchor/presentation/providers/im_token_providers.dart';
@@ -16,7 +17,11 @@ class AnchorChatsTab extends ConsumerStatefulWidget {
   ConsumerState<AnchorChatsTab> createState() => _AnchorChatsTabState();
 }
 
-class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab> {
+class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   RCIMIWEngine? _engine;
   String? _roomCid;
   String? _myId;
@@ -221,6 +226,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final isLoggedIn = ref.watch(authNotifierProvider).valueOrNull?.isAuthenticated ?? false;
 
     ref.listen(authNotifierProvider, (prev, next) {
@@ -311,7 +317,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab> {
                   text: '${msg.senderName}: ',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: msg.isOwn ? Colors.pink : Colors.blueGrey.shade700,
+                    color: msg.isOwn ? Colors.pink : Colors.green,
                   ),
                 ),
                 TextSpan(text: msg.text),
@@ -330,7 +336,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab> {
           border: Border(top: BorderSide(color: Colors.grey.shade200)),
         ),
         child: TextButton.icon(
-          onPressed: () => context.push('/auth/login'),
+          onPressed: () => context.push(AppRoutes.login),
           icon: const Icon(Icons.lock_outline, size: 16),
           label: Text('anchor.detail.chats.login_to_chat'.tr()),
           style: TextButton.styleFrom(

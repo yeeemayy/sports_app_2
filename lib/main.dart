@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/routes/app_router.dart';
 
 void main() async {
@@ -44,6 +45,7 @@ class MyApp extends ConsumerWidget {
           elevation: 0.5,
           surfaceTintColor: Colors.white,
           shadowColor: Colors.grey.shade100,
+          titleTextStyle: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(foregroundColor: Colors.pink),

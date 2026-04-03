@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:sports_app/src/shared_widgets/country_phone_number_text_field.dart';
@@ -35,7 +36,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
        telephone: _telephoneController.text.trim(),
        password: _passwordController.text,
      );
-     if (mounted) context.go('/home');
+     if (mounted) context.go(AppRoutes.home);
    } catch (e) {
      if (!mounted) return;
      context.showErrorDialog(title: 'auth.login.error_title'.tr(), error: e);
@@ -90,7 +91,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () => context.push('/auth/forgot-password'),
+                    onPressed: () => context.push(AppRoutes.forgotPassword),
                     child: Text('auth.login.forgot_password'.tr()),
                   ),
                 ),
@@ -114,7 +115,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   children: [
                     Text('auth.login.no_account'.tr()),
                     TextButton(
-                      onPressed: () => context.push('/auth/register'),
+                      onPressed: () => context.push(AppRoutes.register),
                       child: Text('auth.login.register'.tr()),
                     ),
                   ],

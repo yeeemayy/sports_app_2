@@ -41,10 +41,7 @@ class AuthNotifier extends _$AuthNotifier {
     }
   }
 
-  Future<void> login({
-    required String telephone,
-    required String password,
-  }) async {
+  Future<void> login({required String telephone, required String password}) async {
     state = const AsyncLoading();
     try {
       final repo = ref.read(authRepositoryProvider.notifier);
@@ -84,6 +81,7 @@ class AuthNotifier extends _$AuthNotifier {
       );
       tokenHolder.value = token;
       await storage.writeToken(token);
+      await storage.writeCredentials(telephone: telephone, password: password);
 
       final user = await repo.fetchUser();
       return AuthState(token: token, user: user);
@@ -104,6 +102,16 @@ class AuthNotifier extends _$AuthNotifier {
     state = const AsyncData(AuthState());
   }
 
+  Future<void> updateProfile({String? nickname, String? avatarUrl}) async {
+    final repo = ref.read(authRepositoryProvider.notifier);
+    await repo.updateProfile(nickname: nickname, avatarUrl: avatarUrl);
+    final user = await repo.fetchUser();
+    final current = state.value;
+    if (current != null) {
+      state = AsyncData(AuthState(token: current.token, user: user));
+    }
+  }
+
   void clearSession() {
     state = const AsyncData(AuthState());
   }
@@ -115,11 +123,9 @@ class AuthNotifier extends _$AuthNotifier {
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(authRepositoryProvider.notifier).resetPassword(
-        telephone: telephone,
-        password: password,
-        sms: sms,
-      );
+      await ref
+          .read(authRepositoryProvider.notifier)
+          .resetPassword(telephone: telephone, password: password, sms: sms);
       return const AuthState();
     });
   }

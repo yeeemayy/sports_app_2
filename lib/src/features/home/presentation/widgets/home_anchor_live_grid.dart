@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/features/home/domain/models/anchor_model.dart';
 import 'package:sports_app/src/features/home/presentation/widgets/home_anchor_live_card.dart';
 
@@ -28,7 +29,7 @@ class HomeAnchorLiveGrid extends StatelessWidget {
           ? const HomeAnchorLiveCard.loading()
           : HomeAnchorLiveCard(
               anchor: anchors![index],
-              onTap: () => context.push('/anchor/${anchors![index].id}'),
+              onTap: () => context.push(AppRoutes.anchorPath(anchors![index].id)),
             ),
     );
   }

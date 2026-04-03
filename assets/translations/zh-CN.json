@@ -76,6 +76,15 @@
   },
   "profile": {
     "edit_button": "编辑资料",
+    "edit_title": "编辑资料",
+    "edit_change_avatar": "更换头像",
+    "avatar_take_photo": "拍照",
+    "avatar_choose_gallery": "从相册选择",
+    "edit_nickname_label": "昵称",
+    "edit_nickname_hint": "输入昵称",
+    "edit_save": "保存",
+    "edit_success": "资料已更新",
+    "edit_error_title": "更新失败",
     "toggle_language": "切换语言",
     "language_zh_cn": "简体中文",
     "language_en_gb": "English (UK)",
@@ -103,7 +112,12 @@
       "submit": "注册",
       "have_account": "已有账号？",
       "register": "注册",
-      "login": "去登录"
+      "login": "去登录",
+      "otp_error_title": "发送验证码失败",
+      "error_title": "注册失败",
+      "success_title": "注册成功",
+      "success_description": "您的账号已创建成功。",
+      "login_now": "立即登录"
     },
     "forgot": {
       "title": "重置密码",
@@ -128,7 +142,7 @@
     },
     "otp": {
       "send": "获取验证码",
-      "resend_countdown": "{seconds} 秒后重发"
+      "resend_countdown": "{seconds}秒后重发"
     },
     "validation": {
       "telephone_required": "请输入手机号",

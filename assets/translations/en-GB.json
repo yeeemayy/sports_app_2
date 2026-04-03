@@ -76,6 +76,15 @@
   },
   "profile": {
     "edit_button": "Edit Profile",
+    "edit_title": "Edit Profile",
+    "edit_change_avatar": "Change Avatar",
+    "avatar_take_photo": "Take Photo",
+    "avatar_choose_gallery": "Choose from Gallery",
+    "edit_nickname_label": "Nickname",
+    "edit_nickname_hint": "Enter nickname",
+    "edit_save": "Save",
+    "edit_success": "Profile updated",
+    "edit_error_title": "Update Failed",
     "toggle_language": "Change Language",
     "language_zh_cn": "简体中文",
     "language_en_gb": "English (UK)",
@@ -103,7 +112,12 @@
       "submit": "Create Account",
       "have_account": "Already have an account?",
       "register": "Register",
-      "login": "Login"
+      "login": "Login",
+      "otp_error_title": "Send Code Failed",
+      "error_title": "Registration Failed",
+      "success_title": "Registration Successful",
+      "success_description": "Your account has been created.",
+      "login_now": "Log In Now"
     },
     "forgot": {
       "title": "Reset Password",
@@ -128,7 +142,7 @@
     },
     "otp": {
       "send": "Send Code",
-      "resend_countdown": "Resend in {seconds} s"
+      "resend_countdown": "Resend in {seconds}s"
     },
     "validation": {
       "telephone_required": "Please enter your phone number",

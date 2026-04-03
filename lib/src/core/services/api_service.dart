@@ -9,6 +9,7 @@ import 'package:sports_app/src/core/utils/session_expired_interceptor.dart';
 import 'package:sports_app/src/features/auth/data/auth_storage_service.dart';
 import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:sports_app/src/routes/app_router.dart';
+import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/custom_status_dialog.dart';
 
 part 'api_service.g.dart';
@@ -50,7 +51,7 @@ ApiClient apiService(ApiServiceRef ref) {
       holder.value = null;
       ref.read(authNotifierProvider.notifier).clearSession();
 
-      final context = navigatorKey.currentContext;
+      final context = rootNavigatorKey.currentContext;
       if (context == null || !context.mounted) return;
 
       await showCustomStatusDialog(
@@ -61,7 +62,7 @@ ApiClient apiService(ApiServiceRef ref) {
         dialogType: DialogType.fail,
         showCloseButton: false,
         // onButtonPressed: () => Navigator.of(context, rootNavigator: true).pop(),
-        onButtonPressed: () => context.go('/home'),
+        onButtonPressed: () => context.go(AppRoutes.home),
       );
 
       // final navContext = navigatorKey.currentContext;

@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sports_app/src/core/exceptions/app_exception.dart';
@@ -57,7 +58,8 @@ class AuthRepository extends _$AuthRepository {
   Future<void> requestSms({required String telephone, required int scene}) async {
     final dio = ref.read(apiServiceProvider).httpClient;
     final response = await dio.get(
-      '/auth/sms',
+      // '/auth/sms',
+      '/auth/sms-dev-test',
       queryParameters: {'telephone': telephone, 'scene': scene},
     );
     final json = response.data as Map<String, dynamic>;
@@ -71,6 +73,27 @@ class AuthRepository extends _$AuthRepository {
     log('[Fetch User] raw response: $json');
     if (json['code'] != 1) throw AppException(json['msg'] ?? 'Failed to fetch user');
     return UserModel.fromJson(json['data'] as Map<String, dynamic>);
+  }
+
+  Future<String> uploadAvatar(String filePath) async {
+    final dio = ref.read(apiServiceProvider).httpClient;
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(filePath),
+    });
+    final response = await dio.post('/upload', data: formData);
+    final json = response.data as Map<String, dynamic>;
+    if (json['code'] != 1) throw AppException(json['msg'] ?? 'Upload failed');
+    return (json['data'] as Map<String, dynamic>)['imgUrl'] as String;
+  }
+
+  Future<void> updateProfile({String? nickname, String? avatarUrl}) async {
+    final dio = ref.read(apiServiceProvider).httpClient;
+    final data = <String, dynamic>{};
+    if (nickname != null) data['nickname'] = nickname;
+    if (avatarUrl != null) data['avatarUrl'] = avatarUrl;
+    final response = await dio.put('/users', data: data);
+    final json = response.data as Map<String, dynamic>;
+    if (json['code'] != 1) throw AppException(json['msg'] ?? 'Update failed');
   }
 
   Future<void> logout() async {

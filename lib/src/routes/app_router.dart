@@ -13,6 +13,7 @@ import 'package:sports_app/src/features/home/presentation/home_screen.dart';
 import 'package:sports_app/src/features/news/presentation/news_screen.dart';
 import 'package:sports_app/src/features/profile/presentation/edit_profile_screen.dart';
 import 'package:sports_app/src/features/profile/presentation/profile_screen.dart';
+import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/routes/app_wrapper.dart';
 
 part 'app_router.g.dart';
@@ -20,15 +21,15 @@ part 'app_router.g.dart';
 /// Global navigator key passed to GoRouter.
 /// Used by interceptors and services that need to navigate or show dialogs
 /// outside the widget tree.
-final navigatorKey = GlobalKey<NavigatorState>();
+final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 @Riverpod(keepAlive: true)
 GoRouter appRouter(AppRouterRef ref) {
   final authNotifier = _AuthNotifierListenable(ref);
 
   return GoRouter(
-    navigatorKey: navigatorKey,
-    initialLocation: '/home',
+    navigatorKey: rootNavigatorKey,
+    initialLocation: AppRoutes.home,
     refreshListenable: authNotifier,
     redirect: (context, state) {
       final authAsync = ref.read(authNotifierProvider);
@@ -41,51 +42,76 @@ GoRouter appRouter(AppRouterRef ref) {
       return null;
     },
     routes: [
-      ShellRoute(
-        builder: (context, state, child) => AppWrapper(child: child),
-        routes: [
-          GoRoute(
-            path: '/home',
-            builder: (context, state) => const HomeScreen(),
+      StatefulShellRoute.indexedStack(
+        builder: (BuildContext context, GoRouterState state, StatefulNavigationShell navigationShell) {
+          return AppWrapper(navigationShell: navigationShell);
+        },
+        branches: <StatefulShellBranch>[
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: AppRoutes.home,
+                builder: (BuildContext context, GoRouterState state) => const HomeScreen(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/event',
-            builder: (context, state) => const EventScreen(),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: AppRoutes.event,
+                builder: (BuildContext context, GoRouterState state) => const EventScreen(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/news',
-            builder: (context, state) => const NewsScreen(),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: AppRoutes.news,
+                builder: (BuildContext context, GoRouterState state) => const NewsScreen(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/data',
-            builder: (context, state) => const DataScreen(),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: AppRoutes.data,
+                builder: (BuildContext context, GoRouterState state) => const DataScreen(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/profile',
-            builder: (context, state) => const ProfileScreen(),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: AppRoutes.profile,
+                builder: (BuildContext context, GoRouterState state) => const ProfileScreen(),
+                routes: [
+                  GoRoute(
+                    parentNavigatorKey: rootNavigatorKey,
+                    path: AppRoutes.profileEdit,
+                    builder: (BuildContext context, GoRouterState state) => const EditProfileScreen(),
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),
       GoRoute(
-        path: '/profile/edit',
-        builder: (context, state) => const EditProfileScreen(),
-      ),
-      GoRoute(
-        path: '/anchor/:anchorId',
+        path: AppRoutes.anchor,
         builder: (context, state) => AnchorDetailScreen(
           anchorId: int.parse(state.pathParameters['anchorId']!),
         ),
       ),
       GoRoute(
-        path: '/auth/login',
+        path: AppRoutes.login,
         builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
-        path: '/auth/register',
+        path: AppRoutes.register,
         builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
-        path: '/auth/forgot-password',
+        path: AppRoutes.forgotPassword,
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
     ],

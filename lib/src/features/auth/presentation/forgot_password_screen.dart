@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/auth/data/auth_repository.dart';
 import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
@@ -88,7 +89,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     style: context.textTheme.titleMedium),
                 const SizedBox(height: 24),
                 FilledButton(
-                  onPressed: () => context.go('/auth/login'),
+                  onPressed: () => context.go(AppRoutes.login),
                   child: Text('auth.forgot.go_to_login'.tr()),
                 ),
               ],

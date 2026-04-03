@@ -2,11 +2,14 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
+import 'package:sports_app/src/core/exceptions/app_exception.dart';
 import 'package:sports_app/src/features/auth/data/auth_repository.dart';
 import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:sports_app/src/features/auth/presentation/providers/otp_timer_notifier.dart';
 import 'package:sports_app/src/shared_widgets/country_phone_number_text_field.dart';
+import 'package:sports_app/src/shared_widgets/custom_status_dialog.dart';
 import 'package:sports_app/src/shared_widgets/custom_text_field.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -26,6 +29,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   String _countryCode = '+86';
+  bool _isSendingOtp = false;
 
   @override
   void dispose() {
@@ -40,11 +44,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Future<void> _sendOtp() async {
     final telephone = _telephoneController.text.trim();
     if (telephone.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('auth.validation.telephone_required'.tr())));
+      context.showErrorDialog(
+        title: 'auth.register.otp_error_title'.tr(),
+        error: AppException('auth.validation.telephone_required'.tr()),
+      );
       return;
     }
+    setState(() => _isSendingOtp = true);
     try {
       await ref
           .read(authRepositoryProvider.notifier)
@@ -55,28 +61,39 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       ref.read(otpTimerNotifierProvider.notifier).start();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+        context.showErrorDialog(title: 'auth.register.otp_error_title'.tr(), error: e);
       }
+    } finally {
+      if (mounted) setState(() => _isSendingOtp = false);
     }
   }
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    await ref
-        .read(authNotifierProvider.notifier)
-        .register(
-          nickname: _nicknameController.text.trim(),
-          telephone: _telephoneController.text.trim(),
-          password: _passwordController.text,
-          sms: _smsController.text.trim(),
-        );
-    if (mounted) {
-      ref
-          .read(authNotifierProvider)
-          .whenOrNull(
-            error: (e, _) =>
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()))),
+    try {
+      await ref
+          .read(authNotifierProvider.notifier)
+          .register(
+            nickname: _nicknameController.text.trim(),
+            telephone: _telephoneController.text.trim(),
+            password: _passwordController.text,
+            sms: _smsController.text.trim(),
           );
+      if (mounted) {
+        await showCustomStatusDialog(
+          context: context,
+          title: 'auth.register.success_title'.tr(),
+          description: 'auth.register.success_description'.tr(),
+          buttonText: 'auth.register.login_now'.tr(),
+          onButtonPressed: () => context.go(AppRoutes.home),
+          dialogType: DialogType.success,
+          onCloseSameWithPrimaryButton: true,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showErrorDialog(title: 'auth.register.error_title'.tr(), error: e);
+      }
     }
   }
 
@@ -158,12 +175,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
                       child: OutlinedButton(
-                        onPressed: countdown > 0 ? null : _sendOtp,
-                        child: Text(
-                          countdown > 0
-                              ? 'auth.otp.resend_countdown'.tr(args: ['$countdown'])
-                              : 'auth.otp.send'.tr(),
-                        ),
+                        onPressed: countdown > 0 || _isSendingOtp ? null : _sendOtp,
+                        child: _isSendingOtp
+                            ? const SizedBox(
+                                height: 16,
+                                width: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Text(
+                                countdown > 0
+                                    ? 'auth.otp.resend_countdown'.tr(
+                                        namedArgs: {'seconds': '$countdown'},
+                                      )
+                                    : 'auth.otp.send'.tr(),
+                              ),
                       ),
                     ),
                   ],
@@ -185,7 +210,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   children: [
                     Text('auth.register.have_account'.tr()),
                     TextButton(
-                      onPressed: () => context.push('/auth/login'),
+                      onPressed: () => context.push(AppRoutes.login),
                       child: Text('auth.register.login'.tr()),
                     ),
                   ],

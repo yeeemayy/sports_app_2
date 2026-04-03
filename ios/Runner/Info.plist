@@ -66,5 +66,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>$(CFBundleDisplayName) 需要访问您的相册以选择头像</string>
+    <key>NSCameraUsageDescription</key>
+    <string>$(CFBundleDisplayName) 需要访问您的相机以拍摄头像</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>$(CFBundleDisplayName) 需要访问您的相机以拍摄头像</string>
 </dict>
 </plist>

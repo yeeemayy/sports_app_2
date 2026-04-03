@@ -7,6 +7,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:sports_app/src/routes/app_router.dart';
+import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/avatar.dart';
 import 'package:sports_app/src/shared_widgets/custom_status_dialog.dart';
 
@@ -51,7 +52,7 @@ class ProfileScreen extends ConsumerWidget {
 
     showModalBottomSheet<void>(
       backgroundColor: Colors.white,
-      context: navigatorKey.currentContext ?? context,
+      context: rootNavigatorKey.currentContext ?? context,
       builder: (sheetContext) {
         return SafeArea(
           child: Column(
@@ -130,7 +131,7 @@ class ProfileScreen extends ConsumerWidget {
                   _ProfileTile(
                     icon: Icons.person_outline,
                     label: 'profile.edit_button'.tr(),
-                    onTap: () => context.push('/profile/edit'),
+                    onTap: () => context.push(AppRoutes.profileEditFull),
                   ),
                   _ProfileTile(
                     icon: Icons.language,
