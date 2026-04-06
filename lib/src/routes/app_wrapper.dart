@@ -16,8 +16,18 @@ class AppWrapper extends ConsumerWidget {
 
   static const _tabs = [
     (labelKey: 'nav.home', icon: Icons.home_outlined, activeIcon: Icons.home, path: AppRoutes.home),
-    (labelKey: 'nav.event', icon: Icons.event_outlined, activeIcon: Icons.event, path: AppRoutes.event),
-    (labelKey: 'nav.news', icon: Icons.article_outlined, activeIcon: Icons.article, path: AppRoutes.news),
+    (
+      labelKey: 'nav.event',
+      icon: Icons.event_outlined,
+      activeIcon: Icons.event,
+      path: AppRoutes.event,
+    ),
+    (
+      labelKey: 'nav.news',
+      icon: Icons.article_outlined,
+      activeIcon: Icons.article,
+      path: AppRoutes.news,
+    ),
     (
       labelKey: 'nav.data',
       icon: Icons.bar_chart_outlined,
@@ -93,14 +103,17 @@ class AppWrapper extends ConsumerWidget {
                   ),
               ],
             )
+          : currentIndex != 1
+          ? AppBar(
+              centerTitle: true,
+              title: Text(_tabs[navigationShell.currentIndex].labelKey.tr()),
+            )
           : null,
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentIndex,
-        onDestinationSelected: (index) => navigationShell.goBranch(
-          index,
-          initialLocation: index == navigationShell.currentIndex,
-        ),
+        onDestinationSelected: (index) =>
+            navigationShell.goBranch(index, initialLocation: index == navigationShell.currentIndex),
         destinations: _tabs
             .map(
               (t) => NavigationDestination(

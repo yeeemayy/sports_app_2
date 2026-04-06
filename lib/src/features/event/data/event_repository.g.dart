@@ -1,26 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'auth_notifier.dart';
+part of 'event_repository.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$authNotifierHash() => r'a50c292bd71203fe1f47bd57988a16a99aade70c';
+String _$eventRepositoryHash() => r'f23cb7effa97d5b1fac8381305ea891fb75a477a';
 
-/// See also [AuthNotifier].
-@ProviderFor(AuthNotifier)
-final authNotifierProvider =
-    AsyncNotifierProvider<AuthNotifier, AuthState>.internal(
-      AuthNotifier.new,
-      name: r'authNotifierProvider',
+/// See also [EventRepository].
+@ProviderFor(EventRepository)
+final eventRepositoryProvider =
+    NotifierProvider<EventRepository, void>.internal(
+      EventRepository.new,
+      name: r'eventRepositoryProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$authNotifierHash,
+          : _$eventRepositoryHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$AuthNotifier = AsyncNotifier<AuthState>;
+typedef _$EventRepository = Notifier<void>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

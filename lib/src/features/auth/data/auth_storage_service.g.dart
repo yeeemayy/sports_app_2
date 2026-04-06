@@ -7,7 +7,7 @@ part of 'auth_storage_service.dart';
 // **************************************************************************
 
 String _$authStorageServiceHash() =>
-    r'98c022b215739c9ce6437c39eb1de05bc7c7f6e1';
+    r'95988ff8f8c270ad1087adcd219ed8ee2413fde4';
 
 /// See also [AuthStorageService].
 @ProviderFor(AuthStorageService)

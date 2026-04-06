@@ -6,7 +6,24 @@ part of 'api_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$apiServiceHash() => r'f5ec77ed89134823c49fa47fccca1cdefd09cf89';
+String _$sportsApiServiceHash() => r'4fca0e96abb6e3d22c7e8121ff72732762df873f';
+
+/// See also [sportsApiService].
+@ProviderFor(sportsApiService)
+final sportsApiServiceProvider = Provider<Dio>.internal(
+  sportsApiService,
+  name: r'sportsApiServiceProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$sportsApiServiceHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef SportsApiServiceRef = ProviderRef<Dio>;
+String _$apiServiceHash() => r'001f05ad0ed440e2c9317e473cf6a8969330dffc';
 
 /// See also [apiService].
 @ProviderFor(apiService)

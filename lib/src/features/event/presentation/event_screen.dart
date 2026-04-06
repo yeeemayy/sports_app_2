@@ -1,12 +1,382 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
-class EventScreen extends StatelessWidget {
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:sports_app/src/extensions/context_extensions.dart';
+import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
+import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/event_match_card.dart';
+
+class EventScreen extends StatefulWidget {
   const EventScreen({super.key});
 
   @override
+  State<EventScreen> createState() => _EventScreenState();
+}
+
+class _EventScreenState extends State<EventScreen> with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
+
+  static const _sports = SportType.values;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: _sports.length, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Event')),
+    return Column(
+      children: [
+        Container(
+          color: Colors.pink,
+          child: SafeArea(
+            child: Row(
+              children: [
+                Expanded(
+                  child: TabBar(
+                    dividerColor: Colors.transparent,
+                    tabAlignment: TabAlignment.start,
+                    isScrollable: true,
+                    controller: _tabController,
+                    indicator: const BoxDecoration(),
+                    labelStyle: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+                    unselectedLabelStyle: context.textTheme.bodyMedium?.copyWith(color: Colors.white),
+                    tabs: _sports.map((s) => Tab(text: s.i18nKey.tr())).toList(),
+                  ),
+                ),
+                // IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: _sports.map((s) => _SportTabContent(sport: s)).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SportTabContent extends ConsumerStatefulWidget {
+  const _SportTabContent({required this.sport});
+
+  final SportType sport;
+
+  @override
+  ConsumerState<_SportTabContent> createState() => _SportTabContentState();
+}
+
+class _SportTabContentState extends ConsumerState<_SportTabContent>
+    with AutomaticKeepAliveClientMixin {
+  late String _matchStatus;
+  DateTime _scheduledDate = DateTime.now().add(Duration(days: 1));
+  Timer? _refreshTimer;
+
+  String get _formattedScheduledDate {
+    final d = _scheduledDate;
+    return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _matchStatus = _hotLeagueSports.contains(widget.sport) ? 'hot' : 'all';
+    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) => _refresh());
+  }
+
+  void _refresh() {
+    if (_isHot) {
+      ref.invalidate(sportHotMatchesProvider(sport: widget.sport));
+    } else if (_isScheduled) {
+      ref.invalidate(footballScheduledMatchesProvider(date: _formattedScheduledDate));
+    } else {
+      ref.invalidate(sportMatchesProvider(sport: widget.sport, matchStatus: _matchStatus));
+    }
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+
+  static const _footballStatuses = ['hot', 'all', 'live', 'finished', 'upcoming', 'scheduled'];
+  static const _statusesWithHot = ['hot', 'all', 'live', 'finished', 'upcoming'];
+  static const _statuses = ['all', 'live', 'finished', 'upcoming'];
+
+  static const _hotLeagueSports = {SportType.football, SportType.basketball};
+
+  List<String> get _availableStatuses {
+    if (widget.sport == SportType.football) return _footballStatuses;
+    if (_hotLeagueSports.contains(widget.sport)) return _statusesWithHot;
+    return _statuses;
+  }
+
+  bool get _isHot => _matchStatus == 'hot';
+  bool get _isScheduled => _matchStatus == 'scheduled';
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
+    final matchesAsync = _isHot
+        ? ref.watch(sportHotMatchesProvider(sport: widget.sport))
+        : _isScheduled
+        ? ref.watch(footballScheduledMatchesProvider(date: _formattedScheduledDate))
+        : ref.watch(sportMatchesProvider(sport: widget.sport, matchStatus: _matchStatus));
+
+    return Column(
+      children: [
+        _StatusFilterBar(
+          selected: _matchStatus,
+          onSelected: (status) => setState(() => _matchStatus = status),
+          statuses: _availableStatuses,
+        ),
+        if (_isScheduled)
+          _DateSelectorBar(
+            selected: _scheduledDate,
+            onSelected: (date) => setState(() => _scheduledDate = date),
+          ),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              if (_isHot) {
+                ref.invalidate(sportHotMatchesProvider(sport: widget.sport));
+                await ref.read(sportHotMatchesProvider(sport: widget.sport).future);
+              } else if (_isScheduled) {
+                ref.invalidate(footballScheduledMatchesProvider(date: _formattedScheduledDate));
+                await ref.read(
+                  footballScheduledMatchesProvider(date: _formattedScheduledDate).future,
+                );
+              } else {
+                ref.invalidate(
+                  sportMatchesProvider(sport: widget.sport, matchStatus: _matchStatus),
+                );
+                await ref.read(
+                  sportMatchesProvider(sport: widget.sport, matchStatus: _matchStatus).future,
+                );
+              }
+            },
+            child: matchesAsync.when(
+              loading: () => _ShimmerList(),
+              error: (e, st) {
+                debugPrint('$e, $st');
+                return LayoutBuilder(
+                  builder: (context, constraints) => SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: constraints.maxHeight,
+                      child: Center(
+                        child: Text(
+                          'event.error.load_failed'.tr(),
+                          style: context.textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+              data: (matches) {
+                if (matches.isEmpty) {
+                  return LayoutBuilder(
+                    builder: (context, constraints) => SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: SizedBox(
+                        height: constraints.maxHeight,
+                        child: Center(
+                          child: Text(
+                            'event.empty'.tr(),
+                            style: context.textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                return ListView.builder(
+                  padding: EdgeInsets.zero,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: matches.length,
+                  itemBuilder: (context, index) => EventMatchCard(match: matches[index]),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatusFilterBar extends StatefulWidget {
+  const _StatusFilterBar({
+    required this.selected,
+    required this.onSelected,
+    required this.statuses,
+  });
+
+  final String selected;
+  final ValueChanged<String> onSelected;
+  final List<String> statuses;
+
+  @override
+  State<_StatusFilterBar> createState() => _StatusFilterBarState();
+}
+
+class _StatusFilterBarState extends State<_StatusFilterBar> with SingleTickerProviderStateMixin {
+  late TabController _controller;
+
+  int get _selectedIndex =>
+      widget.statuses.indexOf(widget.selected).clamp(0, widget.statuses.length - 1);
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TabController(
+      length: widget.statuses.length,
+      initialIndex: _selectedIndex,
+      vsync: this,
+    );
+  }
+
+  @override
+  void didUpdateWidget(_StatusFilterBar old) {
+    super.didUpdateWidget(old);
+    if (old.statuses.length != widget.statuses.length) {
+      _controller.dispose();
+      _controller = TabController(
+        length: widget.statuses.length,
+        initialIndex: _selectedIndex,
+        vsync: this,
+      );
+    } else if (_controller.index != _selectedIndex) {
+      _controller.index = _selectedIndex;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Colors.pink,
+      child: TabBar(
+        controller: _controller,
+        isScrollable: true,
+        tabAlignment: TabAlignment.start,
+        onTap: (i) => widget.onSelected(widget.statuses[i]),
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white,
+        labelStyle: context.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
+        unselectedLabelStyle: context.textTheme.labelMedium,
+        indicatorColor: Colors.white,
+        indicatorPadding: EdgeInsets.only(bottom: 6),
+        dividerColor: Colors.transparent,
+        tabs: widget.statuses.map((s) => Tab(text: 'event.status.$s'.tr())).toList(),
+      ),
+    );
+  }
+}
+
+class _DateSelectorBar extends StatelessWidget {
+  const _DateSelectorBar({required this.selected, required this.onSelected});
+
+  final DateTime selected;
+  final ValueChanged<DateTime> onSelected;
+
+  static String _formatDate(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  static const _weekdayKeysEn = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  static const _weekdayKeysZh = ['一', '二', '三', '四', '五', '六', '日'];
+
+  @override
+  Widget build(BuildContext context) {
+    final today = DateTime.now();
+    final isZh = context.locale.languageCode == 'zh';
+    final weekdays = isZh ? _weekdayKeysZh : _weekdayKeysEn;
+
+    return SizedBox(
+      height: 56,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Row(
+          children: List.generate(7, (index) {
+            final date = today.add(Duration(days: index + 1));
+            final isSelected = _formatDate(date) == _formatDate(selected);
+            final weekdayLabel = weekdays[date.weekday - 1];
+            final dayLabel = '${date.day}';
+
+            return Expanded(
+              child: GestureDetector(
+                onTap: () => onSelected(date),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  decoration: BoxDecoration(color: isSelected ? Colors.pink : Colors.grey.shade100),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        weekdayLabel,
+                        style: context.textTheme.labelSmall?.copyWith(
+                          color: isSelected ? Colors.white : Colors.grey.shade600,
+                          fontWeight: isSelected ? FontWeight.w600 : null,
+                        ),
+                      ),
+                      Text(
+                        dayLabel,
+                        style: context.textTheme.labelMedium?.copyWith(
+                          color: isSelected ? Colors.white : null,
+                          fontWeight: isSelected ? FontWeight.w600 : null,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+  }
+}
+
+class _ShimmerList extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: EdgeInsets.zero,
+      itemCount: 8,
+      itemBuilder: (context, _) => Shimmer.fromColors(
+        baseColor: Colors.grey.shade300,
+        highlightColor: Colors.grey.shade100,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          height: 72,
+          decoration: BoxDecoration(color: Colors.grey, borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
     );
   }
 }

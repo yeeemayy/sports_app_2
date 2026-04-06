@@ -10,6 +10,10 @@ abstract final class AppRoutes {
   static const profileEdit = 'edit';
   static const profileEditFull = '/profile/edit';
 
+  // Football match detail
+  static const footballMatchDetail = '/event/football/:matchId';
+  static String footballMatchDetailPath(String matchId) => '/event/football/$matchId';
+
   // Anchor
   static const anchor = '/anchor/:anchorId';
   static String anchorPath(int id) => '/anchor/$id';

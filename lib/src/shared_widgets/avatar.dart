@@ -54,9 +54,9 @@ class AvatarFallback extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      decoration: BoxDecoration(color: Colors.grey.shade200, shape: BoxShape.circle),
       width: size,
       height: size,
-      color: Colors.grey.shade200,
       child: Icon(Icons.person, size: iconSize, color: Colors.grey.shade400),
     );
   }
