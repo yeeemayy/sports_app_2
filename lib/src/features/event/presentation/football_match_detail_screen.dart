@@ -20,12 +20,10 @@ class FootballMatchDetailScreen extends ConsumerStatefulWidget {
   final String matchId;
 
   @override
-  ConsumerState<FootballMatchDetailScreen> createState() =>
-      _FootballMatchDetailScreenState();
+  ConsumerState<FootballMatchDetailScreen> createState() => _FootballMatchDetailScreenState();
 }
 
-class _FootballMatchDetailScreenState
-    extends ConsumerState<FootballMatchDetailScreen> {
+class _FootballMatchDetailScreenState extends ConsumerState<FootballMatchDetailScreen> {
   Timer? _pollTimer;
 
   void _startPolling() {
@@ -51,8 +49,13 @@ class _FootballMatchDetailScreenState
   @override
   Widget build(BuildContext context) {
     final detailAsync = ref.watch(footballMatchDetailProvider(matchId: widget.matchId));
+    final eventsAsync = ref.watch(footballMatchEventsKeyProvider(matchId: widget.matchId));
 
-    final isFinished = detailAsync.valueOrNull?.isReallyFinished ?? false;
+    final isFinished =
+        detailAsync.valueOrNull?.isReallyFinished(
+          kickoffTimestamp: eventsAsync.valueOrNull?.kickoffTimestamp,
+        ) ??
+        false;
     if (isFinished) {
       _stopPolling();
     } else if (_pollTimer == null) {
@@ -136,6 +139,7 @@ class _MatchHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final detailAsync = ref.watch(footballMatchDetailProvider(matchId: matchId));
+    final eventsAsync = ref.watch(footballMatchEventsKeyProvider(matchId: matchId));
 
     return Container(
       width: double.maxFinite,
@@ -144,16 +148,28 @@ class _MatchHeader extends ConsumerWidget {
       child: detailAsync.when(
         loading: () => const SizedBox(height: 72),
         error: (_, __) => const SizedBox(height: 72),
-        data: (detail) => _MatchHeaderContent(detail: detail),
+        data: (detail) => _MatchHeaderContent(
+          detail: detail,
+          kickoffTimestamp: eventsAsync.valueOrNull?.kickoffTimestamp,
+          isReallyFinished: detail.isReallyFinished(
+            kickoffTimestamp: eventsAsync.valueOrNull?.kickoffTimestamp,
+          ),
+        ),
       ),
     );
   }
 }
 
 class _MatchHeaderContent extends StatelessWidget {
-  const _MatchHeaderContent({required this.detail});
+  const _MatchHeaderContent({
+    required this.detail,
+    required this.isReallyFinished,
+    this.kickoffTimestamp,
+  });
 
   final FootballMatchDetail detail;
+  final bool isReallyFinished;
+  final int? kickoffTimestamp;
 
   @override
   Widget build(BuildContext context) {
@@ -187,16 +203,16 @@ class _MatchHeaderContent extends StatelessWidget {
               child: Column(
                 children: [
                   MatchStatusBadge(
-                    statusId: detail.isReallyFinished ? 8 : detail.statusId,
-                    label: detail.isReallyFinished
+                    statusId: isReallyFinished ? 8 : detail.statusId,
+                    label: isReallyFinished
                         ? 'event.football.status.finished'.tr()
-                        : detail.statusLabel,
+                        : detail.statusLabel(kickoffTimestamp: kickoffTimestamp),
                     liveColor: Colors.white,
                     staticColor: Colors.grey.shade200,
                   ),
                   _ScoreOrStatus(detail: detail),
                   const SizedBox(height: 4),
-                  if (!detail.isReallyFinished &&
+                  if (!isReallyFinished &&
                       detail.homeInfo.halfTimeScore != null &&
                       detail.awayInfo.halfTimeScore != null)
                     Text(
@@ -303,7 +319,6 @@ class _ScoreOrStatus extends StatelessWidget {
   final FootballMatchDetail detail;
 
   static const _noScoreStatuses = {0, 1, 13};
-  static const _liveStatuses = {2, 3, 4, 5, 6, 7};
 
   @override
   Widget build(BuildContext context) {
@@ -317,11 +332,12 @@ class _ScoreOrStatus extends StatelessWidget {
       );
     }
 
-    final color = _liveStatuses.contains(detail.statusId) ? Colors.white : Colors.black87;
-
     return RichText(
       text: TextSpan(
-        style: context.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900, color: color),
+        style: context.textTheme.headlineSmall?.copyWith(
+          fontWeight: FontWeight.w900,
+          color: Colors.white,
+        ),
         children: [
           TextSpan(text: detail.homeScore),
           TextSpan(
@@ -358,7 +374,7 @@ class _EventsTab extends ConsumerWidget {
         );
       },
       data: (events) {
-        if (events.incidents.isEmpty) {
+        if (events == null || events.incidents.isEmpty) {
           return Center(
             child: Text(
               'event.football.detail.no_events'.tr(),
@@ -901,6 +917,9 @@ class _StatsTab extends ConsumerWidget {
 
   final String matchId;
 
+  // Incident type codes for the minimal stat rows (in display order).
+  static const _minimalTypeCodes = ['2', '3', '4', '8', '21', '22', '23', '24', '25'];
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final eventsAsync = ref.watch(footballMatchEventsKeyProvider(matchId: matchId));
@@ -911,15 +930,23 @@ class _StatsTab extends ConsumerWidget {
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
       data: (events) {
-        final stats = events.stats.where((s) => s.label != null && s.label!.isNotEmpty).toList();
+        final apiStats = events?.stats.where((s) => s.label != null && s.label!.isNotEmpty).toList() ?? [];
+        final apiByLabel = {for (final s in apiStats) s.label!: s};
 
-        if (stats.isEmpty) {
-          return Center(child: Text('event.football.detail.no_events'.tr()));
+        final displayStats = _minimalTypeCodes.map((code) {
+          final label = 'event.football.detail.incident_type.$code'.tr();
+          return apiByLabel[label] ?? MatchStat(label: label, home: 0, away: 0);
+        }).toList();
+
+        // Append any extra API stats not already covered by the minimal set.
+        final minimalLabels = displayStats.map((s) => s.label).toSet();
+        for (final s in apiStats) {
+          if (!minimalLabels.contains(s.label)) displayStats.add(s);
         }
 
         return ListView(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-          children: stats.map((stat) => _StatRow(stat: stat)).toList(),
+          children: displayStats.map((stat) => _StatRow(stat: stat)).toList(),
         );
       },
     );

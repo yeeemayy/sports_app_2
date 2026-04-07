@@ -71,20 +71,27 @@ class FootballMatchEvents {
     required this.id,
     required this.incidents,
     required this.stats,
+    this.kickoffTimestamp,
   });
 
   final String id;
   final List<MatchIncident> incidents;
   final List<MatchStat> stats;
 
-  factory FootballMatchEvents.fromJson(Map<String, dynamic> json) =>
-      FootballMatchEvents(
-        id: json['id'] as String? ?? '',
-        incidents: (json['incidents'] as List<dynamic>? ?? [])
-            .map((e) => MatchIncident.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        stats: (json['stats'] as List<dynamic>? ?? [])
-            .map((e) => MatchStat.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+  /// Unix timestamp of the kick-off of the current half (score[4] from the API).
+  final int? kickoffTimestamp;
+
+  factory FootballMatchEvents.fromJson(Map<String, dynamic> json) {
+    final score = json['score'] as List<dynamic>?;
+    return FootballMatchEvents(
+      id: json['id'] as String? ?? '',
+      kickoffTimestamp: score != null && score.length > 4 ? score[4] as int? : null,
+      incidents: (json['incidents'] as List<dynamic>? ?? [])
+          .map((e) => MatchIncident.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      stats: (json['stats'] as List<dynamic>? ?? [])
+          .map((e) => MatchStat.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 }

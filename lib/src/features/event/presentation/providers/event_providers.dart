@@ -21,10 +21,12 @@ Future<List<SportMatch>> sportMatches(
   SportMatchesRef ref, {
   required SportType sport,
   String matchStatus = 'all',
+  String? date,
 }) {
   return ref.watch(eventRepositoryProvider.notifier).getMatches(
         sport: sport,
         matchStatus: matchStatus,
+        date: date,
       );
 }
 
@@ -53,7 +55,7 @@ Future<FootballLineups?> footballMatchLineups(
 }
 
 @riverpod
-Future<FootballMatchEvents> footballMatchEventsKey(
+Future<FootballMatchEvents?> footballMatchEventsKey(
   FootballMatchEventsKeyRef ref, {
   required String matchId,
 }) {

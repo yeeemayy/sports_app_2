@@ -62,7 +62,14 @@ class _EventScreenState extends State<EventScreen> with SingleTickerProviderStat
         Expanded(
           child: TabBarView(
             controller: _tabController,
-            children: _sports.map((s) => _SportTabContent(sport: s)).toList(),
+            children: [
+              for (var i = 0; i < _sports.length; i++)
+                _SportTabContent(
+                  sport: _sports[i],
+                  tabIndex: i,
+                  tabController: _tabController,
+                ),
+            ],
           ),
         ),
       ],
@@ -71,9 +78,15 @@ class _EventScreenState extends State<EventScreen> with SingleTickerProviderStat
 }
 
 class _SportTabContent extends ConsumerStatefulWidget {
-  const _SportTabContent({required this.sport});
+  const _SportTabContent({
+    required this.sport,
+    required this.tabIndex,
+    required this.tabController,
+  });
 
   final SportType sport;
+  final int tabIndex;
+  final TabController tabController;
 
   @override
   ConsumerState<_SportTabContent> createState() => _SportTabContentState();
@@ -97,7 +110,10 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
     _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) => _refresh());
   }
 
+  bool get _isActiveTab => widget.tabController.index == widget.tabIndex;
+
   void _refresh() {
+    if (!_isActiveTab) return;
     if (_isHot) {
       ref.invalidate(sportHotMatchesProvider(sport: widget.sport));
     } else if (_isScheduled) {
@@ -130,6 +146,7 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
 
   bool get _isHot => _matchStatus == 'hot';
   bool get _isScheduled => _matchStatus == 'scheduled';
+  bool get _isFinished => _matchStatus == 'finished';
 
   @override
   Widget build(BuildContext context) {
@@ -139,19 +156,31 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
         ? ref.watch(sportHotMatchesProvider(sport: widget.sport))
         : _isScheduled
         ? ref.watch(footballScheduledMatchesProvider(date: _formattedScheduledDate))
-        : ref.watch(sportMatchesProvider(sport: widget.sport, matchStatus: _matchStatus));
+        : ref.watch(sportMatchesProvider(
+            sport: widget.sport,
+            matchStatus: _matchStatus,
+            date: _isFinished ? _formattedScheduledDate : null,
+          ));
 
     return Column(
       children: [
         _StatusFilterBar(
           selected: _matchStatus,
-          onSelected: (status) => setState(() => _matchStatus = status),
+          onSelected: (status) => setState(() {
+            _matchStatus = status;
+            if (status == 'finished') {
+              _scheduledDate = DateTime.now();
+            } else if (status == 'scheduled') {
+              _scheduledDate = DateTime.now().add(const Duration(days: 1));
+            }
+          }),
           statuses: _availableStatuses,
         ),
-        if (_isScheduled)
+        if (_isScheduled || (widget.sport == SportType.football && _isFinished))
           _DateSelectorBar(
             selected: _scheduledDate,
             onSelected: (date) => setState(() => _scheduledDate = date),
+            isPast: _isFinished,
           ),
         Expanded(
           child: RefreshIndicator(
@@ -299,10 +328,15 @@ class _StatusFilterBarState extends State<_StatusFilterBar> with SingleTickerPro
 }
 
 class _DateSelectorBar extends StatelessWidget {
-  const _DateSelectorBar({required this.selected, required this.onSelected});
+  const _DateSelectorBar({
+    required this.selected,
+    required this.onSelected,
+    this.isPast = false,
+  });
 
   final DateTime selected;
   final ValueChanged<DateTime> onSelected;
+  final bool isPast;
 
   static String _formatDate(DateTime d) =>
       '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
@@ -322,10 +356,12 @@ class _DateSelectorBar extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 10),
         child: Row(
           children: List.generate(7, (index) {
-            final date = today.add(Duration(days: index + 1));
+            final date = isPast
+                ? today.subtract(Duration(days: index))
+                : today.add(Duration(days: index + 1));
             final isSelected = _formatDate(date) == _formatDate(selected);
             final weekdayLabel = weekdays[date.weekday - 1];
-            final dayLabel = '${date.day}';
+            final dayLabel = '${date.day}'.padLeft(2, '0');
 
             return Expanded(
               child: GestureDetector(

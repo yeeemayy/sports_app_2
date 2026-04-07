@@ -126,9 +126,9 @@
     "error": {
       "load_failed": "加载失败，请稍后再试"
     },
-    "empty": "今日暂无赛事",
+    "empty": "暂无赛事",
     "football": {
-      "ht": "半场",
+      "ht": "HT",
       "detail": {
         "events": "重要事件",
         "lineups": "阵容",

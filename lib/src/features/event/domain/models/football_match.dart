@@ -71,15 +71,16 @@ class FootballMatch with _$FootballMatch implements SportMatch {
     final now = DateTime.now().millisecondsSinceEpoch / 1000;
     final elapsed = ((now - counterTiming!) / 60).floor();
     if (statusId == 2) {
-      return elapsed <= 45 ? "$elapsed'" : "45+'";
+      final minute = elapsed + 1;
+      return minute <= 45 ? "$minute'" : "45+'";
     }
     if (statusId == 4) {
-      final minute = elapsed + 45;
+      final minute = elapsed + 46;
       return minute <= 90 ? "$minute'" : "90+'";
     }
     if (statusId == 5 || statusId == 6) {
-      final minute = elapsed + 90;
-      return minute <= 105 ? "$minute'" : "105+${elapsed - 15}'";
+      final minute = elapsed + 91;
+      return minute <= 105 ? "$minute'" : "105+${elapsed - 14}'";
     }
     return null;
   }

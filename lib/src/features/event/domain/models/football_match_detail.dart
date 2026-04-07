@@ -74,8 +74,6 @@ class FootballMatchDetail {
     required this.awayInfo,
     required this.leagueInfo,
     this.counterTiming,
-    this.matchTiming,
-    this.updateTiming,
   });
 
   final String id;
@@ -88,23 +86,27 @@ class FootballMatchDetail {
   final FootballTeamDetailInfo awayInfo;
   final FootballLeagueDetailInfo leagueInfo;
   final int? counterTiming;
-  final String? matchTiming;
-  final String? updateTiming;
 
-  String? get liveMinute {
-    if (counterTiming == null || counterTiming == 0) return null;
+  /// Returns the current match minute string, e.g. "32'" or "90+'".
+  ///
+  /// Pass [kickoffTimestamp] (Unix seconds, from the events API score[4]) for
+  /// the official formula: first half = elapsed/60+1, second half = elapsed/60+46.
+  String? liveMinute({int? kickoffTimestamp}) {
+    final ts = kickoffTimestamp ?? (counterTiming != 0 ? counterTiming : null);
+    if (ts == null) return null;
     final now = DateTime.now().millisecondsSinceEpoch / 1000;
-    final elapsed = ((now - counterTiming!) / 60).floor();
+    final elapsed = now - ts;
     if (statusId == 2) {
-      return elapsed <= 45 ? "$elapsed'" : "45+'";
+      final minute = (elapsed / 60).floor() + 1;
+      return minute <= 45 ? "$minute'" : "45+'";
     }
     if (statusId == 4) {
-      final minute = elapsed + 45;
+      final minute = (elapsed / 60).floor() + 46;
       return minute <= 90 ? "$minute'" : "90+'";
     }
     if (statusId == 5 || statusId == 6) {
-      final minute = elapsed + 90;
-      return minute <= 105 ? "$minute'" : "105+${elapsed - 15}'";
+      final minute = (elapsed / 60).floor() + 91;
+      return minute <= 105 ? "$minute'" : "105+'";
     }
     return null;
   }
@@ -121,16 +123,18 @@ class FootballMatchDetail {
   String get leagueName =>
       SportMatch.teamName({'en_name': leagueInfo.enName, 'cn_name': leagueInfo.cnName});
 
-  String get statusLabel {
+  String statusLabel({int? kickoffTimestamp}) {
     switch (statusId) {
       case 1:
         return 'event.football.status.not_started'.tr();
       case 2:
-        return liveMinute ?? 'event.football.status.first_half'.tr();
+        return liveMinute(kickoffTimestamp: kickoffTimestamp) ??
+            'event.football.status.first_half'.tr();
       case 3:
         return 'event.football.status.half_time'.tr();
       case 4:
-        return liveMinute ?? 'event.football.status.second_half'.tr();
+        return liveMinute(kickoffTimestamp: kickoffTimestamp) ??
+            'event.football.status.second_half'.tr();
       case 5:
       case 6:
         return 'event.football.status.overtime'.tr();
@@ -153,17 +157,18 @@ class FootballMatchDetail {
     }
   }
 
-  bool get isReallyFinished {
+  /// Returns true if the match is really finished.
+  ///
+  /// Pass [kickoffTimestamp] (Unix seconds, from the events API score[4]) for
+  /// the most accurate determination when status 4 with a stopped counter.
+  bool isReallyFinished({int? kickoffTimestamp}) {
     if (statusId == 8) return true;
 
-    if (statusId == 4 && counterTiming == 0) {
-      final kickoff = matchTiming != null ? DateTime.tryParse(matchTiming!) : null;
-      final update = updateTiming != null ? DateTime.tryParse(updateTiming!) : null;
-
-      if (kickoff != null && update != null) {
-        final elapsed = update.difference(kickoff).inMinutes;
-        if (elapsed > 110) return true;
-      }
+    if (statusId == 4 && counterTiming == 0 && kickoffTimestamp != null) {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      final elapsedSeconds = now - kickoffTimestamp;
+      // Second half is 45 min + up to ~10 min stoppage; 55 min is a safe threshold.
+      if (elapsedSeconds > 55 * 60) return true;
     }
 
     return false;
@@ -198,8 +203,6 @@ class FootballMatchDetail {
           ? FootballMatchEnvironment.fromJson((d['environment'] as Map).cast<String, dynamic>())
           : null,
       counterTiming: d['counter_timing'] as int?,
-      matchTiming: d['match_timing'] as String?,
-      updateTiming: d['update_timing'] as String?,
       homeInfo: _parseTeamInfo(homeInfoJson, isHome: true),
       awayInfo: _parseTeamInfo(awayInfoJson, isHome: false),
       leagueInfo: FootballLeagueDetailInfo(

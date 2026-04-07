@@ -148,7 +148,7 @@ class _SportHotMatchesProviderElement
   SportType get sport => (origin as SportHotMatchesProvider).sport;
 }
 
-String _$sportMatchesHash() => r'39178d052b8c6209aad5420fe933acd5254d3628';
+String _$sportMatchesHash() => r'1f39dbcd4337dd676b3c4d613280a0bfa2496067';
 
 /// See also [sportMatches].
 @ProviderFor(sportMatches)
@@ -163,15 +163,24 @@ class SportMatchesFamily extends Family<AsyncValue<List<SportMatch>>> {
   SportMatchesProvider call({
     required SportType sport,
     String matchStatus = 'all',
+    String? date,
   }) {
-    return SportMatchesProvider(sport: sport, matchStatus: matchStatus);
+    return SportMatchesProvider(
+      sport: sport,
+      matchStatus: matchStatus,
+      date: date,
+    );
   }
 
   @override
   SportMatchesProvider getProviderOverride(
     covariant SportMatchesProvider provider,
   ) {
-    return call(sport: provider.sport, matchStatus: provider.matchStatus);
+    return call(
+      sport: provider.sport,
+      matchStatus: provider.matchStatus,
+      date: provider.date,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -192,24 +201,29 @@ class SportMatchesFamily extends Family<AsyncValue<List<SportMatch>>> {
 /// See also [sportMatches].
 class SportMatchesProvider extends AutoDisposeFutureProvider<List<SportMatch>> {
   /// See also [sportMatches].
-  SportMatchesProvider({required SportType sport, String matchStatus = 'all'})
-    : this._internal(
-        (ref) => sportMatches(
-          ref as SportMatchesRef,
-          sport: sport,
-          matchStatus: matchStatus,
-        ),
-        from: sportMatchesProvider,
-        name: r'sportMatchesProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$sportMatchesHash,
-        dependencies: SportMatchesFamily._dependencies,
-        allTransitiveDependencies:
-            SportMatchesFamily._allTransitiveDependencies,
-        sport: sport,
-        matchStatus: matchStatus,
-      );
+  SportMatchesProvider({
+    required SportType sport,
+    String matchStatus = 'all',
+    String? date,
+  }) : this._internal(
+         (ref) => sportMatches(
+           ref as SportMatchesRef,
+           sport: sport,
+           matchStatus: matchStatus,
+           date: date,
+         ),
+         from: sportMatchesProvider,
+         name: r'sportMatchesProvider',
+         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+             ? null
+             : _$sportMatchesHash,
+         dependencies: SportMatchesFamily._dependencies,
+         allTransitiveDependencies:
+             SportMatchesFamily._allTransitiveDependencies,
+         sport: sport,
+         matchStatus: matchStatus,
+         date: date,
+       );
 
   SportMatchesProvider._internal(
     super._createNotifier, {
@@ -220,10 +234,12 @@ class SportMatchesProvider extends AutoDisposeFutureProvider<List<SportMatch>> {
     required super.from,
     required this.sport,
     required this.matchStatus,
+    required this.date,
   }) : super.internal();
 
   final SportType sport;
   final String matchStatus;
+  final String? date;
 
   @override
   Override overrideWith(
@@ -240,6 +256,7 @@ class SportMatchesProvider extends AutoDisposeFutureProvider<List<SportMatch>> {
         debugGetCreateSourceHash: null,
         sport: sport,
         matchStatus: matchStatus,
+        date: date,
       ),
     );
   }
@@ -253,7 +270,8 @@ class SportMatchesProvider extends AutoDisposeFutureProvider<List<SportMatch>> {
   bool operator ==(Object other) {
     return other is SportMatchesProvider &&
         other.sport == sport &&
-        other.matchStatus == matchStatus;
+        other.matchStatus == matchStatus &&
+        other.date == date;
   }
 
   @override
@@ -261,6 +279,7 @@ class SportMatchesProvider extends AutoDisposeFutureProvider<List<SportMatch>> {
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
     hash = _SystemHash.combine(hash, sport.hashCode);
     hash = _SystemHash.combine(hash, matchStatus.hashCode);
+    hash = _SystemHash.combine(hash, date.hashCode);
 
     return _SystemHash.finish(hash);
   }
@@ -274,6 +293,9 @@ mixin SportMatchesRef on AutoDisposeFutureProviderRef<List<SportMatch>> {
 
   /// The parameter `matchStatus` of this provider.
   String get matchStatus;
+
+  /// The parameter `date` of this provider.
+  String? get date;
 }
 
 class _SportMatchesProviderElement
@@ -285,6 +307,8 @@ class _SportMatchesProviderElement
   SportType get sport => (origin as SportMatchesProvider).sport;
   @override
   String get matchStatus => (origin as SportMatchesProvider).matchStatus;
+  @override
+  String? get date => (origin as SportMatchesProvider).date;
 }
 
 String _$footballScheduledMatchesHash() =>
@@ -671,7 +695,7 @@ class _FootballMatchLineupsProviderElement
 }
 
 String _$footballMatchEventsKeyHash() =>
-    r'eb36eb0ab0234ec7c22ef95a72bdc7b8e86ba286';
+    r'f2b3f372887348b817427adc8edd8c2b3babd5a5';
 
 /// See also [footballMatchEventsKey].
 @ProviderFor(footballMatchEventsKey)
@@ -679,7 +703,7 @@ const footballMatchEventsKeyProvider = FootballMatchEventsKeyFamily();
 
 /// See also [footballMatchEventsKey].
 class FootballMatchEventsKeyFamily
-    extends Family<AsyncValue<FootballMatchEvents>> {
+    extends Family<AsyncValue<FootballMatchEvents?>> {
   /// See also [footballMatchEventsKey].
   const FootballMatchEventsKeyFamily();
 
@@ -712,7 +736,7 @@ class FootballMatchEventsKeyFamily
 
 /// See also [footballMatchEventsKey].
 class FootballMatchEventsKeyProvider
-    extends AutoDisposeFutureProvider<FootballMatchEvents> {
+    extends AutoDisposeFutureProvider<FootballMatchEvents?> {
   /// See also [footballMatchEventsKey].
   FootballMatchEventsKeyProvider({required String matchId})
     : this._internal(
@@ -745,7 +769,7 @@ class FootballMatchEventsKeyProvider
 
   @override
   Override overrideWith(
-    FutureOr<FootballMatchEvents> Function(FootballMatchEventsKeyRef provider)
+    FutureOr<FootballMatchEvents?> Function(FootballMatchEventsKeyRef provider)
     create,
   ) {
     return ProviderOverride(
@@ -763,7 +787,7 @@ class FootballMatchEventsKeyProvider
   }
 
   @override
-  AutoDisposeFutureProviderElement<FootballMatchEvents> createElement() {
+  AutoDisposeFutureProviderElement<FootballMatchEvents?> createElement() {
     return _FootballMatchEventsKeyProviderElement(this);
   }
 
@@ -784,13 +808,13 @@ class FootballMatchEventsKeyProvider
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 mixin FootballMatchEventsKeyRef
-    on AutoDisposeFutureProviderRef<FootballMatchEvents> {
+    on AutoDisposeFutureProviderRef<FootballMatchEvents?> {
   /// The parameter `matchId` of this provider.
   String get matchId;
 }
 
 class _FootballMatchEventsKeyProviderElement
-    extends AutoDisposeFutureProviderElement<FootballMatchEvents>
+    extends AutoDisposeFutureProviderElement<FootballMatchEvents?>
     with FootballMatchEventsKeyRef {
   _FootballMatchEventsKeyProviderElement(super.provider);
 

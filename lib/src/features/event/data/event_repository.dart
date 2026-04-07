@@ -75,9 +75,12 @@ class EventRepository extends _$EventRepository {
     return FootballLineups.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<FootballMatchEvents> getFootballMatchEventsKey(String matchId) async {
+  Future<FootballMatchEvents?> getFootballMatchEventsKey(String matchId) async {
     final dio = ref.read(sportsApiServiceProvider);
     final response = await dio.get('/football/match/events/key/$matchId');
+    if (response.data is! Map<String, dynamic>) {
+      return null;
+    }
     return FootballMatchEvents.fromJson(response.data as Map<String, dynamic>);
   }
 }
