@@ -4,6 +4,7 @@ import 'package:sports_app/src/core/services/api_service.dart' show sportsApiSer
 import 'package:sports_app/src/features/event/domain/models/football_lineup.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match_events.dart';
+import 'package:sports_app/src/features/event/domain/models/match_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_match.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 
@@ -14,39 +15,51 @@ class EventRepository extends _$EventRepository {
   @override
   void build() {}
 
-  Future<List<SportMatch>> getHotLeagueMatches({required SportType sport}) async {
+  Future<({List<SportMatch> matches, int totalPage})> getHotLeagueMatches({
+    required SportType sport,
+    int page = 1,
+  }) async {
     final dio = ref.read(sportsApiServiceProvider);
     final path = '/${sport.apiPath}/match/list/today-hot-league';
-    final response = await dio.get(path);
+    final response = await dio.get(path, queryParameters: {'page': page});
 
     final json = response.data as Map<String, dynamic>;
     final list = json[sport.matchListKey] as List<dynamic>? ?? [];
+    final totalPage = (json['totalPage'] as num?)?.toInt() ?? 1;
 
-    return list
-        .map((item) => SportMatch.fromSportJson(item as Map<String, dynamic>, sport))
-        .toList();
+    return (
+      matches: list
+          .map((item) => SportMatch.fromSportJson(item as Map<String, dynamic>, sport))
+          .toList(),
+      totalPage: totalPage,
+    );
   }
 
-  Future<List<SportMatch>> getMatches({
+  Future<({List<SportMatch> matches, int totalPage})> getMatches({
     required SportType sport,
     String matchStatus = 'all',
     String? date,
+    int page = 1,
   }) async {
     final dio = ref.read(sportsApiServiceProvider);
     final path = '/${sport.apiPath}/match/list/today-by-match-time';
     final response = await dio.get(
       path,
-      queryParameters: {'matchStatus': matchStatus, 'date': ?date},
+      queryParameters: {'matchStatus': matchStatus, 'date': ?date, 'page': page},
     );
 
     final json = response.data as Map<String, dynamic>;
     debugPrint('[EventRepository] ${sport.apiPath} liveMatches=${json['liveMatches']}');
 
     final list = json[sport.matchListKey] as List<dynamic>? ?? [];
+    final totalPage = (json['totalPage'] as num?)?.toInt() ?? 1;
 
-    return list
-        .map((item) => SportMatch.fromSportJson(item as Map<String, dynamic>, sport))
-        .toList();
+    return (
+      matches: list
+          .map((item) => SportMatch.fromSportJson(item as Map<String, dynamic>, sport))
+          .toList(),
+      totalPage: totalPage,
+    );
   }
 
   Future<List<SportMatch>> getScheduledMatches({required String date}) async {
@@ -82,5 +95,16 @@ class EventRepository extends _$EventRepository {
       return null;
     }
     return FootballMatchEvents.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<List<MatchRealtimeData>> getRealtimeMatches() async {
+    final dio = ref.read(sportsApiServiceProvider);
+    final response = await dio.get(
+      '/football/match/realtime',
+    );
+    final list = response.data as List<dynamic>? ?? [];
+    return list
+        .map((item) => MatchRealtimeData.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 }

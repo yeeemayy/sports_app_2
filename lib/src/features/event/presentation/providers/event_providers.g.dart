@@ -6,7 +6,8 @@ part of 'event_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$sportHotMatchesHash() => r'614573614c5a724d986d2e76febda145e6c18da0';
+String _$footballScheduledMatchesHash() =>
+    r'ff8c0bbe84d0c0a492eb8fcf29cd4d796c4603ad';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -28,291 +29,6 @@ class _SystemHash {
     return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
   }
 }
-
-/// See also [sportHotMatches].
-@ProviderFor(sportHotMatches)
-const sportHotMatchesProvider = SportHotMatchesFamily();
-
-/// See also [sportHotMatches].
-class SportHotMatchesFamily extends Family<AsyncValue<List<SportMatch>>> {
-  /// See also [sportHotMatches].
-  const SportHotMatchesFamily();
-
-  /// See also [sportHotMatches].
-  SportHotMatchesProvider call({required SportType sport}) {
-    return SportHotMatchesProvider(sport: sport);
-  }
-
-  @override
-  SportHotMatchesProvider getProviderOverride(
-    covariant SportHotMatchesProvider provider,
-  ) {
-    return call(sport: provider.sport);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'sportHotMatchesProvider';
-}
-
-/// See also [sportHotMatches].
-class SportHotMatchesProvider
-    extends AutoDisposeFutureProvider<List<SportMatch>> {
-  /// See also [sportHotMatches].
-  SportHotMatchesProvider({required SportType sport})
-    : this._internal(
-        (ref) => sportHotMatches(ref as SportHotMatchesRef, sport: sport),
-        from: sportHotMatchesProvider,
-        name: r'sportHotMatchesProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$sportHotMatchesHash,
-        dependencies: SportHotMatchesFamily._dependencies,
-        allTransitiveDependencies:
-            SportHotMatchesFamily._allTransitiveDependencies,
-        sport: sport,
-      );
-
-  SportHotMatchesProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.sport,
-  }) : super.internal();
-
-  final SportType sport;
-
-  @override
-  Override overrideWith(
-    FutureOr<List<SportMatch>> Function(SportHotMatchesRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: SportHotMatchesProvider._internal(
-        (ref) => create(ref as SportHotMatchesRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        sport: sport,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeFutureProviderElement<List<SportMatch>> createElement() {
-    return _SportHotMatchesProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is SportHotMatchesProvider && other.sport == sport;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, sport.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin SportHotMatchesRef on AutoDisposeFutureProviderRef<List<SportMatch>> {
-  /// The parameter `sport` of this provider.
-  SportType get sport;
-}
-
-class _SportHotMatchesProviderElement
-    extends AutoDisposeFutureProviderElement<List<SportMatch>>
-    with SportHotMatchesRef {
-  _SportHotMatchesProviderElement(super.provider);
-
-  @override
-  SportType get sport => (origin as SportHotMatchesProvider).sport;
-}
-
-String _$sportMatchesHash() => r'1f39dbcd4337dd676b3c4d613280a0bfa2496067';
-
-/// See also [sportMatches].
-@ProviderFor(sportMatches)
-const sportMatchesProvider = SportMatchesFamily();
-
-/// See also [sportMatches].
-class SportMatchesFamily extends Family<AsyncValue<List<SportMatch>>> {
-  /// See also [sportMatches].
-  const SportMatchesFamily();
-
-  /// See also [sportMatches].
-  SportMatchesProvider call({
-    required SportType sport,
-    String matchStatus = 'all',
-    String? date,
-  }) {
-    return SportMatchesProvider(
-      sport: sport,
-      matchStatus: matchStatus,
-      date: date,
-    );
-  }
-
-  @override
-  SportMatchesProvider getProviderOverride(
-    covariant SportMatchesProvider provider,
-  ) {
-    return call(
-      sport: provider.sport,
-      matchStatus: provider.matchStatus,
-      date: provider.date,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'sportMatchesProvider';
-}
-
-/// See also [sportMatches].
-class SportMatchesProvider extends AutoDisposeFutureProvider<List<SportMatch>> {
-  /// See also [sportMatches].
-  SportMatchesProvider({
-    required SportType sport,
-    String matchStatus = 'all',
-    String? date,
-  }) : this._internal(
-         (ref) => sportMatches(
-           ref as SportMatchesRef,
-           sport: sport,
-           matchStatus: matchStatus,
-           date: date,
-         ),
-         from: sportMatchesProvider,
-         name: r'sportMatchesProvider',
-         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-             ? null
-             : _$sportMatchesHash,
-         dependencies: SportMatchesFamily._dependencies,
-         allTransitiveDependencies:
-             SportMatchesFamily._allTransitiveDependencies,
-         sport: sport,
-         matchStatus: matchStatus,
-         date: date,
-       );
-
-  SportMatchesProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.sport,
-    required this.matchStatus,
-    required this.date,
-  }) : super.internal();
-
-  final SportType sport;
-  final String matchStatus;
-  final String? date;
-
-  @override
-  Override overrideWith(
-    FutureOr<List<SportMatch>> Function(SportMatchesRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: SportMatchesProvider._internal(
-        (ref) => create(ref as SportMatchesRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        sport: sport,
-        matchStatus: matchStatus,
-        date: date,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeFutureProviderElement<List<SportMatch>> createElement() {
-    return _SportMatchesProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is SportMatchesProvider &&
-        other.sport == sport &&
-        other.matchStatus == matchStatus &&
-        other.date == date;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, sport.hashCode);
-    hash = _SystemHash.combine(hash, matchStatus.hashCode);
-    hash = _SystemHash.combine(hash, date.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin SportMatchesRef on AutoDisposeFutureProviderRef<List<SportMatch>> {
-  /// The parameter `sport` of this provider.
-  SportType get sport;
-
-  /// The parameter `matchStatus` of this provider.
-  String get matchStatus;
-
-  /// The parameter `date` of this provider.
-  String? get date;
-}
-
-class _SportMatchesProviderElement
-    extends AutoDisposeFutureProviderElement<List<SportMatch>>
-    with SportMatchesRef {
-  _SportMatchesProviderElement(super.provider);
-
-  @override
-  SportType get sport => (origin as SportMatchesProvider).sport;
-  @override
-  String get matchStatus => (origin as SportMatchesProvider).matchStatus;
-  @override
-  String? get date => (origin as SportMatchesProvider).date;
-}
-
-String _$footballScheduledMatchesHash() =>
-    r'ff8c0bbe84d0c0a492eb8fcf29cd4d796c4603ad';
 
 /// See also [footballScheduledMatches].
 @ProviderFor(footballScheduledMatches)
@@ -820,6 +536,229 @@ class _FootballMatchEventsKeyProviderElement
 
   @override
   String get matchId => (origin as FootballMatchEventsKeyProvider).matchId;
+}
+
+String _$sportMatchesPaginatedHash() =>
+    r'deae687e672944ccd2882c02768841aa274fcd12';
+
+abstract class _$SportMatchesPaginated
+    extends BuildlessAutoDisposeAsyncNotifier<PaginatedMatchResult> {
+  late final SportType sport;
+  late final String matchStatus;
+  late final String? date;
+  late final bool isHot;
+
+  FutureOr<PaginatedMatchResult> build({
+    required SportType sport,
+    String matchStatus = 'all',
+    String? date,
+    bool isHot = false,
+  });
+}
+
+/// See also [SportMatchesPaginated].
+@ProviderFor(SportMatchesPaginated)
+const sportMatchesPaginatedProvider = SportMatchesPaginatedFamily();
+
+/// See also [SportMatchesPaginated].
+class SportMatchesPaginatedFamily
+    extends Family<AsyncValue<PaginatedMatchResult>> {
+  /// See also [SportMatchesPaginated].
+  const SportMatchesPaginatedFamily();
+
+  /// See also [SportMatchesPaginated].
+  SportMatchesPaginatedProvider call({
+    required SportType sport,
+    String matchStatus = 'all',
+    String? date,
+    bool isHot = false,
+  }) {
+    return SportMatchesPaginatedProvider(
+      sport: sport,
+      matchStatus: matchStatus,
+      date: date,
+      isHot: isHot,
+    );
+  }
+
+  @override
+  SportMatchesPaginatedProvider getProviderOverride(
+    covariant SportMatchesPaginatedProvider provider,
+  ) {
+    return call(
+      sport: provider.sport,
+      matchStatus: provider.matchStatus,
+      date: provider.date,
+      isHot: provider.isHot,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'sportMatchesPaginatedProvider';
+}
+
+/// See also [SportMatchesPaginated].
+class SportMatchesPaginatedProvider
+    extends
+        AutoDisposeAsyncNotifierProviderImpl<
+          SportMatchesPaginated,
+          PaginatedMatchResult
+        > {
+  /// See also [SportMatchesPaginated].
+  SportMatchesPaginatedProvider({
+    required SportType sport,
+    String matchStatus = 'all',
+    String? date,
+    bool isHot = false,
+  }) : this._internal(
+         () => SportMatchesPaginated()
+           ..sport = sport
+           ..matchStatus = matchStatus
+           ..date = date
+           ..isHot = isHot,
+         from: sportMatchesPaginatedProvider,
+         name: r'sportMatchesPaginatedProvider',
+         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+             ? null
+             : _$sportMatchesPaginatedHash,
+         dependencies: SportMatchesPaginatedFamily._dependencies,
+         allTransitiveDependencies:
+             SportMatchesPaginatedFamily._allTransitiveDependencies,
+         sport: sport,
+         matchStatus: matchStatus,
+         date: date,
+         isHot: isHot,
+       );
+
+  SportMatchesPaginatedProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.sport,
+    required this.matchStatus,
+    required this.date,
+    required this.isHot,
+  }) : super.internal();
+
+  final SportType sport;
+  final String matchStatus;
+  final String? date;
+  final bool isHot;
+
+  @override
+  FutureOr<PaginatedMatchResult> runNotifierBuild(
+    covariant SportMatchesPaginated notifier,
+  ) {
+    return notifier.build(
+      sport: sport,
+      matchStatus: matchStatus,
+      date: date,
+      isHot: isHot,
+    );
+  }
+
+  @override
+  Override overrideWith(SportMatchesPaginated Function() create) {
+    return ProviderOverride(
+      origin: this,
+      override: SportMatchesPaginatedProvider._internal(
+        () => create()
+          ..sport = sport
+          ..matchStatus = matchStatus
+          ..date = date
+          ..isHot = isHot,
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        sport: sport,
+        matchStatus: matchStatus,
+        date: date,
+        isHot: isHot,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeAsyncNotifierProviderElement<
+    SportMatchesPaginated,
+    PaginatedMatchResult
+  >
+  createElement() {
+    return _SportMatchesPaginatedProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SportMatchesPaginatedProvider &&
+        other.sport == sport &&
+        other.matchStatus == matchStatus &&
+        other.date == date &&
+        other.isHot == isHot;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, sport.hashCode);
+    hash = _SystemHash.combine(hash, matchStatus.hashCode);
+    hash = _SystemHash.combine(hash, date.hashCode);
+    hash = _SystemHash.combine(hash, isHot.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin SportMatchesPaginatedRef
+    on AutoDisposeAsyncNotifierProviderRef<PaginatedMatchResult> {
+  /// The parameter `sport` of this provider.
+  SportType get sport;
+
+  /// The parameter `matchStatus` of this provider.
+  String get matchStatus;
+
+  /// The parameter `date` of this provider.
+  String? get date;
+
+  /// The parameter `isHot` of this provider.
+  bool get isHot;
+}
+
+class _SportMatchesPaginatedProviderElement
+    extends
+        AutoDisposeAsyncNotifierProviderElement<
+          SportMatchesPaginated,
+          PaginatedMatchResult
+        >
+    with SportMatchesPaginatedRef {
+  _SportMatchesPaginatedProviderElement(super.provider);
+
+  @override
+  SportType get sport => (origin as SportMatchesPaginatedProvider).sport;
+  @override
+  String get matchStatus =>
+      (origin as SportMatchesPaginatedProvider).matchStatus;
+  @override
+  String? get date => (origin as SportMatchesPaginatedProvider).date;
+  @override
+  bool get isHot => (origin as SportMatchesPaginatedProvider).isHot;
 }
 
 // ignore_for_file: type=lint

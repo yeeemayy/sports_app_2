@@ -10,6 +10,7 @@ import 'package:sports_app/src/features/event/domain/models/football_lineup.dart
 import 'package:sports_app/src/features/event/domain/models/football_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match_events.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
+import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/football_match_card.dart';
 import 'package:sports_app/src/shared_widgets/avatar.dart';
 import 'package:timeline_tile/timeline_tile.dart';
@@ -24,43 +25,44 @@ class FootballMatchDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _FootballMatchDetailScreenState extends ConsumerState<FootballMatchDetailScreen> {
-  Timer? _pollTimer;
+  Timer? _eventsTimer;
 
-  void _startPolling() {
-    _pollTimer?.cancel();
-    _pollTimer = Timer.periodic(const Duration(seconds: 30), (_) {
-      ref.invalidate(footballMatchDetailProvider(matchId: widget.matchId));
-      ref.invalidate(footballMatchEventsKeyProvider(matchId: widget.matchId));
-      ref.invalidate(footballMatchLineupsProvider(matchId: widget.matchId));
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(footballRealtimeProvider.notifier).setWatchedIds(
+        'detail:${widget.matchId}',
+        [widget.matchId],
+      );
     });
-  }
-
-  void _stopPolling() {
-    _pollTimer?.cancel();
-    _pollTimer = null;
+    _eventsTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      ref.invalidate(footballMatchEventsKeyProvider(matchId: widget.matchId));
+    });
   }
 
   @override
   void dispose() {
-    _stopPolling();
+    _eventsTimer?.cancel();
+    ref.read(footballRealtimeProvider.notifier).clearSource('detail:${widget.matchId}');
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final detailAsync = ref.watch(footballMatchDetailProvider(matchId: widget.matchId));
-    final eventsAsync = ref.watch(footballMatchEventsKeyProvider(matchId: widget.matchId));
 
-    final isFinished =
-        detailAsync.valueOrNull?.isReallyFinished(
-          kickoffTimestamp: eventsAsync.valueOrNull?.kickoffTimestamp,
-        ) ??
-        false;
-    if (isFinished) {
-      _stopPolling();
-    } else if (_pollTimer == null) {
-      _startPolling();
-    }
+    ref.listen(
+      footballRealtimeProvider.select((map) => map[widget.matchId]?.statusId),
+      (prev, next) {
+        if (prev == null || next == null || prev == next) return;
+        ref.invalidate(footballMatchDetailProvider(matchId: widget.matchId));
+        ref.invalidate(footballMatchEventsKeyProvider(matchId: widget.matchId));
+        ref.invalidate(footballMatchLineupsProvider(matchId: widget.matchId));
+      },
+    );
 
     final title = detailAsync.valueOrNull?.leagueName ?? '';
 
@@ -140,6 +142,7 @@ class _MatchHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final detailAsync = ref.watch(footballMatchDetailProvider(matchId: matchId));
     final eventsAsync = ref.watch(footballMatchEventsKeyProvider(matchId: matchId));
+    final rt = ref.watch(footballRealtimeProvider.select((map) => map[matchId]));
 
     return Container(
       width: double.maxFinite,
@@ -148,13 +151,20 @@ class _MatchHeader extends ConsumerWidget {
       child: detailAsync.when(
         loading: () => const SizedBox(height: 72),
         error: (_, __) => const SizedBox(height: 72),
-        data: (detail) => _MatchHeaderContent(
-          detail: detail,
-          kickoffTimestamp: eventsAsync.valueOrNull?.kickoffTimestamp,
-          isReallyFinished: detail.isReallyFinished(
-            kickoffTimestamp: eventsAsync.valueOrNull?.kickoffTimestamp,
-          ),
-        ),
+        data: (detail) {
+          final effKickoff = (rt != null && rt.kickoffTimestamp != 0)
+              ? rt.kickoffTimestamp
+              : eventsAsync.valueOrNull?.kickoffTimestamp;
+          return _MatchHeaderContent(
+            detail: detail,
+            kickoffTimestamp: effKickoff,
+            rtStatusId: rt?.statusId,
+            rtHomeScore: rt?.homeScore,
+            rtAwayScore: rt?.awayScore,
+            rtHomeHtScore: rt?.homeHtScore,
+            rtAwayHtScore: rt?.awayHtScore,
+          );
+        },
       ),
     );
   }
@@ -163,16 +173,30 @@ class _MatchHeader extends ConsumerWidget {
 class _MatchHeaderContent extends StatelessWidget {
   const _MatchHeaderContent({
     required this.detail,
-    required this.isReallyFinished,
     this.kickoffTimestamp,
+    this.rtStatusId,
+    this.rtHomeScore,
+    this.rtAwayScore,
+    this.rtHomeHtScore,
+    this.rtAwayHtScore,
   });
 
   final FootballMatchDetail detail;
-  final bool isReallyFinished;
   final int? kickoffTimestamp;
+  final int? rtStatusId;
+  final int? rtHomeScore;
+  final int? rtAwayScore;
+  final int? rtHomeHtScore;
+  final int? rtAwayHtScore;
 
   @override
   Widget build(BuildContext context) {
+    final int effStatusId = rtStatusId ?? detail.statusId;
+    final String effHomeScore = rtHomeScore?.toString() ?? detail.homeScore;
+    final String effAwayScore = rtAwayScore?.toString() ?? detail.awayScore;
+    final int? effHomeHtScore = rtHomeHtScore ?? detail.homeInfo.halfTimeScore;
+    final int? effAwayHtScore = rtAwayHtScore ?? detail.awayInfo.halfTimeScore;
+
     return Column(
       children: [
         Row(
@@ -203,20 +227,20 @@ class _MatchHeaderContent extends StatelessWidget {
               child: Column(
                 children: [
                   MatchStatusBadge(
-                    statusId: isReallyFinished ? 8 : detail.statusId,
-                    label: isReallyFinished
-                        ? 'event.football.status.finished'.tr()
-                        : detail.statusLabel(kickoffTimestamp: kickoffTimestamp),
+                    statusId: effStatusId,
+                    label: detail.statusLabel(kickoffTimestamp: kickoffTimestamp),
                     liveColor: Colors.white,
                     staticColor: Colors.grey.shade200,
                   ),
-                  _ScoreOrStatus(detail: detail),
+                  _ScoreOrStatus(
+                    statusId: effStatusId,
+                    homeScore: effHomeScore,
+                    awayScore: effAwayScore,
+                  ),
                   const SizedBox(height: 4),
-                  if (!isReallyFinished &&
-                      detail.homeInfo.halfTimeScore != null &&
-                      detail.awayInfo.halfTimeScore != null)
+                  if (effStatusId != 8 && effHomeHtScore != null && effAwayHtScore != null)
                     Text(
-                      '${'event.football.ht'.tr()} ${detail.homeInfo.halfTimeScore}-${detail.awayInfo.halfTimeScore}',
+                      '${'event.football.ht'.tr()} $effHomeHtScore-$effAwayHtScore',
                       style: context.textTheme.labelSmall?.copyWith(color: Colors.grey.shade300),
                     ),
                 ],
@@ -314,15 +338,21 @@ class _EnvironmentRow extends StatelessWidget {
 }
 
 class _ScoreOrStatus extends StatelessWidget {
-  const _ScoreOrStatus({required this.detail});
+  const _ScoreOrStatus({
+    required this.statusId,
+    required this.homeScore,
+    required this.awayScore,
+  });
 
-  final FootballMatchDetail detail;
+  final int statusId;
+  final String homeScore;
+  final String awayScore;
 
   static const _noScoreStatuses = {0, 1, 13};
 
   @override
   Widget build(BuildContext context) {
-    if (_noScoreStatuses.contains(detail.statusId)) {
+    if (_noScoreStatuses.contains(statusId)) {
       return Text(
         '-',
         style: context.textTheme.headlineSmall?.copyWith(
@@ -339,12 +369,12 @@ class _ScoreOrStatus extends StatelessWidget {
           color: Colors.white,
         ),
         children: [
-          TextSpan(text: detail.homeScore),
+          TextSpan(text: homeScore),
           TextSpan(
             text: ' - ',
             style: TextStyle(color: Colors.grey.shade200),
           ),
-          TextSpan(text: detail.awayScore),
+          TextSpan(text: awayScore),
         ],
       ),
     );

@@ -38,6 +38,8 @@ mixin _$FootballMatch {
   String? get statusDescription => throw _privateConstructorUsedError;
   String? get htHomeScore => throw _privateConstructorUsedError;
   String? get htAwayScore => throw _privateConstructorUsedError;
+  int get homeYellowCards => throw _privateConstructorUsedError;
+  int get awayYellowCards => throw _privateConstructorUsedError;
 
   /// Serializes this FootballMatch to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -74,6 +76,8 @@ abstract class $FootballMatchCopyWith<$Res> {
     String? statusDescription,
     String? htHomeScore,
     String? htAwayScore,
+    int homeYellowCards,
+    int awayYellowCards,
   });
 }
 
@@ -109,6 +113,8 @@ class _$FootballMatchCopyWithImpl<$Res, $Val extends FootballMatch>
     Object? statusDescription = freezed,
     Object? htHomeScore = freezed,
     Object? htAwayScore = freezed,
+    Object? homeYellowCards = null,
+    Object? awayYellowCards = null,
   }) {
     return _then(
       _value.copyWith(
@@ -180,6 +186,14 @@ class _$FootballMatchCopyWithImpl<$Res, $Val extends FootballMatch>
                 ? _value.htAwayScore
                 : htAwayScore // ignore: cast_nullable_to_non_nullable
                       as String?,
+            homeYellowCards: null == homeYellowCards
+                ? _value.homeYellowCards
+                : homeYellowCards // ignore: cast_nullable_to_non_nullable
+                      as int,
+            awayYellowCards: null == awayYellowCards
+                ? _value.awayYellowCards
+                : awayYellowCards // ignore: cast_nullable_to_non_nullable
+                      as int,
           )
           as $Val,
     );
@@ -213,6 +227,8 @@ abstract class _$$FootballMatchImplCopyWith<$Res>
     String? statusDescription,
     String? htHomeScore,
     String? htAwayScore,
+    int homeYellowCards,
+    int awayYellowCards,
   });
 }
 
@@ -247,6 +263,8 @@ class __$$FootballMatchImplCopyWithImpl<$Res>
     Object? statusDescription = freezed,
     Object? htHomeScore = freezed,
     Object? htAwayScore = freezed,
+    Object? homeYellowCards = null,
+    Object? awayYellowCards = null,
   }) {
     return _then(
       _$FootballMatchImpl(
@@ -318,6 +336,14 @@ class __$$FootballMatchImplCopyWithImpl<$Res>
             ? _value.htAwayScore
             : htAwayScore // ignore: cast_nullable_to_non_nullable
                   as String?,
+        homeYellowCards: null == homeYellowCards
+            ? _value.homeYellowCards
+            : homeYellowCards // ignore: cast_nullable_to_non_nullable
+                  as int,
+        awayYellowCards: null == awayYellowCards
+            ? _value.awayYellowCards
+            : awayYellowCards // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }
@@ -344,6 +370,8 @@ class _$FootballMatchImpl extends _FootballMatch {
     this.statusDescription,
     this.htHomeScore,
     this.htAwayScore,
+    this.homeYellowCards = 0,
+    this.awayYellowCards = 0,
   }) : _oddsEuro = oddsEuro,
        super._();
 
@@ -392,10 +420,16 @@ class _$FootballMatchImpl extends _FootballMatch {
   final String? htHomeScore;
   @override
   final String? htAwayScore;
+  @override
+  @JsonKey()
+  final int homeYellowCards;
+  @override
+  @JsonKey()
+  final int awayYellowCards;
 
   @override
   String toString() {
-    return 'FootballMatch(id: $id, statusId: $statusId, matchTimeSim: $matchTimeSim, homeName: $homeName, homeLogo: $homeLogo, homeScore: $homeScore, awayName: $awayName, awayLogo: $awayLogo, awayScore: $awayScore, leagueName: $leagueName, leagueLogo: $leagueLogo, matchTime: $matchTime, counterTiming: $counterTiming, oddsEuro: $oddsEuro, statusDescription: $statusDescription, htHomeScore: $htHomeScore, htAwayScore: $htAwayScore)';
+    return 'FootballMatch(id: $id, statusId: $statusId, matchTimeSim: $matchTimeSim, homeName: $homeName, homeLogo: $homeLogo, homeScore: $homeScore, awayName: $awayName, awayLogo: $awayLogo, awayScore: $awayScore, leagueName: $leagueName, leagueLogo: $leagueLogo, matchTime: $matchTime, counterTiming: $counterTiming, oddsEuro: $oddsEuro, statusDescription: $statusDescription, htHomeScore: $htHomeScore, htAwayScore: $htAwayScore, homeYellowCards: $homeYellowCards, awayYellowCards: $awayYellowCards)';
   }
 
   @override
@@ -434,12 +468,16 @@ class _$FootballMatchImpl extends _FootballMatch {
             (identical(other.htHomeScore, htHomeScore) ||
                 other.htHomeScore == htHomeScore) &&
             (identical(other.htAwayScore, htAwayScore) ||
-                other.htAwayScore == htAwayScore));
+                other.htAwayScore == htAwayScore) &&
+            (identical(other.homeYellowCards, homeYellowCards) ||
+                other.homeYellowCards == homeYellowCards) &&
+            (identical(other.awayYellowCards, awayYellowCards) ||
+                other.awayYellowCards == awayYellowCards));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     id,
     statusId,
@@ -458,7 +496,9 @@ class _$FootballMatchImpl extends _FootballMatch {
     statusDescription,
     htHomeScore,
     htAwayScore,
-  );
+    homeYellowCards,
+    awayYellowCards,
+  ]);
 
   /// Create a copy of FootballMatch
   /// with the given fields replaced by the non-null parameter values.
@@ -493,6 +533,8 @@ abstract class _FootballMatch extends FootballMatch {
     final String? statusDescription,
     final String? htHomeScore,
     final String? htAwayScore,
+    final int homeYellowCards,
+    final int awayYellowCards,
   }) = _$FootballMatchImpl;
   const _FootballMatch._() : super._();
 
@@ -533,6 +575,10 @@ abstract class _FootballMatch extends FootballMatch {
   String? get htHomeScore;
   @override
   String? get htAwayScore;
+  @override
+  int get homeYellowCards;
+  @override
+  int get awayYellowCards;
 
   /// Create a copy of FootballMatch
   /// with the given fields replaced by the non-null parameter values.

@@ -1,12 +1,12 @@
-import 'dart:async';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
+import 'package:sports_app/src/features/event/domain/models/football_match.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
+import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/event_match_card.dart';
 
 class EventScreen extends StatefulWidget {
@@ -50,7 +50,9 @@ class _EventScreenState extends State<EventScreen> with SingleTickerProviderStat
                     controller: _tabController,
                     indicator: const BoxDecoration(),
                     labelStyle: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-                    unselectedLabelStyle: context.textTheme.bodyMedium?.copyWith(color: Colors.white),
+                    unselectedLabelStyle: context.textTheme.bodyMedium?.copyWith(
+                      color: Colors.white,
+                    ),
                     tabs: _sports.map((s) => Tab(text: s.i18nKey.tr())).toList(),
                   ),
                 ),
@@ -64,11 +66,7 @@ class _EventScreenState extends State<EventScreen> with SingleTickerProviderStat
             controller: _tabController,
             children: [
               for (var i = 0; i < _sports.length; i++)
-                _SportTabContent(
-                  sport: _sports[i],
-                  tabIndex: i,
-                  tabController: _tabController,
-                ),
+                _SportTabContent(sport: _sports[i], tabIndex: i, tabController: _tabController),
             ],
           ),
         ),
@@ -96,7 +94,7 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
     with AutomaticKeepAliveClientMixin {
   late String _matchStatus;
   DateTime _scheduledDate = DateTime.now().add(Duration(days: 1));
-  Timer? _refreshTimer;
+  final ScrollController _scrollController = ScrollController();
 
   String get _formattedScheduledDate {
     final d = _scheduledDate;
@@ -107,25 +105,34 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
   void initState() {
     super.initState();
     _matchStatus = _hotLeagueSports.contains(widget.sport) ? 'hot' : 'all';
-    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) => _refresh());
+    _scrollController.addListener(_onScroll);
   }
 
-  bool get _isActiveTab => widget.tabController.index == widget.tabIndex;
+  void _onScroll() {
+    if (_isScheduled) return;
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 300) {
+      ref.read(_paginatedProvider.notifier).loadMore();
+    }
+  }
+
+  SportMatchesPaginatedProvider get _paginatedProvider => sportMatchesPaginatedProvider(
+    sport: widget.sport,
+    matchStatus: _matchStatus,
+    date: _isFinished ? _formattedScheduledDate : null,
+    isHot: _isHot,
+  );
 
   void _refresh() {
-    if (!_isActiveTab) return;
-    if (_isHot) {
-      ref.invalidate(sportHotMatchesProvider(sport: widget.sport));
-    } else if (_isScheduled) {
+    if (_isScheduled) {
       ref.invalidate(footballScheduledMatchesProvider(date: _formattedScheduledDate));
     } else {
-      ref.invalidate(sportMatchesProvider(sport: widget.sport, matchStatus: _matchStatus));
+      ref.invalidate(_paginatedProvider);
     }
   }
 
   @override
   void dispose() {
-    _refreshTimer?.cancel();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -152,15 +159,33 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
   Widget build(BuildContext context) {
     super.build(context);
 
-    final matchesAsync = _isHot
-        ? ref.watch(sportHotMatchesProvider(sport: widget.sport))
-        : _isScheduled
-        ? ref.watch(footballScheduledMatchesProvider(date: _formattedScheduledDate))
-        : ref.watch(sportMatchesProvider(
-            sport: widget.sport,
-            matchStatus: _matchStatus,
-            date: _isFinished ? _formattedScheduledDate : null,
-          ));
+    // Scheduled uses the diary endpoint (no pagination).
+    // All other tabs use the paginated notifier.
+    final matchesAsync = _isScheduled
+        ? ref
+              .watch(footballScheduledMatchesProvider(date: _formattedScheduledDate))
+              .whenData((list) => PaginatedMatchResult(matches: list, currentPage: 1, totalPage: 1))
+        : ref.watch(_paginatedProvider);
+
+    if (widget.sport == SportType.football) {
+      ref.listen(footballRealtimeProvider, (prev, realtimeMap) {
+        final matches = matchesAsync.valueOrNull?.matches;
+        if (matches == null || realtimeMap.isEmpty) return;
+        final matchIds = matches.map((m) => m.id).toSet();
+        // Only treat an ID as new if it just appeared in this poll (not in the
+        // previous realtime state), to avoid spurious refreshes from unrelated
+        // live matches that the realtime endpoint always returns.
+        final prevMap = prev ?? const {};
+        final hasNewId = realtimeMap.keys.any(
+          (id) => !matchIds.contains(id) && !prevMap.containsKey(id),
+        );
+        final statusChanged = prevMap.entries.any((e) {
+          final curr = realtimeMap[e.key];
+          return curr != null && e.value.statusId != curr.statusId;
+        });
+        if (hasNewId || statusChanged) _refresh();
+      });
+    }
 
     return Column(
       children: [
@@ -185,21 +210,14 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
         Expanded(
           child: RefreshIndicator(
             onRefresh: () async {
-              if (_isHot) {
-                ref.invalidate(sportHotMatchesProvider(sport: widget.sport));
-                await ref.read(sportHotMatchesProvider(sport: widget.sport).future);
-              } else if (_isScheduled) {
+              if (_isScheduled) {
                 ref.invalidate(footballScheduledMatchesProvider(date: _formattedScheduledDate));
                 await ref.read(
                   footballScheduledMatchesProvider(date: _formattedScheduledDate).future,
                 );
               } else {
-                ref.invalidate(
-                  sportMatchesProvider(sport: widget.sport, matchStatus: _matchStatus),
-                );
-                await ref.read(
-                  sportMatchesProvider(sport: widget.sport, matchStatus: _matchStatus).future,
-                );
+                ref.invalidate(_paginatedProvider);
+                await ref.read(_paginatedProvider.future);
               }
             },
             child: matchesAsync.when(
@@ -221,8 +239,16 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
                   ),
                 );
               },
-              data: (matches) {
-                if (matches.isEmpty) {
+              data: (result) {
+                if (widget.sport == SportType.football) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted) return;
+                    ref
+                        .read(footballRealtimeProvider.notifier)
+                        .setWatchedIds('list', result.matches.map((m) => m.id).toList());
+                  });
+                }
+                if (result.matches.isEmpty) {
                   return LayoutBuilder(
                     builder: (context, constraints) => SingleChildScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
@@ -239,10 +265,19 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
                   );
                 }
                 return ListView.builder(
+                  controller: _scrollController,
                   padding: EdgeInsets.zero,
                   physics: const AlwaysScrollableScrollPhysics(),
-                  itemCount: matches.length,
-                  itemBuilder: (context, index) => EventMatchCard(match: matches[index]),
+                  itemCount: result.matches.length + (result.isLoadingMore ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index == result.matches.length) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+                    return EventMatchCard(match: result.matches[index]);
+                  },
                 );
               },
             ),
@@ -328,11 +363,7 @@ class _StatusFilterBarState extends State<_StatusFilterBar> with SingleTickerPro
 }
 
 class _DateSelectorBar extends StatelessWidget {
-  const _DateSelectorBar({
-    required this.selected,
-    required this.onSelected,
-    this.isPast = false,
-  });
+  const _DateSelectorBar({required this.selected, required this.onSelected, this.isPast = false});
 
   final DateTime selected;
   final ValueChanged<DateTime> onSelected;

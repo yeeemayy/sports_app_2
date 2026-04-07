@@ -3,21 +3,36 @@ import 'dart:async';
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match.dart';
+import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/avatar.dart';
 
-class FootballMatchCard extends StatelessWidget {
+class FootballMatchCard extends ConsumerWidget {
   const FootballMatchCard({super.key, required this.match});
 
   final FootballMatch match;
 
   @override
-  Widget build(BuildContext context) {
-    final hasHtScore = match.htHomeScore != null && match.htAwayScore != null;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rt = ref.watch(footballRealtimeProvider.select((map) => map[match.id]));
+
+    final effective = rt == null
+        ? match
+        : match.copyWith(
+            statusId: rt.statusId,
+            homeScore: rt.homeScore.toString(),
+            awayScore: rt.awayScore.toString(),
+            htHomeScore: rt.homeHtScore.toString(),
+            htAwayScore: rt.awayHtScore.toString(),
+            counterTiming: rt.kickoffTimestamp != 0 ? rt.kickoffTimestamp : match.counterTiming,
+          );
+
+    final hasHtScore = effective.htHomeScore != null && effective.htAwayScore != null;
 
     return GestureDetector(
       onTap: () => context.push(AppRoutes.footballMatchDetailPath(match.id)),
@@ -36,11 +51,11 @@ class FootballMatchCard extends StatelessWidget {
                   Expanded(
                     child: Row(
                       children: [
-                        _LeagueLogo(url: match.leagueLogo),
+                        _LeagueLogo(url: effective.leagueLogo),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
-                            match.leagueName,
+                            effective.leagueName,
                             style: context.textTheme.labelSmall?.copyWith(
                               color: Colors.grey.shade700,
                               fontWeight: FontWeight.w500,
@@ -55,14 +70,17 @@ class FootballMatchCard extends StatelessWidget {
                   SizedBox(
                     width: 35,
                     child: Center(
-                      child: MatchStatusBadge(statusId: match.statusId, label: match.statusLabel),
+                      child: MatchStatusBadge(
+                        statusId: effective.statusId,
+                        label: effective.statusLabel,
+                      ),
                     ),
                   ),
                   Expanded(
                     child: Align(
                       alignment: Alignment.centerRight,
                       child: Text(
-                        match.matchTimeSim,
+                        effective.matchTimeSim,
                         style: context.textTheme.labelSmall?.copyWith(color: Colors.grey.shade500),
                       ),
                     ),
@@ -80,13 +98,27 @@ class FootballMatchCard extends StatelessWidget {
                   Expanded(
                     child: Row(
                       children: [
-                        _TeamLogo(url: match.homeLogo),
+                        _TeamLogo(url: effective.homeLogo),
                         const SizedBox(width: 6),
                         Expanded(
-                          child: Text(
-                            match.homeName,
-                            style: context.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: effective.homeName,
+                                  style: context.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                if (effective.homeYellowCards > 0)
+                                  WidgetSpan(
+                                    alignment: PlaceholderAlignment.middle,
+                                    child: _YellowCardBadge(
+                                      count: effective.homeYellowCards,
+                                      isHome: true,
+                                    ),
+                                  ),
+                              ],
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -99,9 +131,9 @@ class FootballMatchCard extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: _ScoreDisplay(
-                      homeScore: match.homeScore,
-                      awayScore: match.awayScore,
-                      statusId: match.statusId,
+                      homeScore: effective.homeScore,
+                      awayScore: effective.awayScore,
+                      statusId: effective.statusId,
                     ),
                   ),
                   // Away team
@@ -110,10 +142,24 @@ class FootballMatchCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Expanded(
-                          child: Text(
-                            match.awayName,
-                            style: context.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                if (effective.awayYellowCards > 0)
+                                  WidgetSpan(
+                                    alignment: PlaceholderAlignment.middle,
+                                    child: _YellowCardBadge(
+                                      count: effective.awayYellowCards,
+                                      isHome: false,
+                                    ),
+                                  ),
+                                TextSpan(
+                                  text: effective.awayName,
+                                  style: context.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -121,7 +167,7 @@ class FootballMatchCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 6),
-                        _TeamLogo(url: match.awayLogo),
+                        _TeamLogo(url: effective.awayLogo),
                       ],
                     ),
                   ),
@@ -135,13 +181,13 @@ class FootballMatchCard extends StatelessWidget {
                 maintainSize: true,
                 maintainAnimation: true,
                 maintainState: true,
-                visible: match.statusId > 3 && match.statusId!=8,
+                visible: effective.statusId > 3 && effective.statusId != 8,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (hasHtScore)
                       Text(
-                        '${'event.football.ht'.tr()} ${match.htHomeScore}-${match.htAwayScore}',
+                        '${'event.football.ht'.tr()} ${effective.htHomeScore}-${effective.htAwayScore}',
                         style: context.textTheme.labelSmall?.copyWith(color: Colors.grey.shade500),
                       ),
                   ],
@@ -193,17 +239,22 @@ class _MatchStatusBadgeState extends State<MatchStatusBadge> {
   @override
   void didUpdateWidget(covariant MatchStatusBadge oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _setupTimer();
+    _syncTimer();
   }
 
-  void _setupTimer() {
-    _timer?.cancel();
+  void _setupTimer() => _syncTimer();
 
+  void _syncTimer() {
     if (_shouldBlink) {
-      _timer = Timer.periodic(
+      // Only start the timer if it isn't already running — don't reset the phase.
+      _timer ??= Timer.periodic(
         const Duration(seconds: 1),
         (_) => setState(() => _visible = !_visible),
       );
+    } else {
+      _timer?.cancel();
+      _timer = null;
+      if (!_visible) setState(() => _visible = true);
     }
   }
 
@@ -284,6 +335,29 @@ class _LeagueLogo extends StatelessWidget {
         height: 16,
         fit: BoxFit.cover,
         errorWidget: (_, _, _) => const SizedBox(width: 16, height: 16),
+      ),
+    );
+  }
+}
+
+class _YellowCardBadge extends StatelessWidget {
+  const _YellowCardBadge({required this.isHome, required this.count});
+  final bool isHome;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(left: isHome ? 4 : 0, right: isHome ? 0 : 4),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+      decoration: BoxDecoration(color: Colors.amber, borderRadius: BorderRadius.circular(3)),
+      child: Text(
+        '$count',
+        style: const TextStyle(
+          fontSize: 12,
+          color: Colors.black87,
+          height: 1.2,
+        ),
       ),
     );
   }

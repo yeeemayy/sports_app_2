@@ -3,6 +3,7 @@
 
 # Dev docs / internal assets
 .devdocs/
+CLAUDE.md
 
 # Miscellaneous
 *.class

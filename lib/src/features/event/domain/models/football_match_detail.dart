@@ -157,23 +157,6 @@ class FootballMatchDetail {
     }
   }
 
-  /// Returns true if the match is really finished.
-  ///
-  /// Pass [kickoffTimestamp] (Unix seconds, from the events API score[4]) for
-  /// the most accurate determination when status 4 with a stopped counter.
-  bool isReallyFinished({int? kickoffTimestamp}) {
-    if (statusId == 8) return true;
-
-    if (statusId == 4 && counterTiming == 0 && kickoffTimestamp != null) {
-      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-      final elapsedSeconds = now - kickoffTimestamp;
-      // Second half is 45 min + up to ~10 min stoppage; 55 min is a safe threshold.
-      if (elapsedSeconds > 55 * 60) return true;
-    }
-
-    return false;
-  }
-
   factory FootballMatchDetail.fromJson(Map<String, dynamic> json) {
     final d = json['matchDetails'] is Map
         ? (json['matchDetails'] as Map).cast<String, dynamic>()

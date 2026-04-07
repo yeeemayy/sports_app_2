@@ -27,6 +27,8 @@ class FootballMatch with _$FootballMatch implements SportMatch {
     String? statusDescription,
     String? htHomeScore,
     String? htAwayScore,
+    @Default(0) int homeYellowCards,
+    @Default(0) int awayYellowCards,
   }) = _FootballMatch;
 
   factory FootballMatch.fromJson(Map<String, dynamic> json) => _$FootballMatchFromJson(json);
@@ -62,6 +64,8 @@ class FootballMatch with _$FootballMatch implements SportMatch {
       statusDescription: json['statusDescription'] as String?,
       htHomeScore: _parseHtScore(homeInfo),
       htAwayScore: _parseHtScore(awayInfo),
+      homeYellowCards: homeInfo['yellow_cards'] as int? ?? 0,
+      awayYellowCards: awayInfo['yellow_cards'] as int? ?? 0,
     );
   }
 
