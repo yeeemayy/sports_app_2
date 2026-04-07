@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/event/domain/models/football_match.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
@@ -101,11 +100,43 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
     return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
   }
 
+  bool get _isActiveTab => widget.tabController.index == widget.tabIndex;
+
   @override
   void initState() {
     super.initState();
     _matchStatus = _hotLeagueSports.contains(widget.sport) ? 'hot' : 'all';
     _scrollController.addListener(_onScroll);
+    widget.tabController.addListener(_onTabChanged);
+  }
+
+  void _onTabChanged() {
+    if (_isActiveTab) {
+      // Tab became visible — re-register IDs from the current loaded data.
+      _reRegisterRealtimeIds();
+    } else {
+      // Tab went off-screen — stop polling.
+      _clearRealtimeSource();
+    }
+  }
+
+  void _reRegisterRealtimeIds() {
+    final result = ref.read(_paginatedProvider).valueOrNull;
+    if (result == null) return;
+    final ids = result.matches.map((m) => m.id).toList();
+    if (widget.sport == SportType.football) {
+      ref.read(footballRealtimeProvider.notifier).setWatchedIds('list', ids);
+    } else if (widget.sport == SportType.basketball) {
+      ref.read(basketballRealtimeProvider.notifier).setWatchedIds('list', ids);
+    }
+  }
+
+  void _clearRealtimeSource() {
+    if (widget.sport == SportType.football) {
+      ref.read(footballRealtimeProvider.notifier).clearSource('list');
+    } else if (widget.sport == SportType.basketball) {
+      ref.read(basketballRealtimeProvider.notifier).clearSource('list');
+    }
   }
 
   void _onScroll() {
@@ -132,6 +163,7 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
 
   @override
   void dispose() {
+    widget.tabController.removeListener(_onTabChanged);
     _scrollController.dispose();
     super.dispose();
   }
@@ -175,6 +207,23 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
         // Only treat an ID as new if it just appeared in this poll (not in the
         // previous realtime state), to avoid spurious refreshes from unrelated
         // live matches that the realtime endpoint always returns.
+        final prevMap = prev ?? const {};
+        final hasNewId = realtimeMap.keys.any(
+          (id) => !matchIds.contains(id) && !prevMap.containsKey(id),
+        );
+        final statusChanged = prevMap.entries.any((e) {
+          final curr = realtimeMap[e.key];
+          return curr != null && e.value.statusId != curr.statusId;
+        });
+        if (hasNewId || statusChanged) _refresh();
+      });
+    }
+
+    if (widget.sport == SportType.basketball) {
+      ref.listen(basketballRealtimeProvider, (prev, realtimeMap) {
+        final matches = matchesAsync.valueOrNull?.matches;
+        if (matches == null || realtimeMap.isEmpty) return;
+        final matchIds = matches.map((m) => m.id).toSet();
         final prevMap = prev ?? const {};
         final hasNewId = realtimeMap.keys.any(
           (id) => !matchIds.contains(id) && !prevMap.containsKey(id),
@@ -240,12 +289,15 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
                 );
               },
               data: (result) {
-                if (widget.sport == SportType.football) {
+                if (_isActiveTab) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (!mounted) return;
-                    ref
-                        .read(footballRealtimeProvider.notifier)
-                        .setWatchedIds('list', result.matches.map((m) => m.id).toList());
+                    final ids = result.matches.map((m) => m.id).toList();
+                    if (widget.sport == SportType.football) {
+                      ref.read(footballRealtimeProvider.notifier).setWatchedIds('list', ids);
+                    } else if (widget.sport == SportType.basketball) {
+                      ref.read(basketballRealtimeProvider.notifier).setWatchedIds('list', ids);
+                    }
                   });
                 }
                 if (result.matches.isEmpty) {

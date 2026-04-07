@@ -228,6 +228,24 @@
         "cancelled": "取消",
         "tbd": "待定"
       }
+    },
+    "basketball": {
+      "period": {
+        "not_started": "未开",
+        "q1": "第一节",
+        "q1_over": "第一节完",
+        "q2": "第二节",
+        "q2_over": "第二节完",
+        "q3": "第三节",
+        "q3_over": "第三节完",
+        "q4": "第四节",
+        "ot": "超时",
+        "end": "完毕",
+        "interrupt": "中断",
+        "cancel": "取消",
+        "extension": "延长",
+        "half": "减半"
+      }
     }
   },
   "auth": {

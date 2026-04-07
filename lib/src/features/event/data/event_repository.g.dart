@@ -6,7 +6,7 @@ part of 'event_repository.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$eventRepositoryHash() => r'723bd9a4cf4e5eec5724ce70e7316ae1cbdceeb3';
+String _$eventRepositoryHash() => r'b8c8aaa46d375e935f016f19aaf8f585c9b65565';
 
 /// See also [EventRepository].
 @ProviderFor(EventRepository)

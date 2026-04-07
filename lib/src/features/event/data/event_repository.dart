@@ -4,6 +4,7 @@ import 'package:sports_app/src/core/services/api_service.dart' show sportsApiSer
 import 'package:sports_app/src/features/event/domain/models/football_lineup.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match_events.dart';
+import 'package:sports_app/src/features/event/domain/models/basketball_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/match_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_match.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
@@ -105,6 +106,15 @@ class EventRepository extends _$EventRepository {
     final list = response.data as List<dynamic>? ?? [];
     return list
         .map((item) => MatchRealtimeData.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<BasketballRealtimeData>> getBasketballRealtimeMatches() async {
+    final dio = ref.read(sportsApiServiceProvider);
+    final response = await dio.get('/basketball/match/realtime');
+    final list = response.data as List<dynamic>? ?? [];
+    return list
+        .map((item) => BasketballRealtimeData.fromJson(item as Map<String, dynamic>))
         .toList();
   }
 }

@@ -26,5 +26,26 @@ final footballRealtimeProvider =
 
 typedef _$FootballRealtime =
     AutoDisposeNotifier<Map<String, MatchRealtimeData>>;
+String _$basketballRealtimeHash() =>
+    r'05fdf3616a4fe4e77d2a58b24c94d52da550b812';
+
+/// See also [BasketballRealtime].
+@ProviderFor(BasketballRealtime)
+final basketballRealtimeProvider =
+    AutoDisposeNotifierProvider<
+      BasketballRealtime,
+      Map<String, BasketballRealtimeData>
+    >.internal(
+      BasketballRealtime.new,
+      name: r'basketballRealtimeProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$basketballRealtimeHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+typedef _$BasketballRealtime =
+    AutoDisposeNotifier<Map<String, BasketballRealtimeData>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

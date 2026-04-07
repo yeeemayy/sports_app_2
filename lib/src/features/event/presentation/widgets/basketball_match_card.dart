@@ -1,19 +1,31 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/basketball_match.dart';
+import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 
-class BasketballMatchCard extends StatelessWidget {
+class BasketballMatchCard extends ConsumerWidget {
   const BasketballMatchCard({super.key, required this.match});
 
   final BasketballMatch match;
 
   @override
-  Widget build(BuildContext context) {
-    final isLive = match.statusId > 0 && match.statusId < 100;
-    final isUpcoming = match.statusId == 0;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rt = ref.watch(basketballRealtimeProvider.select((map) => map[match.id]));
+
+    final effectiveStatusId = rt?.statusId ?? match.statusId;
+    final effectiveHomeScore = rt != null ? rt.homeTotal.toString() : match.homeScore;
+    final effectiveAwayScore = rt != null ? rt.awayTotal.toString() : match.awayScore;
+    final effectivePeriodLabel = rt != null
+        ? (rt.periodLabelKey.isEmpty ? null : rt.periodLabelKey.tr())
+        : match.statusDescription;
+    final effectiveClockDisplay = (rt != null && rt.showClock) ? rt.clockDisplay : match.liveMinute;
+
+    final isLive = effectiveStatusId > 0 && effectiveStatusId < 10;
+    final isUpcoming = effectiveStatusId == 1 || effectiveStatusId == 0;
 
     return Container(
       color: Colors.white,
@@ -54,12 +66,12 @@ class BasketballMatchCard extends StatelessWidget {
                 children: [
                   // Left: period + timer (or status label)
                   SizedBox(
-                    width: 52,
+                    width: 60,
                     child: _StatusColumn(
-                      isLive: isLive,
+                      status: effectiveStatusId,
                       isUpcoming: isUpcoming,
-                      periodLabel: match.statusDescription,
-                      liveTimer: match.liveMinute,
+                      periodLabel: effectivePeriodLabel,
+                      liveTimer: effectiveClockDisplay,
                     ),
                   ),
                   // Vertical divider
@@ -75,25 +87,20 @@ class BasketballMatchCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _TeamScoreRow(
-                          score: match.homeScore,
+                          score: effectiveHomeScore,
                           logo: match.homeLogo,
                           name: match.homeName,
                           isLive: isLive,
                         ),
                         const SizedBox(height: 6),
                         _TeamScoreRow(
-                          score: match.awayScore,
+                          score: effectiveAwayScore,
                           logo: match.awayLogo,
                           name: match.awayName,
                           isLive: isLive,
                         ),
                       ],
                     ),
-                  ),
-                  // Favourite star
-                  Padding(
-                    padding: const EdgeInsets.only(left: 4),
-                    child: Icon(Icons.star_border, color: Colors.grey.shade400, size: 20),
                   ),
                 ],
               ),
@@ -108,23 +115,26 @@ class BasketballMatchCard extends StatelessWidget {
 
 class _StatusColumn extends StatelessWidget {
   const _StatusColumn({
-    required this.isLive,
+    required this.status,
     required this.isUpcoming,
     required this.periodLabel,
     required this.liveTimer,
   });
 
-  final bool isLive;
+  final int status;
   final bool isUpcoming;
   final String? periodLabel;
   final String? liveTimer;
 
+  static const _liveStatuses = {2, 3, 4, 5, 6, 7, 8};
+  static const _noScoreStatuses = {0, 1, 3, 5, 7, 12};
+
   @override
   Widget build(BuildContext context) {
-    if (isLive) {
+    if (_liveStatuses.contains(status)) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           if (periodLabel != null && periodLabel!.isNotEmpty)
             Text(
@@ -134,11 +144,8 @@ class _StatusColumn extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-          if (liveTimer != null && liveTimer!.isNotEmpty)
-            Text(
-              liveTimer!,
-              style: context.textTheme.labelSmall?.copyWith(color: Colors.red),
-            ),
+          if (!_noScoreStatuses.contains(status) && liveTimer != null && liveTimer!.isNotEmpty)
+            Text(liveTimer!, style: context.textTheme.labelSmall?.copyWith(color: Colors.red)),
         ],
       );
     }
@@ -171,12 +178,13 @@ class _TeamScoreRow extends StatelessWidget {
     return Row(
       children: [
         SizedBox(
-          width: 28,
+          width: 45,
           child: Text(
             score,
+            textAlign: TextAlign.center,
             style: context.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
-              color: isLive ? Colors.blue.shade700 : Colors.black87,
+              color: isLive ? Colors.pink : Colors.black87,
             ),
           ),
         ),
