@@ -2,10 +2,12 @@ import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/basketball_match.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:sports_app/src/routes/app_routes.dart';
 
 class BasketballMatchCard extends ConsumerStatefulWidget {
   const BasketballMatchCard({super.key, required this.match});
@@ -71,7 +73,9 @@ class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
     final isLive = effectiveStatusId > 0 && effectiveStatusId < 10;
     final isUpcoming = effectiveStatusId == 1 || effectiveStatusId == 0;
 
-    return Container(
+    return InkWell(
+      onTap: () => context.push(AppRoutes.basketballMatchDetailPath(widget.match.id)),
+      child: Container(
       color: Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,6 +158,7 @@ class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
           ),
           Divider(height: 1, thickness: 0.5, color: Colors.grey.shade200),
         ],
+      ),
       ),
     );
   }

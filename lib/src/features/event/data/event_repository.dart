@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sports_app/src/core/services/api_service.dart' show sportsApiServiceProvider;
+import 'package:sports_app/src/features/event/domain/models/basketball_match_detail.dart';
+import 'package:sports_app/src/features/event/domain/models/basketball_match_events.dart';
+import 'package:sports_app/src/features/event/domain/models/basketball_team_squad.dart';
 import 'package:sports_app/src/features/event/domain/models/football_lineup.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match_events.dart';
@@ -100,13 +103,22 @@ class EventRepository extends _$EventRepository {
 
   Future<List<MatchRealtimeData>> getRealtimeMatches() async {
     final dio = ref.read(sportsApiServiceProvider);
-    final response = await dio.get(
-      '/football/match/realtime',
-    );
+    final response = await dio.get('/football/match/realtime');
     final list = response.data as List<dynamic>? ?? [];
-    return list
-        .map((item) => MatchRealtimeData.fromJson(item as Map<String, dynamic>))
-        .toList();
+    return list.map((item) => MatchRealtimeData.fromJson(item as Map<String, dynamic>)).toList();
+  }
+
+  Future<BasketballMatchDetail> getBasketballMatchDetail(String matchId) async {
+    final dio = ref.read(sportsApiServiceProvider);
+    final response = await dio.get('/basketball/match/details/$matchId');
+    return BasketballMatchDetail.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<BasketballMatchEventsData?> getBasketballMatchEventsKey(String matchId) async {
+    final dio = ref.read(sportsApiServiceProvider);
+    final response = await dio.get('/basketball/match/events/$matchId');
+    if (response.data is! Map<String, dynamic>) return null;
+    return BasketballMatchEventsData.fromJson(response.data as Map<String, dynamic>);
   }
 
   Future<List<BasketballRealtimeData>> getBasketballRealtimeMatches() async {
@@ -116,5 +128,14 @@ class EventRepository extends _$EventRepository {
     return list
         .map((item) => BasketballRealtimeData.fromJson(item as Map<String, dynamic>))
         .toList();
+  }
+
+  Future<List<BasketballPlayer>> getBasketballTeamSquad(String teamId) async {
+    final dio = ref.read(sportsApiServiceProvider);
+    final response = await dio.get('/basketball/team/squad/$teamId');
+    final json = response.data as Map<String, dynamic>;
+    if (json['teamPlayers'] is! List) return [];
+    final list = json['teamPlayers'] as List<dynamic>? ?? [];
+    return list.map((item) => BasketballPlayer.fromJson(item as Map<String, dynamic>)).toList();
   }
 }

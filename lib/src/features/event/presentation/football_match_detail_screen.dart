@@ -975,7 +975,7 @@ class _StatsTab extends ConsumerWidget {
         }
 
         return ListView(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          padding: EdgeInsets.zero,
           children: displayStats.map((stat) => _StatRow(stat: stat)).toList(),
         );
       },
@@ -990,71 +990,35 @@ class _StatRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final total = stat.home + stat.away;
-    final homeRatio = total == 0 ? 0.5 : stat.home / total;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: Colors.grey.shade200, width: 0.5)),
+      ),
+      child: Row(
         children: [
-          Row(
-            children: [
-              SizedBox(
-                width: 36,
-                child: Text(
-                  '${stat.home}',
-                  style: context.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w700),
-                  textAlign: TextAlign.left,
-                ),
-              ),
-              Expanded(
-                child: Text(
-                  stat.label!,
-                  textAlign: TextAlign.center,
-                  style: context.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
-                ),
-              ),
-              SizedBox(
-                width: 36,
-                child: Text(
-                  '${stat.away}',
-                  style: context.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w700),
-                  textAlign: TextAlign.right,
-                ),
-              ),
-            ],
+          SizedBox(
+            width: 60,
+            child: Text(
+              '${stat.home}',
+              style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+              textAlign: TextAlign.left,
+            ),
           ),
-          const SizedBox(height: 4),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final width = constraints.maxWidth;
-              return Row(
-                children: [
-                  Container(
-                    width: width * homeRatio,
-                    height: 5,
-                    decoration: const BoxDecoration(
-                      color: Colors.pink,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(3),
-                        bottomLeft: Radius.circular(3),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: width * (1 - homeRatio),
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade200,
-                      borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(3),
-                        bottomRight: Radius.circular(3),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
+          Expanded(
+            child: Text(
+              stat.label!,
+              textAlign: TextAlign.center,
+              style: context.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+            ),
+          ),
+          SizedBox(
+            width: 60,
+            child: Text(
+              '${stat.away}',
+              style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+              textAlign: TextAlign.right,
+            ),
           ),
         ],
       ),

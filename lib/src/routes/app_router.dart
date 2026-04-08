@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sports_app/src/features/anchor/presentation/anchor_detail_screen.dart';
+import 'package:sports_app/src/features/event/presentation/basketball_match_detail_screen.dart';
 import 'package:sports_app/src/features/event/presentation/football_match_detail_screen.dart';
 import 'package:sports_app/src/features/auth/presentation/forgot_password_screen.dart';
 import 'package:sports_app/src/features/auth/presentation/login_screen.dart';
@@ -100,6 +101,12 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: AppRoutes.footballMatchDetail,
         builder: (context, state) => FootballMatchDetailScreen(
+          matchId: state.pathParameters['matchId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.basketballMatchDetail,
+        builder: (context, state) => BasketballMatchDetailScreen(
           matchId: state.pathParameters['matchId']!,
         ),
       ),

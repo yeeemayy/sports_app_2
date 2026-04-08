@@ -14,6 +14,10 @@ abstract final class AppRoutes {
   static const footballMatchDetail = '/event/football/:matchId';
   static String footballMatchDetailPath(String matchId) => '/event/football/$matchId';
 
+  // Basketball match detail
+  static const basketballMatchDetail = '/event/basketball/:matchId';
+  static String basketballMatchDetailPath(String matchId) => '/event/basketball/$matchId';
+
   // Anchor
   static const anchor = '/anchor/:anchorId';
   static String anchorPath(int id) => '/anchor/$id';

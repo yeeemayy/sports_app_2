@@ -1,5 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sports_app/src/features/event/data/event_repository.dart';
+import 'package:sports_app/src/features/event/domain/models/basketball_match_detail.dart';
+import 'package:sports_app/src/features/event/domain/models/basketball_match_events.dart';
+import 'package:sports_app/src/features/event/domain/models/basketball_team_squad.dart';
 import 'package:sports_app/src/features/event/domain/models/football_lineup.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match_events.dart';
@@ -117,4 +120,28 @@ Future<FootballMatchEvents?> footballMatchEventsKey(
   required String matchId,
 }) {
   return ref.watch(eventRepositoryProvider.notifier).getFootballMatchEventsKey(matchId);
+}
+
+@riverpod
+Future<BasketballMatchDetail> basketballMatchDetail(
+  BasketballMatchDetailRef ref, {
+  required String matchId,
+}) {
+  return ref.watch(eventRepositoryProvider.notifier).getBasketballMatchDetail(matchId);
+}
+
+@riverpod
+Future<BasketballMatchEventsData?> basketballMatchEventsKey(
+  BasketballMatchEventsKeyRef ref, {
+  required String matchId,
+}) {
+  return ref.watch(eventRepositoryProvider.notifier).getBasketballMatchEventsKey(matchId);
+}
+
+@riverpod
+Future<List<BasketballPlayer>> basketballTeamSquad(
+  BasketballTeamSquadRef ref, {
+  required String teamId,
+}) {
+  return ref.watch(eventRepositoryProvider.notifier).getBasketballTeamSquad(teamId);
 }
