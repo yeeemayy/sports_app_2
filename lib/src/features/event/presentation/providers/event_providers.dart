@@ -8,6 +8,8 @@ import 'package:sports_app/src/features/event/domain/models/football_match_detai
 import 'package:sports_app/src/features/event/domain/models/football_match_events.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_match.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
+import 'package:sports_app/src/features/event/domain/models/tennis_match_detail.dart';
+import 'package:sports_app/src/features/event/domain/models/tennis_match_events.dart';
 
 part 'event_providers.g.dart';
 
@@ -144,4 +146,20 @@ Future<List<BasketballPlayer>> basketballTeamSquad(
   required String teamId,
 }) {
   return ref.watch(eventRepositoryProvider.notifier).getBasketballTeamSquad(teamId);
+}
+
+@riverpod
+Future<TennisMatchDetail> tennisMatchDetail(
+  TennisMatchDetailRef ref, {
+  required String matchId,
+}) {
+  return ref.watch(eventRepositoryProvider.notifier).getTennisMatchDetail(matchId);
+}
+
+@riverpod
+Future<TennisMatchEventsData?> tennisMatchEvents(
+  TennisMatchEventsRef ref, {
+  required String matchId,
+}) {
+  return ref.watch(eventRepositoryProvider.notifier).getTennisMatchEvents(matchId);
 }

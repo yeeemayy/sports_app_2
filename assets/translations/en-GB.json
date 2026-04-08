@@ -70,6 +70,7 @@
   },
   "common": {
     "ok": "OK",
+    "unknown": "unknown",
     "error": {
       "unexpected": "An unexpected error occurred, please try again"
     }
@@ -266,6 +267,58 @@
         "fouls": "Fouls",
         "free_throw_pct": "Free Throw %",
         "total_timeouts": "Total Timeouts"
+      }
+    },
+    "tennis": {
+      "status": {
+        "pre": "Pre",
+        "s1": "S1",
+        "s2": "S2",
+        "s3": "S3",
+        "s4": "S4",
+        "s5": "S5",
+        "ft": "FT",
+        "live": "Live",
+        "wo": "W/O",
+        "ret": "RET",
+        "def": "DEF",
+        "pst": "PST",
+        "dly": "DLY",
+        "can": "CAN",
+        "int": "INT",
+        "sus": "SUS",
+        "tbd": "TBD"
+      },
+      "detail": {
+        "score": "Score",
+        "stats": "Stats",
+        "situation": "Situation",
+        "set_n": "S{n}",
+        "pt": "Pt",
+        "total": "Sets",
+        "overall": "Overall",
+        "game": "G",
+        "points": "Points",
+        "no_stats": "No stats available",
+        "no_situation": "No situation data available"
+      },
+      "stat": {
+        "aces": "Aces",
+        "first_serve_success": "1st Serve In",
+        "first_serve_total": "1st Serve Total",
+        "first_serve_rate": "1st Serve %",
+        "second_serve_success": "2nd Serve In",
+        "second_serve_total": "2nd Serve Total",
+        "second_serve_rate": "2nd Serve %",
+        "break_points_success": "Break Points Won",
+        "break_points_total": "Break Points",
+        "break_points_rate": "Break Points %",
+        "double_faults": "Double Faults",
+        "points_won": "Total Points Won",
+        "first_serve_points_success": "1st Serve Pts Won",
+        "first_serve_points_rate": "1st Serve Pts %",
+        "second_serve_points_success": "2nd Serve Pts Won",
+        "second_serve_points_rate": "2nd Serve Pts %"
       }
     }
   },

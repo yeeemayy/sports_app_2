@@ -11,6 +11,9 @@ import 'package:sports_app/src/features/event/domain/models/basketball_realtime_
 import 'package:sports_app/src/features/event/domain/models/match_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_match.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
+import 'package:sports_app/src/features/event/domain/models/tennis_match_detail.dart';
+import 'package:sports_app/src/features/event/domain/models/tennis_match_events.dart';
+import 'package:sports_app/src/features/event/domain/models/tennis_realtime_data.dart';
 
 part 'event_repository.g.dart';
 
@@ -137,5 +140,27 @@ class EventRepository extends _$EventRepository {
     if (json['teamPlayers'] is! List) return [];
     final list = json['teamPlayers'] as List<dynamic>? ?? [];
     return list.map((item) => BasketballPlayer.fromJson(item as Map<String, dynamic>)).toList();
+  }
+
+  Future<TennisMatchDetail> getTennisMatchDetail(String matchId) async {
+    final dio = ref.read(sportsApiServiceProvider);
+    final response = await dio.get('/tennis/match/details/$matchId');
+    return TennisMatchDetail.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<TennisMatchEventsData?> getTennisMatchEvents(String matchId) async {
+    final dio = ref.read(sportsApiServiceProvider);
+    final response = await dio.get('/tennis/match/events/$matchId');
+    if (response.data is! Map<String, dynamic>) return null;
+    return TennisMatchEventsData.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<List<TennisRealtimeData>> getTennisRealtimeMatches() async {
+    final dio = ref.read(sportsApiServiceProvider);
+    final response = await dio.get('/tennis/match/realtime');
+    final list = response.data as List<dynamic>? ?? [];
+    return list
+        .map((item) => TennisRealtimeData.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 }

@@ -312,7 +312,6 @@ class _ScoreDisplay extends StatelessWidget {
           TextSpan(text: homeScore),
           TextSpan(
             text: ' - ',
-            style: TextStyle(color: Colors.grey.shade400),
           ),
           TextSpan(text: awayScore),
         ],

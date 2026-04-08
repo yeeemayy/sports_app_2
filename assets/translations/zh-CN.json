@@ -70,6 +70,7 @@
   },
   "common": {
     "ok": "确定",
+    "unknown": "未知",
     "error": {
       "unexpected": "发生未知错误，请稍后再试"
     }
@@ -266,6 +267,58 @@
         "fouls": "犯规",
         "free_throw_pct": "罚球命中率",
         "total_timeouts": "总暂停次数"
+      }
+    },
+    "tennis": {
+      "status": {
+        "pre": "未开",
+        "s1": "第一局",
+        "s2": "第二局",
+        "s3": "第三局",
+        "s4": "第四局",
+        "s5": "第五局",
+        "ft": "完",
+        "live": "直播",
+        "wo": "弃权",
+        "ret": "退赛",
+        "def": "违规",
+        "pst": "推迟",
+        "dly": "延误",
+        "can": "取消",
+        "int": "中断",
+        "sus": "暂停",
+        "tbd": "待定"
+      },
+      "detail": {
+        "score": "比分",
+        "stats": "数据",
+        "situation": "态势",
+        "set_n": "第{n}盘",
+        "pt": "局分",
+        "total": "总盘",
+        "overall": "全场",
+        "game": "局",
+        "points": "得分",
+        "no_stats": "暂无统计数据",
+        "no_situation": "暂无态势数据"
+      },
+      "stat": {
+        "aces": "ACE球",
+        "first_serve_success": "一发进球数",
+        "first_serve_total": "一发总数",
+        "first_serve_rate": "一发进球率",
+        "second_serve_success": "二发进球数",
+        "second_serve_total": "二发总数",
+        "second_serve_rate": "二发进球率",
+        "break_points_success": "破发成功数",
+        "break_points_total": "破发机会数",
+        "break_points_rate": "破发成功率",
+        "double_faults": "双误",
+        "points_won": "得分总数",
+        "first_serve_points_success": "一发得分数",
+        "first_serve_points_rate": "一发得分率",
+        "second_serve_points_success": "二发得分数",
+        "second_serve_points_rate": "二发得分率"
       }
     }
   },
