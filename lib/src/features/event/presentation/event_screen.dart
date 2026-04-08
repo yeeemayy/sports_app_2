@@ -153,6 +153,27 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
     isHot: _isHot,
   );
 
+  void _onRealtimeUpdate(
+    AsyncValue<PaginatedMatchResult> matchesAsync,
+    Map<String, int> prevStatusIds,
+    Map<String, int> currStatusIds,
+  ) {
+    final matches = matchesAsync.valueOrNull?.matches;
+    if (matches == null || currStatusIds.isEmpty) return;
+    final matchIds = matches.map((m) => m.id).toSet();
+    // Only treat an ID as new if it just appeared in this poll (not in the
+    // previous realtime state), to avoid spurious refreshes from unrelated
+    // live matches that the realtime endpoint always returns.
+    final hasNewId = currStatusIds.keys.any(
+      (id) => !matchIds.contains(id) && !prevStatusIds.containsKey(id),
+    );
+    final statusChanged = prevStatusIds.entries.any((e) {
+      final curr = currStatusIds[e.key];
+      return curr != null && e.value != curr;
+    });
+    if (hasNewId || statusChanged) _refresh();
+  }
+
   void _refresh() {
     if (_isScheduled) {
       ref.invalidate(footballScheduledMatchesProvider(date: _formattedScheduledDate));
@@ -200,39 +221,20 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
         : ref.watch(_paginatedProvider);
 
     if (widget.sport == SportType.football) {
-      ref.listen(footballRealtimeProvider, (prev, realtimeMap) {
-        final matches = matchesAsync.valueOrNull?.matches;
-        if (matches == null || realtimeMap.isEmpty) return;
-        final matchIds = matches.map((m) => m.id).toSet();
-        // Only treat an ID as new if it just appeared in this poll (not in the
-        // previous realtime state), to avoid spurious refreshes from unrelated
-        // live matches that the realtime endpoint always returns.
-        final prevMap = prev ?? const {};
-        final hasNewId = realtimeMap.keys.any(
-          (id) => !matchIds.contains(id) && !prevMap.containsKey(id),
+      ref.listen(footballRealtimeProvider, (prev, curr) {
+        _onRealtimeUpdate(
+          matchesAsync,
+          prev?.map((k, v) => MapEntry(k, v.statusId)) ?? {},
+          curr.map((k, v) => MapEntry(k, v.statusId)),
         );
-        final statusChanged = prevMap.entries.any((e) {
-          final curr = realtimeMap[e.key];
-          return curr != null && e.value.statusId != curr.statusId;
-        });
-        if (hasNewId || statusChanged) _refresh();
       });
-    }
-
-    if (widget.sport == SportType.basketball) {
-      ref.listen(basketballRealtimeProvider, (prev, realtimeMap) {
-        final matches = matchesAsync.valueOrNull?.matches;
-        if (matches == null || realtimeMap.isEmpty) return;
-        final matchIds = matches.map((m) => m.id).toSet();
-        final prevMap = prev ?? const {};
-        final hasNewId = realtimeMap.keys.any(
-          (id) => !matchIds.contains(id) && !prevMap.containsKey(id),
+    } else if (widget.sport == SportType.basketball) {
+      ref.listen(basketballRealtimeProvider, (prev, curr) {
+        _onRealtimeUpdate(
+          matchesAsync,
+          prev?.map((k, v) => MapEntry(k, v.statusId)) ?? {},
+          curr.map((k, v) => MapEntry(k, v.statusId)),
         );
-        final statusChanged = prevMap.entries.any((e) {
-          final curr = realtimeMap[e.key];
-          return curr != null && e.value.statusId != curr.statusId;
-        });
-        if (hasNewId || statusChanged) _refresh();
       });
     }
 

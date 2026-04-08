@@ -7,22 +7,66 @@ import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/basketball_match.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 
-class BasketballMatchCard extends ConsumerWidget {
+class BasketballMatchCard extends ConsumerStatefulWidget {
   const BasketballMatchCard({super.key, required this.match});
 
   final BasketballMatch match;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final rt = ref.watch(basketballRealtimeProvider.select((map) => map[match.id]));
+  ConsumerState<BasketballMatchCard> createState() => _BasketballMatchCardState();
+}
 
-    final effectiveStatusId = rt?.statusId ?? match.statusId;
-    final effectiveHomeScore = rt != null ? rt.homeTotal.toString() : match.homeScore;
-    final effectiveAwayScore = rt != null ? rt.awayTotal.toString() : match.awayScore;
+class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
+    with TickerProviderStateMixin {
+  late final AnimationController _homeCtrl;
+  late final AnimationController _awayCtrl;
+  late final Animation<Color?> _homeHighlight;
+  late final Animation<Color?> _awayHighlight;
+
+  static const _highlightDuration = Duration(milliseconds: 1500);
+  static const _highlightColor = Color(0xFFFFD54F); // amber-300
+
+  @override
+  void initState() {
+    super.initState();
+    _homeCtrl = AnimationController(vsync: this, duration: _highlightDuration, value: 1.0);
+    _awayCtrl = AnimationController(vsync: this, duration: _highlightDuration, value: 1.0);
+    _homeHighlight = ColorTween(begin: _highlightColor, end: Colors.transparent)
+        .animate(CurvedAnimation(parent: _homeCtrl, curve: Curves.easeOut));
+    _awayHighlight = ColorTween(begin: _highlightColor, end: Colors.transparent)
+        .animate(CurvedAnimation(parent: _awayCtrl, curve: Curves.easeOut));
+  }
+
+  @override
+  void dispose() {
+    _homeCtrl.dispose();
+    _awayCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onRealtimeUpdate(prev, next) {
+    if (next == null || prev == null) return;
+    if (next.homeTotal > prev.homeTotal) _homeCtrl.forward(from: 0);
+    if (next.awayTotal > prev.awayTotal) _awayCtrl.forward(from: 0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen(
+      basketballRealtimeProvider.select((map) => map[widget.match.id]),
+      _onRealtimeUpdate,
+    );
+
+    final rt = ref.watch(basketballRealtimeProvider.select((map) => map[widget.match.id]));
+
+    final effectiveStatusId = rt?.statusId ?? widget.match.statusId;
+    final effectiveHomeScore = rt != null ? rt.homeTotal.toString() : widget.match.homeScore;
+    final effectiveAwayScore = rt != null ? rt.awayTotal.toString() : widget.match.awayScore;
     final effectivePeriodLabel = rt != null
         ? (rt.periodLabelKey.isEmpty ? null : rt.periodLabelKey.tr())
-        : match.statusDescription;
-    final effectiveClockDisplay = (rt != null && rt.showClock) ? rt.clockDisplay : match.liveMinute;
+        : widget.match.statusDescription;
+    final effectiveClockDisplay =
+        (rt != null && rt.showClock) ? rt.clockDisplay : widget.match.liveMinute;
 
     final isLive = effectiveStatusId > 0 && effectiveStatusId < 10;
     final isUpcoming = effectiveStatusId == 1 || effectiveStatusId == 0;
@@ -37,11 +81,11 @@ class BasketballMatchCard extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
             child: Row(
               children: [
-                _LeagueLogo(url: match.leagueLogo),
+                _LeagueLogo(url: widget.match.leagueLogo),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    match.leagueName,
+                    widget.match.leagueName,
                     style: context.textTheme.labelSmall?.copyWith(
                       color: Colors.grey.shade700,
                       fontWeight: FontWeight.w500,
@@ -51,7 +95,7 @@ class BasketballMatchCard extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  match.matchTimeSim,
+                  widget.match.matchTimeSim,
                   style: context.textTheme.labelSmall?.copyWith(color: Colors.grey.shade500),
                 ),
               ],
@@ -88,16 +132,18 @@ class BasketballMatchCard extends ConsumerWidget {
                       children: [
                         _TeamScoreRow(
                           score: effectiveHomeScore,
-                          logo: match.homeLogo,
-                          name: match.homeName,
+                          logo: widget.match.homeLogo,
+                          name: widget.match.homeName,
                           isLive: isLive,
+                          scoreHighlight: _homeHighlight,
                         ),
                         const SizedBox(height: 6),
                         _TeamScoreRow(
                           score: effectiveAwayScore,
-                          logo: match.awayLogo,
-                          name: match.awayName,
+                          logo: widget.match.awayLogo,
+                          name: widget.match.awayName,
                           isLive: isLive,
+                          scoreHighlight: _awayHighlight,
                         ),
                       ],
                     ),
@@ -166,19 +212,29 @@ class _TeamScoreRow extends StatelessWidget {
     required this.logo,
     required this.name,
     required this.isLive,
+    required this.scoreHighlight,
   });
 
   final String score;
   final String logo;
   final String name;
   final bool isLive;
+  final Animation<Color?> scoreHighlight;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SizedBox(
-          width: 45,
+        AnimatedBuilder(
+          animation: scoreHighlight,
+          builder: (_, child) => Container(
+            width: 45,
+            decoration: BoxDecoration(
+              color: scoreHighlight.value,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: child,
+          ),
           child: Text(
             score,
             textAlign: TextAlign.center,

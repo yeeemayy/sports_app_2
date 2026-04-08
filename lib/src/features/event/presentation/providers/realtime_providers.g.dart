@@ -27,7 +27,7 @@ final footballRealtimeProvider =
 typedef _$FootballRealtime =
     AutoDisposeNotifier<Map<String, MatchRealtimeData>>;
 String _$basketballRealtimeHash() =>
-    r'05fdf3616a4fe4e77d2a58b24c94d52da550b812';
+    r'771ce2407a4799e3a2ebd12310b5a552c2aa913a';
 
 /// See also [BasketballRealtime].
 @ProviderFor(BasketballRealtime)

@@ -3,6 +3,7 @@
 
 # Dev docs / internal assets
 .devdocs/
+.claude/
 CLAUDE.md
 
 # Miscellaneous

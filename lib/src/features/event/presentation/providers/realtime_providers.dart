@@ -23,7 +23,8 @@ class FootballRealtime extends _$FootballRealtime {
   void setWatchedIds(String source, List<String> ids) {
     final newSet = ids.toSet();
     final existing = _sources[source];
-    if (existing != null && existing.length == newSet.length && existing.containsAll(newSet)) return;
+    if (existing != null && existing.length == newSet.length && existing.containsAll(newSet))
+      return;
     _sources[source] = newSet;
     _restartTimer();
   }
@@ -66,7 +67,8 @@ class BasketballRealtime extends _$BasketballRealtime {
   void setWatchedIds(String source, List<String> ids) {
     final newSet = ids.toSet();
     final existing = _sources[source];
-    if (existing != null && existing.length == newSet.length && existing.containsAll(newSet)) return;
+    if (existing != null && existing.length == newSet.length && existing.containsAll(newSet))
+      return;
     _sources[source] = newSet;
     _restartTimer();
   }
@@ -81,14 +83,13 @@ class BasketballRealtime extends _$BasketballRealtime {
     _timer?.cancel();
     if (_allIds.isEmpty) return;
     _poll();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _poll());
+    _timer = Timer.periodic(const Duration(seconds: 2), (_) => _poll());
   }
 
   Future<void> _poll() async {
     if (_allIds.isEmpty) return;
     try {
-      final data =
-          await ref.read(eventRepositoryProvider.notifier).getBasketballRealtimeMatches();
+      final data = await ref.read(eventRepositoryProvider.notifier).getBasketballRealtimeMatches();
       state = {for (final d in data) d.id: d};
     } catch (_) {}
   }
