@@ -120,23 +120,36 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
     }
   }
 
-  void _reRegisterRealtimeIds() {
-    final result = ref.read(_paginatedProvider).valueOrNull;
-    if (result == null) return;
-    final ids = result.matches.map((m) => m.id).toList();
-    if (widget.sport == SportType.football) {
-      ref.read(footballRealtimeProvider.notifier).setWatchedIds('list', ids);
-    } else if (widget.sport == SportType.basketball) {
-      ref.read(basketballRealtimeProvider.notifier).setWatchedIds('list', ids);
+  void _setRealtimeWatchedIds(List<String> ids) {
+    switch (widget.sport) {
+      case SportType.football:
+        ref.read(footballRealtimeProvider.notifier).setWatchedIds('list', ids);
+      case SportType.basketball:
+        ref.read(basketballRealtimeProvider.notifier).setWatchedIds('list', ids);
+      case SportType.tennis:
+        ref.read(tennisRealtimeProvider.notifier).setWatchedIds('list', ids);
+      default:
+        break;
     }
   }
 
   void _clearRealtimeSource() {
-    if (widget.sport == SportType.football) {
-      ref.read(footballRealtimeProvider.notifier).clearSource('list');
-    } else if (widget.sport == SportType.basketball) {
-      ref.read(basketballRealtimeProvider.notifier).clearSource('list');
+    switch (widget.sport) {
+      case SportType.football:
+        ref.read(footballRealtimeProvider.notifier).clearSource('list');
+      case SportType.basketball:
+        ref.read(basketballRealtimeProvider.notifier).clearSource('list');
+      case SportType.tennis:
+        ref.read(tennisRealtimeProvider.notifier).clearSource('list');
+      default:
+        break;
     }
+  }
+
+  void _reRegisterRealtimeIds() {
+    final result = ref.read(_paginatedProvider).valueOrNull;
+    if (result == null) return;
+    _setRealtimeWatchedIds(result.matches.map((m) => m.id).toList());
   }
 
   void _onScroll() {
@@ -220,22 +233,33 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
               .whenData((list) => PaginatedMatchResult(matches: list, currentPage: 1, totalPage: 1))
         : ref.watch(_paginatedProvider);
 
-    if (widget.sport == SportType.football) {
-      ref.listen(footballRealtimeProvider, (prev, curr) {
-        _onRealtimeUpdate(
-          matchesAsync,
-          prev?.map((k, v) => MapEntry(k, v.statusId)) ?? {},
-          curr.map((k, v) => MapEntry(k, v.statusId)),
-        );
-      });
-    } else if (widget.sport == SportType.basketball) {
-      ref.listen(basketballRealtimeProvider, (prev, curr) {
-        _onRealtimeUpdate(
-          matchesAsync,
-          prev?.map((k, v) => MapEntry(k, v.statusId)) ?? {},
-          curr.map((k, v) => MapEntry(k, v.statusId)),
-        );
-      });
+    switch (widget.sport) {
+      case SportType.football:
+        ref.listen(footballRealtimeProvider, (prev, curr) {
+          _onRealtimeUpdate(
+            matchesAsync,
+            prev?.map((k, v) => MapEntry(k, v.statusId)) ?? {},
+            curr.map((k, v) => MapEntry(k, v.statusId)),
+          );
+        });
+      case SportType.basketball:
+        ref.listen(basketballRealtimeProvider, (prev, curr) {
+          _onRealtimeUpdate(
+            matchesAsync,
+            prev?.map((k, v) => MapEntry(k, v.statusId)) ?? {},
+            curr.map((k, v) => MapEntry(k, v.statusId)),
+          );
+        });
+      case SportType.tennis:
+        ref.listen(tennisRealtimeProvider, (prev, curr) {
+          _onRealtimeUpdate(
+            matchesAsync,
+            prev?.map((k, v) => MapEntry(k, v.statusId)) ?? {},
+            curr.map((k, v) => MapEntry(k, v.statusId)),
+          );
+        });
+      default:
+        break;
     }
 
     return Column(
@@ -294,12 +318,7 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
                 if (_isActiveTab) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (!mounted) return;
-                    final ids = result.matches.map((m) => m.id).toList();
-                    if (widget.sport == SportType.football) {
-                      ref.read(footballRealtimeProvider.notifier).setWatchedIds('list', ids);
-                    } else if (widget.sport == SportType.basketball) {
-                      ref.read(basketballRealtimeProvider.notifier).setWatchedIds('list', ids);
-                    }
+                    _setRealtimeWatchedIds(result.matches.map((m) => m.id).toList());
                   });
                 }
                 if (result.matches.isEmpty) {

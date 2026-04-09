@@ -128,7 +128,7 @@ class TennisRealtime extends _$TennisRealtime {
     _timer?.cancel();
     if (_allIds.isEmpty) return;
     _poll();
-    _timer = Timer.periodic(const Duration(seconds: 5), (_) => _poll());
+    _timer = Timer.periodic(const Duration(seconds: 2), (_) => _poll());
   }
 
   Future<void> _poll() async {
