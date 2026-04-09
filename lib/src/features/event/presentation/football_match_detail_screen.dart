@@ -1,10 +1,8 @@
 import 'dart:async';
 
-import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/football_lineup.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match_detail.dart';
@@ -12,7 +10,8 @@ import 'package:sports_app/src/features/event/domain/models/football_match_event
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/football_match_card.dart';
-import 'package:sports_app/src/shared_widgets/avatar.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/match_detail_appbar.dart';
+import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
 class FootballMatchDetailScreen extends ConsumerStatefulWidget {
@@ -69,34 +68,9 @@ class _FootballMatchDetailScreenState extends ConsumerState<FootballMatchDetailS
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.pink,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          title: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                title,
-                style: context.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-              if (detailAsync.valueOrNull?.matchTime != null)
-                Text(
-                  DateFormat(
-                    context.locale.languageCode == 'zh'
-                        ? 'yyyy年MM月dd日 EEEE ahh:mm'
-                        : 'yyyy MMM dd EEEE hh:mmaa',
-                    context.locale.toString(),
-                  ).format(
-                    DateTime.fromMillisecondsSinceEpoch(detailAsync.valueOrNull!.matchTime * 1000),
-                  ),
-                  style: context.textTheme.labelSmall?.copyWith(color: Colors.white),
-                ),
-            ],
-          ),
+        appBar: MatchDetailAppBar(
+          leagueName: title,
+          matchTimestamp: detailAsync.valueOrNull?.matchTime,
         ),
         body: Column(
           children: [
@@ -206,7 +180,7 @@ class _MatchHeaderContent extends StatelessWidget {
             Expanded(
               child: Column(
                 children: [
-                  _TeamLogo(url: detail.homeInfo.logo, size: 40),
+                  SportLogo(url: detail.homeInfo.logo, size: 40),
                   const SizedBox(height: 6),
                   Text(
                     detail.homeName,
@@ -250,7 +224,7 @@ class _MatchHeaderContent extends StatelessWidget {
             Expanded(
               child: Column(
                 children: [
-                  _TeamLogo(url: detail.awayInfo.logo, size: 40),
+                  SportLogo(url: detail.awayInfo.logo, size: 40),
                   const SizedBox(height: 6),
                   Text(
                     detail.awayName,
@@ -761,23 +735,9 @@ class _LineupsTabState extends ConsumerState<_LineupsTab> with SingleTickerProvi
                         children: [
                           WidgetSpan(
                             alignment: PlaceholderAlignment.middle,
-                            child: Container(
-                              margin: EdgeInsets.only(right: 8),
-                              width: 20,
-                              height: 20,
-                              child: homeIcon == null || homeIcon.isEmpty
-                                  ? AvatarFallback(size: 20, iconSize: 14)
-                                  : CachedNetworkImage(
-                                      imageUrl: homeIcon,
-                                      fit: BoxFit.contain,
-                                      placeholder: (_, _) => Shimmer.fromColors(
-                                        baseColor: Colors.grey.shade300,
-                                        highlightColor: Colors.grey.shade100,
-                                        child: AvatarFallback(size: 20, iconSize: 14),
-                                      ),
-                                      errorBuilder: (_, _, _) =>
-                                          AvatarFallback(size: 20, iconSize: 14),
-                                    ),
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: SportLogo(url: homeIcon, size: 20),
                             ),
                           ),
                           TextSpan(text: homeName),
@@ -791,23 +751,9 @@ class _LineupsTabState extends ConsumerState<_LineupsTab> with SingleTickerProvi
                         children: [
                           WidgetSpan(
                             alignment: PlaceholderAlignment.middle,
-                            child: Container(
-                              margin: EdgeInsets.only(right: 8),
-                              width: 20,
-                              height: 20,
-                              child: awayIcon == null || awayIcon.isEmpty
-                                  ? AvatarFallback(size: 20, iconSize: 14)
-                                  : CachedNetworkImage(
-                                      imageUrl: awayIcon,
-                                      fit: BoxFit.contain,
-                                      placeholder: (_, _) => Shimmer.fromColors(
-                                        baseColor: Colors.grey.shade300,
-                                        highlightColor: Colors.grey.shade100,
-                                        child: AvatarFallback(size: 20, iconSize: 14),
-                                      ),
-                                      errorBuilder: (_, _, _) =>
-                                          AvatarFallback(size: 20, iconSize: 14),
-                                    ),
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: SportLogo(url: awayIcon, size: 20),
                             ),
                           ),
                           TextSpan(text: awayName),
@@ -907,22 +853,7 @@ class _PlayerRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          SizedBox(
-            width: 28,
-            height: 28,
-            child: player.logo.isEmpty
-                ? AvatarFallback(size: 28, iconSize: 14)
-                : CachedNetworkImage(
-                    imageUrl: player.logo,
-                    fit: BoxFit.contain,
-                    placeholder: (_, _) => Shimmer.fromColors(
-                      baseColor: Colors.grey.shade300,
-                      highlightColor: Colors.grey.shade100,
-                      child: AvatarFallback(size: 28, iconSize: 14),
-                    ),
-                    errorBuilder: (_, _, _) => AvatarFallback(size: 28, iconSize: 14),
-                  ),
-          ),
+          SportLogo(url: player.logo, size: 28),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -1026,31 +957,3 @@ class _StatRow extends StatelessWidget {
   }
 }
 
-// ─── Shared ──────────────────────────────────────────────────────────────────
-
-class _TeamLogo extends StatelessWidget {
-  const _TeamLogo({required this.url, required this.size});
-
-  final String url;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: size,
-      height: size,
-      child: url.isEmpty
-          ? AvatarFallback(size: size, iconSize: size * 0.5)
-          : CachedNetworkImage(
-              imageUrl: url,
-              fit: BoxFit.contain,
-              placeholder: (_, _) => Shimmer.fromColors(
-                baseColor: Colors.grey.shade300,
-                highlightColor: Colors.grey.shade100,
-                child: AvatarFallback(size: size, iconSize: size * 0.5),
-              ),
-              errorBuilder: (_, _, _) => AvatarFallback(size: size, iconSize: size * 0.5),
-            ),
-    );
-  }
-}

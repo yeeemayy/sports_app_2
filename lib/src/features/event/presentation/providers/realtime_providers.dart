@@ -8,24 +8,36 @@ import 'package:sports_app/src/features/event/domain/models/tennis_realtime_data
 
 part 'realtime_providers.g.dart';
 
-@riverpod
-class FootballRealtime extends _$FootballRealtime {
-  Timer? _timer;
+/// Shared polling logic for realtime sports data notifiers.
+///
+/// Consumers call [setWatchedIds] with a named source and a list of IDs to
+/// watch. Call [clearSource] to stop polling for those IDs. The timer is
+/// restarted whenever the union of all watched IDs changes.
+mixin RealtimePollMixin<T> on AutoDisposeNotifier<Map<String, T>> {
+  Timer? _pollTimer;
   final Map<String, Set<String>> _sources = {};
 
   Set<String> get _allIds => _sources.values.expand((s) => s).toSet();
 
-  @override
-  Map<String, MatchRealtimeData> build() {
-    ref.onDispose(() => _timer?.cancel());
+  /// How often to poll the realtime endpoint.
+  Duration get pollInterval;
+
+  /// Returns the unique match ID for a realtime data item.
+  String idOf(T item);
+
+  /// Fetches a fresh snapshot from the repository.
+  Future<List<T>> fetchData();
+
+  /// Wire up dispose handling. Call from [build].
+  Map<String, T> initRealtime() {
+    ref.onDispose(() => _pollTimer?.cancel());
     return {};
   }
 
   void setWatchedIds(String source, List<String> ids) {
     final newSet = ids.toSet();
     final existing = _sources[source];
-    if (existing != null && existing.length == newSet.length && existing.containsAll(newSet))
-      return;
+    if (existing != null && existing.length == newSet.length && existing.containsAll(newSet)) return;
     _sources[source] = newSet;
     _restartTimer();
   }
@@ -37,105 +49,65 @@ class FootballRealtime extends _$FootballRealtime {
   }
 
   void _restartTimer() {
-    _timer?.cancel();
+    _pollTimer?.cancel();
     if (_allIds.isEmpty) return;
     _poll();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _poll());
+    _pollTimer = Timer.periodic(pollInterval, (_) => _poll());
   }
 
   Future<void> _poll() async {
     if (_allIds.isEmpty) return;
     try {
-      final data = await ref.read(eventRepositoryProvider.notifier).getRealtimeMatches();
-      state = {for (final d in data) d.id: d};
+      final data = await fetchData();
+      state = {for (final d in data) idOf(d): d};
     } catch (_) {}
   }
 }
 
 @riverpod
-class BasketballRealtime extends _$BasketballRealtime {
-  Timer? _timer;
-  final Map<String, Set<String>> _sources = {};
-
-  Set<String> get _allIds => _sources.values.expand((s) => s).toSet();
+class FootballRealtime extends _$FootballRealtime with RealtimePollMixin<MatchRealtimeData> {
+  @override
+  Duration get pollInterval => const Duration(seconds: 1);
 
   @override
-  Map<String, BasketballRealtimeData> build() {
-    ref.onDispose(() => _timer?.cancel());
-    return {};
-  }
+  String idOf(MatchRealtimeData item) => item.id;
 
-  void setWatchedIds(String source, List<String> ids) {
-    final newSet = ids.toSet();
-    final existing = _sources[source];
-    if (existing != null && existing.length == newSet.length && existing.containsAll(newSet))
-      return;
-    _sources[source] = newSet;
-    _restartTimer();
-  }
+  @override
+  Future<List<MatchRealtimeData>> fetchData() =>
+      ref.read(eventRepositoryProvider.notifier).getRealtimeMatches();
 
-  void clearSource(String source) {
-    if (!_sources.containsKey(source)) return;
-    _sources.remove(source);
-    _restartTimer();
-  }
-
-  void _restartTimer() {
-    _timer?.cancel();
-    if (_allIds.isEmpty) return;
-    _poll();
-    _timer = Timer.periodic(const Duration(seconds: 2), (_) => _poll());
-  }
-
-  Future<void> _poll() async {
-    if (_allIds.isEmpty) return;
-    try {
-      final data = await ref.read(eventRepositoryProvider.notifier).getBasketballRealtimeMatches();
-      state = {for (final d in data) d.id: d};
-    } catch (_) {}
-  }
+  @override
+  Map<String, MatchRealtimeData> build() => initRealtime();
 }
 
 @riverpod
-class TennisRealtime extends _$TennisRealtime {
-  Timer? _timer;
-  final Map<String, Set<String>> _sources = {};
-
-  Set<String> get _allIds => _sources.values.expand((s) => s).toSet();
+class BasketballRealtime extends _$BasketballRealtime with RealtimePollMixin<BasketballRealtimeData> {
+  @override
+  Duration get pollInterval => const Duration(seconds: 2);
 
   @override
-  Map<String, TennisRealtimeData> build() {
-    ref.onDispose(() => _timer?.cancel());
-    return {};
-  }
+  String idOf(BasketballRealtimeData item) => item.id;
 
-  void setWatchedIds(String source, List<String> ids) {
-    final newSet = ids.toSet();
-    final existing = _sources[source];
-    if (existing != null && existing.length == newSet.length && existing.containsAll(newSet))
-      return;
-    _sources[source] = newSet;
-    _restartTimer();
-  }
+  @override
+  Future<List<BasketballRealtimeData>> fetchData() =>
+      ref.read(eventRepositoryProvider.notifier).getBasketballRealtimeMatches();
 
-  void clearSource(String source) {
-    if (!_sources.containsKey(source)) return;
-    _sources.remove(source);
-    _restartTimer();
-  }
+  @override
+  Map<String, BasketballRealtimeData> build() => initRealtime();
+}
 
-  void _restartTimer() {
-    _timer?.cancel();
-    if (_allIds.isEmpty) return;
-    _poll();
-    _timer = Timer.periodic(const Duration(seconds: 2), (_) => _poll());
-  }
+@riverpod
+class TennisRealtime extends _$TennisRealtime with RealtimePollMixin<TennisRealtimeData> {
+  @override
+  Duration get pollInterval => const Duration(seconds: 2);
 
-  Future<void> _poll() async {
-    if (_allIds.isEmpty) return;
-    try {
-      final data = await ref.read(eventRepositoryProvider.notifier).getTennisRealtimeMatches();
-      state = {for (final d in data) d.id: d};
-    } catch (_) {}
-  }
+  @override
+  String idOf(TennisRealtimeData item) => item.id;
+
+  @override
+  Future<List<TennisRealtimeData>> fetchData() =>
+      ref.read(eventRepositoryProvider.notifier).getTennisRealtimeMatches();
+
+  @override
+  Map<String, TennisRealtimeData> build() => initRealtime();
 }

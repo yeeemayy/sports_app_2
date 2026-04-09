@@ -1,7 +1,5 @@
-import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/basketball_match.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match.dart';
@@ -10,7 +8,7 @@ import 'package:sports_app/src/features/event/domain/models/tennis_match.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/basketball_match_card.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/football_match_card.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/tennis_match_card.dart';
-import 'package:sports_app/src/shared_widgets/avatar.dart';
+import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
 class EventMatchCard extends StatelessWidget {
   const EventMatchCard({super.key, required this.match});
@@ -42,7 +40,7 @@ class _DefaultMatchCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
             child: Row(
               children: [
-                _LeagueLogo(url: match.leagueLogo),
+                LeagueLogo(url: match.leagueLogo),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
@@ -73,7 +71,7 @@ class _DefaultMatchCard extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _TeamAvatar(url: match.homeLogo),
+                      SportLogo(url: match.homeLogo, size: 48, circular: true),
                       const SizedBox(height: 4),
                       Text(
                         match.homeName,
@@ -110,7 +108,7 @@ class _DefaultMatchCard extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _TeamAvatar(url: match.awayLogo),
+                      SportLogo(url: match.awayLogo, size: 48, circular: true),
                       const SizedBox(height: 4),
                       Text(
                         match.awayName,
@@ -219,52 +217,6 @@ class _StatusBadge extends StatelessWidget {
           color: textColor,
           fontWeight: FontWeight.w600,
         ),
-      ),
-    );
-  }
-}
-
-class _TeamAvatar extends StatelessWidget {
-  const _TeamAvatar({required this.url});
-  final String url;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipOval(
-      child: SizedBox(
-        width: 48,
-        height: 48,
-        child: url.isEmpty
-            ? AvatarFallback(size: 48, iconSize: 24)
-            : CachedNetworkImage(
-                imageUrl: url,
-                fit: BoxFit.cover,
-                placeholder: (_, _) => Shimmer.fromColors(
-                  baseColor: Colors.grey.shade300,
-                  highlightColor: Colors.grey.shade100,
-                  child: const ColoredBox(color: Colors.grey),
-                ),
-                errorBuilder: (_, _, _) => AvatarFallback(size: 48, iconSize: 20),
-              ),
-      ),
-    );
-  }
-}
-
-class _LeagueLogo extends StatelessWidget {
-  const _LeagueLogo({required this.url});
-  final String url;
-
-  @override
-  Widget build(BuildContext context) {
-    if (url.isEmpty) return const SizedBox(width: 16, height: 16);
-    return ClipOval(
-      child: CachedNetworkImage(
-        imageUrl: url,
-        width: 16,
-        height: 16,
-        fit: BoxFit.cover,
-        errorWidget: (_, _, _) => const SizedBox(width: 16, height: 16),
       ),
     );
   }

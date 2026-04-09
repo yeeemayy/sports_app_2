@@ -1,12 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/event_match_card.dart';
+import 'package:sports_app/src/shared_widgets/shimmer_loading_list.dart';
 
 class EventScreen extends StatefulWidget {
   const EventScreen({super.key});
@@ -296,7 +296,7 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
               }
             },
             child: matchesAsync.when(
-              loading: () => _ShimmerList(),
+              loading: () => const ShimmerLoadingList(),
               error: (e, st) {
                 debugPrint('$e, $st');
                 return LayoutBuilder(
@@ -502,21 +502,3 @@ class _DateSelectorBar extends StatelessWidget {
   }
 }
 
-class _ShimmerList extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: EdgeInsets.zero,
-      itemCount: 8,
-      itemBuilder: (context, _) => Shimmer.fromColors(
-        baseColor: Colors.grey.shade300,
-        highlightColor: Colors.grey.shade100,
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          height: 72,
-          decoration: BoxDecoration(color: Colors.grey, borderRadius: BorderRadius.circular(8)),
-        ),
-      ),
-    );
-  }
-}

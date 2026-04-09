@@ -1,17 +1,17 @@
 import 'dart:async';
 
-import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/tennis_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/tennis_match_events.dart';
 import 'package:sports_app/src/features/event/domain/models/tennis_realtime_data.dart';
+import 'package:sports_app/src/features/event/domain/tennis_status.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
-import 'package:sports_app/src/shared_widgets/avatar.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/match_detail_appbar.dart';
+import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
 class TennisMatchDetailScreen extends ConsumerStatefulWidget {
   const TennisMatchDetailScreen({super.key, required this.matchId});
@@ -62,35 +62,9 @@ class _TennisMatchDetailScreenState extends ConsumerState<TennisMatchDetailScree
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.pink,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          title: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                title,
-                style: context.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-              if (detailAsync.valueOrNull?.matchTime != null &&
-                  detailAsync.valueOrNull!.matchTime > 0)
-                Text(
-                  DateFormat(
-                    context.locale.languageCode == 'zh'
-                        ? 'yyyy年MM月dd日 EEEE ahh:mm'
-                        : 'yyyy MMM dd EEEE hh:mmaa',
-                    context.locale.toString(),
-                  ).format(
-                    DateTime.fromMillisecondsSinceEpoch(detailAsync.valueOrNull!.matchTime * 1000),
-                  ),
-                  style: context.textTheme.labelSmall?.copyWith(color: Colors.white),
-                ),
-            ],
-          ),
+        appBar: MatchDetailAppBar(
+          leagueName: title,
+          matchTimestamp: detailAsync.valueOrNull?.matchTime,
         ),
         body: Column(
           children: [
@@ -159,40 +133,6 @@ class _TennisHeaderContent extends StatelessWidget {
   final TennisRealtimeData? rt;
   final TennisMatchEventsData? eventsData;
 
-  String _statusLabel(int statusId, String? desc) {
-    switch (statusId) {
-      case 1:
-        return 'event.tennis.status.pre'.tr();
-      case 3:
-        return 'event.tennis.status.live'.tr();
-      case 51:
-        return 'event.tennis.status.s1'.tr();
-      case 52:
-        return 'event.tennis.status.s2'.tr();
-      case 53:
-        return 'event.tennis.status.s3'.tr();
-      case 54:
-        return 'event.tennis.status.s4'.tr();
-      case 55:
-        return 'event.tennis.status.s5'.tr();
-      case 100:
-        return 'event.tennis.status.ft'.tr();
-      case 20:
-      case 22:
-      case 23:
-        return 'event.tennis.status.wo'.tr();
-      case 21:
-      case 24:
-      case 25:
-        return 'event.tennis.status.ret'.tr();
-      case 26:
-      case 27:
-        return 'event.tennis.status.def'.tr();
-      default:
-        return desc ?? '';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final effStatusId = eventsData?.statusId ?? rt?.statusId ?? detail.statusId;
@@ -211,7 +151,7 @@ class _TennisHeaderContent extends StatelessWidget {
     final isLive = const {3, 51, 52, 53, 54, 55}.contains(effStatusId);
     final isNotStarted = effStatusId == 1;
 
-    final statusLabel = _statusLabel(effStatusId, detail.statusDescription);
+    final statusLabel = tennisStatusLabel(effStatusId, detail.statusDescription);
 
     return Column(
       children: [
@@ -784,7 +724,7 @@ class _BasicPlayerRow extends StatelessWidget {
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    _PlayerLogoSmall(url: logo),
+                    SportLogo(url: logo, size: 24),
                     if (isServing)
                       Positioned(
                         bottom: -2,
@@ -1197,7 +1137,7 @@ class _RoundCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              _RoundPlayerAvatar(logo: servingLogo),
+              SportLogo(url: servingLogo, size: 24, circular: true),
               const SizedBox(width: 6),
               Expanded(
                 child: RichText(
@@ -1245,33 +1185,6 @@ class _RoundCard extends StatelessWidget {
   }
 }
 
-class _RoundPlayerAvatar extends StatelessWidget {
-  const _RoundPlayerAvatar({required this.logo});
-
-  final String logo;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 24,
-      height: 24,
-      child: ClipOval(
-        child: logo.isEmpty
-            ? AvatarFallback(size: 24, iconSize: 12)
-            : CachedNetworkImage(
-                imageUrl: logo,
-                fit: BoxFit.cover,
-                placeholder: (_, _) => Shimmer.fromColors(
-                  baseColor: Colors.grey.shade300,
-                  highlightColor: Colors.grey.shade100,
-                  child: AvatarFallback(size: 24, iconSize: 12),
-                ),
-                errorBuilder: (_, _, _) => AvatarFallback(size: 24, iconSize: 12),
-              ),
-      ),
-    );
-  }
-}
 
 class _PointChip extends StatelessWidget {
   const _PointChip({required this.home, required this.away});
@@ -1312,6 +1225,10 @@ class _ServingDot extends StatelessWidget {
   }
 }
 
+/// Tennis player avatar shown in the match header.
+///
+/// Wraps [SportLogo] in a white circular container to distinguish player photos
+/// from the pink background. Falls back to [SportLogo]'s avatar placeholder.
 class _PlayerLogo extends StatelessWidget {
   const _PlayerLogo({required this.url, required this.size});
 
@@ -1320,48 +1237,12 @@ class _PlayerLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return url.isEmpty
-        ? AvatarFallback(size: size, iconSize: size * 0.5)
-        : Container(
-            padding: EdgeInsets.all(5),
-            height: size + 10,
-            width: size + 10,
-            decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-            child: CachedNetworkImage(
-              imageUrl: url,
-              fit: BoxFit.contain,
-              placeholder: (_, _) => Shimmer.fromColors(
-                baseColor: Colors.grey.shade300,
-                highlightColor: Colors.grey.shade100,
-                child: AvatarFallback(size: size, iconSize: size * 0.5),
-              ),
-              errorBuilder: (_, _, _) => AvatarFallback(size: size, iconSize: size * 0.5),
-            ),
-          );
-  }
-}
-
-class _PlayerLogoSmall extends StatelessWidget {
-  const _PlayerLogoSmall({required this.url});
-  final String url;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 24,
-      height: 24,
-      child: url.isEmpty
-          ? AvatarFallback(size: 24, iconSize: 12)
-          : CachedNetworkImage(
-              imageUrl: url,
-              fit: BoxFit.contain,
-              placeholder: (_, _) => Shimmer.fromColors(
-                baseColor: Colors.grey.shade300,
-                highlightColor: Colors.grey.shade100,
-                child: AvatarFallback(size: 24, iconSize: 12),
-              ),
-              errorBuilder: (_, _, _) => AvatarFallback(size: 24, iconSize: 12),
-            ),
+    return Container(
+      padding: const EdgeInsets.all(5),
+      height: size + 10,
+      width: size + 10,
+      decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+      child: SportLogo(url: url, size: size),
     );
   }
 }

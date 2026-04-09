@@ -1,16 +1,14 @@
 import 'dart:async';
 
-import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
-import 'package:sports_app/src/shared_widgets/avatar.dart';
+import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
 class FootballMatchCard extends ConsumerWidget {
   const FootballMatchCard({super.key, required this.match});
@@ -51,7 +49,7 @@ class FootballMatchCard extends ConsumerWidget {
                   Expanded(
                     child: Row(
                       children: [
-                        _LeagueLogo(url: effective.leagueLogo),
+                        LeagueLogo(url: effective.leagueLogo),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
@@ -98,7 +96,7 @@ class FootballMatchCard extends ConsumerWidget {
                   Expanded(
                     child: Row(
                       children: [
-                        _TeamLogo(url: effective.homeLogo),
+                        SportLogo(url: effective.homeLogo, size: 24),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text.rich(
@@ -167,7 +165,7 @@ class FootballMatchCard extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(width: 6),
-                        _TeamLogo(url: effective.awayLogo),
+                        SportLogo(url: effective.awayLogo, size: 24),
                       ],
                     ),
                   ),
@@ -246,7 +244,6 @@ class _MatchStatusBadgeState extends State<MatchStatusBadge> {
 
   void _syncTimer() {
     if (_shouldBlink) {
-      // Only start the timer if it isn't already running — don't reset the phase.
       _timer ??= Timer.periodic(
         const Duration(seconds: 1),
         (_) => setState(() => _visible = !_visible),
@@ -310,30 +307,9 @@ class _ScoreDisplay extends StatelessWidget {
         ),
         children: [
           TextSpan(text: homeScore),
-          TextSpan(
-            text: ' - ',
-          ),
+          const TextSpan(text: ' - '),
           TextSpan(text: awayScore),
         ],
-      ),
-    );
-  }
-}
-
-class _LeagueLogo extends StatelessWidget {
-  const _LeagueLogo({required this.url});
-  final String url;
-
-  @override
-  Widget build(BuildContext context) {
-    if (url.isEmpty) return const SizedBox(width: 16, height: 16);
-    return ClipOval(
-      child: CachedNetworkImage(
-        imageUrl: url,
-        width: 16,
-        height: 16,
-        fit: BoxFit.cover,
-        errorWidget: (_, _, _) => const SizedBox(width: 16, height: 16),
       ),
     );
   }
@@ -358,31 +334,6 @@ class _YellowCardBadge extends StatelessWidget {
           height: 1.2,
         ),
       ),
-    );
-  }
-}
-
-class _TeamLogo extends StatelessWidget {
-  const _TeamLogo({required this.url});
-  final String url;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 24,
-      height: 24,
-      child: url.isEmpty
-          ? AvatarFallback(size: 24, iconSize: 12)
-          : CachedNetworkImage(
-              imageUrl: url,
-              fit: BoxFit.contain,
-              placeholder: (_, _) => Shimmer.fromColors(
-                baseColor: Colors.grey.shade300,
-                highlightColor: Colors.grey.shade100,
-                child: const AvatarFallback(size: 24, iconSize: 12),
-              ),
-              errorBuilder: (_, _, _) => AvatarFallback(size: 24, iconSize: 12),
-            ),
     );
   }
 }
