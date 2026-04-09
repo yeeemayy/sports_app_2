@@ -301,7 +301,7 @@
         "points": "Points",
         "no_stats": "No stats available",
         "no_situation": "No situation data available",
-        "round_n": "Game {n}",
+        "round_n": "Round {n}",
         "serving": "Serving"
       },
       "stat": {

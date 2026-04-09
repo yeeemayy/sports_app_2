@@ -147,26 +147,19 @@ class TennisMatchCard extends ConsumerWidget {
                 children: [
                   // Home player
                   Expanded(
-                    child: Row(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         _PlayerLogo(url: match.homeLogo),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  match.homeName,
-                                  style: context.textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              if (isLive && effectiveServingSide == 1) _ServingDot(),
-                            ],
+                        const SizedBox(height: 4),
+                        Text(
+                          match.homeName,
+                          style: context.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w500,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
@@ -185,30 +178,20 @@ class TennisMatchCard extends ConsumerWidget {
                   ),
                   // Away player
                   Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Expanded(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              if (isLive && effectiveServingSide == 2) _ServingDot(),
-                              Expanded(
-                                child: Text(
-                                  match.awayName,
-                                  style: context.textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  textAlign: TextAlign.end,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 6),
                         _PlayerLogo(url: match.awayLogo),
+                        const SizedBox(height: 4),
+                        Text(
+                          match.awayName,
+                          style: context.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                        ),
                       ],
                     ),
                   ),
@@ -295,9 +278,7 @@ class _TennisScoreDisplay extends StatelessWidget {
               ),
               children: [
                 TextSpan(text: homeTotal),
-                TextSpan(
-                  text: ' - ',
-                ),
+                TextSpan(text: ' - '),
                 TextSpan(text: awayTotal),
               ],
             ),
@@ -354,21 +335,23 @@ class _PlayerLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 24,
-      height: 24,
-      child: url.isEmpty
-          ? AvatarFallback(size: 24, iconSize: 12)
-          : CachedNetworkImage(
-              imageUrl: url,
-              fit: BoxFit.contain,
-              placeholder: (_, _) => Shimmer.fromColors(
-                baseColor: Colors.grey.shade300,
-                highlightColor: Colors.grey.shade100,
-                child: AvatarFallback(size: 24, iconSize: 12),
+    return ClipOval(
+      child: SizedBox(
+        width: 48,
+        height: 48,
+        child: url.isEmpty
+            ? AvatarFallback(size: 48, iconSize: 24)
+            : CachedNetworkImage(
+                imageUrl: url,
+                fit: BoxFit.cover,
+                placeholder: (_, _) => Shimmer.fromColors(
+                  baseColor: Colors.grey.shade300,
+                  highlightColor: Colors.grey.shade100,
+                  child: const ColoredBox(color: Colors.grey),
+                ),
+                errorBuilder: (_, _, _) => AvatarFallback(size: 48, iconSize: 20),
               ),
-              errorBuilder: (_, _, _) => AvatarFallback(size: 24, iconSize: 12),
-            ),
+      ),
     );
   }
 }
