@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
+import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
+import 'package:sports_app/src/features/event/domain/models/table_tennis_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/table_tennis_status.dart';
 import 'package:sports_app/src/features/event/domain/models/table_tennis_match.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
@@ -40,7 +42,9 @@ class TableTennisMatchCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final rt = ref.watch(tableTennisRealtimeProvider.select((map) => map[match.id]));
+    final rt = ref.watch(
+      sportRealtimeProvider(SportType.tableTennis).select((map) => map[match.id] as TableTennisRealtimeData?),
+    );
 
     final effectiveStatusId = rt?.statusId ?? match.statusId;
     final effectiveHomeSets = rt?.homeSets ?? _homeSets(match);

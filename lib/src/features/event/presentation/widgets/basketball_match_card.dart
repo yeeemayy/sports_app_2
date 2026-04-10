@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/basketball_match.dart';
+import 'package:sports_app/src/features/event/domain/models/basketball_realtime_data.dart';
+import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
@@ -32,10 +34,14 @@ class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
     super.initState();
     _homeCtrl = AnimationController(vsync: this, duration: _highlightDuration, value: 1.0);
     _awayCtrl = AnimationController(vsync: this, duration: _highlightDuration, value: 1.0);
-    _homeHighlight = ColorTween(begin: _highlightColor, end: Colors.transparent)
-        .animate(CurvedAnimation(parent: _homeCtrl, curve: Curves.easeOut));
-    _awayHighlight = ColorTween(begin: _highlightColor, end: Colors.transparent)
-        .animate(CurvedAnimation(parent: _awayCtrl, curve: Curves.easeOut));
+    _homeHighlight = ColorTween(
+      begin: _highlightColor,
+      end: Colors.transparent,
+    ).animate(CurvedAnimation(parent: _homeCtrl, curve: Curves.easeOut));
+    _awayHighlight = ColorTween(
+      begin: _highlightColor,
+      end: Colors.transparent,
+    ).animate(CurvedAnimation(parent: _awayCtrl, curve: Curves.easeOut));
   }
 
   @override
@@ -54,11 +60,13 @@ class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
   @override
   Widget build(BuildContext context) {
     ref.listen(
-      basketballRealtimeProvider.select((map) => map[widget.match.id]),
+      sportRealtimeProvider(SportType.basketball).select((map) => map[widget.match.id] as BasketballRealtimeData?),
       _onRealtimeUpdate,
     );
 
-    final rt = ref.watch(basketballRealtimeProvider.select((map) => map[widget.match.id]));
+    final rt = ref.watch(
+      sportRealtimeProvider(SportType.basketball).select((map) => map[widget.match.id] as BasketballRealtimeData?),
+    );
 
     final effectiveStatusId = rt?.statusId ?? widget.match.statusId;
     final effectiveHomeScore = rt != null ? rt.homeTotal.toString() : widget.match.homeScore;
@@ -66,8 +74,9 @@ class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
     final effectivePeriodLabel = rt != null
         ? (rt.periodLabelKey.isEmpty ? null : rt.periodLabelKey.tr())
         : widget.match.statusDescription;
-    final effectiveClockDisplay =
-        (rt != null && rt.showClock) ? rt.clockDisplay : widget.match.liveMinute;
+    final effectiveClockDisplay = (rt != null && rt.showClock)
+        ? rt.clockDisplay
+        : widget.match.liveMinute;
 
     final isLive = effectiveStatusId > 0 && effectiveStatusId < 10;
     final isUpcoming = effectiveStatusId == 1 || effectiveStatusId == 0;

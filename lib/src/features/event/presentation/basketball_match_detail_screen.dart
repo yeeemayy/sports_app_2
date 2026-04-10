@@ -1,16 +1,15 @@
-import 'dart:async';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/basketball_match_detail.dart';
+import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/domain/models/basketball_match_events.dart';
 import 'package:sports_app/src/features/event/domain/models/basketball_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/basketball_team_squad.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/match_detail_appbar.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
 class BasketballMatchDetailScreen extends ConsumerStatefulWidget {
@@ -24,89 +23,48 @@ class BasketballMatchDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _BasketballMatchDetailScreenState
-    extends ConsumerState<BasketballMatchDetailScreen> {
-  Timer? _eventsTimer;
+    extends SportDetailScaffoldState<BasketballMatchDetailScreen> {
+  @override
+  String get matchId => widget.matchId;
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      ref.read(basketballRealtimeProvider.notifier).setWatchedIds(
-        'detail:${widget.matchId}',
-        [widget.matchId],
-      );
-    });
-    // Poll events/key every 2 seconds for quarter scores and stats.
-    _eventsTimer = Timer.periodic(const Duration(seconds: 2), (_) {
-      if (!mounted) return;
-      ref.invalidate(basketballMatchEventsKeyProvider(matchId: widget.matchId));
-    });
+  SportType get sportType => SportType.basketball;
+
+  @override
+  Duration get eventsRefreshInterval => const Duration(seconds: 2);
+
+  @override
+  void onEventsTimerTick() =>
+      ref.invalidate(basketballMatchEventsKeyProvider(matchId: matchId));
+
+  @override
+  void onStatusChanged() {
+    ref.invalidate(basketballMatchDetailProvider(matchId: matchId));
+    ref.invalidate(basketballMatchEventsKeyProvider(matchId: matchId));
   }
 
   @override
-  void dispose() {
-    _eventsTimer?.cancel();
-    ref
-        .read(basketballRealtimeProvider.notifier)
-        .clearSource('detail:${widget.matchId}');
-    super.dispose();
+  (String?, int?) watchDetail() {
+    final v =
+        ref.watch(basketballMatchDetailProvider(matchId: matchId)).valueOrNull;
+    return (v?.leagueName, v?.matchTime);
   }
 
   @override
-  Widget build(BuildContext context) {
-    final detailAsync =
-        ref.watch(basketballMatchDetailProvider(matchId: widget.matchId));
+  Widget buildHeader(BuildContext context) =>
+      _BasketballMatchHeader(matchId: matchId);
 
-    // Re-fetch detail and events when status changes.
-    ref.listen(
-      basketballRealtimeProvider.select((map) => map[widget.matchId]?.statusId),
-      (prev, next) {
-        if (prev == null || next == null || prev == next) return;
-        ref.invalidate(basketballMatchDetailProvider(matchId: widget.matchId));
-        ref.invalidate(
-            basketballMatchEventsKeyProvider(matchId: widget.matchId));
-      },
-    );
+  @override
+  List<Tab> buildTabs(BuildContext context) => [
+    Tab(text: 'event.basketball.detail.overview'.tr()),
+    Tab(text: 'event.basketball.detail.players'.tr()),
+  ];
 
-    final title = detailAsync.valueOrNull?.leagueName ?? '';
-
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: MatchDetailAppBar(
-          leagueName: title,
-          matchTimestamp: detailAsync.valueOrNull?.matchTime,
-        ),
-        body: Column(
-          children: [
-            _BasketballMatchHeader(matchId: widget.matchId),
-            Container(
-              color: Colors.white,
-              child: TabBar(
-                labelColor: Colors.pink,
-                unselectedLabelColor: Colors.grey.shade600,
-                indicatorColor: Colors.pink,
-                indicatorWeight: 2,
-                tabs: [
-                  Tab(text: 'event.basketball.detail.overview'.tr()),
-                  Tab(text: 'event.basketball.detail.players'.tr()),
-                ],
-              ),
-            ),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _BasketballMatchBody(matchId: widget.matchId),
-                  _SquadTab(matchId: widget.matchId),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  @override
+  List<Widget> buildTabViews(BuildContext context) => [
+    _BasketballMatchBody(matchId: matchId),
+    _SquadTab(matchId: matchId),
+  ];
 }
 
 // ─── Match Header ─────────────────────────────────────────────────────────────
@@ -122,8 +80,9 @@ class _BasketballMatchHeader extends ConsumerWidget {
         ref.watch(basketballMatchDetailProvider(matchId: matchId));
     final eventsAsync =
         ref.watch(basketballMatchEventsKeyProvider(matchId: matchId));
-    final rt =
-        ref.watch(basketballRealtimeProvider.select((map) => map[matchId]));
+    final rt = ref.watch(
+      sportRealtimeProvider(SportType.basketball).select((map) => map[matchId] as BasketballRealtimeData?),
+    );
 
     return Container(
       width: double.maxFinite,

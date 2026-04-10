@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
+import 'package:sports_app/src/features/event/domain/models/sport_realtime_data.dart';
 
 @immutable
-class TennisRealtimeData {
+class TennisRealtimeData implements SportRealtimeData {
   const TennisRealtimeData({
     required this.id,
     required this.statusId,

@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/baseball_status.dart';
 import 'package:sports_app/src/features/event/domain/models/baseball_match.dart';
+import 'package:sports_app/src/features/event/domain/models/baseball_realtime_data.dart';
+import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
@@ -16,7 +18,9 @@ class BaseballMatchCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final rt = ref.watch(baseballRealtimeProvider.select((map) => map[match.id]));
+    final rt = ref.watch(
+      sportRealtimeProvider(SportType.baseball).select((map) => map[match.id] as BaseballRealtimeData?),
+    );
 
     final effective = rt == null
         ? match

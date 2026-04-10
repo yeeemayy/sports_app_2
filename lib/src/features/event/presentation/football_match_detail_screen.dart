@@ -1,16 +1,16 @@
-import 'dart:async';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/football_lineup.dart';
+import 'package:sports_app/src/features/event/domain/models/match_realtime_data.dart';
+import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match_events.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/football_match_card.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/match_detail_appbar.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
@@ -23,86 +23,51 @@ class FootballMatchDetailScreen extends ConsumerStatefulWidget {
   ConsumerState<FootballMatchDetailScreen> createState() => _FootballMatchDetailScreenState();
 }
 
-class _FootballMatchDetailScreenState extends ConsumerState<FootballMatchDetailScreen> {
-  Timer? _eventsTimer;
+class _FootballMatchDetailScreenState
+    extends SportDetailScaffoldState<FootballMatchDetailScreen> {
+  @override
+  String get matchId => widget.matchId;
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      ref.read(footballRealtimeProvider.notifier).setWatchedIds(
-        'detail:${widget.matchId}',
-        [widget.matchId],
-      );
-    });
-    _eventsTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!mounted) return;
-      ref.invalidate(footballMatchEventsKeyProvider(matchId: widget.matchId));
-    });
+  SportType get sportType => SportType.football;
+
+  @override
+  Duration get eventsRefreshInterval => const Duration(seconds: 1);
+
+  @override
+  void onEventsTimerTick() =>
+      ref.invalidate(footballMatchEventsKeyProvider(matchId: matchId));
+
+  @override
+  void onStatusChanged() {
+    ref.invalidate(footballMatchDetailProvider(matchId: matchId));
+    ref.invalidate(footballMatchEventsKeyProvider(matchId: matchId));
+    ref.invalidate(footballMatchLineupsProvider(matchId: matchId));
   }
 
   @override
-  void dispose() {
-    _eventsTimer?.cancel();
-    ref.read(footballRealtimeProvider.notifier).clearSource('detail:${widget.matchId}');
-    super.dispose();
+  (String?, int?) watchDetail() {
+    final v =
+        ref.watch(footballMatchDetailProvider(matchId: matchId)).valueOrNull;
+    return (v?.leagueName, v?.matchTime);
   }
 
   @override
-  Widget build(BuildContext context) {
-    final detailAsync = ref.watch(footballMatchDetailProvider(matchId: widget.matchId));
+  Widget buildHeader(BuildContext context) => _MatchHeader(matchId: matchId);
 
-    ref.listen(
-      footballRealtimeProvider.select((map) => map[widget.matchId]?.statusId),
-      (prev, next) {
-        if (prev == null || next == null || prev == next) return;
-        ref.invalidate(footballMatchDetailProvider(matchId: widget.matchId));
-        ref.invalidate(footballMatchEventsKeyProvider(matchId: widget.matchId));
-        ref.invalidate(footballMatchLineupsProvider(matchId: widget.matchId));
-      },
-    );
+  @override
+  List<Tab> buildTabs(BuildContext context) => [
+    Tab(text: 'event.football.detail.stats'.tr()),
+    Tab(text: 'event.football.detail.events'.tr()),
+    Tab(text: 'event.football.detail.lineups'.tr()),
+  ];
 
-    final title = detailAsync.valueOrNull?.leagueName ?? '';
-
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: MatchDetailAppBar(
-          leagueName: title,
-          matchTimestamp: detailAsync.valueOrNull?.matchTime,
-        ),
-        body: Column(
-          children: [
-            _MatchHeader(matchId: widget.matchId),
-            Container(
-              color: Colors.white,
-              child: TabBar(
-                labelColor: Colors.pink,
-                unselectedLabelColor: Colors.grey.shade600,
-                indicatorColor: Colors.pink,
-                indicatorWeight: 2,
-                tabs: [
-                  Tab(text: 'event.football.detail.stats'.tr()),
-                  Tab(text: 'event.football.detail.events'.tr()),
-                  Tab(text: 'event.football.detail.lineups'.tr()),
-                ],
-              ),
-            ),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _StatsTab(matchId: widget.matchId),
-                  _EventsTab(matchId: widget.matchId),
-                  _LineupsTab(matchId: widget.matchId),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  @override
+  List<Widget> buildTabViews(BuildContext context) => [
+    _StatsTab(matchId: matchId),
+    _EventsTab(matchId: matchId),
+    _LineupsTab(matchId: matchId),
+  ];
 }
 
 // ─── Match Header ────────────────────────────────────────────────────────────
@@ -116,7 +81,9 @@ class _MatchHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final detailAsync = ref.watch(footballMatchDetailProvider(matchId: matchId));
     final eventsAsync = ref.watch(footballMatchEventsKeyProvider(matchId: matchId));
-    final rt = ref.watch(footballRealtimeProvider.select((map) => map[matchId]));
+    final rt = ref.watch(
+      sportRealtimeProvider(SportType.football).select((map) => map[matchId] as MatchRealtimeData?),
+    );
 
     return Container(
       width: double.maxFinite,

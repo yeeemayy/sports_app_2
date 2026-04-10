@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
+import 'package:sports_app/src/features/event/domain/sport_config.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/event_match_card.dart';
@@ -121,41 +122,13 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
   }
 
   void _setRealtimeWatchedIds(List<String> ids) {
-    switch (widget.sport) {
-      case SportType.football:
-        ref.read(footballRealtimeProvider.notifier).setWatchedIds('list', ids);
-      case SportType.basketball:
-        ref.read(basketballRealtimeProvider.notifier).setWatchedIds('list', ids);
-      case SportType.tennis:
-        ref.read(tennisRealtimeProvider.notifier).setWatchedIds('list', ids);
-      case SportType.badminton:
-        ref.read(badmintonRealtimeProvider.notifier).setWatchedIds('list', ids);
-      case SportType.tableTennis:
-        ref.read(tableTennisRealtimeProvider.notifier).setWatchedIds('list', ids);
-      case SportType.baseball:
-        ref.read(baseballRealtimeProvider.notifier).setWatchedIds('list', ids);
-      default:
-        break;
-    }
+    if (widget.sport.config.parseRealtime == null) return;
+    ref.read(sportRealtimeProvider(widget.sport).notifier).setWatchedIds('list', ids);
   }
 
   void _clearRealtimeSource() {
-    switch (widget.sport) {
-      case SportType.football:
-        ref.read(footballRealtimeProvider.notifier).clearSource('list');
-      case SportType.basketball:
-        ref.read(basketballRealtimeProvider.notifier).clearSource('list');
-      case SportType.tennis:
-        ref.read(tennisRealtimeProvider.notifier).clearSource('list');
-      case SportType.badminton:
-        ref.read(badmintonRealtimeProvider.notifier).clearSource('list');
-      case SportType.tableTennis:
-        ref.read(tableTennisRealtimeProvider.notifier).clearSource('list');
-      case SportType.baseball:
-        ref.read(baseballRealtimeProvider.notifier).clearSource('list');
-      default:
-        break;
-    }
+    if (widget.sport.config.parseRealtime == null) return;
+    ref.read(sportRealtimeProvider(widget.sport).notifier).clearSource('list');
   }
 
   void _reRegisterRealtimeIds() {
@@ -245,57 +218,14 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
               .whenData((list) => PaginatedMatchResult(matches: list, currentPage: 1, totalPage: 1))
         : ref.watch(_paginatedProvider);
 
-    switch (widget.sport) {
-      case SportType.football:
-        ref.listen(footballRealtimeProvider, (prev, curr) {
-          _onRealtimeUpdate(
-            matchesAsync,
-            prev?.map((k, v) => MapEntry(k, v.statusId)) ?? {},
-            curr.map((k, v) => MapEntry(k, v.statusId)),
-          );
-        });
-      case SportType.basketball:
-        ref.listen(basketballRealtimeProvider, (prev, curr) {
-          _onRealtimeUpdate(
-            matchesAsync,
-            prev?.map((k, v) => MapEntry(k, v.statusId)) ?? {},
-            curr.map((k, v) => MapEntry(k, v.statusId)),
-          );
-        });
-      case SportType.tennis:
-        ref.listen(tennisRealtimeProvider, (prev, curr) {
-          _onRealtimeUpdate(
-            matchesAsync,
-            prev?.map((k, v) => MapEntry(k, v.statusId)) ?? {},
-            curr.map((k, v) => MapEntry(k, v.statusId)),
-          );
-        });
-      case SportType.badminton:
-        ref.listen(badmintonRealtimeProvider, (prev, curr) {
-          _onRealtimeUpdate(
-            matchesAsync,
-            prev?.map((k, v) => MapEntry(k, v.statusId)) ?? {},
-            curr.map((k, v) => MapEntry(k, v.statusId)),
-          );
-        });
-      case SportType.tableTennis:
-        ref.listen(tableTennisRealtimeProvider, (prev, curr) {
-          _onRealtimeUpdate(
-            matchesAsync,
-            prev?.map((k, v) => MapEntry(k, v.statusId)) ?? {},
-            curr.map((k, v) => MapEntry(k, v.statusId)),
-          );
-        });
-      case SportType.baseball:
-        ref.listen(baseballRealtimeProvider, (prev, curr) {
-          _onRealtimeUpdate(
-            matchesAsync,
-            prev?.map((k, v) => MapEntry(k, v.statusId)) ?? {},
-            curr.map((k, v) => MapEntry(k, v.statusId)),
-          );
-        });
-      default:
-        break;
+    if (widget.sport.config.parseRealtime != null) {
+      ref.listen(sportRealtimeProvider(widget.sport), (prev, curr) {
+        _onRealtimeUpdate(
+          matchesAsync,
+          prev?.map((k, v) => MapEntry(k, v.statusId)) ?? {},
+          curr.map((k, v) => MapEntry(k, v.statusId)),
+        );
+      });
     }
 
     return Column(
@@ -353,7 +283,7 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
               data: (result) {
                 if (_isActiveTab) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (!mounted) return;
+                    if (!mounted || !_isActiveTab) return;
                     _setRealtimeWatchedIds(result.matches.map((m) => m.id).toList());
                   });
                 }

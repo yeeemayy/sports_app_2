@@ -111,7 +111,9 @@ Future<FootballMatchDetail> footballMatchDetail(
   FootballMatchDetailRef ref, {
   required String matchId,
 }) {
-  return ref.watch(eventRepositoryProvider.notifier).getFootballMatchDetail(matchId);
+  return ref.watch(eventRepositoryProvider.notifier)
+      .getMatchDetail(SportType.football, matchId)
+      .then((r) => r as FootballMatchDetail);
 }
 
 @riverpod
@@ -127,7 +129,9 @@ Future<FootballMatchEvents?> footballMatchEventsKey(
   FootballMatchEventsKeyRef ref, {
   required String matchId,
 }) {
-  return ref.watch(eventRepositoryProvider.notifier).getFootballMatchEventsKey(matchId);
+  return ref.watch(eventRepositoryProvider.notifier)
+      .getMatchEvents(SportType.football, matchId)
+      .then((r) => r as FootballMatchEvents?);
 }
 
 @riverpod
@@ -135,7 +139,9 @@ Future<BasketballMatchDetail> basketballMatchDetail(
   BasketballMatchDetailRef ref, {
   required String matchId,
 }) {
-  return ref.watch(eventRepositoryProvider.notifier).getBasketballMatchDetail(matchId);
+  return ref.watch(eventRepositoryProvider.notifier)
+      .getMatchDetail(SportType.basketball, matchId)
+      .then((r) => r as BasketballMatchDetail);
 }
 
 @riverpod
@@ -143,7 +149,9 @@ Future<BasketballMatchEventsData?> basketballMatchEventsKey(
   BasketballMatchEventsKeyRef ref, {
   required String matchId,
 }) {
-  return ref.watch(eventRepositoryProvider.notifier).getBasketballMatchEventsKey(matchId);
+  return ref.watch(eventRepositoryProvider.notifier)
+      .getMatchEvents(SportType.basketball, matchId)
+      .then((r) => r as BasketballMatchEventsData?);
 }
 
 @riverpod
@@ -159,7 +167,9 @@ Future<TennisMatchDetail> tennisMatchDetail(
   TennisMatchDetailRef ref, {
   required String matchId,
 }) {
-  return ref.watch(eventRepositoryProvider.notifier).getTennisMatchDetail(matchId);
+  return ref.watch(eventRepositoryProvider.notifier)
+      .getMatchDetail(SportType.tennis, matchId)
+      .then((r) => r as TennisMatchDetail);
 }
 
 @riverpod
@@ -167,7 +177,9 @@ Future<TennisMatchEventsData?> tennisMatchEvents(
   TennisMatchEventsRef ref, {
   required String matchId,
 }) {
-  return ref.watch(eventRepositoryProvider.notifier).getTennisMatchEvents(matchId);
+  return ref.watch(eventRepositoryProvider.notifier)
+      .getMatchEvents(SportType.tennis, matchId)
+      .then((r) => r as TennisMatchEventsData?);
 }
 
 @riverpod
@@ -175,7 +187,9 @@ Future<BadmintonMatchDetail> badmintonMatchDetail(
   BadmintonMatchDetailRef ref, {
   required String matchId,
 }) {
-  return ref.watch(eventRepositoryProvider.notifier).getBadmintonMatchDetail(matchId);
+  return ref.watch(eventRepositoryProvider.notifier)
+      .getMatchDetail(SportType.badminton, matchId)
+      .then((r) => r as BadmintonMatchDetail);
 }
 
 @riverpod
@@ -183,7 +197,9 @@ Future<BadmintonMatchEventsData?> badmintonMatchEvents(
   BadmintonMatchEventsRef ref, {
   required String matchId,
 }) {
-  return ref.watch(eventRepositoryProvider.notifier).getBadmintonMatchEvents(matchId);
+  return ref.watch(eventRepositoryProvider.notifier)
+      .getMatchEvents(SportType.badminton, matchId)
+      .then((r) => r as BadmintonMatchEventsData?);
 }
 
 @riverpod
@@ -191,7 +207,9 @@ Future<TableTennisMatchDetail> tableTennisMatchDetail(
   TableTennisMatchDetailRef ref, {
   required String matchId,
 }) {
-  return ref.watch(eventRepositoryProvider.notifier).getTableTennisMatchDetail(matchId);
+  return ref.watch(eventRepositoryProvider.notifier)
+      .getMatchDetail(SportType.tableTennis, matchId)
+      .then((r) => r as TableTennisMatchDetail);
 }
 
 @riverpod
@@ -199,7 +217,9 @@ Future<TableTennisMatchEventsData?> tableTennisMatchEvents(
   TableTennisMatchEventsRef ref, {
   required String matchId,
 }) {
-  return ref.watch(eventRepositoryProvider.notifier).getTableTennisMatchEvents(matchId);
+  return ref.watch(eventRepositoryProvider.notifier)
+      .getMatchEvents(SportType.tableTennis, matchId)
+      .then((r) => r as TableTennisMatchEventsData?);
 }
 
 @riverpod
@@ -207,7 +227,9 @@ Future<BaseballMatchDetail> baseballMatchDetail(
   BaseballMatchDetailRef ref, {
   required String matchId,
 }) {
-  return ref.watch(eventRepositoryProvider.notifier).getBaseballMatchDetail(matchId);
+  return ref.watch(eventRepositoryProvider.notifier)
+      .getMatchDetail(SportType.baseball, matchId)
+      .then((r) => r as BaseballMatchDetail);
 }
 
 @riverpod
@@ -215,5 +237,7 @@ Future<BaseballMatchEventsData?> baseballMatchEvents(
   BaseballMatchEventsRef ref, {
   required String matchId,
 }) {
-  return ref.watch(eventRepositoryProvider.notifier).getBaseballMatchEvents(matchId);
+  return ref.watch(eventRepositoryProvider.notifier)
+      .getMatchEvents(SportType.baseball, matchId)
+      .then((r) => r as BaseballMatchEventsData?);
 }

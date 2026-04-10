@@ -1,16 +1,15 @@
-import 'dart:async';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
+import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/domain/models/tennis_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/tennis_match_events.dart';
 import 'package:sports_app/src/features/event/domain/models/tennis_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/tennis_status.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/match_detail_appbar.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
 class TennisMatchDetailScreen extends ConsumerStatefulWidget {
@@ -22,81 +21,51 @@ class TennisMatchDetailScreen extends ConsumerStatefulWidget {
   ConsumerState<TennisMatchDetailScreen> createState() => _TennisMatchDetailScreenState();
 }
 
-class _TennisMatchDetailScreenState extends ConsumerState<TennisMatchDetailScreen> {
-  Timer? _eventsTimer;
+class _TennisMatchDetailScreenState
+    extends SportDetailScaffoldState<TennisMatchDetailScreen> {
+  @override
+  String get matchId => widget.matchId;
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      ref.read(tennisRealtimeProvider.notifier).setWatchedIds('detail:${widget.matchId}', [
-        widget.matchId,
-      ]);
-    });
-    _eventsTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      if (!mounted) return;
-      ref.invalidate(tennisMatchEventsProvider(matchId: widget.matchId));
-    });
+  SportType get sportType => SportType.tennis;
+
+  @override
+  Duration get eventsRefreshInterval => const Duration(seconds: 5);
+
+  @override
+  void onEventsTimerTick() =>
+      ref.invalidate(tennisMatchEventsProvider(matchId: matchId));
+
+  @override
+  void onStatusChanged() {
+    ref.invalidate(tennisMatchDetailProvider(matchId: matchId));
+    ref.invalidate(tennisMatchEventsProvider(matchId: matchId));
   }
 
   @override
-  void dispose() {
-    _eventsTimer?.cancel();
-    ref.read(tennisRealtimeProvider.notifier).clearSource('detail:${widget.matchId}');
-    super.dispose();
+  (String?, int?) watchDetail() {
+    final v =
+        ref.watch(tennisMatchDetailProvider(matchId: matchId)).valueOrNull;
+    return (v?.leagueName, v?.matchTime);
   }
 
   @override
-  Widget build(BuildContext context) {
-    final detailAsync = ref.watch(tennisMatchDetailProvider(matchId: widget.matchId));
+  Widget buildHeader(BuildContext context) =>
+      _TennisMatchHeader(matchId: matchId);
 
-    ref.listen(tennisRealtimeProvider.select((map) => map[widget.matchId]?.statusId), (prev, next) {
-      if (prev == null || next == null || prev == next) return;
-      ref.invalidate(tennisMatchDetailProvider(matchId: widget.matchId));
-      ref.invalidate(tennisMatchEventsProvider(matchId: widget.matchId));
-    });
+  @override
+  List<Tab> buildTabs(BuildContext context) => [
+    Tab(text: 'event.tennis.detail.score'.tr()),
+    Tab(text: 'event.tennis.detail.stats'.tr()),
+    Tab(text: 'event.tennis.detail.situation'.tr()),
+  ];
 
-    final title = detailAsync.valueOrNull?.leagueName ?? '';
-
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: MatchDetailAppBar(
-          leagueName: title,
-          matchTimestamp: detailAsync.valueOrNull?.matchTime,
-        ),
-        body: Column(
-          children: [
-            _TennisMatchHeader(matchId: widget.matchId),
-            Container(
-              color: Colors.white,
-              child: TabBar(
-                labelColor: Colors.pink,
-                unselectedLabelColor: Colors.grey.shade600,
-                indicatorColor: Colors.pink,
-                indicatorWeight: 2,
-                tabs: [
-                  Tab(text: 'event.tennis.detail.score'.tr()),
-                  Tab(text: 'event.tennis.detail.stats'.tr()),
-                  Tab(text: 'event.tennis.detail.situation'.tr()),
-                ],
-              ),
-            ),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _ScoreTab(matchId: widget.matchId),
-                  _StatsTab(matchId: widget.matchId),
-                  _SituationTab(matchId: widget.matchId),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  @override
+  List<Widget> buildTabViews(BuildContext context) => [
+    _ScoreTab(matchId: matchId),
+    _StatsTab(matchId: matchId),
+    _SituationTab(matchId: matchId),
+  ];
 }
 
 // ─── Header ───────────────────────────────────────────────────────────────────
@@ -110,7 +79,9 @@ class _TennisMatchHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final detailAsync = ref.watch(tennisMatchDetailProvider(matchId: matchId));
     final eventsAsync = ref.watch(tennisMatchEventsProvider(matchId: matchId));
-    final rt = ref.watch(tennisRealtimeProvider.select((map) => map[matchId]));
+    final rt = ref.watch(
+      sportRealtimeProvider(SportType.tennis).select((map) => map[matchId] as TennisRealtimeData?),
+    );
 
     return Container(
       width: double.maxFinite,
@@ -388,7 +359,9 @@ class _ScoreTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final detailAsync = ref.watch(tennisMatchDetailProvider(matchId: matchId));
     final eventsAsync = ref.watch(tennisMatchEventsProvider(matchId: matchId));
-    final rt = ref.watch(tennisRealtimeProvider.select((map) => map[matchId]));
+    final rt = ref.watch(
+      sportRealtimeProvider(SportType.tennis).select((map) => map[matchId] as TennisRealtimeData?),
+    );
 
     return detailAsync.when(
       loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),

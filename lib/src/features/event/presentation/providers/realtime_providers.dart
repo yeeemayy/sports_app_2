@@ -2,12 +2,9 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sports_app/src/features/event/data/event_repository.dart';
-import 'package:sports_app/src/features/event/domain/models/badminton_realtime_data.dart';
-import 'package:sports_app/src/features/event/domain/models/baseball_realtime_data.dart';
-import 'package:sports_app/src/features/event/domain/models/basketball_realtime_data.dart';
-import 'package:sports_app/src/features/event/domain/models/match_realtime_data.dart';
-import 'package:sports_app/src/features/event/domain/models/table_tennis_realtime_data.dart';
-import 'package:sports_app/src/features/event/domain/models/tennis_realtime_data.dart';
+import 'package:sports_app/src/features/event/domain/models/sport_realtime_data.dart';
+import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
+import 'package:sports_app/src/features/event/domain/sport_config.dart';
 
 part 'realtime_providers.g.dart';
 
@@ -16,7 +13,9 @@ part 'realtime_providers.g.dart';
 /// Consumers call [setWatchedIds] with a named source and a list of IDs to
 /// watch. Call [clearSource] to stop polling for those IDs. The timer is
 /// restarted whenever the union of all watched IDs changes.
-mixin RealtimePollMixin<T> on AutoDisposeNotifier<Map<String, T>> {
+// ignore: invalid_use_of_internal_member
+mixin RealtimePollMixin<T extends SportRealtimeData>
+    on BuildlessAutoDisposeNotifier<Map<String, T>> {
   Timer? _pollTimer;
   final Map<String, Set<String>> _sources = {};
 
@@ -24,9 +23,6 @@ mixin RealtimePollMixin<T> on AutoDisposeNotifier<Map<String, T>> {
 
   /// How often to poll the realtime endpoint.
   Duration get pollInterval;
-
-  /// Returns the unique match ID for a realtime data item.
-  String idOf(T item);
 
   /// Fetches a fresh snapshot from the repository.
   Future<List<T>> fetchData();
@@ -62,104 +58,31 @@ mixin RealtimePollMixin<T> on AutoDisposeNotifier<Map<String, T>> {
     if (_allIds.isEmpty) return;
     try {
       final data = await fetchData();
-      state = {for (final d in data) idOf(d): d};
+      state = {for (final d in data) d.id: d};
     } catch (_) {}
   }
 }
 
+/// Generic realtime provider family keyed by [SportType].
+///
+/// Replaces the 6 sport-specific notifier classes. Stores typed
+/// [SportRealtimeData] values; consumers cast to the expected sport type:
+///
+/// ```dart
+/// final rt = ref.watch(
+///   sportRealtimeProvider(SportType.basketball)
+///     .select((map) => map[matchId] as BasketballRealtimeData?),
+/// );
+/// ```
 @riverpod
-class FootballRealtime extends _$FootballRealtime with RealtimePollMixin<MatchRealtimeData> {
+class SportRealtime extends _$SportRealtime with RealtimePollMixin<SportRealtimeData> {
   @override
-  Duration get pollInterval => const Duration(seconds: 1);
+  Duration get pollInterval => arg.config.pollInterval;
 
   @override
-  String idOf(MatchRealtimeData item) => item.id;
+  Future<List<SportRealtimeData>> fetchData() =>
+      ref.read(eventRepositoryProvider.notifier).getTypedRealtime(arg);
 
   @override
-  Future<List<MatchRealtimeData>> fetchData() =>
-      ref.read(eventRepositoryProvider.notifier).getRealtimeMatches();
-
-  @override
-  Map<String, MatchRealtimeData> build() => initRealtime();
-}
-
-@riverpod
-class BasketballRealtime extends _$BasketballRealtime with RealtimePollMixin<BasketballRealtimeData> {
-  @override
-  Duration get pollInterval => const Duration(seconds: 2);
-
-  @override
-  String idOf(BasketballRealtimeData item) => item.id;
-
-  @override
-  Future<List<BasketballRealtimeData>> fetchData() =>
-      ref.read(eventRepositoryProvider.notifier).getBasketballRealtimeMatches();
-
-  @override
-  Map<String, BasketballRealtimeData> build() => initRealtime();
-}
-
-@riverpod
-class TennisRealtime extends _$TennisRealtime with RealtimePollMixin<TennisRealtimeData> {
-  @override
-  Duration get pollInterval => const Duration(seconds: 2);
-
-  @override
-  String idOf(TennisRealtimeData item) => item.id;
-
-  @override
-  Future<List<TennisRealtimeData>> fetchData() =>
-      ref.read(eventRepositoryProvider.notifier).getTennisRealtimeMatches();
-
-  @override
-  Map<String, TennisRealtimeData> build() => initRealtime();
-}
-
-@riverpod
-class BadmintonRealtime extends _$BadmintonRealtime with RealtimePollMixin<BadmintonRealtimeData> {
-  @override
-  Duration get pollInterval => const Duration(seconds: 2);
-
-  @override
-  String idOf(BadmintonRealtimeData item) => item.id;
-
-  @override
-  Future<List<BadmintonRealtimeData>> fetchData() =>
-      ref.read(eventRepositoryProvider.notifier).getBadmintonRealtimeMatches();
-
-  @override
-  Map<String, BadmintonRealtimeData> build() => initRealtime();
-}
-
-@riverpod
-class BaseballRealtime extends _$BaseballRealtime with RealtimePollMixin<BaseballRealtimeData> {
-  @override
-  Duration get pollInterval => const Duration(seconds: 5);
-
-  @override
-  String idOf(BaseballRealtimeData item) => item.id;
-
-  @override
-  Future<List<BaseballRealtimeData>> fetchData() =>
-      ref.read(eventRepositoryProvider.notifier).getBaseballRealtimeMatches();
-
-  @override
-  Map<String, BaseballRealtimeData> build() => initRealtime();
-}
-
-@riverpod
-class TableTennisRealtime extends _$TableTennisRealtime
-    with RealtimePollMixin<TableTennisRealtimeData> {
-  @override
-  Duration get pollInterval => const Duration(seconds: 2);
-
-  @override
-  String idOf(TableTennisRealtimeData item) => item.id;
-
-  @override
-  Future<List<TableTennisRealtimeData>> fetchData() =>
-      ref.read(eventRepositoryProvider.notifier).getTableTennisRealtimeMatches();
-
-  @override
-  Map<String, TableTennisRealtimeData> build() => initRealtime();
+  Map<String, SportRealtimeData> build(SportType arg) => initRealtime();
 }

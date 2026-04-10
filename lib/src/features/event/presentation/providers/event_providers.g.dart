@@ -156,7 +156,7 @@ class _FootballScheduledMatchesProviderElement
 }
 
 String _$footballMatchDetailHash() =>
-    r'fee2367404281b3d8df79162ae92234fcf3516ed';
+    r'20ff62566f2f55da0b4f2259da9821b1df92cc81';
 
 /// See also [footballMatchDetail].
 @ProviderFor(footballMatchDetail)
@@ -411,7 +411,7 @@ class _FootballMatchLineupsProviderElement
 }
 
 String _$footballMatchEventsKeyHash() =>
-    r'f2b3f372887348b817427adc8edd8c2b3babd5a5';
+    r'821655abb2ccba54ebfbc4fc27c8cc814fa68f63';
 
 /// See also [footballMatchEventsKey].
 @ProviderFor(footballMatchEventsKey)
@@ -539,7 +539,7 @@ class _FootballMatchEventsKeyProviderElement
 }
 
 String _$basketballMatchDetailHash() =>
-    r'6963f7a2a3cc2f4dc39f7e156cdebd43046be78d';
+    r'b37d1c92223cf2209638cedd22ad3d9f5dd40b4b';
 
 /// See also [basketballMatchDetail].
 @ProviderFor(basketballMatchDetail)
@@ -667,7 +667,7 @@ class _BasketballMatchDetailProviderElement
 }
 
 String _$basketballMatchEventsKeyHash() =>
-    r'600a715e3c02ea5ecb6e40feac30b9db7ab81de0';
+    r'448f31c8765412528aa6ec69a642a2d91fbf51a1';
 
 /// See also [basketballMatchEventsKey].
 @ProviderFor(basketballMatchEventsKey)
@@ -923,7 +923,7 @@ class _BasketballTeamSquadProviderElement
   String get teamId => (origin as BasketballTeamSquadProvider).teamId;
 }
 
-String _$tennisMatchDetailHash() => r'8566cef58ebb500ccd4d6ad32cfb01c67fb2bd08';
+String _$tennisMatchDetailHash() => r'553cabbc813233d57eb16cb6e36a4f2869ff27df';
 
 /// See also [tennisMatchDetail].
 @ProviderFor(tennisMatchDetail)
@@ -1045,7 +1045,7 @@ class _TennisMatchDetailProviderElement
   String get matchId => (origin as TennisMatchDetailProvider).matchId;
 }
 
-String _$tennisMatchEventsHash() => r'c0c1b186fbd5667e29241f33caad585f53262e91';
+String _$tennisMatchEventsHash() => r'c39b83fbfc5b92dcce7faf9b77c59a13ace17b22';
 
 /// See also [tennisMatchEvents].
 @ProviderFor(tennisMatchEvents)
@@ -1171,7 +1171,7 @@ class _TennisMatchEventsProviderElement
 }
 
 String _$badmintonMatchDetailHash() =>
-    r'88f9f596edf2f83eca2ec5f7aeaa349fceaa333b';
+    r'43f2280cdb4d199b0c8fae795261e65e4cdb3bd3';
 
 /// See also [badmintonMatchDetail].
 @ProviderFor(badmintonMatchDetail)
@@ -1299,7 +1299,7 @@ class _BadmintonMatchDetailProviderElement
 }
 
 String _$badmintonMatchEventsHash() =>
-    r'4bd8fe93f9c21e5dbc9fdf493b4b0c4112cbf88e';
+    r'ec52dc735be43d3ffc8e4d9d0c71800cd47cceab';
 
 /// See also [badmintonMatchEvents].
 @ProviderFor(badmintonMatchEvents)
@@ -1429,7 +1429,7 @@ class _BadmintonMatchEventsProviderElement
 }
 
 String _$tableTennisMatchDetailHash() =>
-    r'fb6c9f449082f6b4cf878826fea11843baf7a835';
+    r'835e53e4a0bff10928cb1b0992169aff64127bad';
 
 /// See also [tableTennisMatchDetail].
 @ProviderFor(tableTennisMatchDetail)
@@ -1559,7 +1559,7 @@ class _TableTennisMatchDetailProviderElement
 }
 
 String _$tableTennisMatchEventsHash() =>
-    r'26fa994071c422a3869033baa6ea364ef9bed0cc';
+    r'd63d59d76c9ae3a750c9cd5070b8350e83dd90d6';
 
 /// See also [tableTennisMatchEvents].
 @ProviderFor(tableTennisMatchEvents)
@@ -1690,7 +1690,7 @@ class _TableTennisMatchEventsProviderElement
 }
 
 String _$baseballMatchDetailHash() =>
-    r'cb2b189a284200ecffe8764e5cc2da8c2c463ed0';
+    r'df2532bfdeeb57092b14999d69753b5261f2bacd';
 
 /// See also [baseballMatchDetail].
 @ProviderFor(baseballMatchDetail)
@@ -1818,7 +1818,7 @@ class _BaseballMatchDetailProviderElement
 }
 
 String _$baseballMatchEventsHash() =>
-    r'b4cee31ac5162cfd40dd0ef44b2aaf72a7922d11';
+    r'5d204e27bf344742e509f7a63c165fc62cdfb678';
 
 /// See also [baseballMatchEvents].
 @ProviderFor(baseballMatchEvents)

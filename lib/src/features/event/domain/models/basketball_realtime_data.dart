@@ -1,4 +1,6 @@
-class BasketballRealtimeData {
+import 'package:sports_app/src/features/event/domain/models/sport_realtime_data.dart';
+
+class BasketballRealtimeData implements SportRealtimeData {
   const BasketballRealtimeData({
     required this.id,
     required this.statusId,

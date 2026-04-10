@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/badminton_status.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_match.dart';
+import 'package:sports_app/src/features/event/domain/models/badminton_realtime_data.dart';
+import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
@@ -40,7 +42,9 @@ class BadmintonMatchCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final rt = ref.watch(badmintonRealtimeProvider.select((map) => map[match.id]));
+    final rt = ref.watch(
+      sportRealtimeProvider(SportType.badminton).select((map) => map[match.id] as BadmintonRealtimeData?),
+    );
 
     final effectiveStatusId = rt?.statusId ?? match.statusId;
     final effectiveHomeSets = rt?.homeSets ?? _homeSets(match);

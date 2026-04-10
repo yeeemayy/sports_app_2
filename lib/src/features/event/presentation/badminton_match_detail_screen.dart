@@ -1,16 +1,15 @@
-import 'dart:async';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/badminton_status.dart';
+import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_match_events.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_realtime_data.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/match_detail_appbar.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
 class BadmintonMatchDetailScreen extends ConsumerStatefulWidget {
@@ -22,82 +21,49 @@ class BadmintonMatchDetailScreen extends ConsumerStatefulWidget {
   ConsumerState<BadmintonMatchDetailScreen> createState() => _BadmintonMatchDetailScreenState();
 }
 
-class _BadmintonMatchDetailScreenState extends ConsumerState<BadmintonMatchDetailScreen> {
-  Timer? _eventsTimer;
+class _BadmintonMatchDetailScreenState
+    extends SportDetailScaffoldState<BadmintonMatchDetailScreen> {
+  @override
+  String get matchId => widget.matchId;
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      ref.read(badmintonRealtimeProvider.notifier).setWatchedIds('detail:${widget.matchId}', [
-        widget.matchId,
-      ]);
-    });
-    _eventsTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      if (!mounted) return;
-      ref.invalidate(badmintonMatchEventsProvider(matchId: widget.matchId));
-    });
+  SportType get sportType => SportType.badminton;
+
+  @override
+  Duration get eventsRefreshInterval => const Duration(seconds: 5);
+
+  @override
+  void onEventsTimerTick() =>
+      ref.invalidate(badmintonMatchEventsProvider(matchId: matchId));
+
+  @override
+  void onStatusChanged() {
+    ref.invalidate(badmintonMatchDetailProvider(matchId: matchId));
+    ref.invalidate(badmintonMatchEventsProvider(matchId: matchId));
   }
 
   @override
-  void dispose() {
-    _eventsTimer?.cancel();
-    ref.read(badmintonRealtimeProvider.notifier).clearSource('detail:${widget.matchId}');
-    super.dispose();
+  (String?, int?) watchDetail() {
+    final v =
+        ref.watch(badmintonMatchDetailProvider(matchId: matchId)).valueOrNull;
+    return (v?.leagueName, v?.matchTime);
   }
 
   @override
-  Widget build(BuildContext context) {
-    final detailAsync = ref.watch(badmintonMatchDetailProvider(matchId: widget.matchId));
+  Widget buildHeader(BuildContext context) =>
+      _BadmintonMatchHeader(matchId: matchId);
 
-    ref.listen(badmintonRealtimeProvider.select((map) => map[widget.matchId]?.statusId), (
-      prev,
-      next,
-    ) {
-      if (prev == null || next == null || prev == next) return;
-      ref.invalidate(badmintonMatchDetailProvider(matchId: widget.matchId));
-      ref.invalidate(badmintonMatchEventsProvider(matchId: widget.matchId));
-    });
+  @override
+  List<Tab> buildTabs(BuildContext context) => [
+    Tab(text: 'event.badminton.detail.score'.tr()),
+    Tab(text: 'event.badminton.detail.stats'.tr()),
+  ];
 
-    final title = detailAsync.valueOrNull?.leagueName ?? '';
-
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: MatchDetailAppBar(
-          leagueName: title,
-          matchTimestamp: detailAsync.valueOrNull?.matchTime,
-        ),
-        body: Column(
-          children: [
-            _BadmintonMatchHeader(matchId: widget.matchId),
-            Container(
-              color: Colors.white,
-              child: TabBar(
-                labelColor: Colors.pink,
-                unselectedLabelColor: Colors.grey.shade600,
-                indicatorColor: Colors.pink,
-                indicatorWeight: 2,
-                tabs: [
-                  Tab(text: 'event.badminton.detail.score'.tr()),
-                  Tab(text: 'event.badminton.detail.stats'.tr()),
-                ],
-              ),
-            ),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _ScoreTab(matchId: widget.matchId),
-                  _StatsTab(matchId: widget.matchId),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  @override
+  List<Widget> buildTabViews(BuildContext context) => [
+    _ScoreTab(matchId: matchId),
+    _StatsTab(matchId: matchId),
+  ];
 }
 
 // ─── Header ───────────────────────────────────────────────────────────────────
@@ -111,7 +77,9 @@ class _BadmintonMatchHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final detailAsync = ref.watch(badmintonMatchDetailProvider(matchId: matchId));
     final eventsAsync = ref.watch(badmintonMatchEventsProvider(matchId: matchId));
-    final rt = ref.watch(badmintonRealtimeProvider.select((map) => map[matchId]));
+    final rt = ref.watch(
+      sportRealtimeProvider(SportType.badminton).select((map) => map[matchId] as BadmintonRealtimeData?),
+    );
 
     return Container(
       width: double.maxFinite,
@@ -375,7 +343,9 @@ class _ScoreTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final detailAsync = ref.watch(badmintonMatchDetailProvider(matchId: matchId));
     final eventsAsync = ref.watch(badmintonMatchEventsProvider(matchId: matchId));
-    final rt = ref.watch(badmintonRealtimeProvider.select((map) => map[matchId]));
+    final rt = ref.watch(
+      sportRealtimeProvider(SportType.badminton).select((map) => map[matchId] as BadmintonRealtimeData?),
+    );
 
     return detailAsync.when(
       loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
