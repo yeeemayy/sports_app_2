@@ -2,12 +2,14 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_match.dart';
+import 'package:sports_app/src/features/event/domain/models/baseball_match.dart';
 import 'package:sports_app/src/features/event/domain/models/basketball_match.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_match.dart';
 import 'package:sports_app/src/features/event/domain/models/table_tennis_match.dart';
 import 'package:sports_app/src/features/event/domain/models/tennis_match.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/badminton_match_card.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/baseball_match_card.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/basketball_match_card.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/football_match_card.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/table_tennis_match_card.dart';
@@ -26,6 +28,7 @@ class EventMatchCard extends StatelessWidget {
     if (match is TennisMatch) return TennisMatchCard(match: match as TennisMatch);
     if (match is BadmintonMatch) return BadmintonMatchCard(match: match as BadmintonMatch);
     if (match is TableTennisMatch) return TableTennisMatchCard(match: match as TableTennisMatch);
+    if (match is BaseballMatch) return BaseballMatchCard(match: match as BaseballMatch);
     return _DefaultMatchCard(match: match);
   }
 }

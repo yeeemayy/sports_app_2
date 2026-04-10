@@ -132,6 +132,8 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
         ref.read(badmintonRealtimeProvider.notifier).setWatchedIds('list', ids);
       case SportType.tableTennis:
         ref.read(tableTennisRealtimeProvider.notifier).setWatchedIds('list', ids);
+      case SportType.baseball:
+        ref.read(baseballRealtimeProvider.notifier).setWatchedIds('list', ids);
       default:
         break;
     }
@@ -149,6 +151,8 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
         ref.read(badmintonRealtimeProvider.notifier).clearSource('list');
       case SportType.tableTennis:
         ref.read(tableTennisRealtimeProvider.notifier).clearSource('list');
+      case SportType.baseball:
+        ref.read(baseballRealtimeProvider.notifier).clearSource('list');
       default:
         break;
     }
@@ -276,6 +280,14 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
         });
       case SportType.tableTennis:
         ref.listen(tableTennisRealtimeProvider, (prev, curr) {
+          _onRealtimeUpdate(
+            matchesAsync,
+            prev?.map((k, v) => MapEntry(k, v.statusId)) ?? {},
+            curr.map((k, v) => MapEntry(k, v.statusId)),
+          );
+        });
+      case SportType.baseball:
+        ref.listen(baseballRealtimeProvider, (prev, curr) {
           _onRealtimeUpdate(
             matchesAsync,
             prev?.map((k, v) => MapEntry(k, v.statusId)) ?? {},

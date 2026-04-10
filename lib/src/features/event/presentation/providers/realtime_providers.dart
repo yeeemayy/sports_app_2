@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sports_app/src/features/event/data/event_repository.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_realtime_data.dart';
+import 'package:sports_app/src/features/event/domain/models/baseball_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/basketball_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/match_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/table_tennis_realtime_data.dart';
@@ -128,6 +129,22 @@ class BadmintonRealtime extends _$BadmintonRealtime with RealtimePollMixin<Badmi
 
   @override
   Map<String, BadmintonRealtimeData> build() => initRealtime();
+}
+
+@riverpod
+class BaseballRealtime extends _$BaseballRealtime with RealtimePollMixin<BaseballRealtimeData> {
+  @override
+  Duration get pollInterval => const Duration(seconds: 5);
+
+  @override
+  String idOf(BaseballRealtimeData item) => item.id;
+
+  @override
+  Future<List<BaseballRealtimeData>> fetchData() =>
+      ref.read(eventRepositoryProvider.notifier).getBaseballRealtimeMatches();
+
+  @override
+  Map<String, BaseballRealtimeData> build() => initRealtime();
 }
 
 @riverpod

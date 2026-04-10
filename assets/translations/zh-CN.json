@@ -417,6 +417,40 @@
         "receiver_points_total": "接发球总数",
         "receiver_points_rate": "接发球得分率"
       }
+    },
+    "baseball": {
+      "status": {
+        "end": "完",
+        "pst": "延期",
+        "dly": "延迟",
+        "can": "取消",
+        "sus": "中止",
+        "mid": "中断",
+        "tbd": "待定"
+      },
+      "detail": {
+        "score": "比分",
+        "stats": "数据",
+        "ft": "全场",
+        "inning_n": "第{n}局",
+        "no_stats": "暂无统计数据",
+        "runs": "得分",
+        "hits": "安打",
+        "errors": "失误"
+      },
+      "stat": {
+        "hits": "安打",
+        "errors": "失误",
+        "doubles": "二垒安打",
+        "triples": "三垒安打",
+        "home_runs": "全垒打",
+        "rbi": "打点",
+        "left_on_base": "残垒",
+        "walks": "四坏球",
+        "strikeouts": "三振",
+        "stolen_bases": "盗垒",
+        "runs": "得分"
+      }
     }
   },
   "auth": {

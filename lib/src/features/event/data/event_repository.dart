@@ -14,6 +14,9 @@ import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_match_events.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_realtime_data.dart';
+import 'package:sports_app/src/features/event/domain/models/baseball_match_detail.dart';
+import 'package:sports_app/src/features/event/domain/models/baseball_match_events.dart';
+import 'package:sports_app/src/features/event/domain/models/baseball_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/table_tennis_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/table_tennis_match_events.dart';
 import 'package:sports_app/src/features/event/domain/models/table_tennis_realtime_data.dart';
@@ -211,6 +214,28 @@ class EventRepository extends _$EventRepository {
     final list = response.data as List<dynamic>? ?? [];
     return list
         .map((item) => TableTennisRealtimeData.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<BaseballMatchDetail> getBaseballMatchDetail(String matchId) async {
+    final dio = ref.read(sportsApiServiceProvider);
+    final response = await dio.get('/baseball/match/details/$matchId');
+    return BaseballMatchDetail.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<BaseballMatchEventsData?> getBaseballMatchEvents(String matchId) async {
+    final dio = ref.read(sportsApiServiceProvider);
+    final response = await dio.get('/baseball/match/events/$matchId');
+    if (response.data is! Map<String, dynamic>) return null;
+    return BaseballMatchEventsData.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<List<BaseballRealtimeData>> getBaseballRealtimeMatches() async {
+    final dio = ref.read(sportsApiServiceProvider);
+    final response = await dio.get('/baseball/match/realtime');
+    final list = response.data as List<dynamic>? ?? [];
+    return list
+        .map((item) => BaseballRealtimeData.fromJson(item as Map<String, dynamic>))
         .toList();
   }
 }

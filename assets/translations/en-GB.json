@@ -417,6 +417,40 @@
         "receiver_points_total": "Receiver Pts Total",
         "receiver_points_rate": "Receiver Pts %"
       }
+    },
+    "baseball": {
+      "status": {
+        "end": "End",
+        "pst": "PST",
+        "dly": "DLY",
+        "can": "CAN",
+        "sus": "SUS",
+        "mid": "Mid",
+        "tbd": "TBD"
+      },
+      "detail": {
+        "score": "Score",
+        "stats": "Stats",
+        "ft": "FT",
+        "inning_n": "{n}th",
+        "no_stats": "No stats available",
+        "runs": "R",
+        "hits": "H",
+        "errors": "E"
+      },
+      "stat": {
+        "hits": "Hits",
+        "errors": "Errors",
+        "doubles": "Doubles",
+        "triples": "Triples",
+        "home_runs": "Home Runs",
+        "rbi": "RBI",
+        "left_on_base": "Left on Base",
+        "walks": "Walks",
+        "strikeouts": "Strikeouts",
+        "stolen_bases": "Stolen Bases",
+        "runs": "Runs"
+      }
     }
   },
   "auth": {

@@ -6,6 +6,7 @@ import 'package:sports_app/src/features/anchor/presentation/anchor_detail_screen
 import 'package:sports_app/src/features/event/presentation/basketball_match_detail_screen.dart';
 import 'package:sports_app/src/features/event/presentation/football_match_detail_screen.dart';
 import 'package:sports_app/src/features/event/presentation/badminton_match_detail_screen.dart';
+import 'package:sports_app/src/features/event/presentation/baseball_match_detail_screen.dart';
 import 'package:sports_app/src/features/event/presentation/table_tennis_match_detail_screen.dart';
 import 'package:sports_app/src/features/event/presentation/tennis_match_detail_screen.dart';
 import 'package:sports_app/src/features/auth/presentation/forgot_password_screen.dart';
@@ -128,6 +129,12 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: AppRoutes.tableTennisMatchDetail,
         builder: (context, state) => TableTennisMatchDetailScreen(
+          matchId: state.pathParameters['matchId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.baseballMatchDetail,
+        builder: (context, state) => BaseballMatchDetailScreen(
           matchId: state.pathParameters['matchId']!,
         ),
       ),

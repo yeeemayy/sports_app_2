@@ -1689,6 +1689,262 @@ class _TableTennisMatchEventsProviderElement
   String get matchId => (origin as TableTennisMatchEventsProvider).matchId;
 }
 
+String _$baseballMatchDetailHash() =>
+    r'cb2b189a284200ecffe8764e5cc2da8c2c463ed0';
+
+/// See also [baseballMatchDetail].
+@ProviderFor(baseballMatchDetail)
+const baseballMatchDetailProvider = BaseballMatchDetailFamily();
+
+/// See also [baseballMatchDetail].
+class BaseballMatchDetailFamily
+    extends Family<AsyncValue<BaseballMatchDetail>> {
+  /// See also [baseballMatchDetail].
+  const BaseballMatchDetailFamily();
+
+  /// See also [baseballMatchDetail].
+  BaseballMatchDetailProvider call({required String matchId}) {
+    return BaseballMatchDetailProvider(matchId: matchId);
+  }
+
+  @override
+  BaseballMatchDetailProvider getProviderOverride(
+    covariant BaseballMatchDetailProvider provider,
+  ) {
+    return call(matchId: provider.matchId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'baseballMatchDetailProvider';
+}
+
+/// See also [baseballMatchDetail].
+class BaseballMatchDetailProvider
+    extends AutoDisposeFutureProvider<BaseballMatchDetail> {
+  /// See also [baseballMatchDetail].
+  BaseballMatchDetailProvider({required String matchId})
+    : this._internal(
+        (ref) => baseballMatchDetail(
+          ref as BaseballMatchDetailRef,
+          matchId: matchId,
+        ),
+        from: baseballMatchDetailProvider,
+        name: r'baseballMatchDetailProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$baseballMatchDetailHash,
+        dependencies: BaseballMatchDetailFamily._dependencies,
+        allTransitiveDependencies:
+            BaseballMatchDetailFamily._allTransitiveDependencies,
+        matchId: matchId,
+      );
+
+  BaseballMatchDetailProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.matchId,
+  }) : super.internal();
+
+  final String matchId;
+
+  @override
+  Override overrideWith(
+    FutureOr<BaseballMatchDetail> Function(BaseballMatchDetailRef provider)
+    create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: BaseballMatchDetailProvider._internal(
+        (ref) => create(ref as BaseballMatchDetailRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        matchId: matchId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<BaseballMatchDetail> createElement() {
+    return _BaseballMatchDetailProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is BaseballMatchDetailProvider && other.matchId == matchId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, matchId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin BaseballMatchDetailRef
+    on AutoDisposeFutureProviderRef<BaseballMatchDetail> {
+  /// The parameter `matchId` of this provider.
+  String get matchId;
+}
+
+class _BaseballMatchDetailProviderElement
+    extends AutoDisposeFutureProviderElement<BaseballMatchDetail>
+    with BaseballMatchDetailRef {
+  _BaseballMatchDetailProviderElement(super.provider);
+
+  @override
+  String get matchId => (origin as BaseballMatchDetailProvider).matchId;
+}
+
+String _$baseballMatchEventsHash() =>
+    r'b4cee31ac5162cfd40dd0ef44b2aaf72a7922d11';
+
+/// See also [baseballMatchEvents].
+@ProviderFor(baseballMatchEvents)
+const baseballMatchEventsProvider = BaseballMatchEventsFamily();
+
+/// See also [baseballMatchEvents].
+class BaseballMatchEventsFamily
+    extends Family<AsyncValue<BaseballMatchEventsData?>> {
+  /// See also [baseballMatchEvents].
+  const BaseballMatchEventsFamily();
+
+  /// See also [baseballMatchEvents].
+  BaseballMatchEventsProvider call({required String matchId}) {
+    return BaseballMatchEventsProvider(matchId: matchId);
+  }
+
+  @override
+  BaseballMatchEventsProvider getProviderOverride(
+    covariant BaseballMatchEventsProvider provider,
+  ) {
+    return call(matchId: provider.matchId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'baseballMatchEventsProvider';
+}
+
+/// See also [baseballMatchEvents].
+class BaseballMatchEventsProvider
+    extends AutoDisposeFutureProvider<BaseballMatchEventsData?> {
+  /// See also [baseballMatchEvents].
+  BaseballMatchEventsProvider({required String matchId})
+    : this._internal(
+        (ref) => baseballMatchEvents(
+          ref as BaseballMatchEventsRef,
+          matchId: matchId,
+        ),
+        from: baseballMatchEventsProvider,
+        name: r'baseballMatchEventsProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$baseballMatchEventsHash,
+        dependencies: BaseballMatchEventsFamily._dependencies,
+        allTransitiveDependencies:
+            BaseballMatchEventsFamily._allTransitiveDependencies,
+        matchId: matchId,
+      );
+
+  BaseballMatchEventsProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.matchId,
+  }) : super.internal();
+
+  final String matchId;
+
+  @override
+  Override overrideWith(
+    FutureOr<BaseballMatchEventsData?> Function(BaseballMatchEventsRef provider)
+    create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: BaseballMatchEventsProvider._internal(
+        (ref) => create(ref as BaseballMatchEventsRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        matchId: matchId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<BaseballMatchEventsData?> createElement() {
+    return _BaseballMatchEventsProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is BaseballMatchEventsProvider && other.matchId == matchId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, matchId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin BaseballMatchEventsRef
+    on AutoDisposeFutureProviderRef<BaseballMatchEventsData?> {
+  /// The parameter `matchId` of this provider.
+  String get matchId;
+}
+
+class _BaseballMatchEventsProviderElement
+    extends AutoDisposeFutureProviderElement<BaseballMatchEventsData?>
+    with BaseballMatchEventsRef {
+  _BaseballMatchEventsProviderElement(super.provider);
+
+  @override
+  String get matchId => (origin as BaseballMatchEventsProvider).matchId;
+}
+
 String _$sportMatchesPaginatedHash() =>
     r'deae687e672944ccd2882c02768841aa274fcd12';
 
