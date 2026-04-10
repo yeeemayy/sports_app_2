@@ -6,7 +6,7 @@ part of 'realtime_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$footballRealtimeHash() => r'52b3f79ebf6a20f1e55f0817b248ac3a022aafcb';
+String _$footballRealtimeHash() => r'49f1c589ab564935582a1d8d6c0bd997d2b8bce3';
 
 /// See also [FootballRealtime].
 @ProviderFor(FootballRealtime)
@@ -27,7 +27,7 @@ final footballRealtimeProvider =
 typedef _$FootballRealtime =
     AutoDisposeNotifier<Map<String, MatchRealtimeData>>;
 String _$basketballRealtimeHash() =>
-    r'771ce2407a4799e3a2ebd12310b5a552c2aa913a';
+    r'225c1ef5f30f6e0745caf72619ea50fdd6391f21';
 
 /// See also [BasketballRealtime].
 @ProviderFor(BasketballRealtime)
@@ -47,7 +47,7 @@ final basketballRealtimeProvider =
 
 typedef _$BasketballRealtime =
     AutoDisposeNotifier<Map<String, BasketballRealtimeData>>;
-String _$tennisRealtimeHash() => r'de0ac3cc9afe58ee472ea5354b3cca898da19a52';
+String _$tennisRealtimeHash() => r'8f2cf2a59a39de21ad2e0c07b88d71f8894642c1';
 
 /// See also [TennisRealtime].
 @ProviderFor(TennisRealtime)
@@ -66,5 +66,25 @@ final tennisRealtimeProvider =
     );
 
 typedef _$TennisRealtime = AutoDisposeNotifier<Map<String, TennisRealtimeData>>;
+String _$badmintonRealtimeHash() => r'e5501b629cf3cb4d534c34668db0fa7e8c2edf5d';
+
+/// See also [BadmintonRealtime].
+@ProviderFor(BadmintonRealtime)
+final badmintonRealtimeProvider =
+    AutoDisposeNotifierProvider<
+      BadmintonRealtime,
+      Map<String, BadmintonRealtimeData>
+    >.internal(
+      BadmintonRealtime.new,
+      name: r'badmintonRealtimeProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$badmintonRealtimeHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+typedef _$BadmintonRealtime =
+    AutoDisposeNotifier<Map<String, BadmintonRealtimeData>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

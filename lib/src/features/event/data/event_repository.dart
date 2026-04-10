@@ -11,6 +11,9 @@ import 'package:sports_app/src/features/event/domain/models/basketball_realtime_
 import 'package:sports_app/src/features/event/domain/models/match_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_match.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
+import 'package:sports_app/src/features/event/domain/models/badminton_match_detail.dart';
+import 'package:sports_app/src/features/event/domain/models/badminton_match_events.dart';
+import 'package:sports_app/src/features/event/domain/models/badminton_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/tennis_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/tennis_match_events.dart';
 import 'package:sports_app/src/features/event/domain/models/tennis_realtime_data.dart';
@@ -161,6 +164,28 @@ class EventRepository extends _$EventRepository {
     final list = response.data as List<dynamic>? ?? [];
     return list
         .map((item) => TennisRealtimeData.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<BadmintonMatchDetail> getBadmintonMatchDetail(String matchId) async {
+    final dio = ref.read(sportsApiServiceProvider);
+    final response = await dio.get('/badminton/match/details/$matchId');
+    return BadmintonMatchDetail.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<BadmintonMatchEventsData?> getBadmintonMatchEvents(String matchId) async {
+    final dio = ref.read(sportsApiServiceProvider);
+    final response = await dio.get('/badminton/match/events/$matchId');
+    if (response.data is! Map<String, dynamic>) return null;
+    return BadmintonMatchEventsData.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<List<BadmintonRealtimeData>> getBadmintonRealtimeMatches() async {
+    final dio = ref.read(sportsApiServiceProvider);
+    final response = await dio.get('/badminton/match/realtime');
+    final list = response.data as List<dynamic>? ?? [];
+    return list
+        .map((item) => BadmintonRealtimeData.fromJson(item as Map<String, dynamic>))
         .toList();
   }
 }

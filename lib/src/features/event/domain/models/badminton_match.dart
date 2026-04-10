@@ -22,6 +22,7 @@ class BadmintonMatch with _$BadmintonMatch implements SportMatch {
     required String leagueLogo,
     int? matchTime,
     int? bestof,
+    Map<String, dynamic>? scores,
     List<dynamic>? oddsEuro,
     String? statusDescription,
   }) = _BadmintonMatch;
@@ -49,6 +50,7 @@ class BadmintonMatch with _$BadmintonMatch implements SportMatch {
       leagueLogo: leagueInfo['logo'] as String? ?? '',
       matchTime: json['match_time'] as int?,
       bestof: json['bestof'] as int?,
+      scores: json['scores'] is Map ? (json['scores'] as Map).cast<String, dynamic>() : null,
       oddsEuro: (json['odds']?['euro'] as List?)?.toList(),
       statusDescription: json['statusDescription'] as String?,
     );

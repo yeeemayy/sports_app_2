@@ -322,6 +322,48 @@
         "second_serve_points_success": "2nd Serve Pts Won",
         "second_serve_points_rate": "2nd Serve Pts %"
       }
+    },
+    "badminton": {
+      "status": {
+        "pre": "Pre",
+        "s1": "G1",
+        "s2": "G2",
+        "s3": "G3",
+        "s4": "G4",
+        "s5": "G5",
+        "ft": "FT",
+        "live": "Live",
+        "wo": "W/O",
+        "ret": "RET",
+        "def": "DEF",
+        "pst": "PST",
+        "dly": "DLY",
+        "can": "CAN",
+        "int": "INT",
+        "sus": "SUS",
+        "tbd": "TBD"
+      },
+      "detail": {
+        "score": "Score",
+        "stats": "Stats",
+        "set_n": "G{n}",
+        "total": "Sets",
+        "overall": "Overall",
+        "no_stats": "No stats available"
+      },
+      "stat": {
+        "points_won": "Points Won",
+        "max_points_in_a_row": "Max Points in a Row",
+        "comeback_to_win": "Comeback to Win",
+        "biggest_lead": "Biggest Lead",
+        "service_errors": "Service Errors",
+        "service_points_success": "Service Pts Won",
+        "service_points_total": "Service Pts Total",
+        "service_points_rate": "Service Pts %",
+        "receiver_points_success": "Receiver Pts Won",
+        "receiver_points_total": "Receiver Pts Total",
+        "receiver_points_rate": "Receiver Pts %"
+      }
     }
   },
   "auth": {

@@ -21,6 +21,7 @@ _$BadmintonMatchImpl _$$BadmintonMatchImplFromJson(Map<String, dynamic> json) =>
       leagueLogo: json['leagueLogo'] as String,
       matchTime: (json['matchTime'] as num?)?.toInt(),
       bestof: (json['bestof'] as num?)?.toInt(),
+      scores: json['scores'] as Map<String, dynamic>?,
       oddsEuro: json['oddsEuro'] as List<dynamic>?,
       statusDescription: json['statusDescription'] as String?,
     );
@@ -41,6 +42,7 @@ Map<String, dynamic> _$$BadmintonMatchImplToJson(
   'leagueLogo': instance.leagueLogo,
   'matchTime': instance.matchTime,
   'bestof': instance.bestof,
+  'scores': instance.scores,
   'oddsEuro': instance.oddsEuro,
   'statusDescription': instance.statusDescription,
 };

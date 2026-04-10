@@ -34,6 +34,7 @@ mixin _$BadmintonMatch {
   String get leagueLogo => throw _privateConstructorUsedError;
   int? get matchTime => throw _privateConstructorUsedError;
   int? get bestof => throw _privateConstructorUsedError;
+  Map<String, dynamic>? get scores => throw _privateConstructorUsedError;
   List<dynamic>? get oddsEuro => throw _privateConstructorUsedError;
   String? get statusDescription => throw _privateConstructorUsedError;
 
@@ -68,6 +69,7 @@ abstract class $BadmintonMatchCopyWith<$Res> {
     String leagueLogo,
     int? matchTime,
     int? bestof,
+    Map<String, dynamic>? scores,
     List<dynamic>? oddsEuro,
     String? statusDescription,
   });
@@ -101,6 +103,7 @@ class _$BadmintonMatchCopyWithImpl<$Res, $Val extends BadmintonMatch>
     Object? leagueLogo = null,
     Object? matchTime = freezed,
     Object? bestof = freezed,
+    Object? scores = freezed,
     Object? oddsEuro = freezed,
     Object? statusDescription = freezed,
   }) {
@@ -158,6 +161,10 @@ class _$BadmintonMatchCopyWithImpl<$Res, $Val extends BadmintonMatch>
                 ? _value.bestof
                 : bestof // ignore: cast_nullable_to_non_nullable
                       as int?,
+            scores: freezed == scores
+                ? _value.scores
+                : scores // ignore: cast_nullable_to_non_nullable
+                      as Map<String, dynamic>?,
             oddsEuro: freezed == oddsEuro
                 ? _value.oddsEuro
                 : oddsEuro // ignore: cast_nullable_to_non_nullable
@@ -195,6 +202,7 @@ abstract class _$$BadmintonMatchImplCopyWith<$Res>
     String leagueLogo,
     int? matchTime,
     int? bestof,
+    Map<String, dynamic>? scores,
     List<dynamic>? oddsEuro,
     String? statusDescription,
   });
@@ -227,6 +235,7 @@ class __$$BadmintonMatchImplCopyWithImpl<$Res>
     Object? leagueLogo = null,
     Object? matchTime = freezed,
     Object? bestof = freezed,
+    Object? scores = freezed,
     Object? oddsEuro = freezed,
     Object? statusDescription = freezed,
   }) {
@@ -284,6 +293,10 @@ class __$$BadmintonMatchImplCopyWithImpl<$Res>
             ? _value.bestof
             : bestof // ignore: cast_nullable_to_non_nullable
                   as int?,
+        scores: freezed == scores
+            ? _value._scores
+            : scores // ignore: cast_nullable_to_non_nullable
+                  as Map<String, dynamic>?,
         oddsEuro: freezed == oddsEuro
             ? _value._oddsEuro
             : oddsEuro // ignore: cast_nullable_to_non_nullable
@@ -314,9 +327,11 @@ class _$BadmintonMatchImpl extends _BadmintonMatch {
     required this.leagueLogo,
     this.matchTime,
     this.bestof,
+    final Map<String, dynamic>? scores,
     final List<dynamic>? oddsEuro,
     this.statusDescription,
-  }) : _oddsEuro = oddsEuro,
+  }) : _scores = scores,
+       _oddsEuro = oddsEuro,
        super._();
 
   factory _$BadmintonMatchImpl.fromJson(Map<String, dynamic> json) =>
@@ -348,6 +363,16 @@ class _$BadmintonMatchImpl extends _BadmintonMatch {
   final int? matchTime;
   @override
   final int? bestof;
+  final Map<String, dynamic>? _scores;
+  @override
+  Map<String, dynamic>? get scores {
+    final value = _scores;
+    if (value == null) return null;
+    if (_scores is EqualUnmodifiableMapView) return _scores;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(value);
+  }
+
   final List<dynamic>? _oddsEuro;
   @override
   List<dynamic>? get oddsEuro {
@@ -363,7 +388,7 @@ class _$BadmintonMatchImpl extends _BadmintonMatch {
 
   @override
   String toString() {
-    return 'BadmintonMatch(id: $id, statusId: $statusId, matchTimeSim: $matchTimeSim, homeName: $homeName, homeLogo: $homeLogo, homeScore: $homeScore, awayName: $awayName, awayLogo: $awayLogo, awayScore: $awayScore, leagueName: $leagueName, leagueLogo: $leagueLogo, matchTime: $matchTime, bestof: $bestof, oddsEuro: $oddsEuro, statusDescription: $statusDescription)';
+    return 'BadmintonMatch(id: $id, statusId: $statusId, matchTimeSim: $matchTimeSim, homeName: $homeName, homeLogo: $homeLogo, homeScore: $homeScore, awayName: $awayName, awayLogo: $awayLogo, awayScore: $awayScore, leagueName: $leagueName, leagueLogo: $leagueLogo, matchTime: $matchTime, bestof: $bestof, scores: $scores, oddsEuro: $oddsEuro, statusDescription: $statusDescription)';
   }
 
   @override
@@ -395,6 +420,7 @@ class _$BadmintonMatchImpl extends _BadmintonMatch {
             (identical(other.matchTime, matchTime) ||
                 other.matchTime == matchTime) &&
             (identical(other.bestof, bestof) || other.bestof == bestof) &&
+            const DeepCollectionEquality().equals(other._scores, _scores) &&
             const DeepCollectionEquality().equals(other._oddsEuro, _oddsEuro) &&
             (identical(other.statusDescription, statusDescription) ||
                 other.statusDescription == statusDescription));
@@ -417,6 +443,7 @@ class _$BadmintonMatchImpl extends _BadmintonMatch {
     leagueLogo,
     matchTime,
     bestof,
+    const DeepCollectionEquality().hash(_scores),
     const DeepCollectionEquality().hash(_oddsEuro),
     statusDescription,
   );
@@ -453,6 +480,7 @@ abstract class _BadmintonMatch extends BadmintonMatch {
     required final String leagueLogo,
     final int? matchTime,
     final int? bestof,
+    final Map<String, dynamic>? scores,
     final List<dynamic>? oddsEuro,
     final String? statusDescription,
   }) = _$BadmintonMatchImpl;
@@ -487,6 +515,8 @@ abstract class _BadmintonMatch extends BadmintonMatch {
   int? get matchTime;
   @override
   int? get bestof;
+  @override
+  Map<String, dynamic>? get scores;
   @override
   List<dynamic>? get oddsEuro;
   @override
