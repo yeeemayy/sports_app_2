@@ -1238,11 +1238,10 @@ class _PlayerLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(5),
-      height: size + 10,
-      width: size + 10,
+      height: size,
+      width: size,
       decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-      child: SportLogo(url: url, size: size),
+      child: ClipOval(child: SportLogo(url: url, size: size)),
     );
   }
 }

@@ -26,6 +26,10 @@ abstract final class AppRoutes {
   static const badmintonMatchDetail = '/event/badminton/:matchId';
   static String badmintonMatchDetailPath(String matchId) => '/event/badminton/$matchId';
 
+  // Table tennis match detail
+  static const tableTennisMatchDetail = '/event/table-tennis/:matchId';
+  static String tableTennisMatchDetailPath(String matchId) => '/event/table-tennis/$matchId';
+
   // Anchor
   static const anchor = '/anchor/:anchorId';
   static String anchorPath(int id) => '/anchor/$id';

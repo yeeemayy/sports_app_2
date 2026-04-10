@@ -14,6 +14,9 @@ import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_match_events.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_realtime_data.dart';
+import 'package:sports_app/src/features/event/domain/models/table_tennis_match_detail.dart';
+import 'package:sports_app/src/features/event/domain/models/table_tennis_match_events.dart';
+import 'package:sports_app/src/features/event/domain/models/table_tennis_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/tennis_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/tennis_match_events.dart';
 import 'package:sports_app/src/features/event/domain/models/tennis_realtime_data.dart';
@@ -186,6 +189,28 @@ class EventRepository extends _$EventRepository {
     final list = response.data as List<dynamic>? ?? [];
     return list
         .map((item) => BadmintonRealtimeData.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<TableTennisMatchDetail> getTableTennisMatchDetail(String matchId) async {
+    final dio = ref.read(sportsApiServiceProvider);
+    final response = await dio.get('/table_tennis/match/details/$matchId');
+    return TableTennisMatchDetail.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<TableTennisMatchEventsData?> getTableTennisMatchEvents(String matchId) async {
+    final dio = ref.read(sportsApiServiceProvider);
+    final response = await dio.get('/table_tennis/match/events/$matchId');
+    if (response.data is! Map<String, dynamic>) return null;
+    return TableTennisMatchEventsData.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<List<TableTennisRealtimeData>> getTableTennisRealtimeMatches() async {
+    final dio = ref.read(sportsApiServiceProvider);
+    final response = await dio.get('/table_tennis/match/realtime');
+    final list = response.data as List<dynamic>? ?? [];
+    return list
+        .map((item) => TableTennisRealtimeData.fromJson(item as Map<String, dynamic>))
         .toList();
   }
 }

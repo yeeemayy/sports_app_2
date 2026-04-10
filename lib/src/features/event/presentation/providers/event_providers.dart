@@ -10,6 +10,8 @@ import 'package:sports_app/src/features/event/domain/models/sport_match.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_match_events.dart';
+import 'package:sports_app/src/features/event/domain/models/table_tennis_match_detail.dart';
+import 'package:sports_app/src/features/event/domain/models/table_tennis_match_events.dart';
 import 'package:sports_app/src/features/event/domain/models/tennis_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/tennis_match_events.dart';
 
@@ -180,4 +182,20 @@ Future<BadmintonMatchEventsData?> badmintonMatchEvents(
   required String matchId,
 }) {
   return ref.watch(eventRepositoryProvider.notifier).getBadmintonMatchEvents(matchId);
+}
+
+@riverpod
+Future<TableTennisMatchDetail> tableTennisMatchDetail(
+  TableTennisMatchDetailRef ref, {
+  required String matchId,
+}) {
+  return ref.watch(eventRepositoryProvider.notifier).getTableTennisMatchDetail(matchId);
+}
+
+@riverpod
+Future<TableTennisMatchEventsData?> tableTennisMatchEvents(
+  TableTennisMatchEventsRef ref, {
+  required String matchId,
+}) {
+  return ref.watch(eventRepositoryProvider.notifier).getTableTennisMatchEvents(matchId);
 }

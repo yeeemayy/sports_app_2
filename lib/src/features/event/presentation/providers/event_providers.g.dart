@@ -1428,6 +1428,267 @@ class _BadmintonMatchEventsProviderElement
   String get matchId => (origin as BadmintonMatchEventsProvider).matchId;
 }
 
+String _$tableTennisMatchDetailHash() =>
+    r'fb6c9f449082f6b4cf878826fea11843baf7a835';
+
+/// See also [tableTennisMatchDetail].
+@ProviderFor(tableTennisMatchDetail)
+const tableTennisMatchDetailProvider = TableTennisMatchDetailFamily();
+
+/// See also [tableTennisMatchDetail].
+class TableTennisMatchDetailFamily
+    extends Family<AsyncValue<TableTennisMatchDetail>> {
+  /// See also [tableTennisMatchDetail].
+  const TableTennisMatchDetailFamily();
+
+  /// See also [tableTennisMatchDetail].
+  TableTennisMatchDetailProvider call({required String matchId}) {
+    return TableTennisMatchDetailProvider(matchId: matchId);
+  }
+
+  @override
+  TableTennisMatchDetailProvider getProviderOverride(
+    covariant TableTennisMatchDetailProvider provider,
+  ) {
+    return call(matchId: provider.matchId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'tableTennisMatchDetailProvider';
+}
+
+/// See also [tableTennisMatchDetail].
+class TableTennisMatchDetailProvider
+    extends AutoDisposeFutureProvider<TableTennisMatchDetail> {
+  /// See also [tableTennisMatchDetail].
+  TableTennisMatchDetailProvider({required String matchId})
+    : this._internal(
+        (ref) => tableTennisMatchDetail(
+          ref as TableTennisMatchDetailRef,
+          matchId: matchId,
+        ),
+        from: tableTennisMatchDetailProvider,
+        name: r'tableTennisMatchDetailProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$tableTennisMatchDetailHash,
+        dependencies: TableTennisMatchDetailFamily._dependencies,
+        allTransitiveDependencies:
+            TableTennisMatchDetailFamily._allTransitiveDependencies,
+        matchId: matchId,
+      );
+
+  TableTennisMatchDetailProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.matchId,
+  }) : super.internal();
+
+  final String matchId;
+
+  @override
+  Override overrideWith(
+    FutureOr<TableTennisMatchDetail> Function(
+      TableTennisMatchDetailRef provider,
+    )
+    create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: TableTennisMatchDetailProvider._internal(
+        (ref) => create(ref as TableTennisMatchDetailRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        matchId: matchId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<TableTennisMatchDetail> createElement() {
+    return _TableTennisMatchDetailProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is TableTennisMatchDetailProvider && other.matchId == matchId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, matchId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin TableTennisMatchDetailRef
+    on AutoDisposeFutureProviderRef<TableTennisMatchDetail> {
+  /// The parameter `matchId` of this provider.
+  String get matchId;
+}
+
+class _TableTennisMatchDetailProviderElement
+    extends AutoDisposeFutureProviderElement<TableTennisMatchDetail>
+    with TableTennisMatchDetailRef {
+  _TableTennisMatchDetailProviderElement(super.provider);
+
+  @override
+  String get matchId => (origin as TableTennisMatchDetailProvider).matchId;
+}
+
+String _$tableTennisMatchEventsHash() =>
+    r'26fa994071c422a3869033baa6ea364ef9bed0cc';
+
+/// See also [tableTennisMatchEvents].
+@ProviderFor(tableTennisMatchEvents)
+const tableTennisMatchEventsProvider = TableTennisMatchEventsFamily();
+
+/// See also [tableTennisMatchEvents].
+class TableTennisMatchEventsFamily
+    extends Family<AsyncValue<TableTennisMatchEventsData?>> {
+  /// See also [tableTennisMatchEvents].
+  const TableTennisMatchEventsFamily();
+
+  /// See also [tableTennisMatchEvents].
+  TableTennisMatchEventsProvider call({required String matchId}) {
+    return TableTennisMatchEventsProvider(matchId: matchId);
+  }
+
+  @override
+  TableTennisMatchEventsProvider getProviderOverride(
+    covariant TableTennisMatchEventsProvider provider,
+  ) {
+    return call(matchId: provider.matchId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'tableTennisMatchEventsProvider';
+}
+
+/// See also [tableTennisMatchEvents].
+class TableTennisMatchEventsProvider
+    extends AutoDisposeFutureProvider<TableTennisMatchEventsData?> {
+  /// See also [tableTennisMatchEvents].
+  TableTennisMatchEventsProvider({required String matchId})
+    : this._internal(
+        (ref) => tableTennisMatchEvents(
+          ref as TableTennisMatchEventsRef,
+          matchId: matchId,
+        ),
+        from: tableTennisMatchEventsProvider,
+        name: r'tableTennisMatchEventsProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$tableTennisMatchEventsHash,
+        dependencies: TableTennisMatchEventsFamily._dependencies,
+        allTransitiveDependencies:
+            TableTennisMatchEventsFamily._allTransitiveDependencies,
+        matchId: matchId,
+      );
+
+  TableTennisMatchEventsProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.matchId,
+  }) : super.internal();
+
+  final String matchId;
+
+  @override
+  Override overrideWith(
+    FutureOr<TableTennisMatchEventsData?> Function(
+      TableTennisMatchEventsRef provider,
+    )
+    create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: TableTennisMatchEventsProvider._internal(
+        (ref) => create(ref as TableTennisMatchEventsRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        matchId: matchId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<TableTennisMatchEventsData?>
+  createElement() {
+    return _TableTennisMatchEventsProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is TableTennisMatchEventsProvider && other.matchId == matchId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, matchId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin TableTennisMatchEventsRef
+    on AutoDisposeFutureProviderRef<TableTennisMatchEventsData?> {
+  /// The parameter `matchId` of this provider.
+  String get matchId;
+}
+
+class _TableTennisMatchEventsProviderElement
+    extends AutoDisposeFutureProviderElement<TableTennisMatchEventsData?>
+    with TableTennisMatchEventsRef {
+  _TableTennisMatchEventsProviderElement(super.provider);
+
+  @override
+  String get matchId => (origin as TableTennisMatchEventsProvider).matchId;
+}
+
 String _$sportMatchesPaginatedHash() =>
     r'deae687e672944ccd2882c02768841aa274fcd12';
 

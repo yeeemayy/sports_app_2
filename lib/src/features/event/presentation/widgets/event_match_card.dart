@@ -5,10 +5,12 @@ import 'package:sports_app/src/features/event/domain/models/badminton_match.dart
 import 'package:sports_app/src/features/event/domain/models/basketball_match.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_match.dart';
+import 'package:sports_app/src/features/event/domain/models/table_tennis_match.dart';
 import 'package:sports_app/src/features/event/domain/models/tennis_match.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/badminton_match_card.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/basketball_match_card.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/football_match_card.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/table_tennis_match_card.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/tennis_match_card.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
@@ -23,6 +25,7 @@ class EventMatchCard extends StatelessWidget {
     if (match is BasketballMatch) return BasketballMatchCard(match: match as BasketballMatch);
     if (match is TennisMatch) return TennisMatchCard(match: match as TennisMatch);
     if (match is BadmintonMatch) return BadmintonMatchCard(match: match as BadmintonMatch);
+    if (match is TableTennisMatch) return TableTennisMatchCard(match: match as TableTennisMatch);
     return _DefaultMatchCard(match: match);
   }
 }

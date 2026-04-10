@@ -4,25 +4,26 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/event/domain/badminton_status.dart';
-import 'package:sports_app/src/features/event/domain/models/badminton_match_detail.dart';
-import 'package:sports_app/src/features/event/domain/models/badminton_match_events.dart';
-import 'package:sports_app/src/features/event/domain/models/badminton_realtime_data.dart';
+import 'package:sports_app/src/features/event/domain/table_tennis_status.dart';
+import 'package:sports_app/src/features/event/domain/models/table_tennis_match_detail.dart';
+import 'package:sports_app/src/features/event/domain/models/table_tennis_match_events.dart';
+import 'package:sports_app/src/features/event/domain/models/table_tennis_realtime_data.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/match_detail_appbar.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
-class BadmintonMatchDetailScreen extends ConsumerStatefulWidget {
-  const BadmintonMatchDetailScreen({super.key, required this.matchId});
+class TableTennisMatchDetailScreen extends ConsumerStatefulWidget {
+  const TableTennisMatchDetailScreen({super.key, required this.matchId});
 
   final String matchId;
 
   @override
-  ConsumerState<BadmintonMatchDetailScreen> createState() => _BadmintonMatchDetailScreenState();
+  ConsumerState<TableTennisMatchDetailScreen> createState() =>
+      _TableTennisMatchDetailScreenState();
 }
 
-class _BadmintonMatchDetailScreenState extends ConsumerState<BadmintonMatchDetailScreen> {
+class _TableTennisMatchDetailScreenState extends ConsumerState<TableTennisMatchDetailScreen> {
   Timer? _eventsTimer;
 
   @override
@@ -30,34 +31,32 @@ class _BadmintonMatchDetailScreenState extends ConsumerState<BadmintonMatchDetai
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref.read(badmintonRealtimeProvider.notifier).setWatchedIds('detail:${widget.matchId}', [
+      ref.read(tableTennisRealtimeProvider.notifier).setWatchedIds('detail:${widget.matchId}', [
         widget.matchId,
       ]);
     });
     _eventsTimer = Timer.periodic(const Duration(seconds: 5), (_) {
       if (!mounted) return;
-      ref.invalidate(badmintonMatchEventsProvider(matchId: widget.matchId));
+      ref.invalidate(tableTennisMatchEventsProvider(matchId: widget.matchId));
     });
   }
 
   @override
   void dispose() {
     _eventsTimer?.cancel();
-    ref.read(badmintonRealtimeProvider.notifier).clearSource('detail:${widget.matchId}');
+    ref.read(tableTennisRealtimeProvider.notifier).clearSource('detail:${widget.matchId}');
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final detailAsync = ref.watch(badmintonMatchDetailProvider(matchId: widget.matchId));
+    final detailAsync = ref.watch(tableTennisMatchDetailProvider(matchId: widget.matchId));
 
-    ref.listen(badmintonRealtimeProvider.select((map) => map[widget.matchId]?.statusId), (
-      prev,
-      next,
-    ) {
+    ref.listen(tableTennisRealtimeProvider.select((map) => map[widget.matchId]?.statusId),
+        (prev, next) {
       if (prev == null || next == null || prev == next) return;
-      ref.invalidate(badmintonMatchDetailProvider(matchId: widget.matchId));
-      ref.invalidate(badmintonMatchEventsProvider(matchId: widget.matchId));
+      ref.invalidate(tableTennisMatchDetailProvider(matchId: widget.matchId));
+      ref.invalidate(tableTennisMatchEventsProvider(matchId: widget.matchId));
     });
 
     final title = detailAsync.valueOrNull?.leagueName ?? '';
@@ -71,7 +70,7 @@ class _BadmintonMatchDetailScreenState extends ConsumerState<BadmintonMatchDetai
         ),
         body: Column(
           children: [
-            _BadmintonMatchHeader(matchId: widget.matchId),
+            _TableTennisMatchHeader(matchId: widget.matchId),
             Container(
               color: Colors.white,
               child: TabBar(
@@ -80,8 +79,8 @@ class _BadmintonMatchDetailScreenState extends ConsumerState<BadmintonMatchDetai
                 indicatorColor: Colors.pink,
                 indicatorWeight: 2,
                 tabs: [
-                  Tab(text: 'event.badminton.detail.score'.tr()),
-                  Tab(text: 'event.badminton.detail.stats'.tr()),
+                  Tab(text: 'event.table_tennis.detail.score'.tr()),
+                  Tab(text: 'event.table_tennis.detail.stats'.tr()),
                 ],
               ),
             ),
@@ -102,16 +101,16 @@ class _BadmintonMatchDetailScreenState extends ConsumerState<BadmintonMatchDetai
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 
-class _BadmintonMatchHeader extends ConsumerWidget {
-  const _BadmintonMatchHeader({required this.matchId});
+class _TableTennisMatchHeader extends ConsumerWidget {
+  const _TableTennisMatchHeader({required this.matchId});
 
   final String matchId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(badmintonMatchDetailProvider(matchId: matchId));
-    final eventsAsync = ref.watch(badmintonMatchEventsProvider(matchId: matchId));
-    final rt = ref.watch(badmintonRealtimeProvider.select((map) => map[matchId]));
+    final detailAsync = ref.watch(tableTennisMatchDetailProvider(matchId: matchId));
+    final eventsAsync = ref.watch(tableTennisMatchEventsProvider(matchId: matchId));
+    final rt = ref.watch(tableTennisRealtimeProvider.select((map) => map[matchId]));
 
     return Container(
       width: double.maxFinite,
@@ -119,20 +118,20 @@ class _BadmintonMatchHeader extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
       child: detailAsync.when(
         loading: () => const SizedBox(height: 80),
-        error: (_, __) => const SizedBox(height: 80),
+        error: (_, _) => const SizedBox(height: 80),
         data: (detail) =>
-            _BadmintonHeaderContent(detail: detail, rt: rt, eventsData: eventsAsync.valueOrNull),
+            _TableTennisHeaderContent(detail: detail, rt: rt, eventsData: eventsAsync.valueOrNull),
       ),
     );
   }
 }
 
-class _BadmintonHeaderContent extends StatelessWidget {
-  const _BadmintonHeaderContent({required this.detail, this.rt, this.eventsData});
+class _TableTennisHeaderContent extends StatelessWidget {
+  const _TableTennisHeaderContent({required this.detail, this.rt, this.eventsData});
 
-  final BadmintonMatchDetail detail;
-  final BadmintonRealtimeData? rt;
-  final BadmintonMatchEventsData? eventsData;
+  final TableTennisMatchDetail detail;
+  final TableTennisRealtimeData? rt;
+  final TableTennisMatchEventsData? eventsData;
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +143,7 @@ class _BadmintonHeaderContent extends StatelessWidget {
     final isNotStarted = effStatusId == 1;
     final isLive = effStatusId >= 3 && effStatusId < 100;
 
-    final statusLabel = badmintonStatusLabel(effStatusId, detail.statusDescription);
+    final statusLabel = tableTennisStatusLabel(effStatusId, detail.statusDescription);
 
     return Column(
       children: [
@@ -201,7 +200,7 @@ class _BadmintonHeaderContent extends StatelessWidget {
                       ),
                     ),
                     Container(
-                      margin: EdgeInsets.only(top: 6),
+                      margin: const EdgeInsets.only(top: 6),
                       constraints: const BoxConstraints(minWidth: 50),
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
@@ -216,7 +215,7 @@ class _BadmintonHeaderContent extends StatelessWidget {
                           color: statusLabel.isNotEmpty ? Colors.white : Colors.pink,
                         ),
                       ),
-                    ),
+                    )
                   ],
                 ],
               ),
@@ -247,104 +246,6 @@ class _BadmintonHeaderContent extends StatelessWidget {
   }
 }
 
-class _SetScoreGrid extends StatelessWidget {
-  const _SetScoreGrid({
-    required this.homeSets,
-    required this.awaySets,
-    required this.homeTotal,
-    required this.awayTotal,
-    required this.statusId,
-  });
-
-  final List<int> homeSets;
-  final List<int> awaySets;
-  final int homeTotal;
-  final int awayTotal;
-  final int statusId;
-
-  int? get _activeSetIndex {
-    switch (statusId) {
-      case 51:
-        return 0;
-      case 52:
-        return 1;
-      case 53:
-        return 2;
-      case 54:
-        return 3;
-      case 55:
-        return 4;
-      default:
-        return null;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final setCount = homeSets.length;
-    final activeIdx = _activeSetIndex;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ...List.generate(setCount, (i) {
-          final isActive = i == activeIdx;
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '${homeSets[i]}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: isActive ? FontWeight.w900 : FontWeight.w500,
-                    color: Colors.white,
-                  ),
-                ),
-                Text(
-                  '${awaySets[i]}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: isActive ? FontWeight.w900 : FontWeight.w500,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
-        if (setCount > 0)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Text('|', style: TextStyle(color: Colors.white54, fontSize: 18)),
-          ),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '$homeTotal',
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              '$awayTotal',
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
 class _PlayerLogo extends StatelessWidget {
   const _PlayerLogo({required this.url, required this.size});
 
@@ -356,10 +257,11 @@ class _PlayerLogo extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white),
-      child: ClipOval(
-        child: SportLogo(url: url, size: size),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white,
       ),
+      child: ClipOval(child: SportLogo(url: url, size: size)),
     );
   }
 }
@@ -373,13 +275,13 @@ class _ScoreTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(badmintonMatchDetailProvider(matchId: matchId));
-    final eventsAsync = ref.watch(badmintonMatchEventsProvider(matchId: matchId));
-    final rt = ref.watch(badmintonRealtimeProvider.select((map) => map[matchId]));
+    final detailAsync = ref.watch(tableTennisMatchDetailProvider(matchId: matchId));
+    final eventsAsync = ref.watch(tableTennisMatchEventsProvider(matchId: matchId));
+    final rt = ref.watch(tableTennisRealtimeProvider.select((map) => map[matchId]));
 
     return detailAsync.when(
       loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
-      error: (_, __) => Center(
+      error: (_, _) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
       data: (detail) {
@@ -432,7 +334,7 @@ class _SetScoreTable extends StatelessWidget {
   final int homeTotal;
   final int awayTotal;
 
-  static const _liveStatuses = {3, 51, 52, 53, 54, 55};
+  static const _liveStatuses = {3, 51, 52, 53, 54, 55, 472, 473};
 
   bool get isLive => _liveStatuses.contains(statusId);
 
@@ -448,6 +350,10 @@ class _SetScoreTable extends StatelessWidget {
         return 3;
       case 55:
         return 4;
+      case 472:
+        return 5;
+      case 473:
+        return 6;
       default:
         return null;
     }
@@ -464,7 +370,7 @@ class _SetScoreTable extends StatelessWidget {
 
     final setLabels = List.generate(
       setCount,
-      (i) => 'event.badminton.detail.set_n'.tr(namedArgs: {'n': '${i + 1}'}),
+      (i) => 'event.table_tennis.detail.set_n'.tr(namedArgs: {'n': '${i + 1}'}),
     );
 
     return ListView(
@@ -497,7 +403,7 @@ class _SetScoreTable extends StatelessWidget {
                     }),
                     Expanded(
                       child: Text(
-                        'event.badminton.detail.total'.tr(),
+                        'event.table_tennis.detail.total'.tr(),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 12,
@@ -531,9 +437,9 @@ class _SetScoreTable extends StatelessWidget {
   }
 
   Widget _buildBasicTable(BuildContext context) {
-    final s1Label = 'event.badminton.detail.set_n'.tr(namedArgs: {'n': '1'});
-    final s2Label = 'event.badminton.detail.set_n'.tr(namedArgs: {'n': '2'});
-    final ftLabel = 'event.badminton.detail.total'.tr();
+    final s1Label = 'event.table_tennis.detail.set_n'.tr(namedArgs: {'n': '1'});
+    final s2Label = 'event.table_tennis.detail.set_n'.tr(namedArgs: {'n': '2'});
+    final ftLabel = 'event.table_tennis.detail.total'.tr();
     final headerStyle = TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w600,
@@ -635,7 +541,11 @@ class _PlayerScoreRow extends StatelessWidget {
 }
 
 class _BasicPlayerRow extends StatelessWidget {
-  const _BasicPlayerRow({required this.name, required this.logo, required this.total});
+  const _BasicPlayerRow({
+    required this.name,
+    required this.logo,
+    required this.total,
+  });
 
   final String name;
   final String logo;
@@ -665,19 +575,11 @@ class _BasicPlayerRow extends StatelessWidget {
           ),
           const SizedBox(
             width: 44,
-            child: Text(
-              '-',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Colors.grey),
-            ),
+            child: Text('-', textAlign: TextAlign.center, style: TextStyle(fontSize: 13, color: Colors.grey)),
           ),
           const SizedBox(
             width: 44,
-            child: Text(
-              '-',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Colors.grey),
-            ),
+            child: Text('-', textAlign: TextAlign.center, style: TextStyle(fontSize: 13, color: Colors.grey)),
           ),
           SizedBox(
             width: 44,
@@ -709,18 +611,18 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
 
   @override
   Widget build(BuildContext context) {
-    final eventsAsync = ref.watch(badmintonMatchEventsProvider(matchId: widget.matchId));
+    final eventsAsync = ref.watch(tableTennisMatchEventsProvider(matchId: widget.matchId));
 
     return eventsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
-      error: (_, __) => Center(
+      error: (_, _) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
       data: (events) {
         if (events == null || events.statSets.isEmpty) {
           return Center(
             child: Text(
-              'event.badminton.detail.no_stats'.tr(),
+              'event.table_tennis.detail.no_stats'.tr(),
               style: TextStyle(color: Colors.grey.shade500),
             ),
           );
@@ -730,8 +632,8 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
         final safeIdx = _selectedIdx.clamp(0, setIndices.length - 1);
 
         final tabLabels = setIndices.map((idx) {
-          if (idx == 0) return 'event.badminton.detail.overall'.tr();
-          return 'event.badminton.detail.set_n'.tr(namedArgs: {'n': '$idx'});
+          if (idx == 0) return 'event.table_tennis.detail.overall'.tr();
+          return 'event.table_tennis.detail.set_n'.tr(namedArgs: {'n': '$idx'});
         }).toList();
 
         final stats = events.statSets
@@ -784,14 +686,14 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
 class _StatsList extends StatelessWidget {
   const _StatsList({required this.stats});
 
-  final List<BadmintonStat> stats;
+  final List<TableTennisStat> stats;
 
   @override
   Widget build(BuildContext context) {
     if (stats.isEmpty) {
       return Center(
         child: Text(
-          'event.badminton.detail.no_stats'.tr(),
+          'event.table_tennis.detail.no_stats'.tr(),
           style: TextStyle(color: Colors.grey.shade500),
         ),
       );
@@ -800,15 +702,15 @@ class _StatsList extends StatelessWidget {
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 20),
       itemCount: stats.length,
-      itemBuilder: (context, i) => _BadmintonStatRow(stat: stats[i]),
+      itemBuilder: (context, i) => _TableTennisStatRow(stat: stats[i]),
     );
   }
 }
 
-class _BadmintonStatRow extends StatelessWidget {
-  const _BadmintonStatRow({required this.stat});
+class _TableTennisStatRow extends StatelessWidget {
+  const _TableTennisStatRow({required this.stat});
 
-  final BadmintonStat stat;
+  final TableTennisStat stat;
 
   @override
   Widget build(BuildContext context) {
@@ -894,10 +796,7 @@ class _BadmintonStatRow extends StatelessWidget {
                             height: barHeight,
                             decoration: const BoxDecoration(
                               color: Colors.pink,
-                              borderRadius: BorderRadius.only(
-                                topRight: radius,
-                                bottomRight: radius,
-                              ),
+                              borderRadius: BorderRadius.only(topRight: radius, bottomRight: radius),
                             ),
                           ),
                         ),
@@ -913,6 +812,8 @@ class _BadmintonStatRow extends StatelessWidget {
     );
   }
 }
+
+// ─── Blinking live indicator ─────────────────────────────────────────────────
 
 class _BlinkingLiveIndicator extends StatefulWidget {
   const _BlinkingLiveIndicator({required this.label});
@@ -931,8 +832,10 @@ class _BlinkingLiveIndicatorState extends State<_BlinkingLiveIndicator>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 800))
-      ..repeat(reverse: true);
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..repeat(reverse: true);
     _opacity = Tween<double>(begin: 1.0, end: 0.2).animate(_controller);
   }
 
@@ -956,7 +859,10 @@ class _BlinkingLiveIndicatorState extends State<_BlinkingLiveIndicator>
               Container(
                 width: 7,
                 height: 7,
-                decoration: const BoxDecoration(color: Color(0xffe67777), shape: BoxShape.circle),
+                decoration: const BoxDecoration(
+                  color: Color(0xffe67777),
+                  shape: BoxShape.circle,
+                ),
               ),
               const SizedBox(width: 4),
               Text(

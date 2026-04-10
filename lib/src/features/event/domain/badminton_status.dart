@@ -16,17 +16,21 @@ String _badmintonStatusKey(int statusId) {
     case 3:
       return 'event.badminton.status.live';
     case 51:
-    case 331:
       return 'event.badminton.status.s1';
+    case 331:
+      return 'event.badminton.status.p1';
     case 52:
-    case 332:
       return 'event.badminton.status.s2';
+    case 332:
+      return 'event.badminton.status.p2';
     case 53:
-    case 333:
       return 'event.badminton.status.s3';
+    case 333:
+      return 'event.badminton.status.p3';
     case 54:
-    case 334:
       return 'event.badminton.status.s4';
+    case 334:
+      return 'event.badminton.status.p4';
     case 55:
       return 'event.badminton.status.s5';
     case 100:
