@@ -35,18 +35,18 @@ class _TableTennisMatchDetailScreenState
 
   @override
   void onEventsTimerTick() =>
-      ref.invalidate(tableTennisMatchEventsProvider(matchId: matchId));
+      ref.invalidate(matchEventsProvider(sport: SportType.tableTennis, matchId: matchId));
 
   @override
   void onStatusChanged() {
-    ref.invalidate(tableTennisMatchDetailProvider(matchId: matchId));
-    ref.invalidate(tableTennisMatchEventsProvider(matchId: matchId));
+    ref.invalidate(matchDetailProvider(sport: SportType.tableTennis, matchId: matchId));
+    ref.invalidate(matchEventsProvider(sport: SportType.tableTennis, matchId: matchId));
   }
 
   @override
   (String?, int?) watchDetail() {
-    final v =
-        ref.watch(tableTennisMatchDetailProvider(matchId: matchId)).valueOrNull;
+    final v = ref.watch(matchDetailProvider(sport: SportType.tableTennis, matchId: matchId))
+        .valueOrNull as TableTennisMatchDetail?;
     return (v?.leagueName, v?.matchTime);
   }
 
@@ -76,8 +76,8 @@ class _TableTennisMatchHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(tableTennisMatchDetailProvider(matchId: matchId));
-    final eventsAsync = ref.watch(tableTennisMatchEventsProvider(matchId: matchId));
+    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.tableTennis, matchId: matchId));
+    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.tableTennis, matchId: matchId));
     final rt = ref.watch(
       sportRealtimeProvider(SportType.tableTennis).select((map) => map[matchId] as TableTennisRealtimeData?),
     );
@@ -89,8 +89,10 @@ class _TableTennisMatchHeader extends ConsumerWidget {
       child: detailAsync.when(
         loading: () => const SizedBox(height: 80),
         error: (_, _) => const SizedBox(height: 80),
-        data: (detail) =>
-            _TableTennisHeaderContent(detail: detail, rt: rt, eventsData: eventsAsync.valueOrNull),
+        data: (obj) {
+          final detail = obj as TableTennisMatchDetail;
+          return _TableTennisHeaderContent(detail: detail, rt: rt, eventsData: eventsAsync.valueOrNull as TableTennisMatchEventsData?);
+        },
       ),
     );
   }
@@ -245,8 +247,8 @@ class _ScoreTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(tableTennisMatchDetailProvider(matchId: matchId));
-    final eventsAsync = ref.watch(tableTennisMatchEventsProvider(matchId: matchId));
+    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.tableTennis, matchId: matchId));
+    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.tableTennis, matchId: matchId));
     final rt = ref.watch(
       sportRealtimeProvider(SportType.tableTennis).select((map) => map[matchId] as TableTennisRealtimeData?),
     );
@@ -256,16 +258,18 @@ class _ScoreTab extends ConsumerWidget {
       error: (_, _) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
-      data: (detail) {
-        final effStatusId = eventsAsync.valueOrNull?.statusId ?? rt?.statusId ?? detail.statusId;
+      data: (obj) {
+        final detail = obj as TableTennisMatchDetail;
+        final ev = eventsAsync.valueOrNull as TableTennisMatchEventsData?;
+        final effStatusId = ev?.statusId ?? rt?.statusId ?? detail.statusId;
         final homeSets =
-            eventsAsync.valueOrNull?.homeSets ?? rt?.homeSets ?? detail.homeInfo.setScores;
+            ev?.homeSets ?? rt?.homeSets ?? detail.homeInfo.setScores;
         final awaySets =
-            eventsAsync.valueOrNull?.awaySets ?? rt?.awaySets ?? detail.awayInfo.setScores;
+            ev?.awaySets ?? rt?.awaySets ?? detail.awayInfo.setScores;
         final homeTotal =
-            eventsAsync.valueOrNull?.homeTotal ?? rt?.homeTotal ?? detail.homeInfo.totalScore;
+            ev?.homeTotal ?? rt?.homeTotal ?? detail.homeInfo.totalScore;
         final awayTotal =
-            eventsAsync.valueOrNull?.awayTotal ?? rt?.awayTotal ?? detail.awayInfo.totalScore;
+            ev?.awayTotal ?? rt?.awayTotal ?? detail.awayInfo.totalScore;
 
         return _SetScoreTable(
           statusId: effStatusId,
@@ -583,14 +587,15 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
 
   @override
   Widget build(BuildContext context) {
-    final eventsAsync = ref.watch(tableTennisMatchEventsProvider(matchId: widget.matchId));
+    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.tableTennis, matchId: widget.matchId));
 
     return eventsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
       error: (_, _) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
-      data: (events) {
+      data: (obj) {
+        final events = obj as TableTennisMatchEventsData?;
         if (events == null || events.statSets.isEmpty) {
           return Center(
             child: Text(

@@ -36,19 +36,19 @@ class _FootballMatchDetailScreenState
 
   @override
   void onEventsTimerTick() =>
-      ref.invalidate(footballMatchEventsKeyProvider(matchId: matchId));
+      ref.invalidate(matchEventsProvider(sport: SportType.football, matchId: matchId));
 
   @override
   void onStatusChanged() {
-    ref.invalidate(footballMatchDetailProvider(matchId: matchId));
-    ref.invalidate(footballMatchEventsKeyProvider(matchId: matchId));
+    ref.invalidate(matchDetailProvider(sport: SportType.football, matchId: matchId));
+    ref.invalidate(matchEventsProvider(sport: SportType.football, matchId: matchId));
     ref.invalidate(footballMatchLineupsProvider(matchId: matchId));
   }
 
   @override
   (String?, int?) watchDetail() {
-    final v =
-        ref.watch(footballMatchDetailProvider(matchId: matchId)).valueOrNull;
+    final v = ref.watch(matchDetailProvider(sport: SportType.football, matchId: matchId))
+        .valueOrNull as FootballMatchDetail?;
     return (v?.leagueName, v?.matchTime);
   }
 
@@ -79,8 +79,8 @@ class _MatchHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(footballMatchDetailProvider(matchId: matchId));
-    final eventsAsync = ref.watch(footballMatchEventsKeyProvider(matchId: matchId));
+    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.football, matchId: matchId));
+    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
     final rt = ref.watch(
       sportRealtimeProvider(SportType.football).select((map) => map[matchId] as MatchRealtimeData?),
     );
@@ -92,10 +92,11 @@ class _MatchHeader extends ConsumerWidget {
       child: detailAsync.when(
         loading: () => const SizedBox(height: 72),
         error: (_, __) => const SizedBox(height: 72),
-        data: (detail) {
+        data: (obj) {
+          final detail = obj as FootballMatchDetail;
           final effKickoff = (rt != null && rt.kickoffTimestamp != 0)
               ? rt.kickoffTimestamp
-              : eventsAsync.valueOrNull?.kickoffTimestamp;
+              : (eventsAsync.valueOrNull as FootballMatchEvents?)?.kickoffTimestamp;
           return _MatchHeaderContent(
             detail: detail,
             kickoffTimestamp: effKickoff,
@@ -331,7 +332,7 @@ class _EventsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final eventsAsync = ref.watch(footballMatchEventsKeyProvider(matchId: matchId));
+    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
 
     return eventsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
@@ -344,7 +345,8 @@ class _EventsTab extends ConsumerWidget {
           ),
         );
       },
-      data: (events) {
+      data: (obj) {
+        final events = obj as FootballMatchEvents?;
         if (events == null || events.incidents.isEmpty) {
           return Center(
             child: Text(
@@ -664,7 +666,7 @@ class _LineupsTabState extends ConsumerState<_LineupsTab> with SingleTickerProvi
           );
         }
 
-        final detail = ref.watch(footballMatchDetailProvider(matchId: widget.matchId)).valueOrNull;
+        final detail = ref.watch(matchDetailProvider(sport: SportType.football, matchId: widget.matchId)).valueOrNull as FootballMatchDetail?;
         final homeIcon = detail?.homeInfo.logo;
         final awayIcon = detail?.awayInfo.logo;
         final homeName = detail?.homeName ?? 'Home';
@@ -850,14 +852,15 @@ class _StatsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final eventsAsync = ref.watch(footballMatchEventsKeyProvider(matchId: matchId));
+    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
 
     return eventsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
-      data: (events) {
+      data: (obj) {
+        final events = obj as FootballMatchEvents?;
         final apiStats = events?.stats.where((s) => s.label != null && s.label!.isNotEmpty).toList() ?? [];
         final apiByLabel = {for (final s in apiStats) s.label!: s};
 

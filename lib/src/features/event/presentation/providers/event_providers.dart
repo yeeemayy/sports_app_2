@@ -1,21 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sports_app/src/features/event/data/event_repository.dart';
-import 'package:sports_app/src/features/event/domain/models/basketball_match_detail.dart';
-import 'package:sports_app/src/features/event/domain/models/basketball_match_events.dart';
 import 'package:sports_app/src/features/event/domain/models/basketball_team_squad.dart';
 import 'package:sports_app/src/features/event/domain/models/football_lineup.dart';
-import 'package:sports_app/src/features/event/domain/models/football_match_detail.dart';
-import 'package:sports_app/src/features/event/domain/models/football_match_events.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_match.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
-import 'package:sports_app/src/features/event/domain/models/badminton_match_detail.dart';
-import 'package:sports_app/src/features/event/domain/models/badminton_match_events.dart';
-import 'package:sports_app/src/features/event/domain/models/baseball_match_detail.dart';
-import 'package:sports_app/src/features/event/domain/models/baseball_match_events.dart';
-import 'package:sports_app/src/features/event/domain/models/table_tennis_match_detail.dart';
-import 'package:sports_app/src/features/event/domain/models/table_tennis_match_events.dart';
-import 'package:sports_app/src/features/event/domain/models/tennis_match_detail.dart';
-import 'package:sports_app/src/features/event/domain/models/tennis_match_events.dart';
 
 part 'event_providers.g.dart';
 
@@ -107,51 +95,11 @@ Future<List<SportMatch>> footballScheduledMatches(
 }
 
 @riverpod
-Future<FootballMatchDetail> footballMatchDetail(
-  FootballMatchDetailRef ref, {
-  required String matchId,
-}) {
-  return ref.watch(eventRepositoryProvider.notifier)
-      .getMatchDetail(SportType.football, matchId)
-      .then((r) => r as FootballMatchDetail);
-}
-
-@riverpod
 Future<FootballLineups?> footballMatchLineups(
   FootballMatchLineupsRef ref, {
   required String matchId,
 }) {
   return ref.watch(eventRepositoryProvider.notifier).getFootballMatchLineups(matchId);
-}
-
-@riverpod
-Future<FootballMatchEvents?> footballMatchEventsKey(
-  FootballMatchEventsKeyRef ref, {
-  required String matchId,
-}) {
-  return ref.watch(eventRepositoryProvider.notifier)
-      .getMatchEvents(SportType.football, matchId)
-      .then((r) => r as FootballMatchEvents?);
-}
-
-@riverpod
-Future<BasketballMatchDetail> basketballMatchDetail(
-  BasketballMatchDetailRef ref, {
-  required String matchId,
-}) {
-  return ref.watch(eventRepositoryProvider.notifier)
-      .getMatchDetail(SportType.basketball, matchId)
-      .then((r) => r as BasketballMatchDetail);
-}
-
-@riverpod
-Future<BasketballMatchEventsData?> basketballMatchEventsKey(
-  BasketballMatchEventsKeyRef ref, {
-  required String matchId,
-}) {
-  return ref.watch(eventRepositoryProvider.notifier)
-      .getMatchEvents(SportType.basketball, matchId)
-      .then((r) => r as BasketballMatchEventsData?);
 }
 
 @riverpod
@@ -162,82 +110,34 @@ Future<List<BasketballPlayer>> basketballTeamSquad(
   return ref.watch(eventRepositoryProvider.notifier).getBasketballTeamSquad(teamId);
 }
 
+/// Generic match detail provider family keyed by [SportType].
+///
+/// Returns `Object` — callers cast to the expected sport-specific type:
+/// ```dart
+/// ref.watch(matchDetailProvider(sport: SportType.football, matchId: id))
+///     .whenData((r) => r as FootballMatchDetail)
+/// ```
 @riverpod
-Future<TennisMatchDetail> tennisMatchDetail(
-  TennisMatchDetailRef ref, {
+Future<Object> matchDetail(
+  MatchDetailRef ref, {
+  required SportType sport,
   required String matchId,
 }) {
-  return ref.watch(eventRepositoryProvider.notifier)
-      .getMatchDetail(SportType.tennis, matchId)
-      .then((r) => r as TennisMatchDetail);
+  return ref.watch(eventRepositoryProvider.notifier).getMatchDetail(sport, matchId);
 }
 
+/// Generic match events provider family keyed by [SportType].
+///
+/// Returns `Object?` — callers cast to the expected sport-specific type:
+/// ```dart
+/// ref.watch(matchEventsProvider(sport: SportType.football, matchId: id))
+///     .whenData((r) => r as FootballMatchEvents?)
+/// ```
 @riverpod
-Future<TennisMatchEventsData?> tennisMatchEvents(
-  TennisMatchEventsRef ref, {
+Future<Object?> matchEvents(
+  MatchEventsRef ref, {
+  required SportType sport,
   required String matchId,
 }) {
-  return ref.watch(eventRepositoryProvider.notifier)
-      .getMatchEvents(SportType.tennis, matchId)
-      .then((r) => r as TennisMatchEventsData?);
-}
-
-@riverpod
-Future<BadmintonMatchDetail> badmintonMatchDetail(
-  BadmintonMatchDetailRef ref, {
-  required String matchId,
-}) {
-  return ref.watch(eventRepositoryProvider.notifier)
-      .getMatchDetail(SportType.badminton, matchId)
-      .then((r) => r as BadmintonMatchDetail);
-}
-
-@riverpod
-Future<BadmintonMatchEventsData?> badmintonMatchEvents(
-  BadmintonMatchEventsRef ref, {
-  required String matchId,
-}) {
-  return ref.watch(eventRepositoryProvider.notifier)
-      .getMatchEvents(SportType.badminton, matchId)
-      .then((r) => r as BadmintonMatchEventsData?);
-}
-
-@riverpod
-Future<TableTennisMatchDetail> tableTennisMatchDetail(
-  TableTennisMatchDetailRef ref, {
-  required String matchId,
-}) {
-  return ref.watch(eventRepositoryProvider.notifier)
-      .getMatchDetail(SportType.tableTennis, matchId)
-      .then((r) => r as TableTennisMatchDetail);
-}
-
-@riverpod
-Future<TableTennisMatchEventsData?> tableTennisMatchEvents(
-  TableTennisMatchEventsRef ref, {
-  required String matchId,
-}) {
-  return ref.watch(eventRepositoryProvider.notifier)
-      .getMatchEvents(SportType.tableTennis, matchId)
-      .then((r) => r as TableTennisMatchEventsData?);
-}
-
-@riverpod
-Future<BaseballMatchDetail> baseballMatchDetail(
-  BaseballMatchDetailRef ref, {
-  required String matchId,
-}) {
-  return ref.watch(eventRepositoryProvider.notifier)
-      .getMatchDetail(SportType.baseball, matchId)
-      .then((r) => r as BaseballMatchDetail);
-}
-
-@riverpod
-Future<BaseballMatchEventsData?> baseballMatchEvents(
-  BaseballMatchEventsRef ref, {
-  required String matchId,
-}) {
-  return ref.watch(eventRepositoryProvider.notifier)
-      .getMatchEvents(SportType.baseball, matchId)
-      .then((r) => r as BaseballMatchEventsData?);
+  return ref.watch(eventRepositoryProvider.notifier).getMatchEvents(sport, matchId);
 }

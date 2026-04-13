@@ -35,18 +35,18 @@ class _BasketballMatchDetailScreenState
 
   @override
   void onEventsTimerTick() =>
-      ref.invalidate(basketballMatchEventsKeyProvider(matchId: matchId));
+      ref.invalidate(matchEventsProvider(sport: SportType.basketball, matchId: matchId));
 
   @override
   void onStatusChanged() {
-    ref.invalidate(basketballMatchDetailProvider(matchId: matchId));
-    ref.invalidate(basketballMatchEventsKeyProvider(matchId: matchId));
+    ref.invalidate(matchDetailProvider(sport: SportType.basketball, matchId: matchId));
+    ref.invalidate(matchEventsProvider(sport: SportType.basketball, matchId: matchId));
   }
 
   @override
   (String?, int?) watchDetail() {
-    final v =
-        ref.watch(basketballMatchDetailProvider(matchId: matchId)).valueOrNull;
+    final v = ref.watch(matchDetailProvider(sport: SportType.basketball, matchId: matchId))
+        .valueOrNull as BasketballMatchDetail?;
     return (v?.leagueName, v?.matchTime);
   }
 
@@ -77,9 +77,9 @@ class _BasketballMatchHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final detailAsync =
-        ref.watch(basketballMatchDetailProvider(matchId: matchId));
+        ref.watch(matchDetailProvider(sport: SportType.basketball, matchId: matchId));
     final eventsAsync =
-        ref.watch(basketballMatchEventsKeyProvider(matchId: matchId));
+        ref.watch(matchEventsProvider(sport: SportType.basketball, matchId: matchId));
     final rt = ref.watch(
       sportRealtimeProvider(SportType.basketball).select((map) => map[matchId] as BasketballRealtimeData?),
     );
@@ -91,11 +91,14 @@ class _BasketballMatchHeader extends ConsumerWidget {
       child: detailAsync.when(
         loading: () => const SizedBox(height: 72),
         error: (_, __) => const SizedBox(height: 72),
-        data: (detail) => _BasketballMatchHeaderContent(
-          detail: detail,
-          rt: rt,
-          eventsData: eventsAsync.valueOrNull,
-        ),
+        data: (obj) {
+          final detail = obj as BasketballMatchDetail;
+          return _BasketballMatchHeaderContent(
+            detail: detail,
+            rt: rt,
+            eventsData: eventsAsync.valueOrNull as BasketballMatchEventsData?,
+          );
+        },
       ),
     );
   }
@@ -276,16 +279,16 @@ class _BasketballMatchBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final detailAsync =
-        ref.watch(basketballMatchDetailProvider(matchId: matchId));
+        ref.watch(matchDetailProvider(sport: SportType.basketball, matchId: matchId));
     final eventsAsync =
-        ref.watch(basketballMatchEventsKeyProvider(matchId: matchId));
+        ref.watch(matchEventsProvider(sport: SportType.basketball, matchId: matchId));
 
     return eventsAsync.when(
       loading: () =>
           const Center(child: CircularProgressIndicator(color: Colors.pink)),
       error: (_, __) {
         // Show detail data only if events fail
-        final detail = detailAsync.valueOrNull;
+        final detail = detailAsync.valueOrNull as BasketballMatchDetail?;
         if (detail == null) {
           return Center(
             child: Text(
@@ -309,8 +312,9 @@ class _BasketballMatchBody extends ConsumerWidget {
           stats: const [],
         );
       },
-      data: (events) {
-        final detail = detailAsync.valueOrNull;
+      data: (obj) {
+        final events = obj as BasketballMatchEventsData?;
+        final detail = detailAsync.valueOrNull as BasketballMatchDetail?;
         // Events API is the primary source; detail is fallback.
         final effStatusId =
             events?.statusId ?? detail?.statusId ?? 0;
@@ -674,7 +678,7 @@ class _SquadTabState extends ConsumerState<_SquadTab>
   @override
   Widget build(BuildContext context) {
     final detail =
-        ref.watch(basketballMatchDetailProvider(matchId: widget.matchId)).valueOrNull;
+        ref.watch(matchDetailProvider(sport: SportType.basketball, matchId: widget.matchId)).valueOrNull as BasketballMatchDetail?;
 
     final homeTeamId = detail?.homeTeamId ?? '';
     final awayTeamId = detail?.awayTeamId ?? '';

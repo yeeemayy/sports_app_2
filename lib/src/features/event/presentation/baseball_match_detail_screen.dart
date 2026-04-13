@@ -34,18 +34,18 @@ class _BaseballMatchDetailScreenState
 
   @override
   void onEventsTimerTick() =>
-      ref.invalidate(baseballMatchEventsProvider(matchId: matchId));
+      ref.invalidate(matchEventsProvider(sport: SportType.baseball, matchId: matchId));
 
   @override
   void onStatusChanged() {
-    ref.invalidate(baseballMatchDetailProvider(matchId: matchId));
-    ref.invalidate(baseballMatchEventsProvider(matchId: matchId));
+    ref.invalidate(matchDetailProvider(sport: SportType.baseball, matchId: matchId));
+    ref.invalidate(matchEventsProvider(sport: SportType.baseball, matchId: matchId));
   }
 
   @override
   (String?, int?) watchDetail() {
-    final v =
-        ref.watch(baseballMatchDetailProvider(matchId: matchId)).valueOrNull;
+    final v = ref.watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId))
+        .valueOrNull as BaseballMatchDetail?;
     return (v?.leagueName, v?.matchTime);
   }
 
@@ -75,7 +75,7 @@ class _BaseballMatchHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(baseballMatchDetailProvider(matchId: matchId));
+    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId));
     final rt = ref.watch(
       sportRealtimeProvider(SportType.baseball).select((map) => map[matchId] as BaseballRealtimeData?),
     );
@@ -87,7 +87,7 @@ class _BaseballMatchHeader extends ConsumerWidget {
       child: detailAsync.when(
         loading: () => const SizedBox(height: 80),
         error: (_, __) => const SizedBox(height: 80),
-        data: (detail) => _HeaderContent(detail: detail, rt: rt),
+        data: (obj) => _HeaderContent(detail: obj as BaseballMatchDetail, rt: rt),
       ),
     );
   }
@@ -217,16 +217,17 @@ class _ScoreTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(baseballMatchDetailProvider(matchId: matchId));
-    final eventsAsync = ref.watch(baseballMatchEventsProvider(matchId: matchId));
+    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId));
+    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.baseball, matchId: matchId));
 
     return detailAsync.when(
       loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
-      data: (detail) {
-        final events = eventsAsync.valueOrNull;
+      data: (obj) {
+        final detail = obj as BaseballMatchDetail;
+        final events = eventsAsync.valueOrNull as BaseballMatchEventsData?;
         return _InningGrid(detail: detail, events: events);
       },
     );
@@ -578,14 +579,15 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
 
   @override
   Widget build(BuildContext context) {
-    final eventsAsync = ref.watch(baseballMatchEventsProvider(matchId: widget.matchId));
+    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.baseball, matchId: widget.matchId));
 
     return eventsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
-      data: (events) {
+      data: (obj) {
+        final events = obj as BaseballMatchEventsData?;
         if (events == null || events.statSets.isEmpty) {
           return Center(
             child: Text(
