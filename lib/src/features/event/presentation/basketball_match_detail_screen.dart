@@ -34,16 +34,6 @@ class _BasketballMatchDetailScreenState
   Duration get eventsRefreshInterval => const Duration(seconds: 2);
 
   @override
-  void onEventsTimerTick() =>
-      ref.invalidate(matchEventsProvider(sport: SportType.basketball, matchId: matchId));
-
-  @override
-  void onStatusChanged() {
-    ref.invalidate(matchDetailProvider(sport: SportType.basketball, matchId: matchId));
-    ref.invalidate(matchEventsProvider(sport: SportType.basketball, matchId: matchId));
-  }
-
-  @override
   (String?, int?) watchDetail() {
     final v = ref.watch(matchDetailProvider(sport: SportType.basketball, matchId: matchId))
         .valueOrNull as BasketballMatchDetail?;
@@ -780,8 +770,7 @@ class _TeamSquadList extends ConsumerWidget {
         debugPrint('$e\n$st');
         return Center(
           child: Text(
-            // 'event.error.load_failed'.tr(),
-            st.toString(),
+            'event.error.load_failed'.tr(),
             style: TextStyle(color: Colors.grey.shade500),
           ),
         );

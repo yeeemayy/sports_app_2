@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 /// Returns a compact label for the baseball status badge on match cards.
 String baseballStatusLabel(int statusId) {
   final labels = <int, String>{
+    1: 'event.baseball.status.not_started'.tr(),
     100: 'event.baseball.status.end'.tr(),
     14: 'event.baseball.status.pst'.tr(),
     15: 'event.baseball.status.dly'.tr(),

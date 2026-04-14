@@ -1,3 +1,6 @@
+import 'package:sports_app/src/features/event/domain/models/am_football_match_detail.dart';
+import 'package:sports_app/src/features/event/domain/models/am_football_match_events.dart';
+import 'package:sports_app/src/features/event/domain/models/am_football_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_match_events.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_realtime_data.dart';
@@ -7,8 +10,14 @@ import 'package:sports_app/src/features/event/domain/models/baseball_realtime_da
 import 'package:sports_app/src/features/event/domain/models/basketball_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/basketball_match_events.dart';
 import 'package:sports_app/src/features/event/domain/models/basketball_realtime_data.dart';
+import 'package:sports_app/src/features/event/domain/models/cricket_match_detail.dart';
+import 'package:sports_app/src/features/event/domain/models/cricket_match_events.dart';
+import 'package:sports_app/src/features/event/domain/models/cricket_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match_events.dart';
+import 'package:sports_app/src/features/event/domain/models/ice_hockey_match_detail.dart';
+import 'package:sports_app/src/features/event/domain/models/ice_hockey_match_events.dart';
+import 'package:sports_app/src/features/event/domain/models/ice_hockey_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/match_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
@@ -18,6 +27,9 @@ import 'package:sports_app/src/features/event/domain/models/table_tennis_realtim
 import 'package:sports_app/src/features/event/domain/models/tennis_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/tennis_match_events.dart';
 import 'package:sports_app/src/features/event/domain/models/tennis_realtime_data.dart';
+import 'package:sports_app/src/features/event/domain/models/volleyball_match_detail.dart';
+import 'package:sports_app/src/features/event/domain/models/volleyball_match_events.dart';
+import 'package:sports_app/src/features/event/domain/models/volleyball_realtime_data.dart';
 
 /// Per-sport API + parsing configuration.
 /// Used by the generic repository methods and the [SportRealtime] family provider.
@@ -112,25 +124,37 @@ const _configs = <SportType, SportConfig>{
     detailPath: '/cricket/match/details',
     eventsPath: '/cricket/match/events',
     realtimePath: '/cricket/match/realtime',
-    pollInterval: Duration(seconds: 5),
+    pollInterval: Duration(seconds: 2),
+    parseDetail: CricketMatchDetail.fromJson,
+    parseEvents: CricketMatchEventsData.fromJson,
+    parseRealtime: CricketRealtimeData.fromJson,
   ),
   SportType.volleyball: SportConfig(
     detailPath: '/volleyball/match/details',
     eventsPath: '/volleyball/match/events',
     realtimePath: '/volleyball/match/realtime',
     pollInterval: Duration(seconds: 2),
+    parseDetail: VolleyballMatchDetail.fromJson,
+    parseEvents: VolleyballMatchEventsData.fromJson,
+    parseRealtime: VolleyballRealtimeData.fromJson,
   ),
   SportType.iceHockey: SportConfig(
     detailPath: '/hockey/match/details',
     eventsPath: '/hockey/match/events',
     realtimePath: '/hockey/match/realtime',
     pollInterval: Duration(seconds: 2),
+    parseDetail: IceHockeyMatchDetail.fromJson,
+    parseEvents: IceHockeyMatchEventsData.fromJson,
+    parseRealtime: IceHockeyRealtimeData.fromJson,
   ),
   SportType.amFootball: SportConfig(
     detailPath: '/amfootball/match/details',
     eventsPath: '/amfootball/match/events',
     realtimePath: '/amfootball/match/realtime',
     pollInterval: Duration(seconds: 2),
+    parseDetail: AmFootballMatchDetail.fromJson,
+    parseEvents: AmFootballMatchEventsData.fromJson,
+    parseRealtime: AmFootballRealtimeData.fromJson,
   ),
 };
 

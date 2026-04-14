@@ -36,6 +36,7 @@ mixin _$CricketMatch {
   String? get description => throw _privateConstructorUsedError;
   List<dynamic>? get oddsEuro => throw _privateConstructorUsedError;
   String? get statusDescription => throw _privateConstructorUsedError;
+  List<dynamic>? get rawInnings => throw _privateConstructorUsedError;
 
   /// Serializes this CricketMatch to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -70,6 +71,7 @@ abstract class $CricketMatchCopyWith<$Res> {
     String? description,
     List<dynamic>? oddsEuro,
     String? statusDescription,
+    List<dynamic>? rawInnings,
   });
 }
 
@@ -103,6 +105,7 @@ class _$CricketMatchCopyWithImpl<$Res, $Val extends CricketMatch>
     Object? description = freezed,
     Object? oddsEuro = freezed,
     Object? statusDescription = freezed,
+    Object? rawInnings = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -166,6 +169,10 @@ class _$CricketMatchCopyWithImpl<$Res, $Val extends CricketMatch>
                 ? _value.statusDescription
                 : statusDescription // ignore: cast_nullable_to_non_nullable
                       as String?,
+            rawInnings: freezed == rawInnings
+                ? _value.rawInnings
+                : rawInnings // ignore: cast_nullable_to_non_nullable
+                      as List<dynamic>?,
           )
           as $Val,
     );
@@ -197,6 +204,7 @@ abstract class _$$CricketMatchImplCopyWith<$Res>
     String? description,
     List<dynamic>? oddsEuro,
     String? statusDescription,
+    List<dynamic>? rawInnings,
   });
 }
 
@@ -229,6 +237,7 @@ class __$$CricketMatchImplCopyWithImpl<$Res>
     Object? description = freezed,
     Object? oddsEuro = freezed,
     Object? statusDescription = freezed,
+    Object? rawInnings = freezed,
   }) {
     return _then(
       _$CricketMatchImpl(
@@ -292,6 +301,10 @@ class __$$CricketMatchImplCopyWithImpl<$Res>
             ? _value.statusDescription
             : statusDescription // ignore: cast_nullable_to_non_nullable
                   as String?,
+        rawInnings: freezed == rawInnings
+            ? _value._rawInnings
+            : rawInnings // ignore: cast_nullable_to_non_nullable
+                  as List<dynamic>?,
       ),
     );
   }
@@ -316,7 +329,9 @@ class _$CricketMatchImpl extends _CricketMatch {
     this.description,
     final List<dynamic>? oddsEuro,
     this.statusDescription,
+    final List<dynamic>? rawInnings,
   }) : _oddsEuro = oddsEuro,
+       _rawInnings = rawInnings,
        super._();
 
   factory _$CricketMatchImpl.fromJson(Map<String, dynamic> json) =>
@@ -360,10 +375,19 @@ class _$CricketMatchImpl extends _CricketMatch {
 
   @override
   final String? statusDescription;
+  final List<dynamic>? _rawInnings;
+  @override
+  List<dynamic>? get rawInnings {
+    final value = _rawInnings;
+    if (value == null) return null;
+    if (_rawInnings is EqualUnmodifiableListView) return _rawInnings;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
 
   @override
   String toString() {
-    return 'CricketMatch(id: $id, statusId: $statusId, matchTimeSim: $matchTimeSim, homeName: $homeName, homeLogo: $homeLogo, homeScore: $homeScore, awayName: $awayName, awayLogo: $awayLogo, awayScore: $awayScore, leagueName: $leagueName, leagueLogo: $leagueLogo, matchTime: $matchTime, description: $description, oddsEuro: $oddsEuro, statusDescription: $statusDescription)';
+    return 'CricketMatch(id: $id, statusId: $statusId, matchTimeSim: $matchTimeSim, homeName: $homeName, homeLogo: $homeLogo, homeScore: $homeScore, awayName: $awayName, awayLogo: $awayLogo, awayScore: $awayScore, leagueName: $leagueName, leagueLogo: $leagueLogo, matchTime: $matchTime, description: $description, oddsEuro: $oddsEuro, statusDescription: $statusDescription, rawInnings: $rawInnings)';
   }
 
   @override
@@ -398,7 +422,11 @@ class _$CricketMatchImpl extends _CricketMatch {
                 other.description == description) &&
             const DeepCollectionEquality().equals(other._oddsEuro, _oddsEuro) &&
             (identical(other.statusDescription, statusDescription) ||
-                other.statusDescription == statusDescription));
+                other.statusDescription == statusDescription) &&
+            const DeepCollectionEquality().equals(
+              other._rawInnings,
+              _rawInnings,
+            ));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -420,6 +448,7 @@ class _$CricketMatchImpl extends _CricketMatch {
     description,
     const DeepCollectionEquality().hash(_oddsEuro),
     statusDescription,
+    const DeepCollectionEquality().hash(_rawInnings),
   );
 
   /// Create a copy of CricketMatch
@@ -453,6 +482,7 @@ abstract class _CricketMatch extends CricketMatch {
     final String? description,
     final List<dynamic>? oddsEuro,
     final String? statusDescription,
+    final List<dynamic>? rawInnings,
   }) = _$CricketMatchImpl;
   const _CricketMatch._() : super._();
 
@@ -489,6 +519,8 @@ abstract class _CricketMatch extends CricketMatch {
   List<dynamic>? get oddsEuro;
   @override
   String? get statusDescription;
+  @override
+  List<dynamic>? get rawInnings;
 
   /// Create a copy of CricketMatch
   /// with the given fields replaced by the non-null parameter values.

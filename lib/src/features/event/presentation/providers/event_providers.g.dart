@@ -775,7 +775,7 @@ class _MatchEventsProviderElement
 }
 
 String _$sportMatchesPaginatedHash() =>
-    r'deae687e672944ccd2882c02768841aa274fcd12';
+    r'd8c2c6da244415f8e04af177ab35c7815afd1faf';
 
 abstract class _$SportMatchesPaginated
     extends BuildlessAutoDisposeAsyncNotifier<PaginatedMatchResult> {

@@ -33,16 +33,6 @@ class _BaseballMatchDetailScreenState
   Duration get eventsRefreshInterval => const Duration(seconds: 5);
 
   @override
-  void onEventsTimerTick() =>
-      ref.invalidate(matchEventsProvider(sport: SportType.baseball, matchId: matchId));
-
-  @override
-  void onStatusChanged() {
-    ref.invalidate(matchDetailProvider(sport: SportType.baseball, matchId: matchId));
-    ref.invalidate(matchEventsProvider(sport: SportType.baseball, matchId: matchId));
-  }
-
-  @override
   (String?, int?) watchDetail() {
     final v = ref.watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId))
         .valueOrNull as BaseballMatchDetail?;

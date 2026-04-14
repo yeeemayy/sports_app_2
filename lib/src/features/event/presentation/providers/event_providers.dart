@@ -55,7 +55,7 @@ class SportMatchesPaginated extends _$SportMatchesPaginated {
     _isHot = isHot;
     final result = await _fetch(page: 1);
     return PaginatedMatchResult(
-      matches: result.matches,
+      matches: result.matches.where((m) => m.statusId != 0).toList(),
       currentPage: 1,
       totalPage: result.totalPage,
     );
@@ -76,7 +76,7 @@ class SportMatchesPaginated extends _$SportMatchesPaginated {
       final nextPage = current.currentPage + 1;
       final result = await _fetch(page: nextPage);
       state = AsyncData(PaginatedMatchResult(
-        matches: [...current.matches, ...result.matches],
+        matches: [...current.matches, ...result.matches.where((m) => m.statusId != 0)],
         currentPage: nextPage,
         totalPage: result.totalPage,
       ));

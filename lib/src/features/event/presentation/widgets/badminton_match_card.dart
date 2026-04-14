@@ -6,39 +6,19 @@ import 'package:sports_app/src/features/event/domain/badminton_status.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_match.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
+import 'package:sports_app/src/features/event/domain/set_score_utils.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/set_score_display.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/sport_status_badge.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
-import 'package:easy_localization/easy_localization.dart';
 
 class BadmintonMatchCard extends ConsumerWidget {
   const BadmintonMatchCard({super.key, required this.match});
 
   final BadmintonMatch match;
 
-  static List<int> _homeSets(BadmintonMatch m) {
-    final scores = m.scores;
-    if (scores == null) return [];
-    final sets = <int>[];
-    for (var i = 1; i <= 5; i++) {
-      final s = scores['p$i'] as List<dynamic>?;
-      if (s == null) break;
-      sets.add((s[0] as num?)?.toInt() ?? 0);
-    }
-    return sets;
-  }
-
-  static List<int> _awaySets(BadmintonMatch m) {
-    final scores = m.scores;
-    if (scores == null) return [];
-    final sets = <int>[];
-    for (var i = 1; i <= 5; i++) {
-      final s = scores['p$i'] as List<dynamic>?;
-      if (s == null) break;
-      sets.add((s[1] as num?)?.toInt() ?? 0);
-    }
-    return sets;
-  }
+  static const _liveStatuses = {3, 51, 52, 53, 54, 55};
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -47,12 +27,13 @@ class BadmintonMatchCard extends ConsumerWidget {
     );
 
     final effectiveStatusId = rt?.statusId ?? match.statusId;
-    final effectiveHomeSets = rt?.homeSets ?? _homeSets(match);
-    final effectiveAwaySets = rt?.awaySets ?? _awaySets(match);
+    final effectiveHomeSets = rt?.homeSets ?? extractSetScores(match.scores, 0);
+    final effectiveAwaySets = rt?.awaySets ?? extractSetScores(match.scores, 1);
     final effectiveHomeTotal = rt?.homeTotal.toString() ?? match.homeScore;
     final effectiveAwayTotal = rt?.awayTotal.toString() ?? match.awayScore;
 
     final statusLabel = badmintonStatusLabel(effectiveStatusId, match.statusDescription);
+    final isLive = _liveStatuses.contains(effectiveStatusId);
 
     return GestureDetector(
       onTap: () => context.push(AppRoutes.badmintonMatchDetailPath(match.id)),
@@ -120,13 +101,14 @@ class BadmintonMatchCard extends ConsumerWidget {
                   // Score area
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: _BadmintonScoreDisplay(
+                    child: SetScoreDisplay(
                       statusId: effectiveStatusId,
                       statusLabel: statusLabel,
                       homeTotal: effectiveHomeTotal,
                       awayTotal: effectiveAwayTotal,
                       homeSets: effectiveHomeSets,
                       awaySets: effectiveAwaySets,
+                      isLive: isLive,
                     ),
                   ),
                   // Away player
@@ -153,94 +135,13 @@ class BadmintonMatchCard extends ConsumerWidget {
             ),
             const SizedBox(height: 3),
             Center(
-              child: Container(
-                constraints: const BoxConstraints(minWidth: 50),
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: statusLabel.isNotEmpty ? Colors.orange : Colors.white,
-                  border: Border.all(color: Colors.orange),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  statusLabel.isNotEmpty ? statusLabel : 'common.unknown'.tr(),
-                  textAlign: TextAlign.center,
-                  style: context.textTheme.labelSmall?.copyWith(
-                    color: statusLabel.isNotEmpty ? Colors.white : Colors.pink,
-                  ),
-                ),
-              ),
+              child: SportStatusBadge(label: statusLabel, isLive: isLive),
             ),
             const SizedBox(height: 8),
             Divider(height: 1, thickness: 0.5, color: Colors.grey.shade200),
           ],
         ),
       ),
-    );
-  }
-}
-
-// ─── Score display ────────────────────────────────────────────────────────────
-
-class _BadmintonScoreDisplay extends StatelessWidget {
-  const _BadmintonScoreDisplay({
-    required this.statusId,
-    required this.statusLabel,
-    required this.homeTotal,
-    required this.awayTotal,
-    required this.homeSets,
-    required this.awaySets,
-  });
-
-  final int statusId;
-  final String statusLabel;
-  final String homeTotal;
-  final String awayTotal;
-  final List<int> homeSets;
-  final List<int> awaySets;
-
-  static const _liveStatuses = {3, 51, 52, 53, 54, 55};
-
-  @override
-  Widget build(BuildContext context) {
-    final isNotStarted = statusId == 1;
-    final isLive = _liveStatuses.contains(statusId);
-    final scoreColor = isNotStarted
-        ? Colors.grey.shade400
-        : isLive
-        ? Colors.pink
-        : Colors.black87;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (isNotStarted || statusLabel.isEmpty)
-          Text(
-            '-',
-            style: context.textTheme.titleSmall?.copyWith(
-              color: Colors.grey.shade400,
-              fontWeight: FontWeight.w600,
-            ),
-          )
-        else
-          RichText(
-            text: TextSpan(
-              style: context.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w900,
-                color: scoreColor,
-              ),
-              children: [
-                TextSpan(text: homeTotal),
-                const TextSpan(text: ' - '),
-                TextSpan(text: awayTotal),
-              ],
-            ),
-          ),
-        if (homeSets.isNotEmpty)
-          Text(
-            '${homeSets.last}:${awaySets.last}',
-            style: context.textTheme.labelMedium?.copyWith(color: Colors.grey.shade500),
-          ),
-      ],
     );
   }
 }

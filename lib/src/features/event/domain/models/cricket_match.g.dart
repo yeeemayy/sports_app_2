@@ -23,6 +23,7 @@ _$CricketMatchImpl _$$CricketMatchImplFromJson(Map<String, dynamic> json) =>
       description: json['description'] as String?,
       oddsEuro: json['oddsEuro'] as List<dynamic>?,
       statusDescription: json['statusDescription'] as String?,
+      rawInnings: json['rawInnings'] as List<dynamic>?,
     );
 
 Map<String, dynamic> _$$CricketMatchImplToJson(_$CricketMatchImpl instance) =>
@@ -42,4 +43,5 @@ Map<String, dynamic> _$$CricketMatchImplToJson(_$CricketMatchImpl instance) =>
       'description': instance.description,
       'oddsEuro': instance.oddsEuro,
       'statusDescription': instance.statusDescription,
+      'rawInnings': instance.rawInnings,
     };

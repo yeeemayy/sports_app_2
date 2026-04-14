@@ -33,16 +33,6 @@ class _BadmintonMatchDetailScreenState
   Duration get eventsRefreshInterval => const Duration(seconds: 5);
 
   @override
-  void onEventsTimerTick() =>
-      ref.invalidate(matchEventsProvider(sport: SportType.badminton, matchId: matchId));
-
-  @override
-  void onStatusChanged() {
-    ref.invalidate(matchDetailProvider(sport: SportType.badminton, matchId: matchId));
-    ref.invalidate(matchEventsProvider(sport: SportType.badminton, matchId: matchId));
-  }
-
-  @override
   (String?, int?) watchDetail() {
     final v = ref.watch(matchDetailProvider(sport: SportType.badminton, matchId: matchId))
         .valueOrNull as BadmintonMatchDetail?;
@@ -931,13 +921,13 @@ class _BlinkingLiveIndicatorState extends State<_BlinkingLiveIndicator>
               Container(
                 width: 7,
                 height: 7,
-                decoration: const BoxDecoration(color: Color(0xffe67777), shape: BoxShape.circle),
+                decoration: BoxDecoration(color: Colors.pink.shade50, shape: BoxShape.circle),
               ),
               const SizedBox(width: 4),
               Text(
                 widget.label,
                 style: context.textTheme.labelSmall?.copyWith(
-                  color: Color(0xffe67777),
+                  color: Colors.pink.shade50,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.5,
                 ),

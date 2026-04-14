@@ -33,16 +33,6 @@ class _TennisMatchDetailScreenState
   Duration get eventsRefreshInterval => const Duration(seconds: 5);
 
   @override
-  void onEventsTimerTick() =>
-      ref.invalidate(matchEventsProvider(sport: SportType.tennis, matchId: matchId));
-
-  @override
-  void onStatusChanged() {
-    ref.invalidate(matchDetailProvider(sport: SportType.tennis, matchId: matchId));
-    ref.invalidate(matchEventsProvider(sport: SportType.tennis, matchId: matchId));
-  }
-
-  @override
   (String?, int?) watchDetail() {
     final v = ref.watch(matchDetailProvider(sport: SportType.tennis, matchId: matchId))
         .valueOrNull as TennisMatchDetail?;
@@ -115,9 +105,6 @@ class _TennisHeaderContent extends StatelessWidget {
 
     final homeSets = eventsData?.homeSets ?? rt?.homeSets ?? detail.homeInfo.setSores;
     final awaySets = eventsData?.awaySets ?? rt?.awaySets ?? detail.awayInfo.setSores;
-
-    final homePt = eventsData?.homePt ?? rt?.homePt ?? detail.homePt ?? '';
-    final awayPt = eventsData?.awayPt ?? rt?.awayPt ?? detail.awayPt ?? '';
 
     final servingSide = eventsData?.servingSide ?? rt?.servingSide ?? detail.servingSide ?? 0;
 
@@ -195,21 +182,10 @@ class _TennisHeaderContent extends StatelessWidget {
                         ],
                       ),
                     ),
-                    if (homeSets.isNotEmpty)
+                    if (isLive && homeSets.isNotEmpty)
                       Text(
                         '${homeSets.last}:${awaySets.last}',
                         style: context.textTheme.labelMedium?.copyWith(color: Colors.white70),
-                      ),
-                    if (isLive && homePt.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          '$homePt : $awayPt',
-                          style: context.textTheme.labelMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
                       ),
                   ],
                 ],

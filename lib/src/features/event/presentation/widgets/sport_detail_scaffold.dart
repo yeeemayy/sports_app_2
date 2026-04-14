@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
+import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/match_detail_appbar.dart';
 
@@ -21,11 +22,22 @@ abstract class SportDetailScaffoldState<T extends ConsumerStatefulWidget>
   SportType get sportType;
   Duration get eventsRefreshInterval;
 
-  /// Invalidate the sport's events provider(s). Called on each timer tick.
-  void onEventsTimerTick();
+  /// Invalidate the sport's events provider. Called on each timer tick.
+  ///
+  /// Override to add sport-specific extra invalidations (e.g. lineups).
+  /// Call [super.onEventsTimerTick] to preserve the default events invalidation.
+  void onEventsTimerTick() {
+    ref.invalidate(matchEventsProvider(sport: sportType, matchId: matchId));
+  }
 
-  /// Invalidate the sport's detail + events providers. Called when status changes.
-  void onStatusChanged();
+  /// Invalidate the sport's detail and events providers. Called when status changes.
+  ///
+  /// Override to add sport-specific extra invalidations (e.g. lineups).
+  /// Call [super.onStatusChanged] to preserve the default invalidations.
+  void onStatusChanged() {
+    ref.invalidate(matchDetailProvider(sport: sportType, matchId: matchId));
+    ref.invalidate(matchEventsProvider(sport: sportType, matchId: matchId));
+  }
 
   /// Called within [build]. Must call ref.watch for the detail provider and
   /// return (leagueName, matchTimestamp) for the AppBar.

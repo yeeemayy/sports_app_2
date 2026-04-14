@@ -35,13 +35,8 @@ class _FootballMatchDetailScreenState
   Duration get eventsRefreshInterval => const Duration(seconds: 1);
 
   @override
-  void onEventsTimerTick() =>
-      ref.invalidate(matchEventsProvider(sport: SportType.football, matchId: matchId));
-
-  @override
   void onStatusChanged() {
-    ref.invalidate(matchDetailProvider(sport: SportType.football, matchId: matchId));
-    ref.invalidate(matchEventsProvider(sport: SportType.football, matchId: matchId));
+    super.onStatusChanged();
     ref.invalidate(footballMatchLineupsProvider(matchId: matchId));
   }
 

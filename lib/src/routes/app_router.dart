@@ -3,12 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sports_app/src/features/anchor/presentation/anchor_detail_screen.dart';
+import 'package:sports_app/src/features/event/presentation/am_football_match_detail_screen.dart';
 import 'package:sports_app/src/features/event/presentation/basketball_match_detail_screen.dart';
+import 'package:sports_app/src/features/event/presentation/cricket_match_detail_screen.dart';
 import 'package:sports_app/src/features/event/presentation/football_match_detail_screen.dart';
 import 'package:sports_app/src/features/event/presentation/badminton_match_detail_screen.dart';
 import 'package:sports_app/src/features/event/presentation/baseball_match_detail_screen.dart';
+import 'package:sports_app/src/features/event/presentation/ice_hockey_match_detail_screen.dart';
 import 'package:sports_app/src/features/event/presentation/table_tennis_match_detail_screen.dart';
 import 'package:sports_app/src/features/event/presentation/tennis_match_detail_screen.dart';
+import 'package:sports_app/src/features/event/presentation/volleyball_match_detail_screen.dart';
 import 'package:sports_app/src/features/auth/presentation/forgot_password_screen.dart';
 import 'package:sports_app/src/features/auth/presentation/login_screen.dart';
 import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
@@ -135,6 +139,30 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: AppRoutes.baseballMatchDetail,
         builder: (context, state) => BaseballMatchDetailScreen(
+          matchId: state.pathParameters['matchId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.volleyballMatchDetail,
+        builder: (context, state) => VolleyballMatchDetailScreen(
+          matchId: state.pathParameters['matchId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.iceHockeyMatchDetail,
+        builder: (context, state) => IceHockeyMatchDetailScreen(
+          matchId: state.pathParameters['matchId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.amFootballMatchDetail,
+        builder: (context, state) => AmFootballMatchDetailScreen(
+          matchId: state.pathParameters['matchId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.cricketMatchDetail,
+        builder: (context, state) => CricketMatchDetailScreen(
           matchId: state.pathParameters['matchId']!,
         ),
       ),

@@ -58,7 +58,7 @@ mixin RealtimePollMixin<T extends SportRealtimeData>
     if (_allIds.isEmpty) return;
     try {
       final data = await fetchData();
-      state = {for (final d in data) d.id: d};
+      state = {for (final d in data.where((d) => d.statusId != 0)) d.id: d};
     } catch (_) {}
   }
 }

@@ -1,19 +1,27 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
+import 'package:sports_app/src/features/event/domain/models/am_football_match.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_match.dart';
 import 'package:sports_app/src/features/event/domain/models/baseball_match.dart';
 import 'package:sports_app/src/features/event/domain/models/basketball_match.dart';
+import 'package:sports_app/src/features/event/domain/models/cricket_match.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match.dart';
+import 'package:sports_app/src/features/event/domain/models/ice_hockey_match.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_match.dart';
 import 'package:sports_app/src/features/event/domain/models/table_tennis_match.dart';
 import 'package:sports_app/src/features/event/domain/models/tennis_match.dart';
+import 'package:sports_app/src/features/event/domain/models/volleyball_match.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/am_football_match_card.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/badminton_match_card.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/baseball_match_card.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/basketball_match_card.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/cricket_match_card.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/football_match_card.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/ice_hockey_match_card.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/table_tennis_match_card.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/tennis_match_card.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/volleyball_match_card.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
 class EventMatchCard extends StatelessWidget {
@@ -29,6 +37,10 @@ class EventMatchCard extends StatelessWidget {
     if (match is BadmintonMatch) return BadmintonMatchCard(match: match as BadmintonMatch);
     if (match is TableTennisMatch) return TableTennisMatchCard(match: match as TableTennisMatch);
     if (match is BaseballMatch) return BaseballMatchCard(match: match as BaseballMatch);
+    if (match is VolleyballMatch) return VolleyballMatchCard(match: match as VolleyballMatch);
+    if (match is IceHockeyMatch) return IceHockeyMatchCard(match: match as IceHockeyMatch);
+    if (match is AmFootballMatch) return AmFootballMatchCard(match: match as AmFootballMatch);
+    if (match is CricketMatch) return CricketMatchCard(match: match as CricketMatch);
     return _DefaultMatchCard(match: match);
   }
 }

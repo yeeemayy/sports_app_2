@@ -2,59 +2,54 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/event/domain/baseball_status.dart';
-import 'package:sports_app/src/features/event/domain/models/baseball_match.dart';
-import 'package:sports_app/src/features/event/domain/models/baseball_realtime_data.dart';
+import 'package:sports_app/src/features/event/domain/cricket_status.dart';
+import 'package:sports_app/src/features/event/domain/models/cricket_match.dart';
+import 'package:sports_app/src/features/event/domain/models/cricket_match_detail.dart';
+import 'package:sports_app/src/features/event/domain/models/cricket_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_status_badge.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
-class BaseballMatchCard extends ConsumerWidget {
-  const BaseballMatchCard({super.key, required this.match});
+class CricketMatchCard extends ConsumerWidget {
+  const CricketMatchCard({super.key, required this.match});
 
-  final BaseballMatch match;
+  final CricketMatch match;
+
+  static const _liveStatuses = {2, 3, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545};
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final rt = ref.watch(
-      sportRealtimeProvider(
-        SportType.baseball,
-      ).select((map) => map[match.id] as BaseballRealtimeData?),
+      sportRealtimeProvider(SportType.cricket)
+          .select((map) => map[match.id] as CricketRealtimeData?),
     );
 
-    final effective = rt == null
-        ? match
-        : match.copyWith(
-            statusId: rt.statusId,
-            homeScore: rt.homeScore,
-            awayScore: rt.awayScore,
-            scores: rt.scores,
-          );
-
-    final isLive = baseballLiveStatuses.contains(effective.statusId);
-    final isNotStarted = effective.statusId == 1;
-    final isEnded = effective.statusId == 100;
-    final label = baseballStatusLabel(effective.statusId);
+    final effectiveStatusId = rt?.statusId ?? match.statusId;
+    final effectiveHomeScore = rt?.homeScore.toString() ?? match.homeScore;
+    final effectiveAwayScore = rt?.awayScore.toString() ?? match.awayScore;
+    final statusLabel = cricketStatusLabel(effectiveStatusId, match.statusDescription);
+    final isLive = _liveStatuses.contains(effectiveStatusId);
+    final innings = rt?.innings ?? match.innings;
+    final homeInnings = innings.where((i) => i.team == 1).lastOrNull;
+    final awayInnings = innings.where((i) => i.team == 2).lastOrNull;
 
     return GestureDetector(
-      onTap: () => context.push(AppRoutes.baseballMatchDetailPath(match.id)),
+      onTap: () => context.push(AppRoutes.cricketMatchDetailPath(match.id)),
       child: Container(
         color: Colors.white,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // League header row
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
               child: Row(
                 children: [
-                  LeagueLogo(url: effective.leagueLogo),
-                  const SizedBox(width: 6),
+                  LeagueLogo(url: match.leagueLogo),
+                  const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      effective.leagueName,
+                      match.leagueName,
                       style: context.textTheme.labelSmall?.copyWith(
                         color: Colors.grey.shade700,
                         fontWeight: FontWeight.w500,
@@ -63,20 +58,13 @@ class BaseballMatchCard extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  SizedBox(
-                    width: 50,
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        effective.matchTimeSim,
-                        style: context.textTheme.labelSmall?.copyWith(color: Colors.grey.shade500),
-                      ),
-                    ),
+                  Text(
+                    match.matchTimeSim,
+                    style: context.textTheme.labelSmall?.copyWith(color: Colors.grey.shade500),
                   ),
                 ],
               ),
             ),
-            // Match body
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
               child: Row(
@@ -103,16 +91,16 @@ class BaseballMatchCard extends ConsumerWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        _BaseballScoreDisplay(
-                          homeScore: effective.homeScore,
-                          awayScore: effective.awayScore,
-                          isNotStarted: isNotStarted,
-                          isLive: isLive,
-                          isEnded: isEnded,
+                        _CricketScore(
+                          homeScore: effectiveHomeScore,
+                          awayScore: effectiveAwayScore,
+                          statusId: effectiveStatusId,
+                          homeInnings: homeInnings,
+                          awayInnings: awayInnings,
                         ),
                         const SizedBox(height: 6),
                         SportStatusBadge(
-                          label: label,
+                          label: statusLabel,
                           isLive: isLive,
                         ),
                       ],
@@ -145,34 +133,77 @@ class BaseballMatchCard extends ConsumerWidget {
   }
 }
 
-class _BaseballScoreDisplay extends StatelessWidget {
-  const _BaseballScoreDisplay({
+class _CricketScore extends StatelessWidget {
+  const _CricketScore({
     required this.homeScore,
     required this.awayScore,
-    required this.isNotStarted,
-    required this.isLive,
-    required this.isEnded,
+    required this.statusId,
+    this.homeInnings,
+    this.awayInnings,
   });
 
   final String homeScore;
   final String awayScore;
-  final bool isNotStarted;
-  final bool isLive;
-  final bool isEnded;
+  final int statusId;
+  final CricketInnings? homeInnings;
+  final CricketInnings? awayInnings;
+
+  static const _liveStatuses = {2, 3, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545};
+  bool get _isNotStarted => statusId == 1;
+
+  String _formatOvers(double overs) {
+    final str = overs.toString();
+    return str.contains('.') ? str : '$str.0';
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (isNotStarted) {
+    if (_isNotStarted) {
       return Text(
         '-',
-        style: context.textTheme.titleSmall?.copyWith(
+        style: context.textTheme.titleMedium?.copyWith(
           color: Colors.grey.shade400,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
         ),
       );
     }
 
-    final scoreColor = isLive ? Colors.pink : Colors.black87;
+    final scoreColor = _liveStatuses.contains(statusId) ? Colors.pink : Colors.black87;
+    final sep = TextSpan(text: ' - ', style: TextStyle(color: Colors.grey.shade400));
+
+    if (homeInnings != null && awayInnings != null) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          RichText(
+            text: TextSpan(
+              style: context.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: scoreColor,
+              ),
+              children: [
+                TextSpan(text: '${homeInnings!.runs}/${homeInnings!.wickets}'),
+                sep,
+                TextSpan(text: '${awayInnings!.runs}/${awayInnings!.wickets}'),
+              ],
+            ),
+          ),
+          RichText(
+            text: TextSpan(
+              style: context.textTheme.labelSmall?.copyWith(
+                color: Colors.grey.shade500,
+              ),
+              children: [
+                TextSpan(text: '(${_formatOvers(homeInnings!.overs)})'),
+                TextSpan(text: ' - '),
+                TextSpan(text: '(${_formatOvers(awayInnings!.overs)})'),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
     return RichText(
       text: TextSpan(
         style: context.textTheme.titleMedium?.copyWith(
@@ -181,10 +212,11 @@ class _BaseballScoreDisplay extends StatelessWidget {
         ),
         children: [
           TextSpan(text: homeScore),
-          const TextSpan(text: ' - '),
+          sep,
           TextSpan(text: awayScore),
         ],
       ),
     );
   }
 }
+

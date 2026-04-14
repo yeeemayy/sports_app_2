@@ -2,79 +2,75 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/event/domain/table_tennis_status.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
-import 'package:sports_app/src/features/event/domain/models/table_tennis_match_detail.dart';
-import 'package:sports_app/src/features/event/domain/models/table_tennis_match_events.dart';
-import 'package:sports_app/src/features/event/domain/models/table_tennis_realtime_data.dart';
+import 'package:sports_app/src/features/event/domain/models/volleyball_match_detail.dart';
+import 'package:sports_app/src/features/event/domain/models/volleyball_match_events.dart';
+import 'package:sports_app/src/features/event/domain/models/volleyball_realtime_data.dart';
+import 'package:sports_app/src/features/event/domain/volleyball_status.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
-class TableTennisMatchDetailScreen extends ConsumerStatefulWidget {
-  const TableTennisMatchDetailScreen({super.key, required this.matchId});
+class VolleyballMatchDetailScreen extends ConsumerStatefulWidget {
+  const VolleyballMatchDetailScreen({super.key, required this.matchId});
 
   final String matchId;
 
   @override
-  ConsumerState<TableTennisMatchDetailScreen> createState() => _TableTennisMatchDetailScreenState();
+  ConsumerState<VolleyballMatchDetailScreen> createState() =>
+      _VolleyballMatchDetailScreenState();
 }
 
-class _TableTennisMatchDetailScreenState
-    extends SportDetailScaffoldState<TableTennisMatchDetailScreen> {
+class _VolleyballMatchDetailScreenState
+    extends SportDetailScaffoldState<VolleyballMatchDetailScreen> {
   @override
   String get matchId => widget.matchId;
 
   @override
-  SportType get sportType => SportType.tableTennis;
+  SportType get sportType => SportType.volleyball;
 
   @override
   Duration get eventsRefreshInterval => const Duration(seconds: 5);
 
   @override
   (String?, int?) watchDetail() {
-    final v =
-        ref.watch(matchDetailProvider(sport: SportType.tableTennis, matchId: matchId)).valueOrNull
-            as TableTennisMatchDetail?;
+    final v = ref
+        .watch(matchDetailProvider(sport: SportType.volleyball, matchId: matchId))
+        .valueOrNull as VolleyballMatchDetail?;
     return (v?.leagueName, v?.matchTime);
   }
 
   @override
-  Widget buildHeader(BuildContext context) => _TableTennisMatchHeader(matchId: matchId);
+  Widget buildHeader(BuildContext context) => _VolleyballMatchHeader(matchId: matchId);
 
   @override
   List<Tab> buildTabs(BuildContext context) => [
-    Tab(text: 'event.table_tennis.detail.score'.tr()),
-    Tab(text: 'event.table_tennis.detail.stats'.tr()),
-  ];
+        Tab(text: 'event.volleyball.detail.score'.tr()),
+        Tab(text: 'event.volleyball.detail.stats'.tr()),
+      ];
 
   @override
   List<Widget> buildTabViews(BuildContext context) => [
-    _ScoreTab(matchId: matchId),
-    _StatsTab(matchId: matchId),
-  ];
+        _ScoreTab(matchId: matchId),
+        _StatsTab(matchId: matchId),
+      ];
 }
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 
-class _TableTennisMatchHeader extends ConsumerWidget {
-  const _TableTennisMatchHeader({required this.matchId});
+class _VolleyballMatchHeader extends ConsumerWidget {
+  const _VolleyballMatchHeader({required this.matchId});
 
   final String matchId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(
-      matchDetailProvider(sport: SportType.tableTennis, matchId: matchId),
-    );
-    final eventsAsync = ref.watch(
-      matchEventsProvider(sport: SportType.tableTennis, matchId: matchId),
-    );
+    final detailAsync =
+        ref.watch(matchDetailProvider(sport: SportType.volleyball, matchId: matchId));
     final rt = ref.watch(
-      sportRealtimeProvider(
-        SportType.tableTennis,
-      ).select((map) => map[matchId] as TableTennisRealtimeData?),
+      sportRealtimeProvider(SportType.volleyball)
+          .select((map) => map[matchId] as VolleyballRealtimeData?),
     );
 
     return Container(
@@ -83,49 +79,42 @@ class _TableTennisMatchHeader extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
       child: detailAsync.when(
         loading: () => const SizedBox(height: 80),
-        error: (_, _) => const SizedBox(height: 80),
+        error: (_, __) => const SizedBox(height: 80),
         data: (obj) {
-          final detail = obj as TableTennisMatchDetail;
-          return _TableTennisHeaderContent(
-            detail: detail,
-            rt: rt,
-            eventsData: eventsAsync.valueOrNull as TableTennisMatchEventsData?,
-          );
+          final detail = obj as VolleyballMatchDetail;
+          return _VolleyballHeaderContent(detail: detail, rt: rt);
         },
       ),
     );
   }
 }
 
-class _TableTennisHeaderContent extends StatelessWidget {
-  const _TableTennisHeaderContent({required this.detail, this.rt, this.eventsData});
+class _VolleyballHeaderContent extends StatelessWidget {
+  const _VolleyballHeaderContent({required this.detail, this.rt});
 
-  final TableTennisMatchDetail detail;
-  final TableTennisRealtimeData? rt;
-  final TableTennisMatchEventsData? eventsData;
+  final VolleyballMatchDetail detail;
+  final VolleyballRealtimeData? rt;
 
   @override
   Widget build(BuildContext context) {
-    final effStatusId = eventsData?.statusId ?? rt?.statusId ?? detail.statusId;
-
-    final homeTotal = eventsData?.homeTotal ?? rt?.homeTotal ?? detail.homeInfo.totalScore;
-    final awayTotal = eventsData?.awayTotal ?? rt?.awayTotal ?? detail.awayInfo.totalScore;
+    final effStatusId = rt?.statusId ?? detail.statusId;
+    final homeTotal = rt?.homeTotal ?? detail.homeInfo.totalScore;
+    final awayTotal = rt?.awayTotal ?? detail.awayInfo.totalScore;
 
     final isNotStarted = effStatusId == 1;
-    final isLive = effStatusId >= 3 && effStatusId < 100;
-
-    final statusLabel = tableTennisStatusLabel(effStatusId, detail.statusDescription);
+    const liveStatuses = {432, 434, 436, 438, 440};
+    final isLive = liveStatuses.contains(effStatusId);
+    final statusLabel = volleyballStatusLabel(effStatusId, detail.statusDescription);
 
     return Column(
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Home player
             Expanded(
               child: Column(
                 children: [
-                  _PlayerLogo(url: detail.homeInfo.logo, size: 48),
+                  _TeamLogo(url: detail.homeInfo.logo, size: 48),
                   const SizedBox(height: 6),
                   Text(
                     detail.homeName,
@@ -140,14 +129,12 @@ class _TableTennisHeaderContent extends StatelessWidget {
                 ],
               ),
             ),
-            // Centre: status + score
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (isLive) _BlinkingLiveIndicator(label: statusLabel),
-
                   if (isNotStarted)
                     Text(
                       '-',
@@ -175,15 +162,15 @@ class _TableTennisHeaderContent extends StatelessWidget {
                       constraints: const BoxConstraints(minWidth: 50),
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: statusLabel.isNotEmpty ? Colors.orange : Colors.white,
-                        border: Border.all(color: Colors.orange),
+                        color: statusLabel.isNotEmpty ? Colors.orange.shade700 : Colors.white,
+                        border: Border.all(color: Colors.orange.shade300),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         statusLabel.isNotEmpty ? statusLabel : 'common.unknown'.tr(),
                         textAlign: TextAlign.center,
                         style: context.textTheme.labelSmall?.copyWith(
-                          color: statusLabel.isNotEmpty ? Colors.white : Colors.pink,
+                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -191,11 +178,10 @@ class _TableTennisHeaderContent extends StatelessWidget {
                 ],
               ),
             ),
-            // Away player
             Expanded(
               child: Column(
                 children: [
-                  _PlayerLogo(url: detail.awayInfo.logo, size: 48),
+                  _TeamLogo(url: detail.awayInfo.logo, size: 48),
                   const SizedBox(height: 6),
                   Text(
                     detail.awayName,
@@ -217,8 +203,8 @@ class _TableTennisHeaderContent extends StatelessWidget {
   }
 }
 
-class _PlayerLogo extends StatelessWidget {
-  const _PlayerLogo({required this.url, required this.size});
+class _TeamLogo extends StatelessWidget {
+  const _TeamLogo({required this.url, required this.size});
 
   final String url;
   final double size;
@@ -228,10 +214,8 @@ class _PlayerLogo extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white),
-      child: ClipOval(
-        child: SportLogo(url: url, size: size),
-      ),
+      decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+      child: ClipOval(child: SportLogo(url: url, size: size)),
     );
   }
 }
@@ -245,26 +229,24 @@ class _ScoreTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(
-      matchDetailProvider(sport: SportType.tableTennis, matchId: matchId),
-    );
-    final eventsAsync = ref.watch(
-      matchEventsProvider(sport: SportType.tableTennis, matchId: matchId),
-    );
+    final detailAsync =
+        ref.watch(matchDetailProvider(sport: SportType.volleyball, matchId: matchId));
+    final eventsAsync =
+        ref.watch(matchEventsProvider(sport: SportType.volleyball, matchId: matchId));
     final rt = ref.watch(
-      sportRealtimeProvider(
-        SportType.tableTennis,
-      ).select((map) => map[matchId] as TableTennisRealtimeData?),
+      sportRealtimeProvider(SportType.volleyball)
+          .select((map) => map[matchId] as VolleyballRealtimeData?),
     );
 
     return detailAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
-      error: (_, _) => Center(
-        child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
+      loading: () => const Center(child: CircularProgressIndicator(color: Colors.orange)),
+      error: (_, __) => Center(
+        child: Text('event.error.load_failed'.tr(),
+            style: TextStyle(color: Colors.grey.shade500)),
       ),
       data: (obj) {
-        final detail = obj as TableTennisMatchDetail;
-        final ev = eventsAsync.valueOrNull as TableTennisMatchEventsData?;
+        final detail = obj as VolleyballMatchDetail;
+        final ev = eventsAsync.valueOrNull as VolleyballMatchEventsData?;
         final effStatusId = ev?.statusId ?? rt?.statusId ?? detail.statusId;
         final homeSets = ev?.homeSets ?? rt?.homeSets ?? detail.homeInfo.setScores;
         final awaySets = ev?.awaySets ?? rt?.awaySets ?? detail.awayInfo.setScores;
@@ -310,26 +292,21 @@ class _SetScoreTable extends StatelessWidget {
   final int homeTotal;
   final int awayTotal;
 
-  static const _liveStatuses = {3, 51, 52, 53, 54, 55, 472, 473};
-
+  static const _liveStatuses = {432, 434, 436, 438, 440};
   bool get isLive => _liveStatuses.contains(statusId);
 
   int? get _activeSetIndex {
     switch (statusId) {
-      case 51:
+      case 432:
         return 0;
-      case 52:
+      case 434:
         return 1;
-      case 53:
+      case 436:
         return 2;
-      case 54:
+      case 438:
         return 3;
-      case 55:
+      case 440:
         return 4;
-      case 472:
-        return 5;
-      case 473:
-        return 6;
       default:
         return null;
     }
@@ -340,13 +317,9 @@ class _SetScoreTable extends StatelessWidget {
     final setCount = homeSets.length;
     final activeIdx = _activeSetIndex;
 
-    if (setCount == 0) {
-      return _buildBasicTable(context);
-    }
-
     final setLabels = List.generate(
       setCount,
-      (i) => 'event.table_tennis.detail.set_n'.tr(namedArgs: {'n': '${i + 1}'}),
+      (i) => 'event.volleyball.detail.set_n'.tr(namedArgs: {'n': '${i + 1}'}),
     );
 
     return ListView(
@@ -357,35 +330,46 @@ class _SetScoreTable extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Column(
             children: [
-              // Header row
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 child: Row(
                   children: [
                     const Expanded(child: SizedBox()),
-                    ...List.generate(setCount, (i) {
-                      final isActive = i == activeIdx;
-                      return Expanded(
+                    if (setCount == 0) ...[
+                      SizedBox(
+                        width: 44,
                         child: Text(
-                          setLabels[i],
+                          'event.volleyball.detail.set_n'.tr(namedArgs: {'n': '1'}),
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: isActive ? Colors.pink : Colors.grey.shade600,
-                          ),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey.shade600),
                         ),
-                      );
-                    }),
+                      ),
+                    ] else
+                      ...List.generate(setCount, (i) {
+                        final isActive = i == activeIdx;
+                        return Expanded(
+                          child: Text(
+                            setLabels[i],
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: isActive ? Colors.orange : Colors.grey.shade600,
+                            ),
+                          ),
+                        );
+                      }),
                     Expanded(
                       child: Text(
-                        'event.table_tennis.detail.total'.tr(),
+                        'event.volleyball.detail.total'.tr(),
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey.shade600,
-                        ),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade600),
                       ),
                     ),
                   ],
@@ -394,66 +378,21 @@ class _SetScoreTable extends StatelessWidget {
               Divider(height: 1, thickness: 0.5, color: Colors.grey.shade200),
               _PlayerScoreRow(
                 name: homeName,
+                logo: homeLogo,
                 setScores: homeSets,
                 total: homeTotal,
                 activeIdx: activeIdx,
+                accentColor: Colors.orange,
               ),
               Divider(height: 1, thickness: 0.5, color: Colors.grey.shade100),
               _PlayerScoreRow(
                 name: awayName,
+                logo: awayLogo,
                 setScores: awaySets,
                 total: awayTotal,
                 activeIdx: activeIdx,
+                accentColor: Colors.orange,
               ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBasicTable(BuildContext context) {
-    final s1Label = 'event.table_tennis.detail.set_n'.tr(namedArgs: {'n': '1'});
-    final s2Label = 'event.table_tennis.detail.set_n'.tr(namedArgs: {'n': '2'});
-    final ftLabel = 'event.table_tennis.detail.total'.tr();
-    final headerStyle = TextStyle(
-      fontSize: 12,
-      fontWeight: FontWeight.w600,
-      color: Colors.grey.shade600,
-    );
-
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 20),
-      children: [
-        Container(
-          color: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                child: Row(
-                  children: [
-                    const Expanded(child: SizedBox()),
-                    SizedBox(
-                      width: 44,
-                      child: Text(s1Label, textAlign: TextAlign.center, style: headerStyle),
-                    ),
-                    SizedBox(
-                      width: 44,
-                      child: Text(s2Label, textAlign: TextAlign.center, style: headerStyle),
-                    ),
-                    SizedBox(
-                      width: 44,
-                      child: Text(ftLabel, textAlign: TextAlign.center, style: headerStyle),
-                    ),
-                  ],
-                ),
-              ),
-              Divider(height: 1, thickness: 0.5, color: Colors.grey.shade200),
-              _BasicPlayerRow(name: homeName, logo: homeLogo, total: homeTotal),
-              Divider(height: 1, thickness: 0.5, color: Colors.grey.shade100),
-              _BasicPlayerRow(name: awayName, logo: awayLogo, total: awayTotal),
             ],
           ),
         ),
@@ -465,15 +404,19 @@ class _SetScoreTable extends StatelessWidget {
 class _PlayerScoreRow extends StatelessWidget {
   const _PlayerScoreRow({
     required this.name,
+    required this.logo,
     required this.setScores,
     required this.total,
     required this.activeIdx,
+    required this.accentColor,
   });
 
   final String name;
+  final String logo;
   final List<int> setScores;
   final int total;
   final int? activeIdx;
+  final Color accentColor;
 
   @override
   Widget build(BuildContext context) {
@@ -482,57 +425,9 @@ class _PlayerScoreRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-            ),
-          ),
-          ...List.generate(setScores.length, (i) {
-            final isActive = i == activeIdx;
-            return Expanded(
-              child: Text(
-                '${setScores[i]}',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? Colors.pink : Colors.black87,
-                ),
-              ),
-            );
-          }),
-          Expanded(
-            child: Text(
-              '$total',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.pink),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BasicPlayerRow extends StatelessWidget {
-  const _BasicPlayerRow({required this.name, required this.logo, required this.total});
-
-  final String name;
-  final String logo;
-  final int total;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: Row(
-        children: [
-          Expanded(
             child: Row(
               children: [
-                SportLogo(url: logo, size: 24),
+                SportLogo(url: logo, size: 20),
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(
@@ -545,28 +440,26 @@ class _BasicPlayerRow extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(
-            width: 44,
-            child: Text(
-              '-',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Colors.grey),
-            ),
-          ),
-          const SizedBox(
-            width: 44,
-            child: Text(
-              '-',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Colors.grey),
-            ),
-          ),
-          SizedBox(
-            width: 44,
+          ...List.generate(setScores.length, (i) {
+            final isActive = i == activeIdx;
+            return Expanded(
+              child: Text(
+                '${setScores[i]}',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                  color: isActive ? accentColor : Colors.black87,
+                ),
+              ),
+            );
+          }),
+          Expanded(
             child: Text(
               '$total',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.pink),
+              style: TextStyle(
+                  fontSize: 14, fontWeight: FontWeight.w800, color: accentColor),
             ),
           ),
         ],
@@ -591,21 +484,21 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
 
   @override
   Widget build(BuildContext context) {
-    final eventsAsync = ref.watch(
-      matchEventsProvider(sport: SportType.tableTennis, matchId: widget.matchId),
-    );
+    final eventsAsync =
+        ref.watch(matchEventsProvider(sport: SportType.volleyball, matchId: widget.matchId));
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
-      error: (_, _) => Center(
-        child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
+      loading: () => const Center(child: CircularProgressIndicator(color: Colors.orange)),
+      error: (_, __) => Center(
+        child: Text('event.error.load_failed'.tr(),
+            style: TextStyle(color: Colors.grey.shade500)),
       ),
       data: (obj) {
-        final events = obj as TableTennisMatchEventsData?;
+        final events = obj as VolleyballMatchEventsData?;
         if (events == null || events.statSets.isEmpty) {
           return Center(
             child: Text(
-              'event.table_tennis.detail.no_stats'.tr(),
+              'event.volleyball.detail.no_stats'.tr(),
               style: TextStyle(color: Colors.grey.shade500),
             ),
           );
@@ -615,8 +508,8 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
         final safeIdx = _selectedIdx.clamp(0, setIndices.length - 1);
 
         final tabLabels = setIndices.map((idx) {
-          if (idx == 0) return 'event.table_tennis.detail.overall'.tr();
-          return 'event.table_tennis.detail.set_n'.tr(namedArgs: {'n': '$idx'});
+          if (idx == 0) return 'event.volleyball.detail.overall'.tr();
+          return 'event.volleyball.detail.set_n'.tr(namedArgs: {'n': '$idx'});
         }).toList();
 
         final stats = events.statSets
@@ -630,7 +523,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
               color: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: List.generate(tabLabels.length, (i) {
@@ -641,7 +534,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                         margin: const EdgeInsets.only(right: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.pink : Colors.grey.shade200,
+                          color: isSelected ? Colors.orange : Colors.grey.shade200,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -669,14 +562,14 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
 class _StatsList extends StatelessWidget {
   const _StatsList({required this.stats});
 
-  final List<TableTennisStat> stats;
+  final List<VolleyballStat> stats;
 
   @override
   Widget build(BuildContext context) {
     if (stats.isEmpty) {
       return Center(
         child: Text(
-          'event.table_tennis.detail.no_stats'.tr(),
+          'event.volleyball.detail.no_stats'.tr(),
           style: TextStyle(color: Colors.grey.shade500),
         ),
       );
@@ -685,15 +578,15 @@ class _StatsList extends StatelessWidget {
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 20),
       itemCount: stats.length,
-      itemBuilder: (context, i) => _TableTennisStatRow(stat: stats[i]),
+      itemBuilder: (context, i) => _VolleyballStatRow(stat: stats[i]),
     );
   }
 }
 
-class _TableTennisStatRow extends StatelessWidget {
-  const _TableTennisStatRow({required this.stat});
+class _VolleyballStatRow extends StatelessWidget {
+  const _VolleyballStatRow({required this.stat});
 
-  final TableTennisStat stat;
+  final VolleyballStat stat;
 
   @override
   Widget build(BuildContext context) {
@@ -765,7 +658,8 @@ class _TableTennisStatRow extends StatelessWidget {
                             height: barHeight,
                             decoration: const BoxDecoration(
                               color: Colors.blue,
-                              borderRadius: BorderRadius.only(topLeft: radius, bottomLeft: radius),
+                              borderRadius: BorderRadius.only(
+                                  topLeft: radius, bottomLeft: radius),
                             ),
                           ),
                         ),
@@ -778,11 +672,9 @@ class _TableTennisStatRow extends StatelessWidget {
                             width: awayWidth,
                             height: barHeight,
                             decoration: const BoxDecoration(
-                              color: Colors.pink,
+                              color: Colors.orange,
                               borderRadius: BorderRadius.only(
-                                topRight: radius,
-                                bottomRight: radius,
-                              ),
+                                  topRight: radius, bottomRight: radius),
                             ),
                           ),
                         ),
@@ -799,7 +691,7 @@ class _TableTennisStatRow extends StatelessWidget {
   }
 }
 
-// ─── Blinking live indicator ─────────────────────────────────────────────────
+// ─── Blinking Live Indicator ──────────────────────────────────────────────────
 
 class _BlinkingLiveIndicator extends StatefulWidget {
   const _BlinkingLiveIndicator({required this.label});
@@ -818,8 +710,9 @@ class _BlinkingLiveIndicatorState extends State<_BlinkingLiveIndicator>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 800))
-      ..repeat(reverse: true);
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(milliseconds: 800))
+          ..repeat(reverse: true);
     _opacity = Tween<double>(begin: 1.0, end: 0.2).animate(_controller);
   }
 
@@ -843,7 +736,8 @@ class _BlinkingLiveIndicatorState extends State<_BlinkingLiveIndicator>
               Container(
                 width: 7,
                 height: 7,
-                decoration: BoxDecoration(color: Colors.pink.shade50, shape: BoxShape.circle),
+                decoration: BoxDecoration(
+                    color: Colors.pink.shade50, shape: BoxShape.circle),
               ),
               const SizedBox(width: 4),
               Text(
