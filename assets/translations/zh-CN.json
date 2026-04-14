@@ -47,6 +47,13 @@
     "data": "数据",
     "profile": "个人"
   },
+  "news": {
+    "details":"新闻详情",
+    "search_hint": "搜索新闻...",
+    "no_results": "暂无结果",
+    "load_error": "加载失败",
+    "detail_error": "加载文章失败"
+  },
   "home": {
     "tab": {
       "recommended": "推荐",

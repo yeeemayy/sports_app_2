@@ -6,6 +6,23 @@ part of 'api_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+String _$newsApiServiceHash() => r'b623e171421cb479423a21b4a18ba13af40a1e47';
+
+/// See also [newsApiService].
+@ProviderFor(newsApiService)
+final newsApiServiceProvider = Provider<Dio>.internal(
+  newsApiService,
+  name: r'newsApiServiceProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$newsApiServiceHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef NewsApiServiceRef = ProviderRef<Dio>;
 String _$sportsApiServiceHash() => r'4fca0e96abb6e3d22c7e8121ff72732762df873f';
 
 /// See also [sportsApiService].

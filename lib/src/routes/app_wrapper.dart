@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:sports_app/src/providers/nav_providers.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/avatar.dart';
 
@@ -28,12 +29,12 @@ class AppWrapper extends ConsumerWidget {
       activeIcon: Icons.article,
       path: AppRoutes.news,
     ),
-    (
-      labelKey: 'nav.data',
-      icon: Icons.bar_chart_outlined,
-      activeIcon: Icons.bar_chart,
-      path: AppRoutes.data,
-    ),
+    // (
+    //   labelKey: 'nav.data',
+    //   icon: Icons.bar_chart_outlined,
+    //   activeIcon: Icons.bar_chart,
+    //   path: AppRoutes.data,
+    // ),
     (
       labelKey: 'nav.profile',
       icon: Icons.person_outline,
@@ -44,6 +45,9 @@ class AppWrapper extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Establish dependency on EasyLocalization's InheritedWidget so this
+    // widget rebuilds (and re-evaluates all .tr() calls) when the locale changes.
+    context.locale;
     final currentIndex = navigationShell.currentIndex;
     final authState = ref.watch(authNotifierProvider);
     final isAuthenticated = authState.hasValue && (authState.value?.isAuthenticated ?? false);
@@ -112,8 +116,10 @@ class AppWrapper extends ConsumerWidget {
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentIndex,
-        onDestinationSelected: (index) =>
-            navigationShell.goBranch(index, initialLocation: index == navigationShell.currentIndex),
+        onDestinationSelected: (index) {
+          ref.read(currentNavIndexProvider.notifier).state = index;
+          navigationShell.goBranch(index, initialLocation: index == navigationShell.currentIndex);
+        },
         destinations: _tabs
             .map(
               (t) => NavigationDestination(

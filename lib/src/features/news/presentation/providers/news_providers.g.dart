@@ -1,0 +1,194 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'news_providers.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+String _$newsDetailHash() => r'a00ea56817e9fb54ec6ac6aabcb03f80920f3ed2';
+
+/// Copied from Dart SDK
+class _SystemHash {
+  _SystemHash._();
+
+  static int combine(int hash, int value) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + value);
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
+    return hash ^ (hash >> 6);
+  }
+
+  static int finish(int hash) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
+    // ignore: parameter_assignments
+    hash = hash ^ (hash >> 11);
+    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
+  }
+}
+
+/// See also [newsDetail].
+@ProviderFor(newsDetail)
+const newsDetailProvider = NewsDetailFamily();
+
+/// See also [newsDetail].
+class NewsDetailFamily extends Family<AsyncValue<NewsDetail>> {
+  /// See also [newsDetail].
+  const NewsDetailFamily();
+
+  /// See also [newsDetail].
+  NewsDetailProvider call(int id, String locale) {
+    return NewsDetailProvider(id, locale);
+  }
+
+  @override
+  NewsDetailProvider getProviderOverride(
+    covariant NewsDetailProvider provider,
+  ) {
+    return call(provider.id, provider.locale);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'newsDetailProvider';
+}
+
+/// See also [newsDetail].
+class NewsDetailProvider extends AutoDisposeFutureProvider<NewsDetail> {
+  /// See also [newsDetail].
+  NewsDetailProvider(int id, String locale)
+    : this._internal(
+        (ref) => newsDetail(ref as NewsDetailRef, id, locale),
+        from: newsDetailProvider,
+        name: r'newsDetailProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$newsDetailHash,
+        dependencies: NewsDetailFamily._dependencies,
+        allTransitiveDependencies: NewsDetailFamily._allTransitiveDependencies,
+        id: id,
+        locale: locale,
+      );
+
+  NewsDetailProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.id,
+    required this.locale,
+  }) : super.internal();
+
+  final int id;
+  final String locale;
+
+  @override
+  Override overrideWith(
+    FutureOr<NewsDetail> Function(NewsDetailRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: NewsDetailProvider._internal(
+        (ref) => create(ref as NewsDetailRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        id: id,
+        locale: locale,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<NewsDetail> createElement() {
+    return _NewsDetailProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is NewsDetailProvider &&
+        other.id == id &&
+        other.locale == locale;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, id.hashCode);
+    hash = _SystemHash.combine(hash, locale.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin NewsDetailRef on AutoDisposeFutureProviderRef<NewsDetail> {
+  /// The parameter `id` of this provider.
+  int get id;
+
+  /// The parameter `locale` of this provider.
+  String get locale;
+}
+
+class _NewsDetailProviderElement
+    extends AutoDisposeFutureProviderElement<NewsDetail>
+    with NewsDetailRef {
+  _NewsDetailProviderElement(super.provider);
+
+  @override
+  int get id => (origin as NewsDetailProvider).id;
+  @override
+  String get locale => (origin as NewsDetailProvider).locale;
+}
+
+String _$newsPaginatedHash() => r'6cc318be17cf4ac4ca31d5270c904104697f9f0a';
+
+/// See also [NewsPaginated].
+@ProviderFor(NewsPaginated)
+final newsPaginatedProvider =
+    AutoDisposeNotifierProvider<NewsPaginated, NewsPaginatedState>.internal(
+      NewsPaginated.new,
+      name: r'newsPaginatedProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$newsPaginatedHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+typedef _$NewsPaginated = AutoDisposeNotifier<NewsPaginatedState>;
+String _$newsSearchHash() => r'3ca3242cc5ee9167bd3da28fd35cf2eddbb39996';
+
+/// See also [NewsSearch].
+@ProviderFor(NewsSearch)
+final newsSearchProvider =
+    AutoDisposeNotifierProvider<NewsSearch, NewsPaginatedState>.internal(
+      NewsSearch.new,
+      name: r'newsSearchProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$newsSearchHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+typedef _$NewsSearch = AutoDisposeNotifier<NewsPaginatedState>;
+// ignore_for_file: type=lint
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

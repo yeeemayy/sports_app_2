@@ -18,6 +18,22 @@ import 'package:sports_app/src/shared_widgets/custom_status_dialog.dart';
 part 'api_service.g.dart';
 
 @Riverpod(keepAlive: true)
+Dio newsApiService(NewsApiServiceRef ref) {
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: EnvConfig.newsApiUrl,
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 15),
+      headers: {'Content-Type': 'application/json'},
+    ),
+  );
+  if (kDebugMode) {
+    dio.interceptors.add(LoggerInterceptor());
+  }
+  return dio;
+}
+
+@Riverpod(keepAlive: true)
 Dio sportsApiService(SportsApiServiceRef ref) {
   final dio = Dio(
     BaseOptions(

@@ -57,6 +57,9 @@ dependencies:
   # Secure token persistence
   flutter_secure_storage: ^9.2.4
 
+  # HTML rendering
+  flutter_html: ^3.0.0
+
   # UI
   country_code_picker: ^3.4.1
   shimmer: ^3.0.0

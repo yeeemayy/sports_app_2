@@ -7,6 +7,7 @@ import 'package:sports_app/src/features/event/domain/sport_config.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/event_match_card.dart';
+import 'package:sports_app/src/providers/nav_providers.dart';
 import 'package:sports_app/src/shared_widgets/shimmer_loading_list.dart';
 
 class EventScreen extends StatefulWidget {
@@ -217,6 +218,16 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
               .watch(footballScheduledMatchesProvider(date: _formattedScheduledDate))
               .whenData((list) => PaginatedMatchResult(matches: list, currentPage: 1, totalPage: 1))
         : ref.watch(_paginatedProvider);
+
+    // Pause/resume realtime polling when the event bottom-nav tab goes off/on screen.
+    ref.listen(currentNavIndexProvider, (prev, curr) {
+      const eventTabIndex = 1;
+      if (curr == eventTabIndex && _isActiveTab) {
+        _reRegisterRealtimeIds();
+      } else if (curr != eventTabIndex) {
+        _clearRealtimeSource();
+      }
+    });
 
     if (widget.sport.config.parseRealtime != null) {
       ref.listen(sportRealtimeProvider(widget.sport), (prev, curr) {

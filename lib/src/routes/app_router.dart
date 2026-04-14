@@ -20,6 +20,7 @@ import 'package:sports_app/src/features/auth/presentation/register_screen.dart';
 import 'package:sports_app/src/features/data/presentation/data_screen.dart';
 import 'package:sports_app/src/features/event/presentation/event_screen.dart';
 import 'package:sports_app/src/features/home/presentation/home_screen.dart';
+import 'package:sports_app/src/features/news/presentation/news_detail_screen.dart';
 import 'package:sports_app/src/features/news/presentation/news_screen.dart';
 import 'package:sports_app/src/features/profile/presentation/edit_profile_screen.dart';
 import 'package:sports_app/src/features/profile/presentation/profile_screen.dart';
@@ -81,14 +82,14 @@ GoRouter appRouter(AppRouterRef ref) {
               ),
             ],
           ),
-          StatefulShellBranch(
-            routes: <RouteBase>[
-              GoRoute(
-                path: AppRoutes.data,
-                builder: (BuildContext context, GoRouterState state) => const DataScreen(),
-              ),
-            ],
-          ),
+          // StatefulShellBranch(
+          //   routes: <RouteBase>[
+          //     GoRoute(
+          //       path: AppRoutes.data,
+          //       builder: (BuildContext context, GoRouterState state) => const DataScreen(),
+          //     ),
+          //   ],
+          // ),
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(
@@ -164,6 +165,12 @@ GoRouter appRouter(AppRouterRef ref) {
         path: AppRoutes.cricketMatchDetail,
         builder: (context, state) => CricketMatchDetailScreen(
           matchId: state.pathParameters['matchId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.newsDetail,
+        builder: (context, state) => NewsDetailScreen(
+          newsId: int.parse(state.pathParameters['newsId']!),
         ),
       ),
       GoRoute(
