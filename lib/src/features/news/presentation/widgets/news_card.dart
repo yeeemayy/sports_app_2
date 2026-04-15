@@ -8,13 +8,21 @@ class NewsCard extends StatelessWidget {
     super.key,
     required this.article,
     required this.onTap,
-  });
+  })  : _loading = false;
 
-  final NewsArticle article;
-  final VoidCallback onTap;
+  const NewsCard.loading({super.key})
+      : article = null,
+        onTap = null,
+        _loading = true;
+
+  final NewsArticle? article;
+  final VoidCallback? onTap;
+  final bool _loading;
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) return const _NewsCardSkeleton();
+
     final theme = Theme.of(context);
     return InkWell(
       onTap: onTap,
@@ -23,14 +31,14 @@ class NewsCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _CoverImage(url: article.imageUrl),
+            _CoverImage(url: article!.imageUrl),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    article.title,
+                    article!.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyMedium?.copyWith(
@@ -40,7 +48,7 @@ class NewsCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    article.description,
+                    article!.description,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -50,7 +58,7 @@ class NewsCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    _formatDate(article.createdAt),
+                    _formatDate(article!.createdAt),
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
                     ),
@@ -74,6 +82,49 @@ class NewsCard extends StatelessWidget {
   }
 
   String _pad(int v) => v.toString().padLeft(2, '0');
+}
+
+class _NewsCardSkeleton extends StatelessWidget {
+  const _NewsCardSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 90,
+              height: 90,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(height: 14, color: Colors.white),
+                  const SizedBox(height: 4),
+                  Container(height: 14, width: double.infinity, color: Colors.white),
+                  const SizedBox(height: 4),
+                  Container(height: 12, width: 160, color: Colors.white),
+                  const SizedBox(height: 10),
+                  Container(height: 10, width: 80, color: Colors.white),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _CoverImage extends StatelessWidget {

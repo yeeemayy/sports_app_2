@@ -70,14 +70,18 @@ class NewsPaginated extends _$NewsPaginated {
     await _loadPage(1, replace: true);
   }
 
+  Future<void> silentRefresh() async {
+    await _loadPage(1, replace: true, silent: true);
+  }
+
   Future<void> loadMore() async {
     if (!state.hasMore || state.isLoadingMore) return;
     state = state.copyWith(isLoadingMore: true);
     await _loadPage(state.currentPage + 1, replace: false);
   }
 
-  Future<void> _loadPage(int page, {required bool replace}) async {
-    if (replace) state = state.copyWith(isLoading: true, clearError: true);
+  Future<void> _loadPage(int page, {required bool replace, bool silent = false}) async {
+    if (replace && !silent) state = state.copyWith(isLoading: true, clearError: true);
     try {
       final response = await ref
           .read(newsRepositoryProvider.notifier)

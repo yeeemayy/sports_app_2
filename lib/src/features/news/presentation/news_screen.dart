@@ -126,7 +126,12 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
 
   Widget _buildBody(NewsPaginatedState state) {
     if (state.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return ListView.separated(
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: 10,
+        separatorBuilder: (context, index) => const Divider(height: 1, indent: 16, endIndent: 16),
+        itemBuilder: (context, index) => const NewsCard.loading(),
+      );
     }
 
     if (state.articles.isEmpty) {
@@ -142,7 +147,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: state.articles.length + (state.isLoadingMore ? 1 : 0),
-      separatorBuilder: (_, __) => const Divider(height: 1, indent: 16, endIndent: 16),
+      separatorBuilder: (context, index) => const Divider(height: 1, indent: 16, endIndent: 16),
       itemBuilder: (context, index) {
         if (index == state.articles.length) {
           return const Padding(

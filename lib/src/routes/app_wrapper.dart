@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
 import 'package:sports_app/src/providers/nav_providers.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/avatar.dart';
@@ -118,6 +119,12 @@ class AppWrapper extends ConsumerWidget {
         selectedIndex: currentIndex,
         onDestinationSelected: (index) {
           ref.read(currentNavIndexProvider.notifier).state = index;
+          if (index == 2 && index != navigationShell.currentIndex) {
+            final newsState = ref.read(newsPaginatedProvider);
+            if (newsState.articles.isNotEmpty) {
+              ref.read(newsPaginatedProvider.notifier).silentRefresh();
+            }
+          }
           navigationShell.goBranch(index, initialLocation: index == navigationShell.currentIndex);
         },
         destinations: _tabs
