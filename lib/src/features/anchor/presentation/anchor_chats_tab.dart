@@ -114,7 +114,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
       callback: RCIMIWConnectCallback(
         onConnected: (int? code, String? userId) async {
           if (code == 0) {
-            final joinCode = await _engine!.joinChatRoom(_roomCid!, -1, false);
+            final joinCode = await _engine!.joinChatRoom(_roomCid!, 0, false);
             if (mounted) {
               setState(() {
                 _connecting = false;

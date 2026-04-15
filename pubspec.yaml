@@ -101,6 +101,7 @@ flutter:
 
   assets:
     - assets/translations/
+    - assets/images/
     - .env
 
   # To add other assets to your application, add to the assets section above:

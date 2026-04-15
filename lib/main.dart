@@ -40,7 +40,7 @@ class MyApp extends ConsumerWidget {
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink).copyWith(primaryContainer: Colors.pink.shade50),
         scaffoldBackgroundColor: Colors.white,
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.white,
@@ -62,6 +62,10 @@ class MyApp extends ConsumerWidget {
             foregroundColor: Colors.pink,
           ),
         ),
+        navigationBarTheme: NavigationBarThemeData(
+          backgroundColor: Colors.pink.shade50,
+          indicatorColor: Colors.pink.shade300,
+        )
       ),
       routerConfig: ref.watch(appRouterProvider),
     );

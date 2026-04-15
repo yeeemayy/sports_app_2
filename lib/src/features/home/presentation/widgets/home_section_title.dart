@@ -2,10 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 
 class HomeSectionTitle extends StatelessWidget {
+  final String? icon;
   final String title;
   final String? subtitle;
   final VoidCallback? onPressed;
-  const HomeSectionTitle({super.key, required this.title, this.subtitle, this.onPressed});
+  const HomeSectionTitle({
+    super.key,
+    this.icon,
+    required this.title,
+    this.subtitle,
+    this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +21,7 @@ class HomeSectionTitle extends StatelessWidget {
       child: Row(
         spacing: 10,
         children: [
-          CircleAvatar(radius: 20),
+          CircleAvatar(radius: 20, child: icon != null ? Image.asset(icon!, height: 20) : null),
           Expanded(
             child: Row(
               spacing: 8,

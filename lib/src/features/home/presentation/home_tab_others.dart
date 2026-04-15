@@ -12,24 +12,33 @@ class HomeTabOthers extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final anchorsAsync = ref.watch(anchorListProvider());
 
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          HomeSectionTitle(title: 'home.section.anchor_live'.tr(), onPressed: () {}),
-          anchorsAsync.when(
-            loading: () => const HomeAnchorLiveGrid(),
-            error: (err, stack) {
-              print('$err\n$stack');
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text('home.error.load_failed'.tr()),
-                ),
-              );
-            },
-            data: (page) => HomeAnchorLiveGrid(anchors: page.data),
-          ),
-        ],
+    return RefreshIndicator(
+      onRefresh: () => ref.refresh(anchorListProvider().future),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        clipBehavior: Clip.none,
+        child: Column(
+          children: [
+            HomeSectionTitle(
+              icon: 'assets/images/live-tv.png',
+              title: 'home.section.anchor_live'.tr(),
+              onPressed: () {},
+            ),
+            anchorsAsync.when(
+              loading: () => const HomeAnchorLiveGrid(),
+              error: (err, stack) {
+                print('$err\n$stack');
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text('home.error.load_failed'.tr()),
+                  ),
+                );
+              },
+              data: (page) => HomeAnchorLiveGrid(anchors: page.data),
+            ),
+          ],
+        ),
       ),
     );
   }
