@@ -33,7 +33,8 @@
       "video": {
         "buffering": "Buffering...",
         "error": "Stream failed to load, check your connection",
-        "retry": "Retry"
+        "retry": "Retry",
+        "fullscreen": "Fullscreen"
       },
       "error": {
         "load_failed": "Failed to load anchor info"
@@ -48,7 +49,7 @@
     "profile": "Profile"
   },
   "news": {
-    "details":"News Details",
+    "details": "News Details",
     "search_hint": "Search news...",
     "no_results": "No results found",
     "load_error": "Failed to load news",

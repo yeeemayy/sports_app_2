@@ -27,9 +27,15 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
   String? _myId;
   String? _myName;
   final List<_ChatMessage> _messages = [];
+  final List<_ChatMessage> _bufferedMessages = [];
+  // Entry message waiting to be appended after history flushes.
+  _ChatMessage? _pendingEntryMsg;
+  bool _initialSyncDone = false;
   bool _connecting = false;
   bool _connected = false;
   bool _connectError = false;
+  bool _entryMessageSent = false;
+  bool _didRetry34001 = false;
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -65,12 +71,33 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
       _connecting = false;
       _connected = false;
       _connectError = false;
+      _entryMessageSent = false;
+      _didRetry34001 = false;
+      _initialSyncDone = false;
+      _pendingEntryMsg = null;
       _messages.clear();
+      _bufferedMessages.clear();
       _roomCid = null;
       _myId = null;
       _myName = null;
     });
     ref.invalidate(imTokenProvider(widget.anchorId));
+  }
+
+  /// Flush buffered history messages into [_messages] and append any pending
+  /// entry message at the end. Idempotent — safe to call multiple times.
+  void _flushHistory() {
+    if (_initialSyncDone) return;
+    setState(() {
+      _initialSyncDone = true;
+      _messages.addAll(_bufferedMessages);
+      _bufferedMessages.clear();
+      if (_pendingEntryMsg != null) {
+        _messages.add(_pendingEntryMsg!);
+        _pendingEntryMsg = null;
+      }
+    });
+    _scrollToBottom();
   }
 
   Future<void> _initChat(ImTokenModel tokenData) async {
@@ -88,48 +115,92 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
 
     _engine!.onMessageReceived =
         (RCIMIWMessage? message, int? left, bool? offline, bool? hasPackage) {
-          if (!mounted || message == null) return;
-          if (message.targetId != _roomCid) return;
-          if (message is! RCIMIWTextMessage) return;
+      if (!mounted || message == null) return;
+      if (message.targetId != _roomCid) return;
+      if (message is! RCIMIWTextMessage) return;
 
-          final senderName = message.userInfo?.name ?? message.senderUserId ?? '';
-          final text = message.text ?? '';
-          if (text.isEmpty) return;
+      final senderName = message.userInfo?.name ?? message.senderUserId ?? '';
+      final text = message.text ?? '';
+      if (text.isEmpty) return;
+
+      final chatMsg = _ChatMessage(
+        senderName: senderName,
+        senderId: message.senderUserId ?? '',
+        text: text,
+        isOwn: message.senderUserId == _myId,
+      );
+
+      if (offline == true) {
+        // History/offline message — buffer until the last one arrives (left == 0).
+        setState(() => _bufferedMessages.add(chatMsg));
+        if ((left ?? 0) == 0) {
+          // Last history message received — flush buffer, then show pending entry.
+          _flushHistory();
+        }
+      } else {
+        // Live message. If history hasn't flushed yet, flush now so the entry
+        // message (if pending) appears before any live messages.
+        if (!_initialSyncDone) _flushHistory();
+        setState(() => _messages.add(chatMsg));
+        _scrollToBottom();
+      }
+    };
+
+    Future<void> onConnectedResult(int? code) async {
+      if (code == 0) {
+        final joinCode = await _engine!.joinChatRoom(_roomCid!, 0, false);
+        if (mounted) {
           setState(() {
-            _messages.add(
-              _ChatMessage(
-                senderName: senderName,
-                senderId: message.senderUserId ?? '',
-                text: text,
-                isOwn: message.senderUserId == _myId,
-              ),
-            );
+            _connecting = false;
+            _connected = joinCode == 0;
+            _connectError = joinCode != 0;
           });
-          _scrollToBottom();
-        };
+          if (joinCode == 0) {
+            // Only send the entry message when the user is logged in.
+            final isLoggedIn =
+                ref.read(authNotifierProvider).valueOrNull?.isAuthenticated ?? false;
+            if (isLoggedIn) {
+              // Delay so that the chatroom's offline message batch starts
+              // arriving before we send the entry message.
+              Future.delayed(const Duration(milliseconds: 1000), () {
+                if (mounted && !_entryMessageSent) {
+                  _entryMessageSent = true;
+                  _sendEntryMessage();
+                }
+              });
+            }
+          }
+        }
+      } else if (code == 34001 && mounted && _engine != null && !_didRetry34001) {
+        // 34001: server still has a previous session active — wait briefly and retry once.
+        _didRetry34001 = true;
+        await Future.delayed(const Duration(milliseconds: 800));
+        if (!mounted || _engine == null) return;
+        await _engine!.connect(
+          tokenData.token,
+          30,
+          callback: RCIMIWConnectCallback(
+            onConnected: (int? retryCode, String? userId) async {
+              if (mounted) await onConnectedResult(retryCode);
+            },
+          ),
+        );
+      } else {
+        if (mounted) {
+          setState(() {
+            _connecting = false;
+            _connectError = true;
+          });
+        }
+      }
+    }
 
     await _engine!.connect(
       tokenData.token,
       30,
       callback: RCIMIWConnectCallback(
         onConnected: (int? code, String? userId) async {
-          if (code == 0) {
-            final joinCode = await _engine!.joinChatRoom(_roomCid!, 0, false);
-            if (mounted) {
-              setState(() {
-                _connecting = false;
-                _connected = joinCode == 0;
-                _connectError = joinCode != 0;
-              });
-              if (joinCode == 0) await _sendEntryMessage();
-            }
-          } else {
-            if (mounted)
-              setState(() {
-                _connecting = false;
-                _connectError = true;
-              });
-          }
+          if (mounted) await onConnectedResult(code);
         },
       ),
     );
@@ -142,7 +213,12 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
       _connecting = false;
       _connected = false;
       _connectError = false;
+      _entryMessageSent = false;
+      _didRetry34001 = false;
+      _initialSyncDone = false;
+      _pendingEntryMsg = null;
       _messages.clear();
+      _bufferedMessages.clear();
     });
     final tokenAsync = ref.read(imTokenProvider(widget.anchorId));
     tokenAsync.whenData((token) => _initChat(token));
@@ -166,14 +242,22 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
       msg.userInfo = userInfo;
       await _engine!.sendMessage(msg);
 
-      // Append locally immediately — RongCloud does not echo messages back to sender.
+      // Append locally — RongCloud does not echo messages back to sender.
+      // If history is still loading, park the message in _pendingEntryMsg so
+      // _flushHistory() appends it after all offline messages. Otherwise append directly.
       if (mounted) {
-        setState(() {
-          _messages.add(
-            _ChatMessage(senderName: name, senderId: _myId ?? '', text: text, isOwn: true),
-          );
-        });
-        _scrollToBottom();
+        final chatMsg = _ChatMessage(senderName: name, senderId: _myId ?? '', text: text, isOwn: true);
+        if (_initialSyncDone) {
+          setState(() => _messages.add(chatMsg));
+          _scrollToBottom();
+        } else {
+          _pendingEntryMsg = chatMsg;
+          // Fallback for empty chatrooms: if no messages trigger _flushHistory
+          // within 500 ms, flush manually so the entry message becomes visible.
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (mounted && _pendingEntryMsg != null) _flushHistory();
+          });
+        }
       }
     }
   }
@@ -230,9 +314,13 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
     final isLoggedIn = ref.watch(authNotifierProvider).valueOrNull?.isAuthenticated ?? false;
 
     ref.listen(authNotifierProvider, (prev, next) {
-      final wasLoggedIn = prev?.valueOrNull?.isAuthenticated ?? false;
-      final nowLoggedIn = next.valueOrNull?.isAuthenticated ?? false;
-      if (wasLoggedIn != nowLoggedIn) _reinitChat();
+      final prevAuth = prev?.valueOrNull;
+      final nextAuth = next.valueOrNull;
+      // Skip transitions while either state is still loading — otherwise the
+      // loading→data transition looks like a login/logout and triggers a
+      // spurious _reinitChat on every app start.
+      if (prevAuth == null || nextAuth == null) return;
+      if (prevAuth.isAuthenticated != nextAuth.isAuthenticated) _reinitChat();
     });
 
     ref.listen(imTokenProvider(widget.anchorId), (_, next) {
@@ -249,7 +337,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
   }
 
   Widget _buildStatusBanner() {
-    if (_connecting) {
+    if (_connecting || !_initialSyncDone) {
       return Container(
         width: double.infinity,
         color: Colors.black12,
@@ -293,7 +381,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
   }
 
   Widget _buildMessageList() {
-    if (_messages.isEmpty && _connected) {
+    if (_initialSyncDone && _messages.isEmpty && _connected) {
       return Center(
         child: Text(
           'anchor.detail.chats.empty'.tr(),

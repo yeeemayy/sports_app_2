@@ -33,7 +33,8 @@
       "video": {
         "buffering": "缓冲中...",
         "error": "直播加载失败，请检查网络",
-        "retry": "重试"
+        "retry": "重试",
+        "fullscreen": "全屏"
       },
       "error": {
         "load_failed": "加载主播信息失败"
@@ -48,7 +49,7 @@
     "profile": "个人"
   },
   "news": {
-    "details":"新闻详情",
+    "details": "新闻详情",
     "search_hint": "搜索新闻...",
     "no_results": "暂无结果",
     "load_error": "加载失败",

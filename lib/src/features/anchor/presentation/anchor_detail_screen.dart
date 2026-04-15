@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +15,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 import 'package:sports_app/src/features/anchor/domain/models/anchor_detail_model.dart';
 import 'package:sports_app/src/features/anchor/presentation/anchor_chats_tab.dart';
+import 'package:sports_app/src/features/anchor/presentation/anchor_video_fullscreen_page.dart';
 import 'package:sports_app/src/features/anchor/presentation/providers/anchor_detail_providers.dart';
 
 class AnchorDetailScreen extends ConsumerStatefulWidget {
@@ -32,6 +35,8 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
   bool _videoError = false;
   bool _isBuffering = false;
   String? _currentM3u8Url;
+  bool _showControls = false;
+  Timer? _controlsTimer;
 
   @override
   void initState() {
@@ -71,6 +76,37 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
     }
   }
 
+  void _onVideoTap() {
+    setState(() => _showControls = true);
+    _controlsTimer?.cancel();
+    _controlsTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _showControls = false);
+    });
+  }
+
+  void _togglePlayPause() {
+    final controller = _videoController;
+    if (controller == null || !_videoInitialized) return;
+    setState(() {
+      if (controller.value.isPlaying) {
+        controller.pause();
+      } else {
+        controller.play();
+      }
+    });
+    _onVideoTap(); // reset the hide timer after interaction
+  }
+
+  void _openFullscreen() {
+    if (_videoController == null || !_videoInitialized) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => AnchorVideoFullscreenPage(controller: _videoController!),
+      ),
+    );
+  }
+
   Future<void> _retryVideo() async {
     final url = _currentM3u8Url;
     if (url == null) return;
@@ -87,6 +123,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
 
   @override
   void dispose() {
+    _controlsTimer?.cancel();
     _videoController?.removeListener(_onVideoUpdate);
     _videoController?.dispose();
     _tabController.dispose();
@@ -120,30 +157,33 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
   }
 
   Widget _buildVideoSection(AsyncValue<AnchorDetailModel> detailAsync) {
-    return Stack(
-      children: [
-        AspectRatio(
-          aspectRatio: 16 / 9,
-          child: detailAsync.when(
-            loading: () => Container(
-              color: Colors.grey.shade900,
-              child: const Center(child: CircularProgressIndicator(color: Colors.white)),
+    return GestureDetector(
+      onTap: _onVideoTap,
+      child: Stack(
+        children: [
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: detailAsync.when(
+              loading: () => Container(
+                color: Colors.grey.shade900,
+                child: const Center(child: CircularProgressIndicator(color: Colors.white)),
+              ),
+              error: (_, _) => Container(color: Colors.grey.shade900),
+              data: (detail) => _buildVideoPlayer(detail),
             ),
-            error: (_, _) => Container(color: Colors.grey.shade900),
-            data: (detail) => _buildVideoPlayer(detail),
           ),
-        ),
-        Positioned(
-          top: 4,
-          left: 4,
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-            onPressed: () => context.pop(),
+          Positioned(
+            top: 4,
+            left: 4,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+              onPressed: () => context.pop(),
+            ),
           ),
-        ),
-        if (detailAsync.valueOrNull?.isLive == 1)
-          Positioned(top: 12, right: 12, child: _LiveBadge()),
-      ],
+          if (detailAsync.valueOrNull?.isLive == 1)
+            Positioned(top: 12, right: 12, child: _LiveBadge()),
+        ],
+      ),
     );
   }
 
@@ -219,6 +259,41 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
             ),
           ),
 
+        // Play/pause button (tap-to-show, auto-hides)
+        // if (_videoInitialized && !_videoError && _showControls)
+        //   Center(
+        //     child: GestureDetector(
+        //       onTap: _togglePlayPause,
+        //       child: Container(
+        //         decoration: const BoxDecoration(
+        //           color: Colors.black45,
+        //           shape: BoxShape.circle,
+        //         ),
+        //         padding: const EdgeInsets.all(10),
+        //         child: Icon(
+        //           _videoController!.value.isPlaying ? Icons.pause : Icons.play_arrow,
+        //           color: Colors.white,
+        //           size: 36,
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+
+        // Fullscreen button (tap-to-show, auto-hides)
+        if (_videoInitialized && !_videoError && _showControls)
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Container(
+              width: double.maxFinite,
+              color: Colors.black54,
+              alignment: Alignment.bottomRight,
+              child: IconButton(
+                onPressed: _openFullscreen,
+                icon: const Icon(Icons.fullscreen, color: Colors.white70, size: 28),
+              ),
+            ),
+          ),
+
         // Offline overlay
         if (!_videoError && (detail.isLive == 0 || detail.m3u8Url == null))
           Container(
@@ -275,7 +350,10 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [AnchorChatsTab(anchorId: widget.anchorId), _buildInfoTab(detail)],
+              children: [
+                AnchorChatsTab(anchorId: widget.anchorId),
+                _buildInfoTab(detail),
+              ],
             ),
           ),
         ],
