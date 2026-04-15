@@ -24,9 +24,10 @@ class ProfileScreen extends ConsumerWidget {
       description: 'profile.logout_confirm_message'.tr(),
       buttonText: 'profile.logout'.tr(),
       buttonBackgroundColor: Colors.red,
-      onButtonPressed: () {
+      onButtonPressed: () async {
         context.pop();
-        ref.read(authNotifierProvider.notifier).logout();
+        await ref.read(authNotifierProvider.notifier).logout();
+        context.go(AppRoutes.home);
       },
       secondaryButton: SizedBox(
         width: double.infinity,
@@ -87,7 +88,9 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(authNotifierProvider).value?.user;
+    final authState = ref.watch(authNotifierProvider);
+    final isAuthenticated = authState.hasValue && (authState.value?.isAuthenticated ?? false);
+    final user = authState.value?.user;
     final avatarUrl = user?.avatarUrl;
     final nickname = user?.nickname ?? '';
 
@@ -99,40 +102,69 @@ class ProfileScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 48),
-              Center(
-                child: ClipOval(
-                  child: avatarUrl != null && avatarUrl.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: avatarUrl,
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Shimmer.fromColors(
-                            baseColor: Colors.grey.shade300,
-                            highlightColor: Colors.grey.shade100,
-                            child: const ColoredBox(color: Colors.white),
+              if (isAuthenticated) ...[
+                Center(
+                  child: ClipOval(
+                    child: avatarUrl != null && avatarUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: avatarUrl,
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Shimmer.fromColors(
+                              baseColor: Colors.grey.shade300,
+                              highlightColor: Colors.grey.shade100,
+                              child: const ColoredBox(color: Colors.white),
+                            ),
+                            errorBuilder: (context, url, error) => AvatarFallback(),
+                          )
+                        : AvatarFallback(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: Text(
+                    nickname,
+                    style: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ] else
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => context.push(AppRoutes.register),
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.pink,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size(0, 48),
                           ),
-                          errorBuilder: (context, url, error) => AvatarFallback(),
-                        )
-                      : AvatarFallback(),
+                          child: Text('auth.register.register'.tr()),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => context.push(AppRoutes.login),
+                          style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
+                          child: Text('auth.login.login'.tr()),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: Text(
-                  nickname,
-                  style: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-                ),
-              ),
               const SizedBox(height: 32),
               _ProfileSection(
                 label: 'profile.section_settings'.tr(),
                 tiles: [
-                  _ProfileTile(
-                    icon: Icons.person_outline,
-                    label: 'profile.edit_button'.tr(),
-                    onTap: () => context.push(AppRoutes.profileEditFull),
-                  ),
+                  if (isAuthenticated)
+                    _ProfileTile(
+                      icon: Icons.person_outline,
+                      label: 'profile.edit_button'.tr(),
+                      onTap: () => context.push(AppRoutes.profileEditFull),
+                    ),
                   _ProfileTile(
                     icon: Icons.language,
                     label: 'profile.toggle_language'.tr(),
@@ -156,18 +188,20 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              ...ListTile.divideTiles(
-                context: context,
-                tiles: [
-                  _ProfileTile(
-                    icon: Icons.logout,
-                    label: 'profile.logout'.tr(),
-                    onTap: () => _confirmLogout(context, ref),
-                    isDestructive: true,
-                  ),
-                ],
-              ),
+              if (isAuthenticated) ...[
+                const SizedBox(height: 16),
+                ...ListTile.divideTiles(
+                  context: context,
+                  tiles: [
+                    _ProfileTile(
+                      icon: Icons.logout,
+                      label: 'profile.logout'.tr(),
+                      onTap: () => _confirmLogout(context, ref),
+                      isDestructive: true,
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),
