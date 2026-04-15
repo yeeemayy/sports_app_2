@@ -111,33 +111,39 @@ class _AnchorVideoFullscreenPageState extends State<AnchorVideoFullscreenPage> {
             //   ),
 
             // Close button
-            if (_showControls)
-              Container(
-                color: Colors.black54,
-                width: double.maxFinite,
-                height: MediaQuery.of(context).size.height,
-                child: SafeArea(
-                  child: Column(
-                    children: [
-                      Align(
-                        alignment: Alignment.topLeft,
-                        child: IconButton(
-                          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                          onPressed: () => context.pop(),
+            AnimatedOpacity(
+              opacity: _showControls ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 300),
+              child: IgnorePointer(
+                ignoring: !_showControls,
+                child: Container(
+                  color: Colors.black54,
+                  width: double.maxFinite,
+                  height: MediaQuery.of(context).size.height,
+                  child: SafeArea(
+                    child: Column(
+                      children: [
+                        Align(
+                          alignment: Alignment.topLeft,
+                          child: IconButton(
+                            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                            onPressed: () => context.pop(),
+                          ),
                         ),
-                      ),
-                      Spacer(),
-                      Align(
-                        alignment: Alignment.bottomRight,
-                        child: IconButton(
-                          icon: const Icon(Icons.fullscreen_exit, color: Colors.white, size: 28),
-                          onPressed: () => context.pop(),
+                        const Spacer(),
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: IconButton(
+                            icon: const Icon(Icons.fullscreen_exit, color: Colors.white, size: 28),
+                            onPressed: () => context.pop(),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
+            ),
           ],
         ),
       ),

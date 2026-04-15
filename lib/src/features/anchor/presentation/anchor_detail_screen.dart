@@ -77,11 +77,13 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
   }
 
   void _onVideoTap() {
-    setState(() => _showControls = true);
-    _controlsTimer?.cancel();
-    _controlsTimer = Timer(const Duration(seconds: 2), () {
-      if (mounted) setState(() => _showControls = false);
-    });
+    setState(() => _showControls = !_showControls);
+    if (_showControls) {
+      _controlsTimer?.cancel();
+      _controlsTimer = Timer(const Duration(seconds: 3), () {
+        if (mounted) setState(() => _showControls = false);
+      });
+    }
   }
 
   void _togglePlayPause() {
@@ -280,16 +282,23 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
         //   ),
 
         // Fullscreen button (tap-to-show, auto-hides)
-        if (_videoInitialized && !_videoError && _showControls)
-          AspectRatio(
-            aspectRatio: 16 / 9,
-            child: Container(
-              width: double.maxFinite,
-              color: Colors.black54,
-              alignment: Alignment.bottomRight,
-              child: IconButton(
-                onPressed: _openFullscreen,
-                icon: const Icon(Icons.fullscreen, color: Colors.white70, size: 28),
+        if (_videoInitialized && !_videoError)
+          AnimatedOpacity(
+            opacity: _showControls ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 300),
+            child: IgnorePointer(
+              ignoring: !_showControls,
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Container(
+                  width: double.maxFinite,
+                  color: Colors.black54,
+                  alignment: Alignment.bottomRight,
+                  child: IconButton(
+                    onPressed: _openFullscreen,
+                    icon: const Icon(Icons.fullscreen, color: Colors.white70, size: 28),
+                  ),
+                ),
               ),
             ),
           ),
