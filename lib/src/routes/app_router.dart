@@ -21,6 +21,7 @@ import 'package:sports_app/src/features/data/presentation/data_screen.dart';
 import 'package:sports_app/src/features/event/presentation/event_screen.dart';
 import 'package:sports_app/src/features/home/presentation/home_screen.dart';
 import 'package:sports_app/src/features/news/presentation/news_detail_screen.dart';
+import 'package:sports_app/src/features/video/presentation/video_detail_screen.dart';
 import 'package:sports_app/src/features/news/presentation/news_screen.dart';
 import 'package:sports_app/src/features/profile/presentation/edit_profile_screen.dart';
 import 'package:sports_app/src/features/profile/presentation/profile_screen.dart';
@@ -177,6 +178,14 @@ GoRouter appRouter(AppRouterRef ref) {
         path: AppRoutes.anchor,
         builder: (context, state) => AnchorDetailScreen(
           anchorId: int.parse(state.pathParameters['anchorId']!),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.videoDetail,
+        builder: (context, state) => VideoDetailScreen(
+          videoId: int.parse(state.pathParameters['videoId']!),
+          currentPage: int.tryParse(state.uri.queryParameters['page'] ?? '') ?? 1,
+          lastPage: int.tryParse(state.uri.queryParameters['lastPage'] ?? '') ?? 1,
         ),
       ),
       GoRoute(

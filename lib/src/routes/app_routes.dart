@@ -58,6 +58,11 @@ abstract final class AppRoutes {
   static const anchor = '/anchor/:anchorId';
   static String anchorPath(int id) => '/anchor/$id';
 
+  // Video highlight detail
+  static const videoDetail = '/video/:videoId';
+  static String videoDetailPath(int id, {int currentPage = 1, int lastPage = 1}) =>
+      '/video/$id?page=$currentPage&lastPage=$lastPage';
+
   // Auth
   static const login = '/auth/login';
   static const register = '/auth/register';

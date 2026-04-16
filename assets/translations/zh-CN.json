@@ -65,11 +65,17 @@
       "live_events": "赛事直播",
       "live_events_count": "{count}场",
       "anchor_rankings": "主播排行榜",
-      "anchor_live": "主播直播"
+      "anchor_live": "主播直播",
+      "video_highlights": "赛事集锦"
     },
     "error": {
       "load_failed": "加载失败，请稍后再试"
     }
+  },
+  "video": {
+    "load_error": "加载视频失败",
+    "detail_title": "赛事集锦详情",
+    "more_videos": "更多集锦"
   },
   "session": {
     "expired_title": "登录已过期",

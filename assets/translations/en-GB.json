@@ -65,11 +65,17 @@
       "live_events": "Live Events",
       "live_events_count": "{count} matches",
       "anchor_rankings": "Anchor Rankings",
-      "anchor_live": "Anchor Live"
+      "anchor_live": "Anchor Live",
+      "video_highlights": "Match Highlights"
     },
     "error": {
       "load_failed": "Failed to load, please try again"
     }
+  },
+  "video": {
+    "load_error": "Failed to load video",
+    "detail_title": "Highlights Detail",
+    "more_videos": "More Highlights"
   },
   "session": {
     "expired_title": "Session Expired",
