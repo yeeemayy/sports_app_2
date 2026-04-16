@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sports_app/src/core/exceptions/app_exception.dart';
 import 'package:sports_app/src/core/services/api_service.dart';
@@ -64,6 +65,10 @@ class AuthRepository extends _$AuthRepository {
     );
     final json = response.data as Map<String, dynamic>;
     if (json['code'] != 1) throw AppException(json['msg'] ?? 'SMS send failed');
+    final code = (json['data'] as Map<String, dynamic>?)?['code'];
+    if (code != null) {
+      Fluttertoast.showToast(msg: '[DEBUG] Code: $code', toastLength: Toast.LENGTH_LONG);
+    }
   }
 
   Future<UserModel> fetchUser() async {

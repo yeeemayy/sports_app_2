@@ -703,7 +703,10 @@
       "title": "重置密码",
       "submit": "重置密码",
       "success": "密码重置成功",
-      "go_to_login": "去登录"
+      "go_to_login": "去登录",
+      "otp_error_title": "验证码错误",
+      "error_title": "重置密码失败",
+      "next": "下一步"
     },
     "field": {
       "select_country_region": "选择国家/地区",

@@ -703,7 +703,10 @@
       "title": "Reset Password",
       "submit": "Reset Password",
       "success": "Password reset successfully",
-      "go_to_login": "Go to Login"
+      "go_to_login": "Go to Login",
+      "otp_error_title": "Verification Code Error",
+      "error_title": "Reset Password Failed",
+      "next": "Next"
     },
     "field": {
       "select_country_region": "Select Country/Region",

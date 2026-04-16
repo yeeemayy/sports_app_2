@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/features/home/domain/models/anchor_model.dart';
 import 'package:sports_app/src/features/home/presentation/widgets/home_anchor_live_card.dart';
@@ -14,7 +13,8 @@ class HomeAnchorLiveGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final count = anchors?.length ?? itemCount;
-    final isTablet = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
+    // final isTablet = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
+    final isTablet = MediaQuery.sizeOf(context).width >= 600;
 
     return GridView.builder(
       shrinkWrap: true,

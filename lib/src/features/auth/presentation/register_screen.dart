@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
@@ -30,6 +31,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   bool _obscureConfirmPassword = true;
   String _countryCode = '+86';
   bool _isSendingOtp = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _telephoneController.addListener(() => setState(() {}));
+  }
 
   @override
   void dispose() {
@@ -165,6 +172,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       child: CustomTextField(
                         textEditingController: _smsController,
                         keyboardType: TextInputType.number,
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                         hintText: 'auth.field.sms_code'.tr(),
                         validator: (v) => v == null || v.trim().isEmpty
                             ? 'auth.validation.sms_required'.tr()
@@ -175,7 +183,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
                       child: OutlinedButton(
-                        onPressed: countdown > 0 || _isSendingOtp ? null : _sendOtp,
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            color:
+                                countdown > 0 ||
+                                    _isSendingOtp ||
+                                    _telephoneController.text.trim().isEmpty
+                                ? Colors.grey
+                                : Colors.pink,
+                          ),
+                        ),
+                        onPressed:
+                            countdown > 0 ||
+                                _isSendingOtp ||
+                                _telephoneController.text.trim().isEmpty
+                            ? null
+                            : _sendOtp,
                         child: _isSendingOtp
                             ? const SizedBox(
                                 height: 16,

@@ -58,7 +58,7 @@ class HomeTabOthers extends ConsumerWidget {
                     title: 'home.section.anchor_live'.tr(),
                     onPressed: () {},
                   ),
-                  const HomeAnchorLiveGrid(),
+                  HomeAnchorLiveGrid(),
                 ],
               ),
               error: (err, stack) => Column(
