@@ -33,6 +33,10 @@ class MyApp extends ConsumerWidget {
     AppLocale.update(context.locale);
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
+        child: child!,
+      ),
       title: 'Sports App',
       localizationsDelegates:[
         CountryLocalizations.delegate,
