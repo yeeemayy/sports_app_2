@@ -42,6 +42,9 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(bannerProvider);
+    });
   }
 
   Future<void> _initVideoPlayer(String m3u8Url) async {

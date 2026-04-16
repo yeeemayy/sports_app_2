@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/features/video/domain/models/video_model.dart';
 import 'package:sports_app/src/features/video/presentation/providers/video_providers.dart';
@@ -70,12 +71,13 @@ class _VideoGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: isTablet ? 3 : 2,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
         childAspectRatio: 1.2,
