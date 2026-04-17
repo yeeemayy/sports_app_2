@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -174,7 +175,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 padding: const EdgeInsets.only(top: 8),
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: countdown > 0 || _isSendingOtp || _telephoneController.text.trim().isEmpty ? Colors.grey : Colors.pink),
+                    side: BorderSide(color: countdown > 0 || _isSendingOtp || _telephoneController.text.trim().isEmpty ? Colors.grey : AppColors.primary),
                   ),
                   onPressed: countdown > 0 || _isSendingOtp || _telephoneController.text.trim().isEmpty ? null : _sendOtp,
                   child: _isSendingOtp

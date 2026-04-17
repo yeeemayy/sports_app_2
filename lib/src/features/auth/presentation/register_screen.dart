@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -190,7 +191,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                     _isSendingOtp ||
                                     _telephoneController.text.trim().isEmpty
                                 ? Colors.grey
-                                : Colors.pink,
+                                : AppColors.primary,
                           ),
                         ),
                         onPressed:

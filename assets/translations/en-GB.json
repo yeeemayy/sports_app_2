@@ -85,6 +85,7 @@
   "common": {
     "ok": "OK",
     "unknown": "unknown",
+    "retry": "Retry",
     "error": {
       "unexpected": "An unexpected error occurred, please try again"
     }
@@ -678,6 +679,15 @@
     }
   },
   "auth": {
+    "error": {
+      "register_failed": "Registration failed",
+      "reset_failed": "Reset password failed",
+      "sms_failed": "Failed to send verification code",
+      "upload_failed": "Upload failed",
+      "update_failed": "Update failed",
+      "logout_failed": "Logout failed",
+      "fetch_user_failed": "Failed to fetch user info"
+    },
     "login": {
       "title": "Login",
       "submit": "Login",

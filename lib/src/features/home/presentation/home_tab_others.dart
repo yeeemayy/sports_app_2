@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
 import 'package:sports_app/src/features/home/presentation/providers/banner_providers.dart';
 import 'package:sports_app/src/features/home/presentation/widgets/home_section_title.dart';
@@ -11,9 +12,6 @@ import 'package:sports_app/src/features/video/presentation/widgets/home_video_li
 
 class HomeTabOthers extends ConsumerWidget {
   const HomeTabOthers({super.key});
-
-  String _locale(BuildContext context) =>
-      context.locale.languageCode == 'zh' ? 'cn' : 'en';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -61,15 +59,23 @@ class HomeTabOthers extends ConsumerWidget {
                   HomeAnchorLiveGrid(),
                 ],
               ),
-              error: (err, stack) => Column(
-                children: [
-                  HomeSectionTitle(
-                    icon: 'assets/images/news.png',
-                    title: 'home.section.video_highlights'.tr(),
-                    onPressed: () {},
-                  ),
-                  HomeVideoList(locale: _locale(context)),
-                ],
+              error: (err, stack) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 48),
+                child: Column(
+                  children: [
+                    Icon(Icons.wifi_off_rounded, size: 48, color: Colors.grey.shade400),
+                    const SizedBox(height: 12),
+                    Text(
+                      'home.error.load_failed'.tr(),
+                      style: TextStyle(color: Colors.grey.shade500),
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () => ref.refresh(anchorListProvider().future),
+                      child: Text('common.retry'.tr()),
+                    ),
+                  ],
+                ),
               ),
               data: (page) => Column(
                 children: [
@@ -82,6 +88,12 @@ class HomeTabOthers extends ConsumerWidget {
                 ],
               ),
             ),
+            HomeSectionTitle(
+              icon: 'assets/images/news.png',
+              title: 'home.section.video_highlights'.tr(),
+              onPressed: () {},
+            ),
+            HomeVideoList(locale: context.localeCode),
           ],
         ),
       ),

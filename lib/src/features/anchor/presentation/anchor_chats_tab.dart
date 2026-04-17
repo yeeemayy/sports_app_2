@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
@@ -415,7 +416,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
                   text: '${msg.senderName}: ',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: msg.isOwn ? Colors.pink : Colors.green,
+                    color: msg.isOwn ? AppColors.primary : Colors.green,
                   ),
                 ),
                 TextSpan(text: msg.text),
@@ -474,7 +475,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(color: Colors.pink),
+                  borderSide: const BorderSide(color: AppColors.primary),
                 ),
               ),
             ),
@@ -483,7 +484,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
           TextButton(
             onPressed: _connected ? _sendMessage : null,
             style: TextButton.styleFrom(
-              backgroundColor: Colors.pink,
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               disabledBackgroundColor: Colors.grey.shade300,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),

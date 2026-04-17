@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
@@ -9,6 +10,7 @@ import 'package:sports_app/src/features/event/domain/models/tennis_realtime_data
 import 'package:sports_app/src/features/event/domain/tennis_status.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_header_shell.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
@@ -73,17 +75,13 @@ class _TennisMatchHeader extends ConsumerWidget {
       sportRealtimeProvider(SportType.tennis).select((map) => map[matchId] as TennisRealtimeData?),
     );
 
-    return Container(
-      width: double.maxFinite,
-      color: Colors.pink,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-      child: detailAsync.when(
-        loading: () => const SizedBox(height: 80),
-        error: (_, __) => const SizedBox(height: 80),
-        data: (obj) {
-          final detail = obj as TennisMatchDetail;
-          return _TennisHeaderContent(detail: detail, rt: rt, eventsData: eventsAsync.valueOrNull as TennisMatchEventsData?);
-        },
+    return SportDetailHeaderShell<TennisMatchDetail>(
+      detailAsync: detailAsync,
+      skeletonHeight: 80,
+      builder: (detail) => _TennisHeaderContent(
+        detail: detail,
+        rt: rt,
+        eventsData: eventsAsync.valueOrNull as TennisMatchEventsData?,
       ),
     );
   }
@@ -342,7 +340,7 @@ class _ScoreTab extends ConsumerWidget {
     );
 
     return detailAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
@@ -527,7 +525,7 @@ class _SetScoreTable extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: isActive ? Colors.pink : Colors.grey.shade600,
+                            color: isActive ? AppColors.primary : Colors.grey.shade600,
                           ),
                         ),
                       );
@@ -540,7 +538,7 @@ class _SetScoreTable extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: Colors.pink,
+                            color: AppColors.primary,
                           ),
                         ),
                       ),
@@ -622,7 +620,7 @@ class _PlayerScoreRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? Colors.pink : Colors.black87,
+                  color: isActive ? AppColors.primary : Colors.black87,
                 ),
               ),
             );
@@ -635,7 +633,7 @@ class _PlayerScoreRow extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: Colors.pink,
+                  color: AppColors.primary,
                 ),
               ),
             ),
@@ -643,7 +641,7 @@ class _PlayerScoreRow extends StatelessWidget {
             child: Text(
               '$total',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.pink),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.primary),
             ),
           ),
         ],
@@ -726,7 +724,7 @@ class _BasicPlayerRow extends StatelessWidget {
             child: Text(
               '$total',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.pink),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.primary),
             ),
           ),
         ],
@@ -754,7 +752,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
     final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.tennis, matchId: widget.matchId));
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
@@ -798,7 +796,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                         margin: const EdgeInsets.only(right: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.pink : Colors.grey.shade200,
+                          color: isSelected ? AppColors.primary : Colors.grey.shade200,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -935,7 +933,7 @@ class _TennisStatRow extends StatelessWidget {
                             width: awayWidth,
                             height: barHeight,
                             decoration: const BoxDecoration(
-                              color: Colors.pink,
+                              color: AppColors.primary,
                               borderRadius: BorderRadius.only(topRight: radius, bottomRight: radius),
                             ),
                           ),
@@ -966,7 +964,7 @@ class _SituationTab extends ConsumerWidget {
     final detail = ref.watch(matchDetailProvider(sport: SportType.tennis, matchId: matchId)).valueOrNull as TennisMatchDetail?;
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
@@ -1023,7 +1021,7 @@ class _SetTimelineSection extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
           child: Row(
             children: [
-              const Icon(Icons.sports_tennis, color: Colors.pink, size: 22),
+              const Icon(Icons.sports_tennis, color: AppColors.primary, size: 22),
               const SizedBox(width: 8),
               Text(
                 'event.tennis.detail.set_n'.tr(namedArgs: {'n': '${setTimeline.set}'}),

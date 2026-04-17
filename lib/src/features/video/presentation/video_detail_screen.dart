@@ -38,7 +38,7 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
   late final int _randomPage;
   final ScrollController _scrollController = ScrollController();
 
-  String get _locale => context.locale.languageCode == 'zh' ? 'cn' : 'en';
+  String get _locale => context.localeCode;
 
   @override
   void initState() {

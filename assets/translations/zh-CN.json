@@ -85,6 +85,7 @@
   "common": {
     "ok": "确定",
     "unknown": "未知",
+    "retry": "重试",
     "error": {
       "unexpected": "发生未知错误，请稍后再试"
     }
@@ -678,6 +679,15 @@
     }
   },
   "auth": {
+    "error": {
+      "register_failed": "注册失败",
+      "reset_failed": "重置密码失败",
+      "sms_failed": "发送验证码失败",
+      "upload_failed": "上传失败",
+      "update_failed": "更新失败",
+      "logout_failed": "退出失败",
+      "fetch_user_failed": "获取用户信息失败"
+    },
     "login": {
       "title": "账号登录",
       "submit": "登录",

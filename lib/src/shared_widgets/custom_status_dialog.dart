@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 
 enum DialogType { success, fail, custom }
 
@@ -112,7 +113,7 @@ Future<void> showCustomStatusDialog({
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: buttonBackgroundColor ?? Colors.pink,
+                    backgroundColor: buttonBackgroundColor ?? AppColors.primary,
                     foregroundColor: Colors.white,
                     minimumSize: const Size(0, 48),
                     shape: RoundedRectangleBorder(

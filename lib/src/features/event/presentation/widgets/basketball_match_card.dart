@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
@@ -253,7 +254,7 @@ class _TeamScoreRow extends StatelessWidget {
             textAlign: TextAlign.center,
             style: context.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
-              color: isLive ? Colors.pink : Colors.black87,
+              color: isLive ? AppColors.primary : Colors.black87,
             ),
           ),
         ),

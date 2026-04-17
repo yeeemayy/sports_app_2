@@ -1,6 +1,7 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -51,8 +52,8 @@ class MyApp extends ConsumerWidget {
       locale: context.locale,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.pink,
-        ).copyWith(primaryContainer: Colors.pink.shade50),
+          seedColor: AppColors.primary,
+        ).copyWith(primaryContainer: AppColors.primaryShade50),
         scaffoldBackgroundColor: Colors.white,
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.white,
@@ -62,11 +63,11 @@ class MyApp extends ConsumerWidget {
           titleTextStyle: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
         textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(foregroundColor: Colors.pink),
+          style: TextButton.styleFrom(foregroundColor: AppColors.primary),
         ),
         filledButtonTheme: FilledButtonThemeData(
           style: TextButton.styleFrom(
-            backgroundColor: Colors.pink,
+            backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             minimumSize: Size(0, 48),
           ),
@@ -74,13 +75,13 @@ class MyApp extends ConsumerWidget {
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
             backgroundColor: Colors.white,
-            side: BorderSide(color: Colors.pink),
-            foregroundColor: Colors.pink,
+            side: BorderSide(color: AppColors.primary),
+            foregroundColor: AppColors.primary,
           ),
         ),
         navigationBarTheme: NavigationBarThemeData(
-          backgroundColor: Colors.pink.shade50,
-          indicatorColor: Colors.pink.shade300,
+          backgroundColor: AppColors.primaryShade50,
+          indicatorColor: AppColors.primaryShade300,
         ),
       ),
       routerConfig: ref.watch(appRouterProvider),

@@ -1,6 +1,7 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/shared_widgets/custom_text_field.dart';
 
 class CountryPhoneNumberTextField extends StatefulWidget {
@@ -62,7 +63,7 @@ class _CountryPhoneNumberTextFieldState extends State<CountryPhoneNumberTextFiel
             borderRadius: BorderRadius.all(Radius.circular(30)),
           ),
           focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.pink),
+            borderSide: BorderSide(color: AppColors.primary),
             borderRadius: BorderRadius.all(Radius.circular(30)),
           ),
         ),

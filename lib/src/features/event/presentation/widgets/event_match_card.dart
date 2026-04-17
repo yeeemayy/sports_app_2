@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/am_football_match.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_match.dart';
@@ -176,7 +177,7 @@ class _MatchScore extends StatelessWidget {
       );
     }
 
-    final scoreColor = _isLive ? Colors.pink : Colors.black87;
+    final scoreColor = _isLive ? AppColors.primary : Colors.black87;
     return RichText(
       text: TextSpan(
         style: context.textTheme.titleMedium?.copyWith(
@@ -223,8 +224,8 @@ class _StatusBadge extends StatelessWidget {
     final label = isLive
         ? (statusDescription?.isNotEmpty == true ? statusDescription! : 'event.status.live'.tr())
         : 'event.status.finished'.tr();
-    final bgColor = isLive ? Colors.pink.shade50 : Colors.orange.shade50;
-    final textColor = isLive ? Colors.pink : Colors.orange.shade800;
+    final bgColor = isLive ? AppColors.primaryShade50 : Colors.orange.shade50;
+    final textColor = isLive ? AppColors.primary : Colors.orange.shade800;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
