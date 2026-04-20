@@ -174,7 +174,7 @@ final newsPaginatedProvider =
     );
 
 typedef _$NewsPaginated = AutoDisposeNotifier<NewsPaginatedState>;
-String _$newsSearchHash() => r'b5295fabe7315beb0c82e940979ce5d8857bbeb4';
+String _$newsSearchHash() => r'd85d48b4dfbf7f5d1a89eaa48e461e793aa9d269';
 
 /// See also [NewsSearch].
 @ProviderFor(NewsSearch)

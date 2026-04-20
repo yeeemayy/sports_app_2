@@ -20,7 +20,9 @@ class FootballMatchCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.football).select((map) => map[match.id] as MatchRealtimeData?),
+      sportRealtimeProvider(
+        SportType.football,
+      ).select((map) => map[match.id] as MatchRealtimeData?),
     );
 
     final effective = rt == null
@@ -112,11 +114,21 @@ class FootballMatchCard extends ConsumerWidget {
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
+                                if (effective.homeRedCards > 0)
+                                  WidgetSpan(
+                                    alignment: PlaceholderAlignment.middle,
+                                    child: _CardBadge(
+                                      count: effective.homeRedCards,
+                                      color: Colors.red,
+                                      isHome: true,
+                                    ),
+                                  ),
                                 if (effective.homeYellowCards > 0)
                                   WidgetSpan(
                                     alignment: PlaceholderAlignment.middle,
-                                    child: _YellowCardBadge(
+                                    child: _CardBadge(
                                       count: effective.homeYellowCards,
+                                      color: Colors.amber,
                                       isHome: true,
                                     ),
                                   ),
@@ -147,11 +159,21 @@ class FootballMatchCard extends ConsumerWidget {
                           child: Text.rich(
                             TextSpan(
                               children: [
+                                if (effective.awayRedCards > 0)
+                                  WidgetSpan(
+                                    alignment: PlaceholderAlignment.middle,
+                                    child: _CardBadge(
+                                      count: effective.awayRedCards,
+                                      color: Colors.red,
+                                      isHome: false,
+                                    ),
+                                  ),
                                 if (effective.awayYellowCards > 0)
                                   WidgetSpan(
                                     alignment: PlaceholderAlignment.middle,
-                                    child: _YellowCardBadge(
+                                    child: _CardBadge(
                                       count: effective.awayYellowCards,
+                                      color: Colors.amber,
                                       isHome: false,
                                     ),
                                   ),
@@ -243,22 +265,23 @@ class _ScoreDisplay extends StatelessWidget {
   }
 }
 
-class _YellowCardBadge extends StatelessWidget {
-  const _YellowCardBadge({required this.isHome, required this.count});
+class _CardBadge extends StatelessWidget {
+  const _CardBadge({required this.isHome, required this.count, required this.color});
   final bool isHome;
   final int count;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(left: isHome ? 4 : 0, right: isHome ? 0 : 4),
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-      decoration: BoxDecoration(color: Colors.amber, borderRadius: BorderRadius.circular(3)),
+      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3)),
       child: Text(
         '$count',
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
-          color: Colors.black87,
+          color: color.computeLuminance() > 0.4 ? Colors.black87 : Colors.white,
           height: 1.2,
         ),
       ),
