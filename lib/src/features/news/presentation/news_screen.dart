@@ -151,7 +151,6 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
       itemCount: state.articles.length + (state.isLoadingMore ? 1 : 0),
       separatorBuilder: (context, index) => const Divider(height: 1, indent: 16, endIndent: 16),
       itemBuilder: (context, index) {
-        print(state.articles.length);
         if (index == state.articles.length) {
           return const Padding(
             padding: EdgeInsets.all(16),

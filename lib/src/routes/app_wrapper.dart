@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
+import 'package:sports_app/src/features/home/presentation/providers/banner_providers.dart';
 import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
 import 'package:sports_app/src/providers/nav_providers.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
@@ -80,6 +82,10 @@ class _AppWrapperState extends ConsumerState<AppWrapper> with TickerProviderStat
 
   void _onTap(int index) {
     ref.read(currentNavIndexProvider.notifier).state = index;
+    if (index == 0 && index != widget.navigationShell.currentIndex) {
+      ref.invalidate(anchorListProvider);
+      ref.invalidate(bannerProvider);
+    }
     if (index == 2 && index != widget.navigationShell.currentIndex) {
       final newsState = ref.read(newsPaginatedProvider);
       if (newsState.articles.isNotEmpty) {
