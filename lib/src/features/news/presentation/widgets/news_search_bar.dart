@@ -8,10 +8,12 @@ class NewsSearchBar extends StatefulWidget {
   const NewsSearchBar({
     super.key,
     required this.onSearch,
+    required this.controller,
     this.debounceMs = 500,
   });
 
   final ValueChanged<String> onSearch;
+  final TextEditingController controller;
   final int debounceMs;
 
   @override
@@ -19,13 +21,13 @@ class NewsSearchBar extends StatefulWidget {
 }
 
 class _NewsSearchBarState extends State<NewsSearchBar> {
-  final _controller = TextEditingController();
   Timer? _debounce;
+
+  TextEditingController get _controller => widget.controller;
 
   @override
   void dispose() {
     _debounce?.cancel();
-    _controller.dispose();
     super.dispose();
   }
 
@@ -51,7 +53,7 @@ class _NewsSearchBarState extends State<NewsSearchBar> {
       prefixIcon: const Icon(Icons.search, size: 20),
       suffixIcon: ValueListenableBuilder<TextEditingValue>(
         valueListenable: _controller,
-        builder: (_, value, __) {
+        builder: (context, value, _) {
           if (value.text.isEmpty) return const SizedBox.shrink();
           return IconButton(
             icon: const Icon(Icons.clear, size: 18),

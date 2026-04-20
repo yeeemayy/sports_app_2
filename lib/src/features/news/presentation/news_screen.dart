@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
 import 'package:sports_app/src/features/news/presentation/widgets/news_card.dart';
@@ -15,20 +16,32 @@ class NewsScreen extends ConsumerStatefulWidget {
   ConsumerState<NewsScreen> createState() => _NewsScreenState();
 }
 
-class _NewsScreenState extends ConsumerState<NewsScreen> {
+class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProviderStateMixin {
   final _scrollController = ScrollController();
+  final _searchController = TextEditingController();
+  late final TabController _tabController;
   String _searchKeyword = '';
   String _currentLocale = '';
+  int _previousTabIndex = 0;
+
+  List<String> get _tabApiKeywords => [
+        'news.tab.football'.tr(),
+        'news.tab.basketball'.tr(),
+        'news.tab.esports'.tr(),
+      ];
 
   String get _locale => context.localeCode;
+  String get _activeKeyword => _searchKeyword.isNotEmpty ? _searchKeyword : _tabApiKeywords[_tabController.index];
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(_onTabChanged);
     _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _currentLocale = _locale;
-      ref.read(newsPaginatedProvider.notifier).init(_locale);
+      ref.read(newsSearchProvider.notifier).search(_activeKeyword, _locale);
     });
   }
 
@@ -40,85 +53,78 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
       _currentLocale = newLocale;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        if (_searchKeyword.isEmpty) {
-          ref.read(newsPaginatedProvider.notifier).init(newLocale);
-        } else {
-          ref.read(newsSearchProvider.notifier).search(_searchKeyword, newLocale);
-        }
+        ref.read(newsSearchProvider.notifier).search(_activeKeyword, newLocale);
       });
     }
   }
 
   @override
   void dispose() {
+    _tabController.dispose();
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
+  void _onTabChanged() {
+    if (_tabController.index == _previousTabIndex) return;
+    _previousTabIndex = _tabController.index;
+    _searchController.clear();
+    setState(() {
+      _searchKeyword = '';
+    });
+    ref.read(newsSearchProvider.notifier).search(_activeKeyword, _locale);
+  }
+
   void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 300) {
-      if (_searchKeyword.isEmpty) {
-        ref.read(newsPaginatedProvider.notifier).loadMore();
-      } else {
-        ref.read(newsSearchProvider.notifier).loadMore();
-      }
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 300) {
+      ref.read(newsSearchProvider.notifier).loadMore();
     }
   }
 
   void _onSearch(String keyword) {
-    if (keyword.isNotEmpty) {
-      ref.read(newsSearchProvider.notifier).search(keyword, _locale);
-    }
     setState(() => _searchKeyword = keyword);
-    if (keyword.isEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) ref.read(newsPaginatedProvider.notifier).init(_locale);
-      });
-    }
+    ref.read(newsSearchProvider.notifier).search(_activeKeyword, _locale);
   }
 
   Future<void> _onRefresh() async {
-    if (_searchKeyword.isEmpty) {
-      await ref.read(newsPaginatedProvider.notifier).refresh();
-    } else {
-      await ref.read(newsSearchProvider.notifier).search(_searchKeyword, _locale);
-    }
+    await ref.read(newsSearchProvider.notifier).search(_activeKeyword, _locale);
   }
 
   @override
   Widget build(BuildContext context) {
-    final state = _searchKeyword.isEmpty
-        ? ref.watch(newsPaginatedProvider)
-        : ref.watch(newsSearchProvider);
+    final state = ref.watch(newsSearchProvider);
 
     if (state.error != null && state.articles.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          context.showErrorDialog(
-            title: 'news.load_error'.tr(),
-            error: state.error!,
-          );
+          context.showErrorDialog(title: 'news.load_error'.tr(), error: state.error!);
         }
       });
     }
 
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: NewsSearchBar(onSearch: _onSearch),
-            ),
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: _onRefresh,
-                child: _buildBody(state),
-              ),
-            ),
-          ],
-        ),
+    return SafeArea(
+      child: Column(
+        children: [
+          TabBar(
+            labelColor: AppColors.primary,
+            indicatorColor: AppColors.primary,
+            controller: _tabController,
+            tabs: [
+              Tab(text: 'news.tab.football'.tr()),
+              Tab(text: 'news.tab.basketball'.tr()),
+              Tab(text: 'news.tab.esports'.tr()),
+            ],
+          ),
+          // Padding(
+          //   padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          //   child: NewsSearchBar(onSearch: _onSearch, controller: _searchController),
+          // ),
+          SizedBox(height: 8),
+          Expanded(
+            child: RefreshIndicator(onRefresh: _onRefresh, child: _buildBody(state)),
+          ),
+        ],
       ),
     );
   }
@@ -135,10 +141,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
 
     if (state.articles.isEmpty) {
       return Center(
-        child: Text(
-          'news.no_results'.tr(),
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
+        child: Text('news.no_results'.tr(), style: Theme.of(context).textTheme.bodyMedium),
       );
     }
 
@@ -148,6 +151,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
       itemCount: state.articles.length + (state.isLoadingMore ? 1 : 0),
       separatorBuilder: (context, index) => const Divider(height: 1, indent: 16, endIndent: 16),
       itemBuilder: (context, index) {
+        print(state.articles.length);
         if (index == state.articles.length) {
           return const Padding(
             padding: EdgeInsets.all(16),

@@ -139,8 +139,11 @@ class NewsSearch extends _$NewsSearch {
       final response = await ref
           .read(newsRepositoryProvider.notifier)
           .searchNews(locale: _locale, keywords: _keywords, page: page);
+      final articles = replace
+          ? response.data
+          : [...state.articles, ...response.data];
       state = state.copyWith(
-        articles: response.data,
+        articles: articles,
         currentPage: response.currentPage,
         lastPage: response.lastPage,
         isLoading: false,

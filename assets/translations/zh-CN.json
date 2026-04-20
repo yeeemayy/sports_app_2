@@ -55,7 +55,12 @@
     "search_hint": "搜索新闻...",
     "no_results": "暂无结果",
     "load_error": "加载失败",
-    "detail_error": "加载文章失败"
+    "detail_error": "加载文章失败",
+    "tab": {
+      "football": "足球",
+      "basketball": "篮球",
+      "esports": "电竞"
+    }
   },
   "home": {
     "tab": {
