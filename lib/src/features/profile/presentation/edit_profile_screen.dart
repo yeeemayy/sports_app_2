@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:sports_app/src/core/config/env_config.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -50,12 +52,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ListTile(
               leading: const Icon(Icons.camera_alt),
               title: Text('profile.avatar_take_photo'.tr()),
-              onTap: () => Navigator.of(context).pop(ImageSource.camera),
+              onTap: () => context.pop(ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
               title: Text('profile.avatar_choose_gallery'.tr()),
-              onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+              onTap: () => context.pop(ImageSource.gallery),
             ),
           ],
         ),
@@ -74,11 +76,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       String? avatarUrl;
       if (_pickedImage != null) {
         avatarUrl = await repo.uploadAvatar(_pickedImage!.path);
+        debugPrint(avatarUrl);
       }
-      await ref.read(authNotifierProvider.notifier).updateProfile(
-            nickname: _nicknameController.text.trim(),
-            avatarUrl: avatarUrl,
-          );
+      await ref
+          .read(authNotifierProvider.notifier)
+          .updateProfile(nickname: _nicknameController.text.trim(), avatarUrl: avatarUrl);
       if (mounted) {
         await showCustomStatusDialog(
           context: context,
@@ -127,24 +129,27 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                               fit: BoxFit.cover,
                             )
                           : (avatarUrl != null && avatarUrl.isNotEmpty
-                              ? CachedNetworkImage(
-                                  imageUrl: avatarUrl,
-                                  width: 100,
-                                  height: 100,
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) => Shimmer.fromColors(
-                                    baseColor: Colors.grey.shade300,
-                                    highlightColor: Colors.grey.shade100,
-                                    child: const ColoredBox(color: Colors.white),
-                                  ),
-                                  errorBuilder: (context, url, error) => AvatarFallback(),
-                                )
-                              : AvatarFallback()),
+                                ? CachedNetworkImage(
+                                    imageUrl: '${EnvConfig.baseUrl}$avatarUrl',
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => Shimmer.fromColors(
+                                      baseColor: Colors.grey.shade300,
+                                      highlightColor: Colors.grey.shade100,
+                                      child: const ColoredBox(color: Colors.white),
+                                    ),
+                                    errorBuilder: (context, url, error) => AvatarFallback(),
+                                  )
+                                : AvatarFallback()),
                     ),
                     Container(
                       width: 28,
                       height: 28,
-                      decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                      decoration: const BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                      ),
                       child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
                     ),
                   ],
@@ -160,8 +165,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 textEditingController: _nicknameController,
                 label: 'profile.edit_nickname_label'.tr(),
                 hintText: 'profile.edit_nickname_hint'.tr(),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'auth.validation.nickname_required'.tr() : null,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'auth.validation.nickname_required'.tr()
+                    : null,
               ),
               const SizedBox(height: 32),
               SizedBox(

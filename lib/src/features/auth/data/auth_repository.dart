@@ -85,7 +85,8 @@ class AuthRepository extends _$AuthRepository {
     final response = await dio.post('/upload', data: formData);
     final json = response.data as Map<String, dynamic>;
     if (json['code'] != 1) throw AppException(json['msg'] ?? 'auth.error.upload_failed'.tr());
-    return (json['data'] as Map<String, dynamic>)['imgUrl'] as String;
+    final imgUrl = (json['data'] as Map<String, dynamic>)['imgUrl'] as String;
+    return imgUrl;
   }
 
   Future<void> updateProfile({String? nickname, String? avatarUrl}) async {

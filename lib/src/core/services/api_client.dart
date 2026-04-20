@@ -41,7 +41,7 @@ class ApiClient {
   ApiClient(TokenHolder tokenHolder, SessionExpiredInterceptor sessionExpiredInterceptor) {
     httpClient = Dio(
       BaseOptions(
-        baseUrl: EnvConfig.baseUrl,
+        baseUrl: EnvConfig.apiUrl,
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 15),
         headers: {'Content-Type': 'application/json'},
