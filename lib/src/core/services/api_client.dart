@@ -99,6 +99,7 @@ class _SigningInterceptor extends Interceptor {
     options.headers['time'] = timestamp;
     options.headers['random'] = random;
     options.headers['sign'] = sign;
+    options.headers['app'] = EnvConfig.appName;
     options.headers['client'] = client;
 
     handler.next(options);
