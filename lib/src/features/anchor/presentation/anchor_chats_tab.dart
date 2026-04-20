@@ -435,9 +435,19 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
           border: Border(top: BorderSide(color: Colors.grey.shade200)),
         ),
         child: TextButton.icon(
-          onPressed: () => context.push(AppRoutes.login),
+          onPressed: () => context.push(
+  '${AppRoutes.login}?returnPath=${Uri.encodeComponent(AppRoutes.anchorPath(widget.anchorId))}',
+),
           icon: const Icon(Icons.lock_outline, size: 16),
-          label: Text('anchor.detail.chats.login_to_chat'.tr()),
+          label: Text.rich(
+            TextSpan(children: [
+              TextSpan(
+                text: 'anchor.detail.chats.login_to_chat_action'.tr(),
+                style: const TextStyle(color: AppColors.primary),
+              ),
+              TextSpan(text: 'anchor.detail.chats.login_to_chat_suffix'.tr()),
+            ]),
+          ),
           style: TextButton.styleFrom(
             minimumSize: const Size(double.infinity, 44),
             foregroundColor: Colors.black38,

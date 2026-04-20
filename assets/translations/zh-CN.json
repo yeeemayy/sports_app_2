@@ -12,6 +12,8 @@
         "connecting": "连接聊天室中...",
         "empty": "暂无消息",
         "login_to_chat": "登录后发言",
+        "login_to_chat_action": "登录",
+        "login_to_chat_suffix": "后发言",
         "retry": "重试",
         "input": {
           "hint": "说点什么..."

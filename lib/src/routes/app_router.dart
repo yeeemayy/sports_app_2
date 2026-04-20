@@ -190,7 +190,12 @@ GoRouter appRouter(AppRouterRef ref) {
       ),
       GoRoute(
         path: AppRoutes.login,
-        builder: (context, state) => const LoginScreen(),
+        builder: (context, state) {
+          final encoded = state.uri.queryParameters['returnPath'];
+          return LoginScreen(
+            returnPath: encoded != null ? Uri.decodeComponent(encoded) : null,
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.register,

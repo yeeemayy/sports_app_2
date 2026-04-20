@@ -12,6 +12,8 @@
         "connecting": "Connecting to chat...",
         "empty": "No messages yet",
         "login_to_chat": "Login to chat",
+        "login_to_chat_action": "Login",
+        "login_to_chat_suffix": " to chat",
         "retry": "Retry",
         "input": {
           "hint": "Say something..."

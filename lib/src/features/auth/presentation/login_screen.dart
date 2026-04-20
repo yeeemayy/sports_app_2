@@ -9,7 +9,8 @@ import 'package:sports_app/src/shared_widgets/country_phone_number_text_field.da
 import 'package:sports_app/src/shared_widgets/custom_text_field.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+  final String? returnPath;
+  const LoginScreen({super.key, this.returnPath});
 
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
@@ -31,16 +32,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-   try {
-     await ref.read(authNotifierProvider.notifier).login(
-       telephone: _telephoneController.text.trim(),
-       password: _passwordController.text,
-     );
-     if (mounted) context.go(AppRoutes.home);
-   } catch (e) {
-     if (!mounted) return;
-     context.showErrorDialog(title: 'auth.login.error_title'.tr(), error: e);
-   }
+    try {
+      await ref
+          .read(authNotifierProvider.notifier)
+          .login(telephone: _telephoneController.text.trim(), password: _passwordController.text);
+      if (mounted) {
+        context.go(AppRoutes.home);
+        if (widget.returnPath != null) {
+          context.push(widget.returnPath!);
+        }
+      }
+    } catch (e) {
+      if (!mounted) return;
+      context.showErrorDialog(title: 'auth.login.error_title'.tr(), error: e);
+    }
   }
 
   @override
@@ -77,15 +82,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   obscureText: _obscurePassword,
                   hintText: 'auth.field.password'.tr(),
                   suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                    ),
-                    onPressed: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
+                    icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                   ),
-                  validator: (v) => v == null || v.isEmpty
-                      ? 'auth.validation.password_required'.tr()
-                      : null,
+                  validator: (v) =>
+                      v == null || v.isEmpty ? 'auth.validation.password_required'.tr() : null,
                 ),
                 const SizedBox(height: 8),
                 Align(
@@ -102,10 +103,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ? const SizedBox(
                           height: 20,
                           width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                         )
                       : Text('auth.login.submit'.tr()),
                 ),

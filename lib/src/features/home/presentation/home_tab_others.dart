@@ -59,23 +59,33 @@ class HomeTabOthers extends ConsumerWidget {
                   HomeAnchorLiveGrid(),
                 ],
               ),
-              error: (err, stack) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 48),
-                child: Column(
-                  children: [
-                    Icon(Icons.wifi_off_rounded, size: 48, color: Colors.grey.shade400),
-                    const SizedBox(height: 12),
-                    Text(
-                      'home.error.load_failed'.tr(),
-                      style: TextStyle(color: Colors.grey.shade500),
+              error: (err, stack) => Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 48),
+                    child: Column(
+                      children: [
+                        Icon(Icons.wifi_off_rounded, size: 48, color: Colors.grey.shade400),
+                        const SizedBox(height: 12),
+                        Text(
+                          'home.error.load_failed'.tr(),
+                          style: TextStyle(color: Colors.grey.shade500),
+                        ),
+                        const SizedBox(height: 16),
+                        TextButton(
+                          onPressed: () => ref.refresh(anchorListProvider().future),
+                          child: Text('common.retry'.tr()),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 16),
-                    TextButton(
-                      onPressed: () => ref.refresh(anchorListProvider().future),
-                      child: Text('common.retry'.tr()),
-                    ),
-                  ],
-                ),
+                  ),
+                  HomeSectionTitle(
+                    icon: 'assets/images/news.png',
+                    title: 'home.section.video_highlights'.tr(),
+                    onPressed: () {},
+                  ),
+                  HomeVideoList(locale: context.localeCode),
+                ],
               ),
               data: (page) => Column(
                 children: [
@@ -88,12 +98,6 @@ class HomeTabOthers extends ConsumerWidget {
                 ],
               ),
             ),
-            HomeSectionTitle(
-              icon: 'assets/images/news.png',
-              title: 'home.section.video_highlights'.tr(),
-              onPressed: () {},
-            ),
-            HomeVideoList(locale: context.localeCode),
           ],
         ),
       ),
