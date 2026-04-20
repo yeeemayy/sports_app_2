@@ -7,14 +7,99 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
+import 'package:sports_app/src/features/auth/data/auth_storage_service.dart';
 import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:sports_app/src/routes/app_router.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/avatar.dart';
 import 'package:sports_app/src/shared_widgets/custom_status_dialog.dart';
+import 'package:sports_app/src/shared_widgets/custom_text_field.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
+
+  void _confirmDeleteAccount(BuildContext context, WidgetRef ref) {
+    showCustomStatusDialog(
+      context: context,
+      dialogType: DialogType.custom,
+      overrideIcon: Icons.delete_forever_rounded,
+      overrideIconBackgroundColor: Colors.red,
+      title: 'profile.delete_account_confirm_title'.tr(),
+      description: 'profile.delete_account_confirm_message'.tr(),
+      buttonText: 'profile.delete_account_confirm_proceed'.tr(),
+      buttonBackgroundColor: Colors.red,
+      onButtonPressed: () {
+        context.pop();
+        _showPasswordConfirmDialog(context, ref);
+      },
+      secondaryButton: SizedBox(
+        width: double.infinity,
+        child: OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(0, 48),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          ),
+          onPressed: () => context.pop(),
+          child: Text('profile.logout_confirm_cancel'.tr()),
+        ),
+      ),
+      showCloseButton: false,
+    );
+  }
+
+  void _showPasswordConfirmDialog(BuildContext context, WidgetRef ref) {
+    final passwordController = TextEditingController();
+    final errorNotifier = ValueNotifier<String?>(null);
+
+    showCustomStatusDialog(
+      context: context,
+      dialogType: DialogType.custom,
+      overrideIcon: Icons.lock_outline_rounded,
+      overrideIconBackgroundColor: Colors.red,
+      title: 'profile.delete_account_password_title'.tr(),
+      overrideContent: _PasswordConfirmContent(
+        controller: passwordController,
+        errorNotifier: errorNotifier,
+      ),
+      buttonText: 'profile.delete_account'.tr(),
+      buttonBackgroundColor: Colors.red,
+      onButtonPressed: () async {
+        if (passwordController.text.trim().isEmpty) {
+          errorNotifier.value = 'profile.delete_account_password_empty'.tr();
+          return;
+        }
+        final storage = ref.read(authStorageServiceProvider.notifier);
+        final credentials = await storage.readCredentials();
+        if (credentials == null || passwordController.text != credentials.password) {
+          errorNotifier.value = 'profile.delete_account_password_incorrect'.tr();
+          return;
+        }
+        errorNotifier.value = null;
+        context.pop();
+        final notifier = ref.read(authNotifierProvider.notifier);
+        try {
+          await notifier.deleteAccount();
+          if (context.mounted) context.go(AppRoutes.home);
+        } catch (e) {
+          if (context.mounted) {
+            context.showErrorDialog(title: 'profile.delete_account_error_title'.tr(), error: e);
+          }
+        }
+      },
+      secondaryButton: SizedBox(
+        width: double.infinity,
+        child: OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(0, 48),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          ),
+          onPressed: () => context.pop(),
+          child: Text('profile.logout_confirm_cancel'.tr()),
+        ),
+      ),
+      showCloseButton: false,
+    );
+  }
 
   void _confirmLogout(BuildContext context, WidgetRef ref) {
     showCustomStatusDialog(
@@ -191,23 +276,79 @@ class ProfileScreen extends ConsumerWidget {
                 ],
               ),
               if (isAuthenticated) ...[
-                const SizedBox(height: 16),
-                ...ListTile.divideTiles(
-                  context: context,
+                SizedBox(height: 16),
+                _ProfileSection(
+                  label: 'profile.section_danger_zone'.tr(),
                   tiles: [
                     _ProfileTile(
-                      icon: Icons.logout,
-                      label: 'profile.logout'.tr(),
-                      onTap: () => _confirmLogout(context, ref),
-                      isDestructive: true,
+                      icon: Icons.person_remove_outlined,
+                      label: 'profile.delete_account'.tr(),
+                      onTap: () => _confirmDeleteAccount(context, ref),
                     ),
                   ],
+                ),
+              ],
+              if (isAuthenticated) ...[
+                const SizedBox(height: 16),
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () => _confirmLogout(context, ref),
+                    icon: Icon(Icons.logout),
+                    label: Text('profile.logout'.tr()),
+                  ),
                 ),
               ],
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _PasswordConfirmContent extends StatefulWidget {
+  const _PasswordConfirmContent({required this.controller, required this.errorNotifier});
+
+  final TextEditingController controller;
+  final ValueNotifier<String?> errorNotifier;
+
+  @override
+  State<_PasswordConfirmContent> createState() => _PasswordConfirmContentState();
+}
+
+class _PasswordConfirmContentState extends State<_PasswordConfirmContent> {
+  bool _obscure = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<String?>(
+      valueListenable: widget.errorNotifier,
+      builder: (context, error, _) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'profile.delete_account_password_message'.tr(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, color: Color(0xFF757575)),
+            ),
+            const SizedBox(height: 16),
+            CustomTextField(
+              textEditingController: widget.controller,
+              obscureText: _obscure,
+              errorText: widget.errorNotifier.value,
+              label: 'profile.delete_account_password_label'.tr(),
+              validator: (value) => (value == null || value.isEmpty)
+                  ? 'profile.delete_account_password_empty'.tr()
+                  : null,
+              suffixIcon: IconButton(
+                icon: Icon(_obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined),
+                onPressed: () => setState(() => _obscure = !_obscure),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

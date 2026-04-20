@@ -7,6 +7,7 @@ class CustomTextField extends StatelessWidget {
   final TextEditingController textEditingController;
   final String? label;
   final String? hintText;
+  final String? errorText;
   final String? helperText;
   final Color? helperTextColor;
   final bool obscureText;
@@ -33,6 +34,7 @@ class CustomTextField extends StatelessWidget {
     required this.textEditingController,
     this.label,
     this.hintText,
+    this.errorText,
     this.helperText,
     this.helperTextColor,
     this.obscureText = false,
@@ -109,6 +111,7 @@ class CustomTextField extends StatelessWidget {
               FocusManager.instance.primaryFocus?.unfocus();
             },
             decoration: InputDecoration(
+              errorText: errorText,
               hintText: hintText ?? label,
               hintStyle: textStyle.copyWith(color: Colors.grey),
               prefixIcon: prefixIcon != null

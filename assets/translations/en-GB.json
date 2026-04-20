@@ -119,10 +119,21 @@
     "terms_of_use": "Terms of Use",
     "section_settings": "Settings",
     "section_legal": "Legal",
+    "section_danger_zone": "Danger Zone",
     "logout": "Log Out",
     "logout_confirm_title": "Log Out",
     "logout_confirm_message": "Are you sure you want to log out?",
-    "logout_confirm_cancel": "Cancel"
+    "logout_confirm_cancel": "Cancel",
+    "delete_account": "Delete Account",
+    "delete_account_confirm_title": "Delete Account",
+    "delete_account_confirm_message": "This action is permanent and cannot be undone. Your account and all associated data will be deleted.",
+    "delete_account_confirm_proceed": "Continue",
+    "delete_account_password_title": "Confirm Your Identity",
+    "delete_account_password_message": "Enter your password to confirm you want to permanently delete your account.",
+    "delete_account_password_label": "Password",
+    "delete_account_password_empty": "Please enter your password",
+    "delete_account_password_incorrect": "Incorrect password. Please try again.",
+    "delete_account_error_title": "Delete Account Failed"
   },
   "event": {
     "search": "Search matches",
