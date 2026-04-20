@@ -21,7 +21,7 @@ class NewsDetailScreen extends ConsumerWidget {
   String _cleanHtml(String html) {
     var result = html.replaceAll(RegExp(r'line-height\s*:\s*[^;"}]+;?\s*'), '');
     result = result.replaceAll('src="/https://', 'src="https://');
-    result = result.replaceAll(RegExp(r'<p[^>]*>\s*<br\s*/?>\s*</p>'), '');
+    result = result.replaceAll(RegExp(r'<p[^>]*>\s*(<span[^>]*>)?\s*<br\s*/?>\s*(</span>)?\s*</p>'), '');
     return result;
   }
 
@@ -76,7 +76,10 @@ class NewsDetailScreen extends ConsumerWidget {
               //   _CoverImage(url: detail.imageUrl!),
               Html(
                 data: _cleanHtml(detail.content),
-                style: {"*": Style(margin: Margins.zero, padding: HtmlPaddings.zero)},
+                style: {
+                  "*": Style(margin: Margins.zero, padding: HtmlPaddings.zero),
+                  "p": Style(margin: Margins.only(bottom: 20)),
+                },
               ),
             ],
           ),
