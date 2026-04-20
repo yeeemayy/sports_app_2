@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:go_router/go_router.dart';
@@ -42,6 +43,9 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(bannerProvider);
+    });
   }
 
   Future<void> _initVideoPlayer(String m3u8Url) async {
@@ -402,7 +406,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
   Widget _buildTabBar() {
     return TabBar(
       controller: _tabController,
-      indicatorColor: Colors.pink,
+      indicatorColor: AppColors.primary,
       indicatorSize: TabBarIndicatorSize.label,
       tabs: [
         Tab(text: 'anchor.detail.tab.chats'.tr()),
@@ -460,7 +464,7 @@ class _LiveBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(color: Colors.pink, borderRadius: BorderRadius.circular(4)),
+      decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(4)),
       child: Text(
         'anchor.detail.live'.tr(),
         style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5),

@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/football_lineup.dart';
@@ -9,8 +10,9 @@ import 'package:sports_app/src/features/event/domain/models/football_match_detai
 import 'package:sports_app/src/features/event/domain/models/football_match_events.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/football_match_card.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_header_shell.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
+import 'package:sports_app/src/shared_widgets/match_status_badge.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
@@ -80,29 +82,22 @@ class _MatchHeader extends ConsumerWidget {
       sportRealtimeProvider(SportType.football).select((map) => map[matchId] as MatchRealtimeData?),
     );
 
-    return Container(
-      width: double.maxFinite,
-      color: Colors.pink,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-      child: detailAsync.when(
-        loading: () => const SizedBox(height: 72),
-        error: (_, __) => const SizedBox(height: 72),
-        data: (obj) {
-          final detail = obj as FootballMatchDetail;
-          final effKickoff = (rt != null && rt.kickoffTimestamp != 0)
-              ? rt.kickoffTimestamp
-              : (eventsAsync.valueOrNull as FootballMatchEvents?)?.kickoffTimestamp;
-          return _MatchHeaderContent(
-            detail: detail,
-            kickoffTimestamp: effKickoff,
-            rtStatusId: rt?.statusId,
-            rtHomeScore: rt?.homeScore,
-            rtAwayScore: rt?.awayScore,
-            rtHomeHtScore: rt?.homeHtScore,
-            rtAwayHtScore: rt?.awayHtScore,
-          );
-        },
-      ),
+    return SportDetailHeaderShell<FootballMatchDetail>(
+      detailAsync: detailAsync,
+      builder: (detail) {
+        final effKickoff = (rt != null && rt.kickoffTimestamp != 0)
+            ? rt.kickoffTimestamp
+            : (eventsAsync.valueOrNull as FootballMatchEvents?)?.kickoffTimestamp;
+        return _MatchHeaderContent(
+          detail: detail,
+          kickoffTimestamp: effKickoff,
+          rtStatusId: rt?.statusId,
+          rtHomeScore: rt?.homeScore,
+          rtAwayScore: rt?.awayScore,
+          rtHomeHtScore: rt?.homeHtScore,
+          rtAwayHtScore: rt?.awayHtScore,
+        );
+      },
     );
   }
 }
@@ -330,7 +325,7 @@ class _EventsTab extends ConsumerWidget {
     final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       error: (e, st) {
         debugPrint('$e\n$st');
         return Center(
@@ -511,7 +506,7 @@ class _IncidentCell extends StatelessWidget {
   }
 
   static const _incidentColors = {
-    1: Colors.pink, // Goal
+    1: AppColors.primary, // Goal
     2: Colors.orange, // Corner
     3: Colors.amber, // Yellow card
     4: Colors.red, // Red card
@@ -595,7 +590,7 @@ class _IncidentText extends StatelessWidget {
         if (incident.homeScore != null && incident.awayScore != null)
           Text(
             '${incident.homeScore} - ${incident.awayScore}',
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.pink),
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
             textAlign: align,
           ),
         if (incident.reason != null && incident.reason != 0)
@@ -641,7 +636,7 @@ class _LineupsTabState extends ConsumerState<_LineupsTab> with SingleTickerProvi
     final lineupsAsync = ref.watch(footballMatchLineupsProvider(matchId: widget.matchId));
 
     return lineupsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       error: (e, st) {
         debugPrint('$e\n$st');
         return Center(
@@ -681,7 +676,7 @@ class _LineupsTabState extends ConsumerState<_LineupsTab> with SingleTickerProvi
                 controller: _tabController,
                 indicator: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  color: Colors.pink,
+                  color: AppColors.primary,
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
                 labelStyle: const TextStyle(
@@ -807,13 +802,13 @@ class _PlayerRow extends StatelessWidget {
             width: 24,
             height: 24,
             decoration: BoxDecoration(
-              color: Colors.pink.withValues(alpha: 0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             alignment: Alignment.center,
             child: Text(
               '${player.shirtNumber}',
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.pink),
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary),
             ),
           ),
           const SizedBox(width: 8),
@@ -850,7 +845,7 @@ class _StatsTab extends ConsumerWidget {
     final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),

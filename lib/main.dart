@@ -1,8 +1,10 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:sports_app/src/core/utils/app_locale.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/routes/app_router.dart';
@@ -33,14 +35,25 @@ class MyApp extends ConsumerWidget {
     AppLocale.update(context.locale);
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
+      builder: (context, child) => ResponsiveBreakpoints.builder(
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
+          child: child!,
+        ),
+        breakpoints: [
+          Breakpoint(start: 0, end: 599, name: MOBILE),
+          Breakpoint(start: 600, end: 1199, name: TABLET),
+          Breakpoint(start: 1200, end: double.infinity, name: DESKTOP),
+        ],
+      ),
       title: 'Sports App',
-      localizationsDelegates:[
-        CountryLocalizations.delegate,
-        ...context.localizationDelegates],
+      localizationsDelegates: [CountryLocalizations.delegate, ...context.localizationDelegates],
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink).copyWith(primaryContainer: Colors.pink.shade50),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppColors.primary,
+        ).copyWith(primaryContainer: AppColors.primaryShade50),
         scaffoldBackgroundColor: Colors.white,
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.white,
@@ -50,22 +63,26 @@ class MyApp extends ConsumerWidget {
           titleTextStyle: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
         textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(foregroundColor: Colors.pink),
+          style: TextButton.styleFrom(foregroundColor: AppColors.primary),
         ),
         filledButtonTheme: FilledButtonThemeData(
-          style: TextButton.styleFrom(backgroundColor: Colors.pink, foregroundColor: Colors.white, minimumSize: Size(0, 48)),
+          style: TextButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            minimumSize: Size(0, 48),
+          ),
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
             backgroundColor: Colors.white,
-            side: BorderSide(color: Colors.pink),
-            foregroundColor: Colors.pink,
+            side: BorderSide(color: AppColors.primary),
+            foregroundColor: AppColors.primary,
           ),
         ),
         navigationBarTheme: NavigationBarThemeData(
-          backgroundColor: Colors.pink.shade50,
-          indicatorColor: Colors.pink.shade300,
-        )
+          backgroundColor: AppColors.primaryShade50,
+          indicatorColor: AppColors.primaryShade300,
+        ),
       ),
       routerConfig: ref.watch(appRouterProvider),
     );

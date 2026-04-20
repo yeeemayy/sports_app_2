@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 
@@ -95,7 +96,7 @@ class CustomTextField extends StatelessWidget {
             textAlign: TextAlign.left,
             style: textStyle.copyWith(color: labelColor),
             maxLines: maxLines,
-            cursorColor: Colors.pink,
+            cursorColor: AppColors.primary,
             keyboardType: keyboardType,
             readOnly: readOnly,
             enabled: enabled,
@@ -123,7 +124,7 @@ class CustomTextField extends StatelessWidget {
                   : null,
               suffixIcon: suffixIcon,
               filled: true,
-              fillColor: enabled ? backgroundColor : Colors.pink.withValues(alpha: 0.2),
+              fillColor: enabled ? backgroundColor : AppColors.primary.withValues(alpha: 0.2),
               helperText: helperText,
               helperMaxLines: 6,
               helperStyle: TextStyle(
@@ -137,7 +138,7 @@ class CustomTextField extends StatelessWidget {
                 borderRadius: borderRadius,
               ),
               focusedBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: Colors.pink),
+                borderSide: const BorderSide(color: AppColors.primary),
                 borderRadius: borderRadius,
               ),
               disabledBorder: OutlineInputBorder(

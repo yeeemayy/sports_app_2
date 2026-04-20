@@ -1,5 +1,7 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:shimmer/shimmer.dart';
 
 class AnchorAvatar extends StatelessWidget {
@@ -37,8 +39,8 @@ class AnchorAvatar extends StatelessWidget {
           bottom: -4,
           child: Badge(
             padding: EdgeInsets.symmetric(horizontal: 6),
-            label: Text('Live', style: TextStyle(fontSize: 12 * (size / 60))),
-            backgroundColor: Colors.pink,
+            label: Text('anchor.detail.live'.tr(), style: TextStyle(fontSize: 12 * (size / 60))),
+            backgroundColor: AppColors.primary,
           ),
         ),
       ],

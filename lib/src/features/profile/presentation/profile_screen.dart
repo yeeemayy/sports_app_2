@@ -1,6 +1,7 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
@@ -137,7 +138,7 @@ class ProfileScreen extends ConsumerWidget {
                         child: TextButton(
                           onPressed: () => context.push(AppRoutes.register),
                           style: TextButton.styleFrom(
-                            backgroundColor: Colors.pink,
+                            backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
                             minimumSize: const Size(0, 48),
                           ),

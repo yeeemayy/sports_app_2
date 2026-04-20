@@ -1,21 +1,27 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
+import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
 import 'package:sports_app/src/providers/nav_providers.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/avatar.dart';
 
-class AppWrapper extends ConsumerWidget {
+class AppWrapper extends ConsumerStatefulWidget {
   const AppWrapper({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
+  @override
+  ConsumerState<AppWrapper> createState() => _AppWrapperState();
+}
+
+class _AppWrapperState extends ConsumerState<AppWrapper> with TickerProviderStateMixin {
   static const _tabs = [
     (labelKey: 'nav.home', icon: Icons.home_outlined, activeIcon: Icons.home, path: AppRoutes.home),
     (
@@ -44,12 +50,53 @@ class AppWrapper extends ConsumerWidget {
     ),
   ];
 
+  late final TabController _controller;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Establish dependency on EasyLocalization's InheritedWidget so this
-    // widget rebuilds (and re-evaluates all .tr() calls) when the locale changes.
+  void initState() {
+    super.initState();
+    _controller = TabController(
+      length: _tabs.length,
+      initialIndex: widget.navigationShell.currentIndex,
+      vsync: this,
+    );
+  }
+
+  @override
+  void didUpdateWidget(AppWrapper oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Sync controller when go_router changes index externally (e.g. deep link, back).
+    final newIndex = widget.navigationShell.currentIndex;
+    if (oldWidget.navigationShell.currentIndex != newIndex) {
+      _controller.index = newIndex;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onTap(int index) {
+    ref.read(currentNavIndexProvider.notifier).state = index;
+    if (index == 2 && index != widget.navigationShell.currentIndex) {
+      final newsState = ref.read(newsPaginatedProvider);
+      if (newsState.articles.isNotEmpty) {
+        ref.read(newsPaginatedProvider.notifier).silentRefresh();
+      }
+    }
+    widget.navigationShell.goBranch(
+      index,
+      initialLocation: index == widget.navigationShell.currentIndex,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Rebuild when locale changes so .tr() calls update.
     context.locale;
-    final currentIndex = navigationShell.currentIndex;
+    final currentIndex = widget.navigationShell.currentIndex;
     final authState = ref.watch(authNotifierProvider);
     final isAuthenticated = authState.hasValue && (authState.value?.isAuthenticated ?? false);
 
@@ -73,7 +120,7 @@ class AppWrapper extends ConsumerWidget {
                   TextButton(
                     onPressed: () => context.push(AppRoutes.register),
                     style: TextButton.styleFrom(
-                      backgroundColor: Colors.pink,
+                      backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                     ),
                     child: Text('auth.register.register'.tr()),
@@ -111,31 +158,19 @@ class AppWrapper extends ConsumerWidget {
           : currentIndex != 1
           ? AppBar(
               centerTitle: true,
-              title: Text(_tabs[navigationShell.currentIndex].labelKey.tr()),
+              title: Text(_tabs[currentIndex].labelKey.tr()),
             )
           : null,
-      body: navigationShell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: currentIndex,
-        onDestinationSelected: (index) {
-          ref.read(currentNavIndexProvider.notifier).state = index;
-          if (index == 2 && index != navigationShell.currentIndex) {
-            final newsState = ref.read(newsPaginatedProvider);
-            if (newsState.articles.isNotEmpty) {
-              ref.read(newsPaginatedProvider.notifier).silentRefresh();
-            }
-          }
-          navigationShell.goBranch(index, initialLocation: index == navigationShell.currentIndex);
-        },
-        destinations: _tabs
-            .map(
-              (t) => NavigationDestination(
-                icon: Icon(t.icon),
-                selectedIcon: Icon(t.activeIcon),
-                label: t.labelKey.tr(),
-              ),
-            )
+      body: widget.navigationShell,
+      bottomNavigationBar: ConvexAppBar(
+        style: TabStyle.react,
+        backgroundColor: AppColors.primary,
+        controller: _controller,
+        initialActiveIndex: currentIndex,
+        items: _tabs
+            .map((t) => TabItem(icon: t.icon, title: t.labelKey.tr()))
             .toList(),
+        onTap: _onTap,
       ),
     );
   }

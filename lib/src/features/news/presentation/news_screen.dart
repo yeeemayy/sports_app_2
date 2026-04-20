@@ -20,8 +20,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
   String _searchKeyword = '';
   String _currentLocale = '';
 
-  String get _locale =>
-      context.locale.languageCode == 'zh' ? 'cn' : 'en';
+  String get _locale => context.localeCode;
 
   @override
   void initState() {

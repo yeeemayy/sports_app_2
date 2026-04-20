@@ -12,6 +12,8 @@
         "connecting": "Connecting to chat...",
         "empty": "No messages yet",
         "login_to_chat": "Login to chat",
+        "login_to_chat_action": "Login",
+        "login_to_chat_suffix": " to chat",
         "retry": "Retry",
         "input": {
           "hint": "Say something..."
@@ -65,11 +67,17 @@
       "live_events": "Live Events",
       "live_events_count": "{count} matches",
       "anchor_rankings": "Anchor Rankings",
-      "anchor_live": "Anchor Live"
+      "anchor_live": "Anchor Live",
+      "video_highlights": "Match Highlights"
     },
     "error": {
       "load_failed": "Failed to load, please try again"
     }
+  },
+  "video": {
+    "load_error": "Failed to load video",
+    "detail_title": "Highlights Detail",
+    "more_videos": "More Highlights"
   },
   "session": {
     "expired_title": "Session Expired",
@@ -79,6 +87,7 @@
   "common": {
     "ok": "OK",
     "unknown": "unknown",
+    "retry": "Retry",
     "error": {
       "unexpected": "An unexpected error occurred, please try again"
     }
@@ -672,6 +681,15 @@
     }
   },
   "auth": {
+    "error": {
+      "register_failed": "Registration failed",
+      "reset_failed": "Reset password failed",
+      "sms_failed": "Failed to send verification code",
+      "upload_failed": "Upload failed",
+      "update_failed": "Update failed",
+      "logout_failed": "Logout failed",
+      "fetch_user_failed": "Failed to fetch user info"
+    },
     "login": {
       "title": "Login",
       "submit": "Login",
@@ -697,7 +715,10 @@
       "title": "Reset Password",
       "submit": "Reset Password",
       "success": "Password reset successfully",
-      "go_to_login": "Go to Login"
+      "go_to_login": "Go to Login",
+      "otp_error_title": "Verification Code Error",
+      "error_title": "Reset Password Failed",
+      "next": "Next"
     },
     "field": {
       "select_country_region": "Select Country/Region",

@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
@@ -39,7 +40,7 @@ class _EventScreenState extends State<EventScreen> with SingleTickerProviderStat
     return Column(
       children: [
         Container(
-          color: Colors.pink,
+          color: AppColors.primary,
           child: SafeArea(
             child: Row(
               children: [
@@ -124,6 +125,7 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
 
   void _setRealtimeWatchedIds(List<String> ids) {
     if (widget.sport.config.parseRealtime == null) return;
+    if (ref.read(currentNavIndexProvider) != 1) return;
     ref.read(sportRealtimeProvider(widget.sport).notifier).setWatchedIds('list', ids);
   }
 
@@ -393,7 +395,7 @@ class _StatusFilterBarState extends State<_StatusFilterBar> with SingleTickerPro
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: Colors.pink,
+      color: AppColors.primary,
       child: TabBar(
         controller: _controller,
         isScrollable: true,
@@ -449,7 +451,7 @@ class _DateSelectorBar extends StatelessWidget {
                 onTap: () => onSelected(date),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
-                  decoration: BoxDecoration(color: isSelected ? Colors.pink : Colors.grey.shade100),
+                  decoration: BoxDecoration(color: isSelected ? AppColors.primary : Colors.grey.shade100),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

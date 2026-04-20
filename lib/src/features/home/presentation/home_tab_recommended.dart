@@ -70,7 +70,7 @@ class HomeTabRecommended extends ConsumerWidget {
           ),
           HomeSectionTitle(title: 'home.section.anchor_live'.tr(), onPressed: () {}),
           anchorsAsync.when(
-            loading: () => const HomeAnchorLiveGrid(),
+            loading: () => HomeAnchorLiveGrid(),
             error: (err, stack) {
               print('$err\n$stack');
               return Center(

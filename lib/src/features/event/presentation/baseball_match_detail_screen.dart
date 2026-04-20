@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/baseball_status.dart';
@@ -9,6 +10,7 @@ import 'package:sports_app/src/features/event/domain/models/baseball_match_event
 import 'package:sports_app/src/features/event/domain/models/baseball_realtime_data.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_header_shell.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
@@ -70,15 +72,10 @@ class _BaseballMatchHeader extends ConsumerWidget {
       sportRealtimeProvider(SportType.baseball).select((map) => map[matchId] as BaseballRealtimeData?),
     );
 
-    return Container(
-      width: double.maxFinite,
-      color: Colors.pink,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-      child: detailAsync.when(
-        loading: () => const SizedBox(height: 80),
-        error: (_, __) => const SizedBox(height: 80),
-        data: (obj) => _HeaderContent(detail: obj as BaseballMatchDetail, rt: rt),
-      ),
+    return SportDetailHeaderShell<BaseballMatchDetail>(
+      detailAsync: detailAsync,
+      skeletonHeight: 80,
+      builder: (detail) => _HeaderContent(detail: detail, rt: rt),
     );
   }
 }
@@ -211,7 +208,7 @@ class _ScoreTab extends ConsumerWidget {
     final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.baseball, matchId: matchId));
 
     return detailAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
@@ -572,7 +569,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
     final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.baseball, matchId: widget.matchId));
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
@@ -606,7 +603,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
                       decoration: BoxDecoration(
-                        color: isSelected ? Colors.pink : Colors.grey.shade200,
+                        color: isSelected ? AppColors.primary : Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -734,7 +731,7 @@ class _BaseballStatRow extends StatelessWidget {
                             width: awayWidth,
                             height: barHeight,
                             decoration: const BoxDecoration(
-                              color: Colors.pink,
+                              color: AppColors.primary,
                               borderRadius: BorderRadius.only(
                                 topRight: radius,
                                 bottomRight: radius,

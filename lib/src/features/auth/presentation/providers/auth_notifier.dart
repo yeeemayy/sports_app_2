@@ -21,21 +21,27 @@ class AuthNotifier extends _$AuthNotifier {
   Future<AuthState> build() async {
     final storage = ref.read(authStorageServiceProvider.notifier);
     final tokenHolder = ref.read(tokenHolderProvider);
+    final repo = ref.read(authRepositoryProvider.notifier);
 
-    final savedToken = await storage.readToken();
-    if (savedToken == null || savedToken.isEmpty) {
+    final credentials = await storage.readCredentials();
+    if (credentials == null) {
       return const AuthState();
     }
 
-    // Restore token so authenticated requests work immediately
-    tokenHolder.value = savedToken;
-
+    // Re-login with saved credentials to get a fresh token on every app open
     try {
-      final user = await ref.read(authRepositoryProvider.notifier).fetchUser();
-      return AuthState(token: savedToken, user: user);
+      final token = await repo.login(
+        telephone: credentials.telephone,
+        password: credentials.password,
+      );
+      tokenHolder.value = token;
+      await storage.writeToken(token);
+      final user = await repo.fetchUser();
+      return AuthState(token: token, user: user);
     } catch (_) {
-      // Token expired or invalid — clear it
+      // Login failed — clear stored session
       await storage.deleteToken();
+      await storage.deleteCredentials();
       tokenHolder.value = null;
       return const AuthState();
     }
@@ -99,6 +105,7 @@ class AuthNotifier extends _$AuthNotifier {
 
     tokenHolder.value = null;
     await storage.deleteToken();
+    await storage.deleteCredentials();
     state = const AsyncData(AuthState());
   }
 

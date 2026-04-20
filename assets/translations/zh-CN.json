@@ -12,6 +12,8 @@
         "connecting": "连接聊天室中...",
         "empty": "暂无消息",
         "login_to_chat": "登录后发言",
+        "login_to_chat_action": "登录",
+        "login_to_chat_suffix": "后发言",
         "retry": "重试",
         "input": {
           "hint": "说点什么..."
@@ -65,11 +67,17 @@
       "live_events": "赛事直播",
       "live_events_count": "{count}场",
       "anchor_rankings": "主播排行榜",
-      "anchor_live": "主播直播"
+      "anchor_live": "主播直播",
+      "video_highlights": "赛事集锦"
     },
     "error": {
       "load_failed": "加载失败，请稍后再试"
     }
+  },
+  "video": {
+    "load_error": "加载视频失败",
+    "detail_title": "赛事集锦详情",
+    "more_videos": "更多集锦"
   },
   "session": {
     "expired_title": "登录已过期",
@@ -79,6 +87,7 @@
   "common": {
     "ok": "确定",
     "unknown": "未知",
+    "retry": "重试",
     "error": {
       "unexpected": "发生未知错误，请稍后再试"
     }
@@ -672,6 +681,15 @@
     }
   },
   "auth": {
+    "error": {
+      "register_failed": "注册失败",
+      "reset_failed": "重置密码失败",
+      "sms_failed": "发送验证码失败",
+      "upload_failed": "上传失败",
+      "update_failed": "更新失败",
+      "logout_failed": "退出失败",
+      "fetch_user_failed": "获取用户信息失败"
+    },
     "login": {
       "title": "账号登录",
       "submit": "登录",
@@ -697,7 +715,10 @@
       "title": "重置密码",
       "submit": "重置密码",
       "success": "密码重置成功",
-      "go_to_login": "去登录"
+      "go_to_login": "去登录",
+      "otp_error_title": "验证码错误",
+      "error_title": "重置密码失败",
+      "next": "下一步"
     },
     "field": {
       "select_country_region": "选择国家/地区",

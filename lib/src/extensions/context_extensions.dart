@@ -11,6 +11,11 @@ extension ContextTheme on BuildContext {
   ColorScheme get colorScheme => Theme.of(this).colorScheme;
 }
 
+extension ContextLocale on BuildContext {
+  /// Maps the current app locale to the API locale param ('cn' or 'en').
+  String get localeCode => locale.languageCode == 'zh' ? 'cn' : 'en';
+}
+
 extension ContextDialogs on BuildContext {
   void showErrorDialog({required String title, required Object error}) {
     final String description;

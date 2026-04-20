@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
@@ -9,6 +10,7 @@ import 'package:sports_app/src/features/event/domain/models/volleyball_realtime_
 import 'package:sports_app/src/features/event/domain/volleyball_status.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_header_shell.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
@@ -73,18 +75,10 @@ class _VolleyballMatchHeader extends ConsumerWidget {
           .select((map) => map[matchId] as VolleyballRealtimeData?),
     );
 
-    return Container(
-      width: double.maxFinite,
-      color: Colors.pink,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-      child: detailAsync.when(
-        loading: () => const SizedBox(height: 80),
-        error: (_, __) => const SizedBox(height: 80),
-        data: (obj) {
-          final detail = obj as VolleyballMatchDetail;
-          return _VolleyballHeaderContent(detail: detail, rt: rt);
-        },
-      ),
+    return SportDetailHeaderShell<VolleyballMatchDetail>(
+      detailAsync: detailAsync,
+      skeletonHeight: 80,
+      builder: (detail) => _VolleyballHeaderContent(detail: detail, rt: rt),
     );
   }
 }
@@ -737,13 +731,13 @@ class _BlinkingLiveIndicatorState extends State<_BlinkingLiveIndicator>
                 width: 7,
                 height: 7,
                 decoration: BoxDecoration(
-                    color: Colors.pink.shade50, shape: BoxShape.circle),
+                    color: AppColors.primaryShade50, shape: BoxShape.circle),
               ),
               const SizedBox(width: 4),
               Text(
                 widget.label,
                 style: context.textTheme.labelSmall?.copyWith(
-                  color: Colors.pink.shade50,
+                  color: AppColors.primaryShade50,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.5,
                 ),

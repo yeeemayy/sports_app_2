@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
@@ -131,11 +132,18 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
       );
 
       if (offline == true) {
-        // History/offline message — buffer until the last one arrives (left == 0).
-        setState(() => _bufferedMessages.add(chatMsg));
-        if ((left ?? 0) == 0) {
-          // Last history message received — flush buffer, then show pending entry.
-          _flushHistory();
+        if (_initialSyncDone) {
+          // The empty-room fallback already marked sync complete before these
+          // offline messages arrived — add directly so they are not lost.
+          setState(() => _messages.add(chatMsg));
+          _scrollToBottom();
+        } else {
+          // History/offline message — buffer until the last one arrives (left == 0).
+          setState(() => _bufferedMessages.add(chatMsg));
+          if ((left ?? 0) == 0) {
+            // Last history message received — flush buffer, then show pending entry.
+            _flushHistory();
+          }
         }
       } else {
         // Live message. If history hasn't flushed yet, flush now so the entry
@@ -156,6 +164,12 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
             _connectError = joinCode != 0;
           });
           if (joinCode == 0) {
+            // Fallback: if no offline messages ever arrive (empty room or
+            // non-logged-in viewer), mark sync complete after 3 s so the
+            // "connecting" banner is dismissed.
+            Future.delayed(const Duration(milliseconds: 3000), () {
+              if (mounted && !_initialSyncDone) _flushHistory();
+            });
             // Only send the entry message when the user is logged in.
             final isLoggedIn =
                 ref.read(authNotifierProvider).valueOrNull?.isAuthenticated ?? false;
@@ -251,12 +265,9 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
           setState(() => _messages.add(chatMsg));
           _scrollToBottom();
         } else {
+          // History is still loading; park the entry message so _flushHistory()
+          // appends it after all offline messages arrive.
           _pendingEntryMsg = chatMsg;
-          // Fallback for empty chatrooms: if no messages trigger _flushHistory
-          // within 500 ms, flush manually so the entry message becomes visible.
-          Future.delayed(const Duration(milliseconds: 500), () {
-            if (mounted && _pendingEntryMsg != null) _flushHistory();
-          });
         }
       }
     }
@@ -405,7 +416,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
                   text: '${msg.senderName}: ',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: msg.isOwn ? Colors.pink : Colors.green,
+                    color: msg.isOwn ? AppColors.primary : Colors.green,
                   ),
                 ),
                 TextSpan(text: msg.text),
@@ -424,9 +435,19 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
           border: Border(top: BorderSide(color: Colors.grey.shade200)),
         ),
         child: TextButton.icon(
-          onPressed: () => context.push(AppRoutes.login),
+          onPressed: () => context.push(
+  '${AppRoutes.login}?returnPath=${Uri.encodeComponent(AppRoutes.anchorPath(widget.anchorId))}',
+),
           icon: const Icon(Icons.lock_outline, size: 16),
-          label: Text('anchor.detail.chats.login_to_chat'.tr()),
+          label: Text.rich(
+            TextSpan(children: [
+              TextSpan(
+                text: 'anchor.detail.chats.login_to_chat_action'.tr(),
+                style: const TextStyle(color: AppColors.primary),
+              ),
+              TextSpan(text: 'anchor.detail.chats.login_to_chat_suffix'.tr()),
+            ]),
+          ),
           style: TextButton.styleFrom(
             minimumSize: const Size(double.infinity, 44),
             foregroundColor: Colors.black38,
@@ -464,7 +485,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(color: Colors.pink),
+                  borderSide: const BorderSide(color: AppColors.primary),
                 ),
               ),
             ),
@@ -473,7 +494,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
           TextButton(
             onPressed: _connected ? _sendMessage : null,
             style: TextButton.styleFrom(
-              backgroundColor: Colors.pink,
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               disabledBackgroundColor: Colors.grey.shade300,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),

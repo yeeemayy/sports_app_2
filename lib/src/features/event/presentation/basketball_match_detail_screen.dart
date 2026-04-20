@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/basketball_match_detail.dart';
@@ -9,6 +10,7 @@ import 'package:sports_app/src/features/event/domain/models/basketball_realtime_
 import 'package:sports_app/src/features/event/domain/models/basketball_team_squad.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_header_shell.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
@@ -74,21 +76,12 @@ class _BasketballMatchHeader extends ConsumerWidget {
       sportRealtimeProvider(SportType.basketball).select((map) => map[matchId] as BasketballRealtimeData?),
     );
 
-    return Container(
-      width: double.maxFinite,
-      color: Colors.pink,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-      child: detailAsync.when(
-        loading: () => const SizedBox(height: 72),
-        error: (_, __) => const SizedBox(height: 72),
-        data: (obj) {
-          final detail = obj as BasketballMatchDetail;
-          return _BasketballMatchHeaderContent(
-            detail: detail,
-            rt: rt,
-            eventsData: eventsAsync.valueOrNull as BasketballMatchEventsData?,
-          );
-        },
+    return SportDetailHeaderShell<BasketballMatchDetail>(
+      detailAsync: detailAsync,
+      builder: (detail) => _BasketballMatchHeaderContent(
+        detail: detail,
+        rt: rt,
+        eventsData: eventsAsync.valueOrNull as BasketballMatchEventsData?,
       ),
     );
   }
@@ -275,7 +268,7 @@ class _BasketballMatchBody extends ConsumerWidget {
 
     return eventsAsync.when(
       loading: () =>
-          const Center(child: CircularProgressIndicator(color: Colors.pink)),
+          const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       error: (_, __) {
         // Show detail data only if events fail
         final detail = detailAsync.valueOrNull as BasketballMatchDetail?;
@@ -471,7 +464,7 @@ class _QuarterScoreTable extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: isActive ? Colors.pink : Colors.grey.shade600,
+                        color: isActive ? AppColors.primary : Colors.grey.shade600,
                       ),
                     ),
                   );
@@ -557,7 +550,7 @@ class _ScoreRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? Colors.pink : Colors.black87,
+                  color: isActive ? AppColors.primary : Colors.black87,
                 ),
               ),
             );
@@ -570,7 +563,7 @@ class _ScoreRow extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
-                color: Colors.pink,
+                color: AppColors.primary,
               ),
             ),
           ),
@@ -678,7 +671,7 @@ class _SquadTabState extends ConsumerState<_SquadTab>
     final awayName = detail?.awayName ?? '';
 
     if (homeTeamId.isEmpty && awayTeamId.isEmpty) {
-      return const Center(child: CircularProgressIndicator(color: Colors.pink));
+      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
     }
 
     return Column(
@@ -695,7 +688,7 @@ class _SquadTabState extends ConsumerState<_SquadTab>
             controller: _tabController,
             indicator: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: Colors.pink,
+              color: AppColors.primary,
             ),
             indicatorSize: TabBarIndicatorSize.tab,
             labelStyle: const TextStyle(
@@ -765,7 +758,7 @@ class _TeamSquadList extends ConsumerWidget {
 
     return squadAsync.when(
       loading: () =>
-          const Center(child: CircularProgressIndicator(color: Colors.pink)),
+          const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       error: (e, st) {
         debugPrint('$e\n$st');
         return Center(
@@ -813,7 +806,7 @@ class _PlayerRow extends StatelessWidget {
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: Colors.pink.withValues(alpha: 0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             alignment: Alignment.center,
@@ -822,7 +815,7 @@ class _PlayerRow extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: Colors.pink,
+                color: AppColors.primary,
               ),
             ),
           ),

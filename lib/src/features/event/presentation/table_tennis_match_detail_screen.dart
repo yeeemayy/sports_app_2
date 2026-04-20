@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/table_tennis_status.dart';
@@ -9,6 +10,7 @@ import 'package:sports_app/src/features/event/domain/models/table_tennis_match_e
 import 'package:sports_app/src/features/event/domain/models/table_tennis_realtime_data.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_header_shell.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
@@ -77,21 +79,13 @@ class _TableTennisMatchHeader extends ConsumerWidget {
       ).select((map) => map[matchId] as TableTennisRealtimeData?),
     );
 
-    return Container(
-      width: double.maxFinite,
-      color: Colors.pink,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-      child: detailAsync.when(
-        loading: () => const SizedBox(height: 80),
-        error: (_, _) => const SizedBox(height: 80),
-        data: (obj) {
-          final detail = obj as TableTennisMatchDetail;
-          return _TableTennisHeaderContent(
-            detail: detail,
-            rt: rt,
-            eventsData: eventsAsync.valueOrNull as TableTennisMatchEventsData?,
-          );
-        },
+    return SportDetailHeaderShell<TableTennisMatchDetail>(
+      detailAsync: detailAsync,
+      skeletonHeight: 80,
+      builder: (detail) => _TableTennisHeaderContent(
+        detail: detail,
+        rt: rt,
+        eventsData: eventsAsync.valueOrNull as TableTennisMatchEventsData?,
       ),
     );
   }
@@ -183,7 +177,7 @@ class _TableTennisHeaderContent extends StatelessWidget {
                         statusLabel.isNotEmpty ? statusLabel : 'common.unknown'.tr(),
                         textAlign: TextAlign.center,
                         style: context.textTheme.labelSmall?.copyWith(
-                          color: statusLabel.isNotEmpty ? Colors.white : Colors.pink,
+                          color: statusLabel.isNotEmpty ? Colors.white : AppColors.primary,
                         ),
                       ),
                     ),
@@ -258,7 +252,7 @@ class _ScoreTab extends ConsumerWidget {
     );
 
     return detailAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       error: (_, _) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
@@ -372,7 +366,7 @@ class _SetScoreTable extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: isActive ? Colors.pink : Colors.grey.shade600,
+                            color: isActive ? AppColors.primary : Colors.grey.shade600,
                           ),
                         ),
                       );
@@ -498,7 +492,7 @@ class _PlayerScoreRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? Colors.pink : Colors.black87,
+                  color: isActive ? AppColors.primary : Colors.black87,
                 ),
               ),
             );
@@ -507,7 +501,7 @@ class _PlayerScoreRow extends StatelessWidget {
             child: Text(
               '$total',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.pink),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.primary),
             ),
           ),
         ],
@@ -566,7 +560,7 @@ class _BasicPlayerRow extends StatelessWidget {
             child: Text(
               '$total',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.pink),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.primary),
             ),
           ),
         ],
@@ -596,7 +590,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
     );
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       error: (_, _) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
@@ -641,7 +635,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                         margin: const EdgeInsets.only(right: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.pink : Colors.grey.shade200,
+                          color: isSelected ? AppColors.primary : Colors.grey.shade200,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -778,7 +772,7 @@ class _TableTennisStatRow extends StatelessWidget {
                             width: awayWidth,
                             height: barHeight,
                             decoration: const BoxDecoration(
-                              color: Colors.pink,
+                              color: AppColors.primary,
                               borderRadius: BorderRadius.only(
                                 topRight: radius,
                                 bottomRight: radius,
@@ -843,13 +837,13 @@ class _BlinkingLiveIndicatorState extends State<_BlinkingLiveIndicator>
               Container(
                 width: 7,
                 height: 7,
-                decoration: BoxDecoration(color: Colors.pink.shade50, shape: BoxShape.circle),
+                decoration: BoxDecoration(color: AppColors.primaryShade50, shape: BoxShape.circle),
               ),
               const SizedBox(width: 4),
               Text(
                 widget.label,
                 style: context.textTheme.labelSmall?.copyWith(
-                  color: Colors.pink.shade50,
+                  color: AppColors.primaryShade50,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.5,
                 ),

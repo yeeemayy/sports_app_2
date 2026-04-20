@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
@@ -162,7 +163,7 @@ class _VolleyballScore extends StatelessWidget {
       );
     }
 
-    final scoreColor = _liveStatuses.contains(statusId) ? Colors.pink : Colors.black87;
+    final scoreColor = _liveStatuses.contains(statusId) ? AppColors.primary : Colors.black87;
     return Column(
       children: [
         RichText(

@@ -158,7 +158,7 @@ class _NewsDetailProviderElement
   String get locale => (origin as NewsDetailProvider).locale;
 }
 
-String _$newsPaginatedHash() => r'6cc318be17cf4ac4ca31d5270c904104697f9f0a';
+String _$newsPaginatedHash() => r'3e9dca484905d79c5fa352c033ba0a6f9cc32f41';
 
 /// See also [NewsPaginated].
 @ProviderFor(NewsPaginated)
@@ -174,7 +174,7 @@ final newsPaginatedProvider =
     );
 
 typedef _$NewsPaginated = AutoDisposeNotifier<NewsPaginatedState>;
-String _$newsSearchHash() => r'3ca3242cc5ee9167bd3da28fd35cf2eddbb39996';
+String _$newsSearchHash() => r'b5295fabe7315beb0c82e940979ce5d8857bbeb4';
 
 /// See also [NewsSearch].
 @ProviderFor(NewsSearch)

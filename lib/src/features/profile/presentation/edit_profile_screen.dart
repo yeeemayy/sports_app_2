@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shimmer/shimmer.dart';
@@ -143,7 +144,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     Container(
                       width: 28,
                       height: 28,
-                      decoration: const BoxDecoration(color: Colors.pink, shape: BoxShape.circle),
+                      decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
                       child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
                     ),
                   ],
@@ -170,7 +171,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(0, 48),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                    backgroundColor: Colors.pink,
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                   ),
                   child: _isSaving

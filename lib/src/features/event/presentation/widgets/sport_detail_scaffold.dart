@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
@@ -107,9 +108,9 @@ abstract class SportDetailScaffoldState<T extends ConsumerStatefulWidget>
             Container(
               color: Colors.white,
               child: TabBar(
-                labelColor: Colors.pink,
+                labelColor: AppColors.primary,
                 unselectedLabelColor: Colors.grey.shade600,
-                indicatorColor: Colors.pink,
+                indicatorColor: AppColors.primary,
                 indicatorWeight: 2,
                 tabs: tabs,
               ),

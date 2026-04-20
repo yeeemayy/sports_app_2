@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 
 /// Score display for set-based sports (tennis, badminton, table tennis).
@@ -31,7 +32,7 @@ class SetScoreDisplay extends StatelessWidget {
     final scoreColor = isNotStarted
         ? Colors.grey.shade400
         : isLive
-            ? Colors.pink
+            ? AppColors.primary
             : Colors.black87;
 
     return Column(

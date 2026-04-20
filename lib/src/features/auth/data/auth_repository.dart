@@ -1,7 +1,6 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sports_app/src/core/exceptions/app_exception.dart';
 import 'package:sports_app/src/core/services/api_service.dart';
@@ -37,7 +36,7 @@ class AuthRepository extends _$AuthRepository {
       data: {'nickname': nickname, 'telephone': telephone, 'password': password, 'sms': sms},
     );
     final json = response.data as Map<String, dynamic>;
-    if (json['code'] != 1) throw AppException(json['msg'] ?? 'Registration failed');
+    if (json['code'] != 1) throw AppException(json['msg'] ?? 'auth.error.register_failed'.tr());
     return (json['data'] as Map<String, dynamic>)['token'] as String;
   }
 
@@ -52,7 +51,7 @@ class AuthRepository extends _$AuthRepository {
       data: {'telephone': telephone, 'password': password, 'sms': sms},
     );
     final json = response.data as Map<String, dynamic>;
-    if (json['code'] != 1) throw AppException(json['msg'] ?? 'Reset failed');
+    if (json['code'] != 1) throw AppException(json['msg'] ?? 'auth.error.reset_failed'.tr());
   }
 
   Future<void> requestSms({required String telephone, required int scene}) async {
@@ -63,15 +62,18 @@ class AuthRepository extends _$AuthRepository {
       queryParameters: {'telephone': telephone, 'scene': scene},
     );
     final json = response.data as Map<String, dynamic>;
-    if (json['code'] != 1) throw AppException(json['msg'] ?? 'SMS send failed');
+    if (json['code'] != 1) throw AppException(json['msg'] ?? 'auth.error.sms_failed'.tr());
+    final code = (json['data'] as Map<String, dynamic>?)?['code'];
+    if (code != null) {
+      Fluttertoast.showToast(msg: '[DEBUG] Code: $code', toastLength: Toast.LENGTH_LONG);
+    }
   }
 
   Future<UserModel> fetchUser() async {
     final dio = ref.read(apiServiceProvider).httpClient;
     final response = await dio.get('/users');
     final json = response.data as Map<String, dynamic>;
-    log('[Fetch User] raw response: $json');
-    if (json['code'] != 1) throw AppException(json['msg'] ?? 'Failed to fetch user');
+    if (json['code'] != 1) throw AppException(json['msg'] ?? 'auth.error.fetch_user_failed'.tr());
     return UserModel.fromJson(json['data'] as Map<String, dynamic>);
   }
 
@@ -82,7 +84,7 @@ class AuthRepository extends _$AuthRepository {
     });
     final response = await dio.post('/upload', data: formData);
     final json = response.data as Map<String, dynamic>;
-    if (json['code'] != 1) throw AppException(json['msg'] ?? 'Upload failed');
+    if (json['code'] != 1) throw AppException(json['msg'] ?? 'auth.error.upload_failed'.tr());
     return (json['data'] as Map<String, dynamic>)['imgUrl'] as String;
   }
 
@@ -93,13 +95,13 @@ class AuthRepository extends _$AuthRepository {
     if (avatarUrl != null) data['avatarUrl'] = avatarUrl;
     final response = await dio.put('/users', data: data);
     final json = response.data as Map<String, dynamic>;
-    if (json['code'] != 1) throw AppException(json['msg'] ?? 'Update failed');
+    if (json['code'] != 1) throw AppException(json['msg'] ?? 'auth.error.update_failed'.tr());
   }
 
   Future<void> logout() async {
     final dio = ref.read(apiServiceProvider).httpClient;
     final response = await dio.delete('/users/logout');
     final json = response.data as Map<String, dynamic>;
-    if (json['code'] != 1) throw AppException(json['msg'] ?? 'Logout failed');
+    if (json['code'] != 1) throw AppException(json['msg'] ?? 'auth.error.logout_failed'.tr());
   }
 }

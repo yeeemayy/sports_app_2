@@ -34,15 +34,15 @@ class HomeSectionTitle extends StatelessWidget {
               ],
             ),
           ),
-          if (onPressed != null)
-            IconButton(
-              onPressed: onPressed,
-              icon: Icon(Icons.play_circle_fill_outlined),
-              color: Colors.grey.shade300,
-              style: IconButton.styleFrom(padding: EdgeInsets.zero),
-              constraints: BoxConstraints(),
-              visualDensity: VisualDensity(vertical: -4),
-            ),
+          // if (onPressed != null)
+          //   IconButton(
+          //     onPressed: onPressed,
+          //     icon: Icon(Icons.play_circle_fill_outlined),
+          //     color: Colors.grey.shade300,
+          //     style: IconButton.styleFrom(padding: EdgeInsets.zero),
+          //     constraints: BoxConstraints(),
+          //     visualDensity: VisualDensity(vertical: -4),
+          //   ),
         ],
       ),
     );

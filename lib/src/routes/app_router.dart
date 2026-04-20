@@ -21,6 +21,7 @@ import 'package:sports_app/src/features/data/presentation/data_screen.dart';
 import 'package:sports_app/src/features/event/presentation/event_screen.dart';
 import 'package:sports_app/src/features/home/presentation/home_screen.dart';
 import 'package:sports_app/src/features/news/presentation/news_detail_screen.dart';
+import 'package:sports_app/src/features/video/presentation/video_detail_screen.dart';
 import 'package:sports_app/src/features/news/presentation/news_screen.dart';
 import 'package:sports_app/src/features/profile/presentation/edit_profile_screen.dart';
 import 'package:sports_app/src/features/profile/presentation/profile_screen.dart';
@@ -180,8 +181,21 @@ GoRouter appRouter(AppRouterRef ref) {
         ),
       ),
       GoRoute(
+        path: AppRoutes.videoDetail,
+        builder: (context, state) => VideoDetailScreen(
+          videoId: int.parse(state.pathParameters['videoId']!),
+          currentPage: int.tryParse(state.uri.queryParameters['page'] ?? '') ?? 1,
+          lastPage: int.tryParse(state.uri.queryParameters['lastPage'] ?? '') ?? 1,
+        ),
+      ),
+      GoRoute(
         path: AppRoutes.login,
-        builder: (context, state) => const LoginScreen(),
+        builder: (context, state) {
+          final encoded = state.uri.queryParameters['returnPath'];
+          return LoginScreen(
+            returnPath: encoded != null ? Uri.decodeComponent(encoded) : null,
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.register,

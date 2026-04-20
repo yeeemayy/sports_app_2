@@ -13,13 +13,15 @@ class HomeAnchorLiveGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final count = anchors?.length ?? itemCount;
+    // final isTablet = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
+    final isTablet = MediaQuery.sizeOf(context).width >= 600;
 
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: isTablet ? 3 : 2,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
         childAspectRatio: 1.2,
