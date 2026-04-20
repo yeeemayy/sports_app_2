@@ -1,5 +1,8 @@
 {
   "anchor": {
+    "list": {
+      "title": "主播直播间"
+    },
     "detail": {
       "live": "直播中",
       "offline": "已下线",
@@ -55,7 +58,12 @@
     "search_hint": "搜索新闻...",
     "no_results": "暂无结果",
     "load_error": "加载失败",
-    "detail_error": "加载文章失败"
+    "detail_error": "加载文章失败",
+    "tab": {
+      "football": "足球",
+      "basketball": "篮球",
+      "esports": "电竞"
+    }
   },
   "home": {
     "tab": {
@@ -68,6 +76,7 @@
       "live_events_count": "{count}场",
       "anchor_rankings": "主播排行榜",
       "anchor_live": "主播直播",
+      "anchor_live_subtitle": "点击进入直播间列表",
       "video_highlights": "赛事集锦"
     },
     "error": {

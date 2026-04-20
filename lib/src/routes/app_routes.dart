@@ -55,6 +55,7 @@ abstract final class AppRoutes {
   static String newsDetailPath(int id) => '/news/detail/$id';
 
   // Anchor
+  static const anchorList = '/anchors';
   static const anchor = '/anchor/:anchorId';
   static String anchorPath(int id) => '/anchor/$id';
 

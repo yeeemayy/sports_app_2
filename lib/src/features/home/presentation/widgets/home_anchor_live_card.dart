@@ -130,7 +130,12 @@ class HomeAnchorLiveCard extends StatelessWidget {
                 child: CircleAvatar(
                   radius: 16,
                   backgroundColor: isLive ? AppColors.primary : Colors.grey.shade300,
-                  child: const Icon(Icons.bar_chart, color: Colors.white, size: 10),
+                  child: Image.asset(
+                    'assets/images/equalizer.gif',
+                    color: Colors.white,
+                    height: 20,
+                    width: 20,
+                  ),
                 ),
               ),
             ],

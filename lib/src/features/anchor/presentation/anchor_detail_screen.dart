@@ -426,12 +426,12 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
         _InfoRow(label: 'anchor.detail.info.title'.tr(), value: detail.title),
         const SizedBox(height: 16),
         _InfoRow(label: 'anchor.detail.info.followers'.tr(), value: '${detail.collect}'),
-        if (detail.matchId.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          _InfoRow(label: 'anchor.detail.info.match_id'.tr(), value: detail.matchId),
-        ],
-        const SizedBox(height: 16),
-        _InfoRow(label: 'anchor.detail.info.updated'.tr(), value: detail.updated),
+        // if (detail.matchId.isNotEmpty) ...[
+        //   const SizedBox(height: 16),
+        //   _InfoRow(label: 'anchor.detail.info.match_id'.tr(), value: detail.matchId),
+        // ],
+        // const SizedBox(height: 16),
+        // _InfoRow(label: 'anchor.detail.info.updated'.tr(), value: detail.updated),
       ],
     );
   }

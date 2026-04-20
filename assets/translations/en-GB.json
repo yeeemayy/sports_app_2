@@ -1,5 +1,8 @@
 {
   "anchor": {
+    "list": {
+      "title": "Live Rooms"
+    },
     "detail": {
       "live": "LIVE",
       "offline": "Offline",
@@ -55,7 +58,12 @@
     "search_hint": "Search news...",
     "no_results": "No results found",
     "load_error": "Failed to load news",
-    "detail_error": "Failed to load article"
+    "detail_error": "Failed to load article",
+    "tab": {
+      "football": "Football",
+      "basketball": "Basketball",
+      "esports": "E-Sports"
+    }
   },
   "home": {
     "tab": {
@@ -68,6 +76,7 @@
       "live_events_count": "{count} matches",
       "anchor_rankings": "Anchor Rankings",
       "anchor_live": "Anchor Live",
+      "anchor_live_subtitle": "View all live rooms",
       "video_highlights": "Match Highlights"
     },
     "error": {

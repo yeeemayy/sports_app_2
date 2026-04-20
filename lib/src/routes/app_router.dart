@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sports_app/src/features/anchor/presentation/anchor_detail_screen.dart';
+import 'package:sports_app/src/features/home/presentation/anchor_list_screen.dart';
 import 'package:sports_app/src/features/event/presentation/am_football_match_detail_screen.dart';
 import 'package:sports_app/src/features/event/presentation/basketball_match_detail_screen.dart';
 import 'package:sports_app/src/features/event/presentation/cricket_match_detail_screen.dart';
@@ -173,6 +174,10 @@ GoRouter appRouter(AppRouterRef ref) {
         builder: (context, state) => NewsDetailScreen(
           newsId: int.parse(state.pathParameters['newsId']!),
         ),
+      ),
+      GoRoute(
+        path: AppRoutes.anchorList,
+        builder: (context, state) => const AnchorListScreen(),
       ),
       GoRoute(
         path: AppRoutes.anchor,

@@ -21,7 +21,7 @@ class NewsDetailScreen extends ConsumerWidget {
   String _cleanHtml(String html) {
     var result = html.replaceAll(RegExp(r'line-height\s*:\s*[^;"}]+;?\s*'), '');
     result = result.replaceAll('src="/https://', 'src="https://');
-    result = result.replaceAll(RegExp(r'<p[^>]*>\s*<br\s*/?>\s*</p>'), '');
+    result = result.replaceAll(RegExp(r'<p[^>]*>\s*(?:<span[^>]*>\s*(?:<br\s*/?>\s*)?</span>\s*)*(?:<br\s*/?>)?\s*</p>'), '');
     return result;
   }
 
@@ -32,8 +32,10 @@ class NewsDetailScreen extends ConsumerWidget {
 
     return asyncDetail.when(
       loading: () => Scaffold(
-        appBar: AppBar(),
-        body: const Center(child: CircularProgressIndicator()),
+        appBar: AppBar(
+          title: Text('news.details'.tr(), maxLines: 1, overflow: TextOverflow.ellipsis),
+        ),
+        body: const _NewsDetailSkeleton(),
       ),
       error: (e, _) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -76,11 +78,73 @@ class NewsDetailScreen extends ConsumerWidget {
               //   _CoverImage(url: detail.imageUrl!),
               Html(
                 data: _cleanHtml(detail.content),
-                style: {"*": Style(margin: Margins.zero, padding: HtmlPaddings.zero)},
+                style: {
+                  "*": Style(margin: Margins.zero, padding: HtmlPaddings.zero),
+                  "p": Style(margin: Margins.only(bottom: 20)),
+                },
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _NewsDetailSkeleton extends StatelessWidget {
+  const _NewsDetailSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final base = Colors.grey.shade300;
+    final highlight = Colors.grey.shade100;
+    return Shimmer.fromColors(
+      baseColor: base,
+      highlightColor: highlight,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _SkeletonBox(width: double.infinity, height: 18),
+            const SizedBox(height: 6),
+            _SkeletonBox(width: double.infinity, height: 18),
+            const SizedBox(height: 6),
+            _SkeletonBox(width: 200, height: 18),
+            const SizedBox(height: 10),
+            _SkeletonBox(width: 140, height: 13),
+            const SizedBox(height: 20),
+            _SkeletonBox(width: double.infinity, height: 220),
+            const SizedBox(height: 20),
+            for (int i = 0; i < 6; i++) ...[
+              _SkeletonBox(width: double.infinity, height: 14),
+              const SizedBox(height: 6),
+              _SkeletonBox(width: double.infinity, height: 14),
+              const SizedBox(height: 6),
+              _SkeletonBox(width: 180, height: 14),
+              const SizedBox(height: 20),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SkeletonBox extends StatelessWidget {
+  const _SkeletonBox({required this.width, required this.height});
+
+  final double width;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(4),
       ),
     );
   }

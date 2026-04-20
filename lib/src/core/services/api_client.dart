@@ -41,7 +41,7 @@ class ApiClient {
   ApiClient(TokenHolder tokenHolder, SessionExpiredInterceptor sessionExpiredInterceptor) {
     httpClient = Dio(
       BaseOptions(
-        baseUrl: EnvConfig.baseUrl,
+        baseUrl: EnvConfig.apiUrl,
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 15),
         headers: {'Content-Type': 'application/json'},
@@ -99,6 +99,7 @@ class _SigningInterceptor extends Interceptor {
     options.headers['time'] = timestamp;
     options.headers['random'] = random;
     options.headers['sign'] = sign;
+    options.headers['app'] = EnvConfig.appName;
     options.headers['client'] = client;
 
     handler.next(options);

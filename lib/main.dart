@@ -56,6 +56,7 @@ class MyApp extends ConsumerWidget {
         ).copyWith(primaryContainer: AppColors.primaryShade50),
         scaffoldBackgroundColor: Colors.white,
         appBarTheme: AppBarTheme(
+          centerTitle: true,
           backgroundColor: Colors.white,
           elevation: 0.5,
           surfaceTintColor: Colors.white,

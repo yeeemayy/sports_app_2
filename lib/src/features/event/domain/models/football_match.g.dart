@@ -27,6 +27,8 @@ _$FootballMatchImpl _$$FootballMatchImplFromJson(Map<String, dynamic> json) =>
       htAwayScore: json['htAwayScore'] as String?,
       homeYellowCards: (json['homeYellowCards'] as num?)?.toInt() ?? 0,
       awayYellowCards: (json['awayYellowCards'] as num?)?.toInt() ?? 0,
+      homeRedCards: (json['homeRedCards'] as num?)?.toInt() ?? 0,
+      awayRedCards: (json['awayRedCards'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$$FootballMatchImplToJson(_$FootballMatchImpl instance) =>
@@ -50,4 +52,6 @@ Map<String, dynamic> _$$FootballMatchImplToJson(_$FootballMatchImpl instance) =>
       'htAwayScore': instance.htAwayScore,
       'homeYellowCards': instance.homeYellowCards,
       'awayYellowCards': instance.awayYellowCards,
+      'homeRedCards': instance.homeRedCards,
+      'awayRedCards': instance.awayRedCards,
     };
