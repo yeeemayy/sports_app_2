@@ -6,7 +6,7 @@ part of 'news_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$newsDetailHash() => r'a00ea56817e9fb54ec6ac6aabcb03f80920f3ed2';
+String _$newsFirstPageHash() => r'12bfe9f43257039783100c8c13a28cd9a68be9e1';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -28,6 +28,127 @@ class _SystemHash {
     return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
   }
 }
+
+/// See also [newsFirstPage].
+@ProviderFor(newsFirstPage)
+const newsFirstPageProvider = NewsFirstPageFamily();
+
+/// See also [newsFirstPage].
+class NewsFirstPageFamily extends Family<AsyncValue<List<NewsArticle>>> {
+  /// See also [newsFirstPage].
+  const NewsFirstPageFamily();
+
+  /// See also [newsFirstPage].
+  NewsFirstPageProvider call(String locale) {
+    return NewsFirstPageProvider(locale);
+  }
+
+  @override
+  NewsFirstPageProvider getProviderOverride(
+    covariant NewsFirstPageProvider provider,
+  ) {
+    return call(provider.locale);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'newsFirstPageProvider';
+}
+
+/// See also [newsFirstPage].
+class NewsFirstPageProvider
+    extends AutoDisposeFutureProvider<List<NewsArticle>> {
+  /// See also [newsFirstPage].
+  NewsFirstPageProvider(String locale)
+    : this._internal(
+        (ref) => newsFirstPage(ref as NewsFirstPageRef, locale),
+        from: newsFirstPageProvider,
+        name: r'newsFirstPageProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$newsFirstPageHash,
+        dependencies: NewsFirstPageFamily._dependencies,
+        allTransitiveDependencies:
+            NewsFirstPageFamily._allTransitiveDependencies,
+        locale: locale,
+      );
+
+  NewsFirstPageProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.locale,
+  }) : super.internal();
+
+  final String locale;
+
+  @override
+  Override overrideWith(
+    FutureOr<List<NewsArticle>> Function(NewsFirstPageRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: NewsFirstPageProvider._internal(
+        (ref) => create(ref as NewsFirstPageRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        locale: locale,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<List<NewsArticle>> createElement() {
+    return _NewsFirstPageProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is NewsFirstPageProvider && other.locale == locale;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, locale.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin NewsFirstPageRef on AutoDisposeFutureProviderRef<List<NewsArticle>> {
+  /// The parameter `locale` of this provider.
+  String get locale;
+}
+
+class _NewsFirstPageProviderElement
+    extends AutoDisposeFutureProviderElement<List<NewsArticle>>
+    with NewsFirstPageRef {
+  _NewsFirstPageProviderElement(super.provider);
+
+  @override
+  String get locale => (origin as NewsFirstPageProvider).locale;
+}
+
+String _$newsDetailHash() => r'a00ea56817e9fb54ec6ac6aabcb03f80920f3ed2';
 
 /// See also [newsDetail].
 @ProviderFor(newsDetail)

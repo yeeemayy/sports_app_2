@@ -6,6 +6,7 @@ import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
 import 'package:sports_app/src/features/home/presentation/providers/banner_providers.dart';
@@ -85,6 +86,7 @@ class _AppWrapperState extends ConsumerState<AppWrapper> with TickerProviderStat
     if (index == 0 && index != widget.navigationShell.currentIndex) {
       ref.invalidate(anchorListProvider);
       ref.invalidate(bannerProvider);
+      ref.invalidate(newsFirstPageProvider(context.localeCode));
     }
     if (index == 2 && index != widget.navigationShell.currentIndex) {
       final newsState = ref.read(newsPaginatedProvider);
@@ -162,10 +164,7 @@ class _AppWrapperState extends ConsumerState<AppWrapper> with TickerProviderStat
               ],
             )
           : currentIndex == 3
-          ? AppBar(
-              centerTitle: true,
-              title: Text(_tabs[currentIndex].labelKey.tr()),
-            )
+          ? AppBar(centerTitle: true, title: Text(_tabs[currentIndex].labelKey.tr()))
           : null,
       body: widget.navigationShell,
       bottomNavigationBar: ConvexAppBar(
@@ -173,9 +172,7 @@ class _AppWrapperState extends ConsumerState<AppWrapper> with TickerProviderStat
         backgroundColor: AppColors.primary,
         controller: _controller,
         initialActiveIndex: currentIndex,
-        items: _tabs
-            .map((t) => TabItem(icon: t.icon, title: t.labelKey.tr()))
-            .toList(),
+        items: _tabs.map((t) => TabItem(icon: t.icon, title: t.labelKey.tr())).toList(),
         onTap: _onTap,
       ),
     );

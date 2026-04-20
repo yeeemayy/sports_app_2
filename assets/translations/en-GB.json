@@ -1,5 +1,8 @@
 {
   "anchor": {
+    "list": {
+      "title": "Live Rooms"
+    },
     "detail": {
       "live": "LIVE",
       "offline": "Offline",
@@ -73,6 +76,7 @@
       "live_events_count": "{count} matches",
       "anchor_rankings": "Anchor Rankings",
       "anchor_live": "Anchor Live",
+      "anchor_live_subtitle": "View all live rooms",
       "video_highlights": "Match Highlights"
     },
     "error": {

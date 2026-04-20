@@ -1,14 +1,16 @@
-import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
 import 'package:sports_app/src/features/home/presentation/providers/banner_providers.dart';
+import 'package:sports_app/src/features/home/presentation/widgets/home_banner_carousel.dart';
 import 'package:sports_app/src/features/home/presentation/widgets/home_section_title.dart';
 import 'package:sports_app/src/features/home/presentation/widgets/home_anchor_live_grid.dart';
+import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
 import 'package:sports_app/src/features/video/presentation/widgets/home_video_list.dart';
+import 'package:sports_app/src/routes/app_routes.dart';
 
 class HomeTabOthers extends ConsumerWidget {
   const HomeTabOthers({super.key});
@@ -16,45 +18,27 @@ class HomeTabOthers extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final anchorsAsync = ref.watch(anchorListProvider());
-    final bannerAsync = ref.watch(bannerProvider);
 
     return RefreshIndicator(
       onRefresh: () async {
         ref.refresh(anchorListProvider().future);
         ref.refresh(bannerProvider.future);
+        ref.refresh(newsFirstPageProvider(context.localeCode).future);
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         clipBehavior: Clip.none,
         child: Column(
           children: [
-            bannerAsync.whenOrNull(
-                  data: (banner) => Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: CachedNetworkImage(
-                        imageUrl: banner.cover,
-                        width: double.maxFinite,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Shimmer.fromColors(
-                          baseColor: Colors.grey.shade300,
-                          highlightColor: Colors.grey.shade100,
-                          child: const SizedBox(height: 180, child: ColoredBox(color: Colors.grey)),
-                        ),
-                        errorWidget: (context, url, error) => const SizedBox.shrink(),
-                      ),
-                    ),
-                  ),
-                ) ??
-                const SizedBox.shrink(),
+            const HomeBannerCarousel(),
             anchorsAsync.when(
               loading: () => Column(
                 children: [
                   HomeSectionTitle(
                     icon: 'assets/images/live-tv.png',
                     title: 'home.section.anchor_live'.tr(),
-                    onPressed: () {},
+                    // subtitle: 'home.section.anchor_live_subtitle'.tr(),
+                    onPressed: () => context.push(AppRoutes.anchorList),
                   ),
                   HomeAnchorLiveGrid(),
                 ],
@@ -92,7 +76,8 @@ class HomeTabOthers extends ConsumerWidget {
                   HomeSectionTitle(
                     icon: 'assets/images/live-tv.png',
                     title: 'home.section.anchor_live'.tr(),
-                    onPressed: () {},
+                    // subtitle: 'home.section.anchor_live_subtitle'.tr(),
+                    onPressed: () => context.push(AppRoutes.anchorList),
                   ),
                   HomeAnchorLiveGrid(anchors: page.data),
                 ],

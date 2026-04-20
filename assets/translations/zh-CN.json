@@ -1,5 +1,8 @@
 {
   "anchor": {
+    "list": {
+      "title": "主播直播间"
+    },
     "detail": {
       "live": "直播中",
       "offline": "已下线",
@@ -73,6 +76,7 @@
       "live_events_count": "{count}场",
       "anchor_rankings": "主播排行榜",
       "anchor_live": "主播直播",
+      "anchor_live_subtitle": "点击进入直播间列表",
       "video_highlights": "赛事集锦"
     },
     "error": {
