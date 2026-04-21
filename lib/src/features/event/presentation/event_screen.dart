@@ -451,7 +451,7 @@ class _DateSelectorBar extends StatelessWidget {
                 onTap: () => onSelected(date),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
-                  decoration: BoxDecoration(color: isSelected ? AppColors.primary : Colors.grey.shade100),
+                  decoration: BoxDecoration(color: isSelected ? AppColors.primary : AppTheme.of(context).shimmerHighlight),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

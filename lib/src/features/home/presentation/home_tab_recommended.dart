@@ -1,6 +1,7 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
@@ -45,8 +46,8 @@ class HomeTabRecommended extends ConsumerWidget {
                   width: double.maxFinite,
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Shimmer.fromColors(
-                    baseColor: Colors.grey.shade300,
-                    highlightColor: Colors.grey.shade100,
+                    baseColor: AppTheme.of(context).shimmerBase,
+                    highlightColor: AppTheme.of(context).shimmerHighlight,
                     child: const SizedBox(
                       height: 180,
                       child: ColoredBox(color: Colors.grey),

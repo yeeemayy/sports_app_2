@@ -134,8 +134,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                     height: 100,
                                     fit: BoxFit.cover,
                                     placeholder: (context, url) => Shimmer.fromColors(
-                                      baseColor: Colors.grey.shade300,
-                                      highlightColor: Colors.grey.shade100,
+                                      baseColor: AppTheme.of(context).shimmerBase,
+                                      highlightColor: AppTheme.of(context).shimmerHighlight,
                                       child: const ColoredBox(color: Colors.white),
                                     ),
                                     errorBuilder: (context, url, error) => AvatarFallback(),

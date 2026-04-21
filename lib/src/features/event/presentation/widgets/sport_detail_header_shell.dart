@@ -13,12 +13,14 @@ class SportDetailHeaderShell<T> extends StatelessWidget {
     required this.builder,
     this.skeletonHeight = 72.0,
     this.backgroundColor,
+    this.fallback,
   });
 
   final AsyncValue<dynamic> detailAsync;
   final Widget Function(T detail) builder;
   final double skeletonHeight;
   final Color? backgroundColor;
+  final Widget? fallback;
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +29,8 @@ class SportDetailHeaderShell<T> extends StatelessWidget {
       color: backgroundColor ?? AppColors.primary,
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
       child: detailAsync.when(
-        loading: () => SizedBox(height: skeletonHeight),
-        error: (e, _) => SizedBox(height: skeletonHeight),
+        loading: () => fallback ?? SizedBox(height: skeletonHeight),
+        error: (e, _) => fallback ?? SizedBox(height: skeletonHeight),
         data: (obj) => builder(obj as T),
       ),
     );

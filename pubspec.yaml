@@ -57,6 +57,9 @@ dependencies:
   # Secure token persistence
   flutter_secure_storage: ^9.2.4
 
+  # Preferences persistence
+  shared_preferences: ^2.3.5
+
   # HTML rendering
   flutter_html: ^3.0.0
 

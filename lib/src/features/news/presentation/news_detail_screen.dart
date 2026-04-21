@@ -1,6 +1,7 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
@@ -96,11 +97,9 @@ class _NewsDetailSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final base = Colors.grey.shade300;
-    final highlight = Colors.grey.shade100;
     return Shimmer.fromColors(
-      baseColor: base,
-      highlightColor: highlight,
+      baseColor: AppTheme.of(context).shimmerBase,
+      highlightColor: AppTheme.of(context).shimmerHighlight,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -162,8 +161,8 @@ class _CoverImage extends StatelessWidget {
       width: double.infinity,
       fit: BoxFit.cover,
       placeholder: (context, url) => Shimmer.fromColors(
-        baseColor: Colors.grey.shade300,
-        highlightColor: Colors.grey.shade100,
+        baseColor: AppTheme.of(context).shimmerBase,
+        highlightColor: AppTheme.of(context).shimmerHighlight,
         child: Container(width: double.infinity, height: 220, color: Colors.white),
       ),
       errorBuilder: (context, url, error) => Container(

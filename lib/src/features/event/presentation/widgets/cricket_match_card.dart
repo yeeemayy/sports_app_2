@@ -39,7 +39,6 @@ class CricketMatchCard extends ConsumerWidget {
     return GestureDetector(
       onTap: () => context.push(AppRoutes.cricketMatchDetailPath(match.id)),
       child: Container(
-        color: Colors.white,
         child: Column(
           children: [
             Padding(
@@ -52,7 +51,7 @@ class CricketMatchCard extends ConsumerWidget {
                     child: Text(
                       match.leagueName,
                       style: context.textTheme.labelSmall?.copyWith(
-                        color: Colors.grey.shade700,
+                        color: AppTheme.of(context).greyText,
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,
@@ -169,7 +168,7 @@ class _CricketScore extends StatelessWidget {
       );
     }
 
-    final scoreColor = _liveStatuses.contains(statusId) ? AppColors.primary : Colors.black87;
+    final scoreColor = _liveStatuses.contains(statusId) ? AppColors.primary : AppTheme.of(context).baseText;
     final sep = TextSpan(text: ' - ', style: TextStyle(color: Colors.grey.shade400));
 
     if (homeInnings != null && awayInnings != null) {

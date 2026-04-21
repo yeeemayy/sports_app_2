@@ -85,7 +85,6 @@ class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
     return InkWell(
       onTap: () => context.push(AppRoutes.basketballMatchDetailPath(widget.match.id)),
       child: Container(
-        color: Colors.white,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -100,7 +99,7 @@ class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
                     child: Text(
                       widget.match.leagueName,
                       style: context.textTheme.labelSmall?.copyWith(
-                        color: Colors.grey.shade700,
+                        color: AppTheme.of(context).greyText,
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,
@@ -254,7 +253,7 @@ class _TeamScoreRow extends StatelessWidget {
             textAlign: TextAlign.center,
             style: context.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
-              color: isLive ? AppColors.primary : Colors.black87,
+              color: isLive ? AppColors.primary : AppTheme.of(context).baseText,
             ),
           ),
         ),

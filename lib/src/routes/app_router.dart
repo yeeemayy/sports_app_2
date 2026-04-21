@@ -7,6 +7,7 @@ import 'package:sports_app/src/features/home/presentation/anchor_list_screen.dar
 import 'package:sports_app/src/features/event/presentation/am_football_match_detail_screen.dart';
 import 'package:sports_app/src/features/event/presentation/basketball_match_detail_screen.dart';
 import 'package:sports_app/src/features/event/presentation/cricket_match_detail_screen.dart';
+import 'package:sports_app/src/features/event/domain/models/football_match.dart';
 import 'package:sports_app/src/features/event/presentation/football_match_detail_screen.dart';
 import 'package:sports_app/src/features/event/presentation/badminton_match_detail_screen.dart';
 import 'package:sports_app/src/features/event/presentation/baseball_match_detail_screen.dart';
@@ -113,6 +114,7 @@ GoRouter appRouter(AppRouterRef ref) {
         path: AppRoutes.footballMatchDetail,
         builder: (context, state) => FootballMatchDetailScreen(
           matchId: state.pathParameters['matchId']!,
+          initialMatch: state.extra as FootballMatch?,
         ),
       ),
       GoRoute(

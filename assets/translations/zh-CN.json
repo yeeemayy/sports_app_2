@@ -112,6 +112,7 @@
     "edit_save": "保存",
     "edit_success": "资料已更新",
     "edit_error_title": "更新失败",
+    "toggle_dark_mode": "深色模式",
     "toggle_language": "切换语言",
     "language_zh_cn": "简体中文",
     "language_en_gb": "English (UK)",

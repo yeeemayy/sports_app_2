@@ -11,7 +11,7 @@ _$UserModelImpl _$$UserModelImplFromJson(Map<String, dynamic> json) =>
       uid: (json['uid'] as num).toInt(),
       telephone: json['telephone'] as String,
       nickname: json['nickname'] as String,
-      avatarUrl: json['avatarUrl'] as String?,
+      avatarUrl: _avatarUrlFromJson(json['avatarUrl'] as String?),
       gender: (json['gender'] as num).toInt(),
       profit: (json['profit'] as num?)?.toInt() ?? 0,
       balance: (json['balance'] as num?)?.toInt() ?? 0,

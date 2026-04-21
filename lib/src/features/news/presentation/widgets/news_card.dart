@@ -1,6 +1,7 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/features/news/domain/models/news_article.dart';
 
 class NewsCard extends StatelessWidget {
@@ -90,8 +91,8 @@ class _NewsCardSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
+      baseColor: AppTheme.of(context).shimmerBase,
+      highlightColor: AppTheme.of(context).shimmerHighlight,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(
@@ -153,8 +154,8 @@ class _CoverImage extends StatelessWidget {
         height: size,
         fit: BoxFit.cover,
         placeholder: (context, url) => Shimmer.fromColors(
-          baseColor: Colors.grey.shade300,
-          highlightColor: Colors.grey.shade100,
+          baseColor: AppTheme.of(context).shimmerBase,
+          highlightColor: AppTheme.of(context).shimmerHighlight,
           child: Container(
             width: size,
             height: size,
