@@ -74,7 +74,7 @@ class AuthNotifier extends _$AuthNotifier {
     required String sms,
   }) async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
+    try {
       final repo = ref.read(authRepositoryProvider.notifier);
       final storage = ref.read(authStorageServiceProvider.notifier);
       final tokenHolder = ref.read(tokenHolderProvider);
@@ -90,8 +90,11 @@ class AuthNotifier extends _$AuthNotifier {
       await storage.writeCredentials(telephone: telephone, password: password);
 
       final user = await repo.fetchUser();
-      return AuthState(token: token, user: user);
-    });
+      state = AsyncData(AuthState(token: token, user: user));
+    } catch (e, st) {
+      state = const AsyncData(AuthState());
+      rethrow;
+    }
   }
 
   Future<void> logout() async {
@@ -117,6 +120,18 @@ class AuthNotifier extends _$AuthNotifier {
     if (current != null) {
       state = AsyncData(AuthState(token: current.token, user: user));
     }
+  }
+
+  Future<void> deleteAccount() async {
+    final tokenHolder = ref.read(tokenHolderProvider);
+    final storage = ref.read(authStorageServiceProvider.notifier);
+
+    await ref.read(authRepositoryProvider.notifier).deleteAccount();
+
+    tokenHolder.value = null;
+    await storage.deleteToken();
+    await storage.deleteCredentials();
+    state = const AsyncData(AuthState());
   }
 
   void clearSession() {

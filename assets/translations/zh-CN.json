@@ -119,10 +119,21 @@
     "terms_of_use": "用户协议",
     "section_settings": "设置",
     "section_legal": "法律",
+    "section_danger_zone": "危险区",
     "logout": "退出登录",
     "logout_confirm_title": "退出登录",
     "logout_confirm_message": "确定要退出登录吗？",
-    "logout_confirm_cancel": "取消"
+    "logout_confirm_cancel": "取消",
+    "delete_account": "注销账号",
+    "delete_account_confirm_title": "注销账号",
+    "delete_account_confirm_message": "此操作不可撤销，您的账号及所有相关数据将被永久删除。",
+    "delete_account_confirm_proceed": "继续",
+    "delete_account_password_title": "确认身份",
+    "delete_account_password_message": "请输入您的密码以确认永久注销账号。",
+    "delete_account_password_label": "密码",
+    "delete_account_password_empty": "请输入密码",
+    "delete_account_password_incorrect": "密码不正确，请重试。",
+    "delete_account_error_title": "注销账号失败"
   },
   "event": {
     "search": "搜索赛事",

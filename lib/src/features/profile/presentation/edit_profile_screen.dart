@@ -88,8 +88,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           title: 'profile.edit_success'.tr(),
           buttonText: 'common.ok'.tr(),
           onButtonPressed: () {
-            Navigator.of(context).pop();
-            Navigator.of(context).pop();
+            context.pop();
+            context.pop();
           },
         );
       }

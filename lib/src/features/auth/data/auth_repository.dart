@@ -105,4 +105,11 @@ class AuthRepository extends _$AuthRepository {
     final json = response.data as Map<String, dynamic>;
     if (json['code'] != 1) throw AppException(json['msg'] ?? 'auth.error.logout_failed'.tr());
   }
+
+  Future<void> deleteAccount() async {
+    final dio = ref.read(apiServiceProvider).httpClient;
+    final response = await dio.delete('/users/logout');
+    final json = response.data as Map<String, dynamic>;
+    if (json['code'] != 1) throw AppException(json['msg'] ?? 'profile.delete_account_error'.tr());
+  }
 }
