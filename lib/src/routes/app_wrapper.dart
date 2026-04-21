@@ -145,19 +145,25 @@ class _AppWrapperState extends ConsumerState<AppWrapper> with TickerProviderStat
                     child: GestureDetector(
                       onTap: () => context.go(AppRoutes.profile),
                       child: ClipOval(
-                        child: CachedNetworkImage(
-                          imageUrl: '${authState.value?.user?.avatarUrl}',
-                          width: 40,
-                          height: 40,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Shimmer.fromColors(
-                            baseColor: Colors.grey.shade300,
-                            highlightColor: Colors.grey.shade100,
-                            child: const ColoredBox(color: Colors.white),
-                          ),
-                          errorBuilder: (context, url, error) =>
-                              AvatarFallback(size: 40, iconSize: 20),
-                        ),
+                        child: () {
+                          final avatarUrl = authState.value?.user?.avatarUrl;
+                          if (avatarUrl != null && avatarUrl.isNotEmpty) {
+                            return CachedNetworkImage(
+                              imageUrl: avatarUrl,
+                              width: 40,
+                              height: 40,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Shimmer.fromColors(
+                                baseColor: Colors.grey.shade300,
+                                highlightColor: Colors.grey.shade100,
+                                child: const ColoredBox(color: Colors.white),
+                              ),
+                              errorBuilder: (context, url, error) =>
+                                  AvatarFallback(size: 40, iconSize: 20),
+                            );
+                          }
+                          return AvatarFallback(size: 40, iconSize: 20);
+                        }(),
                       ),
                     ),
                   ),
