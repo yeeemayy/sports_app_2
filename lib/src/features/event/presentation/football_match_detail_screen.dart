@@ -780,7 +780,7 @@ class _LineupsTabState extends ConsumerState<_LineupsTab> with SingleTickerProvi
               margin: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.all(Radius.circular(20)),
-                border: Border.all(width: 1, color:  context.appTheme.shimmerBase),
+                border: Border.all(width: 1, color: context.appTheme.shimmerBase),
               ),
               child: TabBar(
                 dividerColor: Colors.transparent,
@@ -886,10 +886,10 @@ class _SectionHeader extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-      color:  context.appTheme.grey_3,
+      color: context.appTheme.grey_3,
       child: Text(
         label,
-        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color:  context.appTheme.grey_4),
+        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.appTheme.grey_4),
       ),
     );
   }
@@ -1016,7 +1016,7 @@ class _StatRow extends StatelessWidget {
             child: Text(
               stat.label!,
               textAlign: TextAlign.center,
-              style: context.textTheme.bodySmall?.copyWith(color: context.appTheme.shimmerBase),
+              style: context.textTheme.bodySmall?.copyWith(color: context.appTheme.grey_5),
             ),
           ),
           SizedBox(

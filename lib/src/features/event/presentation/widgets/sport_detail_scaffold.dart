@@ -16,6 +16,7 @@ import 'package:sports_app/src/features/event/presentation/widgets/match_detail_
 abstract class SportDetailScaffoldState<T extends ConsumerStatefulWidget>
     extends ConsumerState<T> {
   Timer? _eventsTimer;
+  SportRealtime? _realtimeNotifier;
 
   // ── Abstract interface ──────────────────────────────────────────────────────
 
@@ -60,12 +61,11 @@ abstract class SportDetailScaffoldState<T extends ConsumerStatefulWidget>
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref
-          .read(sportRealtimeProvider(sportType).notifier)
-          .setWatchedIds('detail:$matchId', [matchId]);
+      _realtimeNotifier = ref.read(sportRealtimeProvider(sportType).notifier);
+      _realtimeNotifier!.setWatchedIds('detail:$matchId', [matchId]);
     });
     _eventsTimer = Timer.periodic(eventsRefreshInterval, (_) {
-      if (!mounted) return;
+      if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
       onEventsTimerTick();
     });
   }
@@ -73,9 +73,7 @@ abstract class SportDetailScaffoldState<T extends ConsumerStatefulWidget>
   @override
   void dispose() {
     _eventsTimer?.cancel();
-    ref
-        .read(sportRealtimeProvider(sportType).notifier)
-        .clearSource('detail:$matchId');
+    _realtimeNotifier?.clearSource('detail:$matchId');
     super.dispose();
   }
 
@@ -89,6 +87,7 @@ abstract class SportDetailScaffoldState<T extends ConsumerStatefulWidget>
       sportRealtimeProvider(sportType).select((map) => map[matchId]?.statusId),
       (prev, next) {
         if (prev == null || next == null || prev == next) return;
+        if (ModalRoute.of(context)?.isCurrent != true) return;
         onStatusChanged();
       },
     );
