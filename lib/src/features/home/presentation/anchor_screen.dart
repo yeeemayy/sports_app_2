@@ -57,8 +57,8 @@
 import 'package:flutter/material.dart';
 import 'package:sports_app/src/features/home/presentation/home_tab_others.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class AnchorScreen extends StatelessWidget {
+  const AnchorScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

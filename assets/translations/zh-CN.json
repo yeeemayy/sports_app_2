@@ -48,7 +48,7 @@
   },
   "nav": {
     "home": "主页",
-    "event": "赛事",
+    "anchor": "主播",
     "news": "新闻",
     "data": "数据",
     "profile": "个人"

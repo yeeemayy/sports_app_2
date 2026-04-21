@@ -23,7 +23,9 @@ class HomeSectionTitle extends StatelessWidget {
         child: Row(
           spacing: 10,
           children: [
-            CircleAvatar(radius: 20, child: icon != null ? Image.asset(icon!, height: 20) : null),
+            CircleAvatar(
+                backgroundColor: Colors.pink.shade100,
+                radius: 20, child: icon != null ? Image.asset(icon!, height: 20) : null),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
