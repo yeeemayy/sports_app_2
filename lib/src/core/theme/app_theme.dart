@@ -26,7 +26,7 @@ class AppThemeColors {
       : Colors.grey.shade700;
 
   Color get baseText => _theme.brightness == Brightness.dark
-      ? Colors.white
+      ? Colors.white70
       : Colors.black87;
 
   Color get shimmerBase => _theme.brightness == Brightness.dark
@@ -60,6 +60,14 @@ class AppThemeColors {
   Color get inningHomeRowBg => _theme.brightness == Brightness.dark
       ? const Color(0xFF1A2435)
       : const Color(0xFFEFF6FF);
+
+  Color get textFieldBg => _theme.brightness == Brightness.dark
+      ? Colors.grey.shade800
+      : const Color(0xFFF5F5F5);
+
+  Color get textFieldLabel => _theme.brightness == Brightness.dark
+      ? Colors.white70
+      : const Color(0xFF343C44);
 }
 
 extension AppThemeColorExtension on BuildContext {

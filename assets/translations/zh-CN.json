@@ -138,7 +138,10 @@
     "delete_account_password_label": "密码",
     "delete_account_password_empty": "请输入密码",
     "delete_account_password_incorrect": "密码不正确，请重试。",
-    "delete_account_error_title": "注销账号失败"
+    "delete_account_error_title": "注销账号失败",
+    "guest_mode_title": "游客模式",
+    "guest_mode_subtitle": "登录以解锁全部功能",
+    "app_version": "应用版本"
   },
   "event": {
     "search": "搜索赛事",

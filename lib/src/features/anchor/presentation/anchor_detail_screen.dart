@@ -328,12 +328,12 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
   ) {
     return detailAsync.when(
       loading: () => Center(
-        child: Text('anchor.detail.loading'.tr(), style: const TextStyle(color: Colors.white38)),
+        child: Text('anchor.detail.loading'.tr(), style: TextStyle(color: context.appTheme.greyText)),
       ),
       error: (_, _) => Center(
         child: Text(
           'anchor.detail.error.load_failed'.tr(),
-          style: const TextStyle(color: Colors.white38),
+          style: TextStyle(color: context.appTheme.greyText),
         ),
       ),
       data: (detail) => Column(
@@ -352,7 +352,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
               ),
               rightChild: Marquee(
                 text: detail.notice,
-                style: context.textTheme.bodySmall,
+                style: context.textTheme.bodySmall?.copyWith(color: Colors.black87),
                 scrollAxis: Axis.horizontal,
                 blankSpace: 30,
                 velocity: 50,
@@ -421,7 +421,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
       children: [
         _AnchorInfoHeader(detail: detail),
         const SizedBox(height: 20),
-        Divider(height: 0, color: Colors.grey.shade300),
+        Divider(height: 0, color: context.appTheme.grey_3),
         const SizedBox(height: 16),
         _InfoRow(label: 'anchor.detail.info.title'.tr(), value: detail.title),
         const SizedBox(height: 16),
@@ -495,7 +495,7 @@ class _AnchorInfoHeader extends StatelessWidget {
                 highlightColor: AppTheme.of(context).shimmerHighlight,
                 child: const ColoredBox(color: Colors.grey),
               ),
-              errorWidget: (context, url, error) => ColoredBox(color: Colors.grey.shade300),
+              errorWidget: (context, url, error) => ColoredBox(color: context.appTheme.grey_3),
             ),
           ),
         ),
@@ -536,7 +536,7 @@ class _InfoRow extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: context.textTheme.labelMedium?.copyWith(color: Colors.black45)),
+        Text(label, style: context.textTheme.labelMedium?.copyWith(color: context.appTheme.greyText)),
         const SizedBox(height: 4),
         Text(value, style: context.textTheme.bodyMedium),
       ],

@@ -351,12 +351,12 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
     if (_connecting || !_initialSyncDone) {
       return Container(
         width: double.infinity,
-        color: Colors.black12,
+        color: context.appTheme.grey_3,
         padding: const EdgeInsets.symmetric(vertical: 6),
         child: Text(
           'anchor.detail.chats.connecting'.tr(),
           textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 12, color: Colors.black54),
+          style: TextStyle(fontSize: 12, color: context.appTheme.greyText),
         ),
       );
     }
@@ -396,7 +396,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
       return Center(
         child: Text(
           'anchor.detail.chats.empty'.tr(),
-          style: const TextStyle(color: Colors.black38, fontSize: 13),
+          style: TextStyle(color: context.appTheme.greyText, fontSize: 13),
         ),
       );
     }
@@ -432,7 +432,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
     if (!isLoggedIn) {
       return Container(
         decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.grey.shade200)),
+          border: Border(top: BorderSide(color: context.appTheme.grey_3)),
         ),
         child: TextButton.icon(
           onPressed: () => context.push(
@@ -450,7 +450,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
           ),
           style: TextButton.styleFrom(
             minimumSize: const Size(double.infinity, 44),
-            foregroundColor: Colors.black38,
+            foregroundColor: context.appTheme.baseText,
           ),
         ),
       );
@@ -459,7 +459,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 6, 8, 6),
       decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: Colors.grey.shade200)),
+        border: Border(top: BorderSide(color: context.appTheme.grey_3)),
       ),
       child: Row(
         children: [
@@ -477,11 +477,11 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+                  borderSide: BorderSide(color: context.appTheme.grey_3),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+                  borderSide: BorderSide(color: context.appTheme.grey_3),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
@@ -496,7 +496,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
             style: TextButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
-              disabledBackgroundColor: Colors.grey.shade300,
+              disabledBackgroundColor: context.appTheme.shimmerBase,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,

@@ -78,10 +78,12 @@ GoRouter appRouter(AppRouterRef ref) {
                 routes: [
                   GoRoute(
                     path: '/anchor-list',
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (context, state) => const AnchorListScreen(),
                     routes: [
                       GoRoute(
                         path: '/:anchorId',
+                        parentNavigatorKey: rootNavigatorKey,
                         builder: (context, state) => AnchorDetailScreen(
                           anchorId: int.parse(state.pathParameters['anchorId']!),
                         ),

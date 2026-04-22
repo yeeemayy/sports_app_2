@@ -5,6 +5,7 @@ import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:sports_app/src/core/utils/app_info.dart';
 import 'package:sports_app/src/core/utils/app_locale.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,6 +16,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
   await EasyLocalization.ensureInitialized();
+  await AppInfo.init();
   final sharedPreferences = await SharedPreferences.getInstance();
 
   runApp(
