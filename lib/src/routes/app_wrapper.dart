@@ -28,10 +28,10 @@ class _AppWrapperState extends ConsumerState<AppWrapper> with TickerProviderStat
   static const _tabs = [
     (labelKey: 'nav.home', icon: Icons.home_outlined, activeIcon: Icons.home, path: AppRoutes.home),
     (
-      labelKey: 'nav.event',
-      icon: Icons.event_outlined,
-      activeIcon: Icons.event,
-      path: AppRoutes.event,
+      labelKey: 'nav.anchor',
+      icon: Icons.video_camera_front_outlined,
+      activeIcon: Icons.video_camera_front_outlined,
+      path: AppRoutes.anchor,
     ),
     (
       labelKey: 'nav.news',
@@ -83,10 +83,10 @@ class _AppWrapperState extends ConsumerState<AppWrapper> with TickerProviderStat
 
   void _onTap(int index) {
     ref.read(currentNavIndexProvider.notifier).state = index;
-    if (index == 0 && index != widget.navigationShell.currentIndex) {
+    if (index <= 1 && index != widget.navigationShell.currentIndex) {
       ref.invalidate(anchorListProvider);
-      ref.invalidate(bannerProvider);
-      ref.invalidate(newsFirstPageProvider(context.localeCode));
+      // ref.invalidate(bannerProvider);
+      // ref.invalidate(newsFirstPageProvider(context.localeCode));
     }
     if (index == 2 && index != widget.navigationShell.currentIndex) {
       final newsState = ref.read(newsPaginatedProvider);
@@ -109,73 +109,74 @@ class _AppWrapperState extends ConsumerState<AppWrapper> with TickerProviderStat
     final isAuthenticated = authState.hasValue && (authState.value?.isAuthenticated ?? false);
 
     return Scaffold(
-      appBar: currentIndex == 0
-          ? AppBar(
-              centerTitle: false,
-              elevation: 0,
-              title: Placeholder(child: SizedBox(height: 40, width: 100)),
-              actions: [
-                if (authState.isLoading)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10.0),
-                    child: Builder(
-                      builder: (context) {
-                        return Shimmer.fromColors(
-                          baseColor: AppTheme.of(context).shimmerBase,
-                          highlightColor: AppTheme.of(context).shimmerHighlight,
-                          child: const CircleAvatar(),
-                        );
-                      },
-                    ),
-                  )
-                else if (!isAuthenticated) ...[
-                  TextButton(
-                    onPressed: () => context.push(AppRoutes.register),
-                    style: TextButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: Text('auth.register.register'.tr()),
-                  ),
-                  SizedBox(width: 8),
-                  OutlinedButton(
-                    onPressed: () => context.push(AppRoutes.login),
-                    child: Text('auth.login.login'.tr()),
-                  ),
-                  SizedBox(width: 10),
-                ] else
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10.0),
-                    child: GestureDetector(
-                      onTap: () => context.go(AppRoutes.profile),
-                      child: ClipOval(
-                        child: () {
-                          final avatarUrl = authState.value?.user?.avatarUrl;
-                          if (avatarUrl != null && avatarUrl.isNotEmpty) {
-                            return CachedNetworkImage(
-                              imageUrl: avatarUrl,
-                              width: 40,
-                              height: 40,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) {
-                                return Shimmer.fromColors(
-                                  baseColor: AppTheme.of(context).shimmerBase,
-                                  highlightColor: AppTheme.of(context).shimmerHighlight,
-                                  child: const ColoredBox(color: Colors.grey),
-                                );
-                              },
-                              errorBuilder: (context, url, error) =>
-                                  AvatarFallback(size: 40, iconSize: 20),
-                            );
-                          }
-                          return AvatarFallback(size: 40, iconSize: 20);
-                        }(),
-                      ),
-                    ),
-                  ),
-              ],
-            )
-          : currentIndex == 3
+      appBar:
+          // currentIndex == 0
+          //     ? AppBar(
+          //         centerTitle: false,
+          //         elevation: 0,
+          //         title: Placeholder(child: SizedBox(height: 40, width: 100)),
+          //         actions: [
+          //           if (authState.isLoading)
+          //             Padding(
+          //               padding: const EdgeInsets.only(right: 10.0),
+          //               child: Builder(
+          //                 builder: (context) {
+          //                   return Shimmer.fromColors(
+          //                     baseColor: AppTheme.of(context).shimmerBase,
+          //                     highlightColor: AppTheme.of(context).shimmerHighlight,
+          //                     child: const CircleAvatar(),
+          //                   );
+          //                 },
+          //               ),
+          //             )
+          //           else if (!isAuthenticated) ...[
+          //             TextButton(
+          //               onPressed: () => context.push(AppRoutes.register),
+          //               style: TextButton.styleFrom(
+          //                 backgroundColor: AppColors.primary,
+          //                 foregroundColor: Colors.white,
+          //               ),
+          //               child: Text('auth.register.register'.tr()),
+          //             ),
+          //             SizedBox(width: 8),
+          //             OutlinedButton(
+          //               onPressed: () => context.push(AppRoutes.login),
+          //               child: Text('auth.login.login'.tr()),
+          //             ),
+          //             SizedBox(width: 10),
+          //           ] else
+          //             Padding(
+          //               padding: const EdgeInsets.only(right: 10.0),
+          //               child: GestureDetector(
+          //                 onTap: () => context.go(AppRoutes.profile),
+          //                 child: ClipOval(
+          //                   child: () {
+          //                     final avatarUrl = authState.value?.user?.avatarUrl;
+          //                     if (avatarUrl != null && avatarUrl.isNotEmpty) {
+          //                       return CachedNetworkImage(
+          //                         imageUrl: avatarUrl,
+          //                         width: 40,
+          //                         height: 40,
+          //                         fit: BoxFit.cover,
+          //                         placeholder: (context, url) {
+          //                           return Shimmer.fromColors(
+          //                             baseColor: AppTheme.of(context).shimmerBase,
+          //                             highlightColor: AppTheme.of(context).shimmerHighlight,
+          //                             child: const ColoredBox(color: Colors.grey),
+          //                           );
+          //                         },
+          //                         errorBuilder: (context, url, error) =>
+          //                             AvatarFallback(size: 40, iconSize: 20),
+          //                       );
+          //                     }
+          //                     return AvatarFallback(size: 40, iconSize: 20);
+          //                   }(),
+          //                 ),
+          //               ),
+          //             ),
+          //         ],
+          //       ) :
+          currentIndex == 1 || currentIndex == 3
           ? AppBar(centerTitle: true, title: Text(_tabs[currentIndex].labelKey.tr()))
           : null,
       body: widget.navigationShell,

@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
@@ -8,8 +9,12 @@ import 'package:sports_app/src/features/event/domain/sport_config.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/event_match_card.dart';
+import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
+import 'package:sports_app/src/features/home/presentation/widgets/home_anchor_live_grid.dart';
+import 'package:sports_app/src/features/home/presentation/widgets/home_section_title.dart';
 import 'package:sports_app/src/providers/nav_providers.dart';
 import 'package:sports_app/src/shared_widgets/shimmer_loading_list.dart';
+import 'package:sports_app/src/routes/app_routes.dart';
 
 class EventScreen extends StatefulWidget {
   const EventScreen({super.key});
@@ -125,7 +130,7 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
 
   void _setRealtimeWatchedIds(List<String> ids) {
     if (widget.sport.config.parseRealtime == null) return;
-    if (ref.read(currentNavIndexProvider) != 1) return;
+    if (ref.read(currentNavIndexProvider) != 0) return;
     ref.read(sportRealtimeProvider(widget.sport).notifier).setWatchedIds('list', ids);
   }
 
@@ -223,7 +228,7 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
 
     // Pause/resume realtime polling when the event bottom-nav tab goes off/on screen.
     ref.listen(currentNavIndexProvider, (prev, curr) {
-      const eventTabIndex = 1;
+      const eventTabIndex = 0;
       if (curr == eventTabIndex && _isActiveTab) {
         _reRegisterRealtimeIds();
       } else if (curr != eventTabIndex) {
@@ -240,6 +245,8 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
         );
       });
     }
+
+    final anchorsAsync = ref.watch(anchorListProvider());
 
     return Column(
       children: [
@@ -261,6 +268,7 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
             onSelected: (date) => setState(() => _scheduledDate = date),
             isPast: _isFinished,
           ),
+
         Expanded(
           child: RefreshIndicator(
             onRefresh: () async {
@@ -273,6 +281,7 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
                 ref.invalidate(_paginatedProvider);
                 await ref.read(_paginatedProvider.future);
               }
+              ref.invalidate(anchorListProvider);
             },
             child: matchesAsync.when(
               loading: () => const ShimmerLoadingList(),
@@ -300,36 +309,94 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
                     _setRealtimeWatchedIds(result.matches.map((m) => m.id).toList());
                   });
                 }
-                if (result.matches.isEmpty) {
-                  return LayoutBuilder(
-                    builder: (context, constraints) => SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: SizedBox(
-                        height: constraints.maxHeight,
+                return CustomScrollView(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    if (_isHot)
+                      SliverToBoxAdapter(
+                        child: anchorsAsync.when(
+                          data: (page) => page.data.isEmpty
+                              ? const SizedBox.shrink()
+                              : Column(
+                                  children: [
+                                    HomeSectionTitle(
+                                      icon: 'assets/images/live-tv.png',
+                                      title: 'home.section.anchor_live'.tr(),
+                                      onPressed: () => context.push(AppRoutes.anchorList),
+                                    ),
+                                    HomeAnchorLiveGrid(
+                                      padding: const EdgeInsets.only(left: 10, right: 10),
+                                      itemCount: 4,
+                                      anchors: page.data,
+                                    ),
+                                  ],
+                                ),
+                          error: (err, stack) => Column(
+                            children: [
+                              HomeSectionTitle(
+                                icon: 'assets/images/live-tv.png',
+                                title: 'home.section.anchor_live'.tr(),
+                                onPressed: () => context.push(AppRoutes.anchorList),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 48),
+                                child: Column(
+                                  children: [
+                                    Icon(
+                                      Icons.wifi_off_rounded,
+                                      size: 48,
+                                      color: Colors.grey.shade400,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      'home.error.load_failed'.tr(),
+                                      style: TextStyle(color: Colors.grey.shade500),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    TextButton(
+                                      onPressed: () => ref.refresh(anchorListProvider().future),
+                                      child: Text('common.retry'.tr()),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          loading: () => Column(
+                            children: [
+                              HomeSectionTitle(
+                                icon: 'assets/images/live-tv.png',
+                                title: 'home.section.anchor_live'.tr(),
+                                onPressed: () => context.push(AppRoutes.anchorList),
+                              ),
+                              const HomeAnchorLiveGrid(),
+                            ],
+                          ),
+                        ),
+                      ),
+                    if (result.matches.isEmpty)
+                      SliverFillRemaining(
                         child: Center(
                           child: Text(
                             'event.empty'.tr(),
                             style: context.textTheme.bodyMedium?.copyWith(color: Colors.grey),
                           ),
                         ),
+                      )
+                    else
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          if (index == result.matches.length) {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              child: Center(child: CircularProgressIndicator()),
+                            );
+                          }
+                          return EventMatchCard(match: result.matches[index]);
+                        }, childCount: result.matches.length + (result.isLoadingMore ? 1 : 0)),
                       ),
-                    ),
-                  );
-                }
-                return ListView.builder(
-                  controller: _scrollController,
-                  padding: EdgeInsets.zero,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  itemCount: result.matches.length + (result.isLoadingMore ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index == result.matches.length) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        child: Center(child: CircularProgressIndicator()),
-                      );
-                    }
-                    return EventMatchCard(match: result.matches[index]);
-                  },
+                  ],
                 );
               },
             ),
@@ -451,7 +518,9 @@ class _DateSelectorBar extends StatelessWidget {
                 onTap: () => onSelected(date),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
-                  decoration: BoxDecoration(color: isSelected ? AppColors.primary : AppTheme.of(context).shimmerHighlight),
+                  decoration: BoxDecoration(
+                    color: isSelected ? AppColors.primary : AppTheme.of(context).shimmerHighlight,
+                  ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -480,4 +549,3 @@ class _DateSelectorBar extends StatelessWidget {
     );
   }
 }
-

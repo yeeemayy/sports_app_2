@@ -9,6 +9,7 @@ import 'package:sports_app/src/features/event/domain/models/match_realtime_data.
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/match_score_display.dart';
 import 'package:sports_app/src/shared_widgets/match_status_badge.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
@@ -38,7 +39,7 @@ class FootballMatchCard extends ConsumerWidget {
 
     final hasHtScore = effective.htHomeScore != null && effective.htAwayScore != null;
 
-    return GestureDetector(
+    return InkWell(
       onTap: () => context.push(AppRoutes.footballMatchDetailPath(match.id), extra: match),
       child: Container(
         child: Column(
@@ -143,10 +144,11 @@ class FootballMatchCard extends ConsumerWidget {
                   // Score / status
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: _ScoreDisplay(
+                    child: MatchScoreDisplay(
                       homeScore: effective.homeScore,
                       awayScore: effective.awayScore,
-                      statusId: effective.statusId,
+                      isNotStarted: const {0, 1, 13}.contains(effective.statusId),
+                      isLive: const {2, 3, 4, 5, 6, 7}.contains(effective.statusId),
                     ),
                   ),
                   // Away team
@@ -225,44 +227,6 @@ class FootballMatchCard extends ConsumerWidget {
   }
 }
 
-class _ScoreDisplay extends StatelessWidget {
-  const _ScoreDisplay({required this.homeScore, required this.awayScore, required this.statusId});
-
-  final String homeScore;
-  final String awayScore;
-  final int statusId;
-
-  static const _liveStatuses = {2, 3, 4, 5, 6, 7};
-  static const _noScoreStatuses = {0, 1, 13};
-
-  @override
-  Widget build(BuildContext context) {
-    if (_noScoreStatuses.contains(statusId)) {
-      return Text(
-        '-',
-        style: context.textTheme.titleSmall?.copyWith(
-          color: Colors.grey.shade400,
-          fontWeight: FontWeight.w600,
-        ),
-      );
-    }
-
-    final scoreColor = _liveStatuses.contains(statusId) ? AppColors.primary : AppTheme.of(context).baseText;
-    return RichText(
-      text: TextSpan(
-        style: context.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w900,
-          color: scoreColor,
-        ),
-        children: [
-          TextSpan(text: homeScore),
-          const TextSpan(text: ' - '),
-          TextSpan(text: awayScore),
-        ],
-      ),
-    );
-  }
-}
 
 class _CardBadge extends StatelessWidget {
   const _CardBadge({required this.isHome, required this.count, required this.color});

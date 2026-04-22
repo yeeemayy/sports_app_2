@@ -22,7 +22,7 @@ RefAppModel _$RefAppModelFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$RefAppModel {
   String get icon => throw _privateConstructorUsedError;
-  String get name => throw _privateConstructorUsedError;
+  String? get name => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
   String get url => throw _privateConstructorUsedError;
 
@@ -43,7 +43,7 @@ abstract class $RefAppModelCopyWith<$Res> {
     $Res Function(RefAppModel) then,
   ) = _$RefAppModelCopyWithImpl<$Res, RefAppModel>;
   @useResult
-  $Res call({String icon, String name, String description, String url});
+  $Res call({String icon, String? name, String description, String url});
 }
 
 /// @nodoc
@@ -62,7 +62,7 @@ class _$RefAppModelCopyWithImpl<$Res, $Val extends RefAppModel>
   @override
   $Res call({
     Object? icon = null,
-    Object? name = null,
+    Object? name = freezed,
     Object? description = null,
     Object? url = null,
   }) {
@@ -72,10 +72,10 @@ class _$RefAppModelCopyWithImpl<$Res, $Val extends RefAppModel>
                 ? _value.icon
                 : icon // ignore: cast_nullable_to_non_nullable
                       as String,
-            name: null == name
+            name: freezed == name
                 ? _value.name
                 : name // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as String?,
             description: null == description
                 ? _value.description
                 : description // ignore: cast_nullable_to_non_nullable
@@ -99,7 +99,7 @@ abstract class _$$RefAppModelImplCopyWith<$Res>
   ) = __$$RefAppModelImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String icon, String name, String description, String url});
+  $Res call({String icon, String? name, String description, String url});
 }
 
 /// @nodoc
@@ -117,7 +117,7 @@ class __$$RefAppModelImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? icon = null,
-    Object? name = null,
+    Object? name = freezed,
     Object? description = null,
     Object? url = null,
   }) {
@@ -127,10 +127,10 @@ class __$$RefAppModelImplCopyWithImpl<$Res>
             ? _value.icon
             : icon // ignore: cast_nullable_to_non_nullable
                   as String,
-        name: null == name
+        name: freezed == name
             ? _value.name
             : name // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as String?,
         description: null == description
             ? _value.description
             : description // ignore: cast_nullable_to_non_nullable
@@ -149,7 +149,7 @@ class __$$RefAppModelImplCopyWithImpl<$Res>
 class _$RefAppModelImpl implements _RefAppModel {
   const _$RefAppModelImpl({
     required this.icon,
-    required this.name,
+    this.name,
     required this.description,
     required this.url,
   });
@@ -160,7 +160,7 @@ class _$RefAppModelImpl implements _RefAppModel {
   @override
   final String icon;
   @override
-  final String name;
+  final String? name;
   @override
   final String description;
   @override
@@ -204,7 +204,7 @@ class _$RefAppModelImpl implements _RefAppModel {
 abstract class _RefAppModel implements RefAppModel {
   const factory _RefAppModel({
     required final String icon,
-    required final String name,
+    final String? name,
     required final String description,
     required final String url,
   }) = _$RefAppModelImpl;
@@ -215,7 +215,7 @@ abstract class _RefAppModel implements RefAppModel {
   @override
   String get icon;
   @override
-  String get name;
+  String? get name;
   @override
   String get description;
   @override
@@ -237,7 +237,7 @@ BannerModel _$BannerModelFromJson(Map<String, dynamic> json) {
 mixin _$BannerModel {
   int get id => throw _privateConstructorUsedError;
   @JsonKey(name: 'app_name')
-  String get appName => throw _privateConstructorUsedError;
+  String? get appName => throw _privateConstructorUsedError;
   String get cover => throw _privateConstructorUsedError;
   @JsonKey(name: 'ref_app')
   List<RefAppModel> get refApp => throw _privateConstructorUsedError;
@@ -262,7 +262,7 @@ abstract class $BannerModelCopyWith<$Res> {
   @useResult
   $Res call({
     int id,
-    @JsonKey(name: 'app_name') String appName,
+    @JsonKey(name: 'app_name') String? appName,
     String cover,
     @JsonKey(name: 'ref_app') List<RefAppModel> refApp,
     String updated,
@@ -285,7 +285,7 @@ class _$BannerModelCopyWithImpl<$Res, $Val extends BannerModel>
   @override
   $Res call({
     Object? id = null,
-    Object? appName = null,
+    Object? appName = freezed,
     Object? cover = null,
     Object? refApp = null,
     Object? updated = null,
@@ -296,10 +296,10 @@ class _$BannerModelCopyWithImpl<$Res, $Val extends BannerModel>
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
                       as int,
-            appName: null == appName
+            appName: freezed == appName
                 ? _value.appName
                 : appName // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as String?,
             cover: null == cover
                 ? _value.cover
                 : cover // ignore: cast_nullable_to_non_nullable
@@ -329,7 +329,7 @@ abstract class _$$BannerModelImplCopyWith<$Res>
   @useResult
   $Res call({
     int id,
-    @JsonKey(name: 'app_name') String appName,
+    @JsonKey(name: 'app_name') String? appName,
     String cover,
     @JsonKey(name: 'ref_app') List<RefAppModel> refApp,
     String updated,
@@ -351,7 +351,7 @@ class __$$BannerModelImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? appName = null,
+    Object? appName = freezed,
     Object? cover = null,
     Object? refApp = null,
     Object? updated = null,
@@ -362,10 +362,10 @@ class __$$BannerModelImplCopyWithImpl<$Res>
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
                   as int,
-        appName: null == appName
+        appName: freezed == appName
             ? _value.appName
             : appName // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as String?,
         cover: null == cover
             ? _value.cover
             : cover // ignore: cast_nullable_to_non_nullable
@@ -388,7 +388,7 @@ class __$$BannerModelImplCopyWithImpl<$Res>
 class _$BannerModelImpl implements _BannerModel {
   const _$BannerModelImpl({
     required this.id,
-    @JsonKey(name: 'app_name') required this.appName,
+    @JsonKey(name: 'app_name') this.appName,
     required this.cover,
     @JsonKey(name: 'ref_app') required final List<RefAppModel> refApp,
     required this.updated,
@@ -401,7 +401,7 @@ class _$BannerModelImpl implements _BannerModel {
   final int id;
   @override
   @JsonKey(name: 'app_name')
-  final String appName;
+  final String? appName;
   @override
   final String cover;
   final List<RefAppModel> _refApp;
@@ -461,7 +461,7 @@ class _$BannerModelImpl implements _BannerModel {
 abstract class _BannerModel implements BannerModel {
   const factory _BannerModel({
     required final int id,
-    @JsonKey(name: 'app_name') required final String appName,
+    @JsonKey(name: 'app_name') final String? appName,
     required final String cover,
     @JsonKey(name: 'ref_app') required final List<RefAppModel> refApp,
     required final String updated,
@@ -474,7 +474,7 @@ abstract class _BannerModel implements BannerModel {
   int get id;
   @override
   @JsonKey(name: 'app_name')
-  String get appName;
+  String? get appName;
   @override
   String get cover;
   @override

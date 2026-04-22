@@ -28,62 +28,64 @@ class HomeTabOthers extends ConsumerWidget {
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         clipBehavior: Clip.none,
-        child: Column(
-          children: [
-            const HomeBannerCarousel(),
-            anchorsAsync.when(
-              loading: () => Column(
-                children: [
-                  HomeSectionTitle(
-                    icon: 'assets/images/live-tv.png',
-                    title: 'home.section.anchor_live'.tr(),
-                    // subtitle: 'home.section.anchor_live_subtitle'.tr(),
-                    onPressed: () => context.push(AppRoutes.anchorList),
-                  ),
-                  HomeAnchorLiveGrid(),
-                ],
-              ),
-              error: (err, stack) => Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 48),
-                    child: Column(
-                      children: [
-                        Icon(Icons.wifi_off_rounded, size: 48, color: Colors.grey.shade400),
-                        const SizedBox(height: 12),
-                        Text(
-                          'home.error.load_failed'.tr(),
-                          style: TextStyle(color: Colors.grey.shade500),
-                        ),
-                        const SizedBox(height: 16),
-                        TextButton(
-                          onPressed: () => ref.refresh(anchorListProvider().future),
-                          child: Text('common.retry'.tr()),
-                        ),
-                      ],
+        child: SafeArea(
+          child: Column(
+            children: [
+              // const HomeBannerCarousel(),
+              anchorsAsync.when(
+                loading: () => Column(
+                  children: [
+                    HomeSectionTitle(
+                      icon: 'assets/images/live-tv.png',
+                      title: 'home.section.anchor_live'.tr(),
+                      // subtitle: 'home.section.anchor_live_subtitle'.tr(),
+                      onPressed: () => context.push(AppRoutes.anchorList),
                     ),
-                  ),
-                  HomeSectionTitle(
-                    icon: 'assets/images/news.png',
-                    title: 'home.section.video_highlights'.tr(),
-                    onPressed: () {},
-                  ),
-                  HomeVideoList(locale: context.localeCode),
-                ],
+                    HomeAnchorLiveGrid(),
+                  ],
+                ),
+                error: (err, stack) => Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 48),
+                      child: Column(
+                        children: [
+                          Icon(Icons.wifi_off_rounded, size: 48, color: Colors.grey.shade400),
+                          const SizedBox(height: 12),
+                          Text(
+                            'home.error.load_failed'.tr(),
+                            style: TextStyle(color: Colors.grey.shade500),
+                          ),
+                          const SizedBox(height: 16),
+                          TextButton(
+                            onPressed: () => ref.refresh(anchorListProvider().future),
+                            child: Text('common.retry'.tr()),
+                          ),
+                        ],
+                      ),
+                    ),
+                    HomeSectionTitle(
+                      icon: 'assets/images/news.png',
+                      title: 'home.section.video_highlights'.tr(),
+                      onPressed: () {},
+                    ),
+                    HomeVideoList(locale: context.localeCode),
+                  ],
+                ),
+                data: (page) => Column(
+                  children: [
+                    HomeSectionTitle(
+                      icon: 'assets/images/live-tv.png',
+                      title: 'home.section.anchor_live'.tr(),
+                      // subtitle: 'home.section.anchor_live_subtitle'.tr(),
+                      onPressed: () => context.push(AppRoutes.anchorList),
+                    ),
+                    HomeAnchorLiveGrid(anchors: page.data),
+                  ],
+                ),
               ),
-              data: (page) => Column(
-                children: [
-                  HomeSectionTitle(
-                    icon: 'assets/images/live-tv.png',
-                    title: 'home.section.anchor_live'.tr(),
-                    // subtitle: 'home.section.anchor_live_subtitle'.tr(),
-                    onPressed: () => context.push(AppRoutes.anchorList),
-                  ),
-                  HomeAnchorLiveGrid(anchors: page.data),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
