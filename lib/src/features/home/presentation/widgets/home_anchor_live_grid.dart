@@ -7,7 +7,7 @@ import 'package:sports_app/src/features/home/presentation/widgets/home_anchor_li
 class HomeAnchorLiveGrid extends StatelessWidget {
   const HomeAnchorLiveGrid({super.key,
     this.padding =  const EdgeInsets.symmetric(horizontal: 16.0),
-    this.anchors, this.itemCount = 6});
+    this.anchors, this.itemCount = 10});
 
   final EdgeInsets padding;
   final List<AnchorModel>? anchors;

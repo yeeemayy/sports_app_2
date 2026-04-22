@@ -9,25 +9,41 @@ import 'package:sports_app/src/features/home/presentation/widgets/home_anchor_li
 import 'package:sports_app/src/features/home/presentation/widgets/home_section_title.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 
-class AnchorScreen extends ConsumerWidget {
+class AnchorScreen extends ConsumerStatefulWidget {
   const AnchorScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AnchorScreen> createState() => _AnchorScreenState();
+}
+
+class _AnchorScreenState extends ConsumerState<AnchorScreen> {
+  bool _isManualRefreshing = false;
+
+  @override
+  Widget build(BuildContext context) {
     final anchorsAsync = ref.watch(anchorListProvider());
 
     return RefreshIndicator(
       onRefresh: () async {
-        ref.refresh(anchorListProvider().future);
-        // ref.refresh(bannerProvider.future);
-        // ref.refresh(newsFirstPageProvider(context.localeCode).future);
+        setState(() => _isManualRefreshing = true);
+        try {
+          ref.invalidate(anchorListProvider());
+          await ref.read(anchorListProvider().future);
+        } catch (_) {
+          // error is displayed by the when() error builder
+        } finally {
+          if (mounted) setState(() => _isManualRefreshing = false);
+        }
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         clipBehavior: Clip.none,
         child: SafeArea(
-          child: anchorsAsync.when(
-            loading: () => HomeAnchorLiveGrid(),
+          child: _isManualRefreshing
+              ? HomeAnchorLiveGrid(padding: EdgeInsets.all(16))
+              : anchorsAsync.when(
+            skipLoadingOnRefresh: true,
+            loading: () => HomeAnchorLiveGrid(padding: EdgeInsets.all(16)),
             error: (err, stack) => Center(
               child: SizedBox(
                 height: MediaQuery.of(context).size.height * .7,
@@ -51,29 +67,29 @@ class AnchorScreen extends ConsumerWidget {
               ),
             ),
             data: (page) => page.data.isNotEmpty
-                ? HomeAnchorLiveGrid(anchors: page.data)
+                ? HomeAnchorLiveGrid(anchors: page.data, padding: EdgeInsets.all(16))
                 : Center(
-                  child: SizedBox(
-                    height: MediaQuery.of(context).size.height * .7,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.video_camera_front_outlined,
-                          size: 48,
-                          color: Colors.grey.shade400,
-                        ),
-                        const SizedBox(height: 12),
-                        Text('home.anchor.no_live'.tr(), style: context.textTheme.titleMedium),
-                        const SizedBox(height: 16),
-                        Text(
-                          'home.anchor.no_live_subtitle'.tr(),
-                          style: TextStyle(color: Colors.grey.shade500),
-                        ),
-                      ],
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height * .7,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.video_camera_front_outlined,
+                            size: 48,
+                            color: Colors.grey.shade400,
+                          ),
+                          const SizedBox(height: 12),
+                          Text('home.anchor.no_live'.tr(), style: context.textTheme.titleMedium),
+                          const SizedBox(height: 16),
+                          Text(
+                            'home.anchor.no_live_subtitle'.tr(),
+                            style: TextStyle(color: Colors.grey.shade500),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
           ),
         ),
       ),

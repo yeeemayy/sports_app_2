@@ -9,7 +9,7 @@ part of 'banner_model.dart';
 _$RefAppModelImpl _$$RefAppModelImplFromJson(Map<String, dynamic> json) =>
     _$RefAppModelImpl(
       icon: json['icon'] as String,
-      name: json['name'] as String,
+      name: json['name'] as String?,
       description: json['description'] as String,
       url: json['url'] as String,
     );
@@ -25,7 +25,7 @@ Map<String, dynamic> _$$RefAppModelImplToJson(_$RefAppModelImpl instance) =>
 _$BannerModelImpl _$$BannerModelImplFromJson(Map<String, dynamic> json) =>
     _$BannerModelImpl(
       id: (json['id'] as num).toInt(),
-      appName: json['app_name'] as String,
+      appName: json['app_name'] as String?,
       cover: json['cover'] as String,
       refApp: (json['ref_app'] as List<dynamic>)
           .map((e) => RefAppModel.fromJson(e as Map<String, dynamic>))

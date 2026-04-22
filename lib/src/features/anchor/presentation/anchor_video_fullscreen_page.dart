@@ -6,15 +6,20 @@ import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 
 class AnchorVideoFullscreenPage extends StatefulWidget {
-  const AnchorVideoFullscreenPage({super.key, required this.controller});
+  const AnchorVideoFullscreenPage({
+    super.key,
+    required this.controller,
+  });
 
   final VideoPlayerController controller;
 
   @override
-  State<AnchorVideoFullscreenPage> createState() => _AnchorVideoFullscreenPageState();
+  State<AnchorVideoFullscreenPage> createState() =>
+      _AnchorVideoFullscreenPageState();
 }
 
-class _AnchorVideoFullscreenPageState extends State<AnchorVideoFullscreenPage> {
+class _AnchorVideoFullscreenPageState
+    extends State<AnchorVideoFullscreenPage> {
   bool _showControls = true;
   Timer? _controlsTimer;
 
@@ -30,7 +35,6 @@ class _AnchorVideoFullscreenPageState extends State<AnchorVideoFullscreenPage> {
   void dispose() {
     _controlsTimer?.cancel();
     widget.controller.removeListener(_onControllerUpdate);
-    _exitFullscreen();
     super.dispose();
   }
 
@@ -52,13 +56,12 @@ class _AnchorVideoFullscreenPageState extends State<AnchorVideoFullscreenPage> {
 
   void _togglePlayPause() {
     final controller = widget.controller;
-    setState(() {
-      if (controller.value.isPlaying) {
-        controller.pause();
-      } else {
-        controller.play();
-      }
-    });
+    if (controller.value.isPlaying) {
+      controller.pause();
+    } else {
+      controller.play();
+    }
+    setState(() {});
     _scheduleHide();
   }
 
@@ -67,16 +70,34 @@ class _AnchorVideoFullscreenPageState extends State<AnchorVideoFullscreenPage> {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    await SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.immersiveSticky,
+    );
   }
 
   Future<void> _exitFullscreen() async {
-    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    await SystemChrome.setPreferredOrientations(
+      DeviceOrientation.values,
+    );
+    await SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.edgeToEdge,
+    );
+  }
+
+  Future<void> _handleExit() async {
+    widget.controller.pause(); // optional but nicer UX
+    setState(() => _showControls = false);
+
+    await Future.delayed(const Duration(milliseconds: 150));
+    await _exitFullscreen();
+
+    if (mounted) context.pop();
   }
 
   @override
   Widget build(BuildContext context) {
+    final controller = widget.controller;
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: GestureDetector(
@@ -85,57 +106,69 @@ class _AnchorVideoFullscreenPageState extends State<AnchorVideoFullscreenPage> {
           children: [
             Center(
               child: AspectRatio(
-                aspectRatio: widget.controller.value.aspectRatio,
-                child: VideoPlayer(widget.controller),
+                aspectRatio: MediaQuery.of(context).size.aspectRatio,
+                // controller.value.aspectRatio == 0
+                //     ? 16 / 9
+                //     : controller.value.aspectRatio,
+                child: VideoPlayer(controller),
               ),
             ),
 
-            // Play/pause button
-            // if (_showControls)
-            //   Center(
-            //     child: GestureDetector(
-            //       onTap: _togglePlayPause,
-            //       child: Container(
-            //         decoration: const BoxDecoration(
-            //           color: Colors.black45,
-            //           shape: BoxShape.circle,
-            //         ),
-            //         padding: const EdgeInsets.all(12),
-            //         child: Icon(
-            //           widget.controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-            //           color: Colors.white,
-            //           size: 40,
-            //         ),
-            //       ),
-            //     ),
-            //   ),
-
-            // Close button
+            // Controls overlay
             AnimatedOpacity(
               opacity: _showControls ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 300),
               child: IgnorePointer(
                 ignoring: !_showControls,
                 child: Container(
-                  color: Colors.black54,
-                  width: double.maxFinite,
-                  height: MediaQuery.of(context).size.height,
+                  color: Colors.black45,
                   child: SafeArea(
                     child: Column(
                       children: [
                         Align(
                           alignment: Alignment.topLeft,
                           child: IconButton(
-                            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                            onPressed: () => context.pop(),
+                            icon: const Icon(
+                              Icons.arrow_back_ios,
+                              color: Colors.white,
+                            ),
+                            onPressed: _handleExit,
                           ),
                         ),
                         const Spacer(),
+
+                        // Play / Pause
+                        // Center(
+                        //   child: GestureDetector(
+                        //     onTap: _togglePlayPause,
+                        //     child: Container(
+                        //       decoration: const BoxDecoration(
+                        //         color: Colors.black54,
+                        //         shape: BoxShape.circle,
+                        //       ),
+                        //       padding: const EdgeInsets.all(14),
+                        //       child: Icon(
+                        //         controller.value.isPlaying
+                        //             ? Icons.pause
+                        //             : Icons.play_arrow,
+                        //         color: Colors.white,
+                        //         size: 40,
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
+
+                        const Spacer(),
+
                         Align(
                           alignment: Alignment.bottomRight,
                           child: IconButton(
-                            icon: const Icon(Icons.fullscreen_exit, color: Colors.white, size: 28),
-                            onPressed: () => context.pop(),
+                            icon: const Icon(
+                              Icons.fullscreen_exit,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                            onPressed: _handleExit,
                           ),
                         ),
                       ],
