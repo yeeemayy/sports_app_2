@@ -26,6 +26,17 @@ class AnchorRepository extends _$AnchorRepository {
     }
 
     final dataJson = json['data'] as Map<String, dynamic>;
+
+    if (dataJson.isEmpty) {
+      return PaginatedResponse<AnchorModel>(
+        total: 0,
+        perPage: 0,
+        currentPage: "1",
+        lastPage: 1,
+        data: <AnchorModel>[],
+      );
+    }
+
     return PaginatedResponse<AnchorModel>.fromJson(
       dataJson,
       (item) => AnchorModel.fromJson(item as Map<String, dynamic>),

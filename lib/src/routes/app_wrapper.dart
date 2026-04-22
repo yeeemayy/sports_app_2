@@ -176,7 +176,7 @@ class _AppWrapperState extends ConsumerState<AppWrapper> with TickerProviderStat
           //             ),
           //         ],
           //       ) :
-          currentIndex == 3
+          currentIndex == 1 || currentIndex == 3
           ? AppBar(centerTitle: true, title: Text(_tabs[currentIndex].labelKey.tr()))
           : null,
       body: widget.navigationShell,

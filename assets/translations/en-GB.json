@@ -81,6 +81,10 @@
     },
     "error": {
       "load_failed": "Failed to load, please try again"
+    },
+    "anchor": {
+      "no_live": "No live streams right now",
+      "no_live_subtitle": "Check out something else"
     }
   },
   "video": {

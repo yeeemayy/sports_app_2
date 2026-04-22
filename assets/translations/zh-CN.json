@@ -81,6 +81,10 @@
     },
     "error": {
       "load_failed": "加载失败，请稍后再试"
+    },
+    "anchor": {
+      "no_live": "目前暂无直播",
+      "no_live_subtitle": "先看看别的吧"
     }
   },
   "video": {
