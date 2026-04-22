@@ -118,10 +118,14 @@ class _AppWrapperState extends ConsumerState<AppWrapper> with TickerProviderStat
                 if (authState.isLoading)
                   Padding(
                     padding: const EdgeInsets.only(right: 10.0),
-                    child: Shimmer.fromColors(
-                      baseColor: Colors.grey.shade300,
-                      highlightColor: Colors.grey.shade100,
-                      child: const CircleAvatar(backgroundColor: Colors.white),
+                    child: Builder(
+                      builder: (context) {
+                        return Shimmer.fromColors(
+                          baseColor: AppTheme.of(context).shimmerBase,
+                          highlightColor: AppTheme.of(context).shimmerHighlight,
+                          child: const CircleAvatar(),
+                        );
+                      },
                     ),
                   )
                 else if (!isAuthenticated) ...[
@@ -153,11 +157,13 @@ class _AppWrapperState extends ConsumerState<AppWrapper> with TickerProviderStat
                               width: 40,
                               height: 40,
                               fit: BoxFit.cover,
-                              placeholder: (context, url) => Shimmer.fromColors(
-                                baseColor: Colors.grey.shade300,
-                                highlightColor: Colors.grey.shade100,
-                                child: const ColoredBox(color: Colors.white),
-                              ),
+                              placeholder: (context, url) {
+                                return Shimmer.fromColors(
+                                  baseColor: AppTheme.of(context).shimmerBase,
+                                  highlightColor: AppTheme.of(context).shimmerHighlight,
+                                  child: const ColoredBox(color: Colors.grey),
+                                );
+                              },
                               errorBuilder: (context, url, error) =>
                                   AvatarFallback(size: 40, iconSize: 20),
                             );

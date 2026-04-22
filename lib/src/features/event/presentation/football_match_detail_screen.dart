@@ -4,6 +4,7 @@ import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/football_lineup.dart';
+import 'package:sports_app/src/features/event/domain/models/football_match.dart';
 import 'package:sports_app/src/features/event/domain/models/match_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match_detail.dart';
@@ -17,16 +18,16 @@ import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
 class FootballMatchDetailScreen extends ConsumerStatefulWidget {
-  const FootballMatchDetailScreen({super.key, required this.matchId});
+  const FootballMatchDetailScreen({super.key, required this.matchId, this.initialMatch});
 
   final String matchId;
+  final FootballMatch? initialMatch;
 
   @override
   ConsumerState<FootballMatchDetailScreen> createState() => _FootballMatchDetailScreenState();
 }
 
-class _FootballMatchDetailScreenState
-    extends SportDetailScaffoldState<FootballMatchDetailScreen> {
+class _FootballMatchDetailScreenState extends SportDetailScaffoldState<FootballMatchDetailScreen> {
   @override
   String get matchId => widget.matchId;
 
@@ -44,13 +45,18 @@ class _FootballMatchDetailScreenState
 
   @override
   (String?, int?) watchDetail() {
-    final v = ref.watch(matchDetailProvider(sport: SportType.football, matchId: matchId))
-        .valueOrNull as FootballMatchDetail?;
-    return (v?.leagueName, v?.matchTime);
+    final v =
+        ref.watch(matchDetailProvider(sport: SportType.football, matchId: matchId)).valueOrNull
+            as FootballMatchDetail?;
+    return (
+      v?.leagueName ?? widget.initialMatch?.leagueName,
+      v?.matchTime ?? widget.initialMatch?.matchTime,
+    );
   }
 
   @override
-  Widget buildHeader(BuildContext context) => _MatchHeader(matchId: matchId);
+  Widget buildHeader(BuildContext context) =>
+      _MatchHeader(matchId: matchId, initialMatch: widget.initialMatch);
 
   @override
   List<Tab> buildTabs(BuildContext context) => [
@@ -70,9 +76,10 @@ class _FootballMatchDetailScreenState
 // ─── Match Header ────────────────────────────────────────────────────────────
 
 class _MatchHeader extends ConsumerWidget {
-  const _MatchHeader({required this.matchId});
+  const _MatchHeader({required this.matchId, this.initialMatch});
 
   final String matchId;
+  final FootballMatch? initialMatch;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -82,8 +89,15 @@ class _MatchHeader extends ConsumerWidget {
       sportRealtimeProvider(SportType.football).select((map) => map[matchId] as MatchRealtimeData?),
     );
 
+    Widget? fallback;
+    if (initialMatch != null) {
+      final im = initialMatch!;
+      fallback = _MatchHeaderFallback(match: im, rt: rt);
+    }
+
     return SportDetailHeaderShell<FootballMatchDetail>(
       detailAsync: detailAsync,
+      fallback: fallback,
       builder: (detail) {
         final effKickoff = (rt != null && rt.kickoffTimestamp != 0)
             ? rt.kickoffTimestamp
@@ -98,6 +112,97 @@ class _MatchHeader extends ConsumerWidget {
           rtAwayHtScore: rt?.awayHtScore,
         );
       },
+    );
+  }
+}
+
+class _MatchHeaderFallback extends StatelessWidget {
+  const _MatchHeaderFallback({required this.match, this.rt});
+
+  final FootballMatch match;
+  final MatchRealtimeData? rt;
+
+  @override
+  Widget build(BuildContext context) {
+    final effStatusId = rt?.statusId ?? match.statusId;
+    final effHomeScore = rt?.homeScore.toString() ?? match.homeScore;
+    final effAwayScore = rt?.awayScore.toString() ?? match.awayScore;
+    final effHomeHt =
+        rt?.homeHtScore ?? (match.htHomeScore != null ? int.tryParse(match.htHomeScore!) : null);
+    final effAwayHt =
+        rt?.awayHtScore ?? (match.htAwayScore != null ? int.tryParse(match.htAwayScore!) : null);
+
+    return Column(
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Column(
+                children: [
+                  SportLogo(url: match.homeLogo, size: 40),
+                  const SizedBox(height: 6),
+                  Text(
+                    match.homeName,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Column(
+                children: [
+                  MatchStatusBadge(
+                    statusId: effStatusId,
+                    label: match.statusLabel,
+                    liveColor: Colors.white,
+                    staticColor: Colors.grey.shade200,
+                  ),
+                  _ScoreOrStatus(
+                    statusId: effStatusId,
+                    homeScore: effHomeScore,
+                    awayScore: effAwayScore,
+                  ),
+                  const SizedBox(height: 4),
+                  if (effStatusId != 1 &&
+                      effStatusId != 8 &&
+                      effHomeHt != null &&
+                      effAwayHt != null)
+                    Text(
+                      '${'event.football.ht'.tr()} $effHomeHt-$effAwayHt',
+                      style: context.textTheme.labelSmall?.copyWith(color: Colors.grey.shade300),
+                    ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Column(
+                children: [
+                  SportLogo(url: match.awayLogo, size: 40),
+                  const SizedBox(height: 6),
+                  Text(
+                    match.awayName,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -170,7 +275,10 @@ class _MatchHeaderContent extends StatelessWidget {
                     awayScore: effAwayScore,
                   ),
                   const SizedBox(height: 4),
-                  if (effStatusId != 8 && effHomeHtScore != null && effAwayHtScore != null)
+                  if (effStatusId != 1 &&
+                      effStatusId != 8 &&
+                      effHomeHtScore != null &&
+                      effAwayHtScore != null)
                     Text(
                       '${'event.football.ht'.tr()} $effHomeHtScore-$effAwayHtScore',
                       style: context.textTheme.labelSmall?.copyWith(color: Colors.grey.shade300),
@@ -270,11 +378,7 @@ class _EnvironmentRow extends StatelessWidget {
 }
 
 class _ScoreOrStatus extends StatelessWidget {
-  const _ScoreOrStatus({
-    required this.statusId,
-    required this.homeScore,
-    required this.awayScore,
-  });
+  const _ScoreOrStatus({required this.statusId, required this.homeScore, required this.awayScore});
 
   final int statusId;
   final String homeScore;
@@ -404,13 +508,13 @@ class _TimeIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
+        color: context.appTheme.grey_3,
         borderRadius: BorderRadius.circular(12),
       ),
       alignment: Alignment.center,
       child: Text(
         "$time'",
-        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey.shade700),
+        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: context.appTheme.grey_4),
       ),
     );
   }
@@ -422,14 +526,14 @@ class _HalfTimeSeparator extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.symmetric(vertical: 6),
-      color: Colors.grey.shade100,
+      color: context.appTheme.shimmerHighlight,
       child: Center(
         child: Text(
           'event.football.detail.half_time'.tr(),
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: Colors.grey.shade600,
+            color: context.appTheme.shimmerBase,
             letterSpacing: 0.5,
           ),
         ),
@@ -448,7 +552,7 @@ class _PhaseMarker extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 2),
       padding: const EdgeInsets.symmetric(vertical: 5),
-      color: Colors.grey.shade100,
+      color: context.appTheme.shimmerHighlight,
       child: Center(
         child: Text(
           'event.football.detail.incident_type.${incident.type}'.tr(),
@@ -590,7 +694,11 @@ class _IncidentText extends StatelessWidget {
         if (incident.homeScore != null && incident.awayScore != null)
           Text(
             '${incident.homeScore} - ${incident.awayScore}',
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: AppColors.primary,
+            ),
             textAlign: align,
           ),
         if (incident.reason != null && incident.reason != 0)
@@ -656,7 +764,11 @@ class _LineupsTabState extends ConsumerState<_LineupsTab> with SingleTickerProvi
           );
         }
 
-        final detail = ref.watch(matchDetailProvider(sport: SportType.football, matchId: widget.matchId)).valueOrNull as FootballMatchDetail?;
+        final detail =
+            ref
+                    .watch(matchDetailProvider(sport: SportType.football, matchId: widget.matchId))
+                    .valueOrNull
+                as FootballMatchDetail?;
         final homeIcon = detail?.homeInfo.logo;
         final awayIcon = detail?.awayInfo.logo;
         final homeName = detail?.homeName ?? 'Home';
@@ -668,7 +780,7 @@ class _LineupsTabState extends ConsumerState<_LineupsTab> with SingleTickerProvi
               margin: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.all(Radius.circular(20)),
-                border: Border.all(width: 1, color: Colors.grey.shade300),
+                border: Border.all(width: 1, color: context.appTheme.shimmerBase),
               ),
               child: TabBar(
                 dividerColor: Colors.transparent,
@@ -774,10 +886,10 @@ class _SectionHeader extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-      color: Colors.grey.shade200,
+      color: context.appTheme.grey_3,
       child: Text(
         label,
-        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700),
+        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.appTheme.grey_4),
       ),
     );
   }
@@ -793,7 +905,6 @@ class _PlayerRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
         border: Border(bottom: BorderSide(color: Colors.grey.shade100, width: 0.5)),
       ),
       child: Row(
@@ -808,7 +919,11 @@ class _PlayerRow extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               '${player.shirtNumber}',
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary),
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primary,
+              ),
             ),
           ),
           const SizedBox(width: 8),
@@ -851,7 +966,8 @@ class _StatsTab extends ConsumerWidget {
       ),
       data: (obj) {
         final events = obj as FootballMatchEvents?;
-        final apiStats = events?.stats.where((s) => s.label != null && s.label!.isNotEmpty).toList() ?? [];
+        final apiStats =
+            events?.stats.where((s) => s.label != null && s.label!.isNotEmpty).toList() ?? [];
         final apiByLabel = {for (final s in apiStats) s.label!: s};
 
         final displayStats = _minimalTypeCodes.map((code) {
@@ -884,7 +1000,7 @@ class _StatRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey.shade200, width: 0.5)),
+        border: Border(bottom: BorderSide(color: context.appTheme.shimmerBase, width: 0.5)),
       ),
       child: Row(
         children: [
@@ -900,7 +1016,7 @@ class _StatRow extends StatelessWidget {
             child: Text(
               stat.label!,
               textAlign: TextAlign.center,
-              style: context.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+              style: context.textTheme.bodySmall?.copyWith(color: context.appTheme.grey_5),
             ),
           ),
           SizedBox(
@@ -916,4 +1032,3 @@ class _StatRow extends StatelessWidget {
     );
   }
 }
-

@@ -112,6 +112,7 @@
     "edit_save": "Save",
     "edit_success": "Profile updated",
     "edit_error_title": "Update Failed",
+    "toggle_dark_mode": "Dark Mode",
     "toggle_language": "Change Language",
     "language_zh_cn": "简体中文",
     "language_en_gb": "English (UK)",

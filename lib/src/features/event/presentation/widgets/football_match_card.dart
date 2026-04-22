@@ -39,9 +39,8 @@ class FootballMatchCard extends ConsumerWidget {
     final hasHtScore = effective.htHomeScore != null && effective.htAwayScore != null;
 
     return GestureDetector(
-      onTap: () => context.push(AppRoutes.footballMatchDetailPath(match.id)),
+      onTap: () => context.push(AppRoutes.footballMatchDetailPath(match.id), extra: match),
       child: Container(
-        color: Colors.white,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -61,7 +60,7 @@ class FootballMatchCard extends ConsumerWidget {
                           child: Text(
                             effective.leagueName,
                             style: context.textTheme.labelSmall?.copyWith(
-                              color: Colors.grey.shade700,
+                              color: AppTheme.of(context).greyText,
                               fontWeight: FontWeight.w500,
                             ),
                             maxLines: 1,
@@ -248,7 +247,7 @@ class _ScoreDisplay extends StatelessWidget {
       );
     }
 
-    final scoreColor = _liveStatuses.contains(statusId) ? AppColors.primary : Colors.black87;
+    final scoreColor = _liveStatuses.contains(statusId) ? AppColors.primary : AppTheme.of(context).baseText;
     return RichText(
       text: TextSpan(
         style: context.textTheme.titleMedium?.copyWith(

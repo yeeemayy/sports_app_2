@@ -491,8 +491,8 @@ class _AnchorInfoHeader extends StatelessWidget {
               imageUrl: detail.avatarUrl,
               fit: BoxFit.cover,
               placeholder: (context, url) => Shimmer.fromColors(
-                baseColor: Colors.grey.shade300,
-                highlightColor: Colors.grey.shade100,
+                baseColor: AppTheme.of(context).shimmerBase,
+                highlightColor: AppTheme.of(context).shimmerHighlight,
                 child: const ColoredBox(color: Colors.grey),
               ),
               errorWidget: (context, url, error) => ColoredBox(color: Colors.grey.shade300),

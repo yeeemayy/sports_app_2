@@ -8,6 +8,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/auth/data/auth_storage_service.dart';
 import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:sports_app/src/providers/theme_provider.dart';
 import 'package:sports_app/src/routes/app_router.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/avatar.dart';
@@ -138,7 +139,6 @@ class ProfileScreen extends ConsumerWidget {
     ];
 
     showModalBottomSheet<void>(
-      backgroundColor: Colors.white,
       context: rootNavigatorKey.currentContext ?? context,
       builder: (sheetContext) {
         return SafeArea(
@@ -178,7 +178,9 @@ class ProfileScreen extends ConsumerWidget {
     final isAuthenticated = authState.hasValue && (authState.value?.isAuthenticated ?? false);
     final user = authState.value?.user;
     final avatarUrl = user?.avatarUrl;
+    debugPrint(avatarUrl);
     final nickname = user?.nickname ?? '';
+    final isDark = ref.watch(themeModeProvider) == ThemeMode.dark;
 
     return Scaffold(
       body: SafeArea(
@@ -197,11 +199,13 @@ class ProfileScreen extends ConsumerWidget {
                             width: 100,
                             height: 100,
                             fit: BoxFit.cover,
-                            placeholder: (context, url) => Shimmer.fromColors(
-                              baseColor: Colors.grey.shade300,
-                              highlightColor: Colors.grey.shade100,
-                              child: const ColoredBox(color: Colors.white),
-                            ),
+                            placeholder: (context, url) {
+                              return Shimmer.fromColors(
+                                baseColor: AppTheme.of(context).shimmerBase,
+                                highlightColor: AppTheme.of(context).shimmerHighlight,
+                                child: const ColoredBox(color: Colors.grey),
+                              );
+                            },
                             errorBuilder: (context, url, error) => AvatarFallback(),
                           )
                         : AvatarFallback(),
@@ -251,6 +255,17 @@ class ProfileScreen extends ConsumerWidget {
                       label: 'profile.edit_button'.tr(),
                       onTap: () => context.push(AppRoutes.profileEditFull),
                     ),
+                  _ProfileTile(
+                    icon: isDark ? Icons.dark_mode : Icons.light_mode,
+                    label: 'profile.toggle_dark_mode'.tr(),
+                    onTap: () => ref.read(themeModeProvider.notifier).setThemeMode(
+                        isDark ? ThemeMode.light : ThemeMode.dark),
+                    trailing: Switch(
+                      value: isDark,
+                      onChanged: (v) => ref.read(themeModeProvider.notifier).setThemeMode(
+                          v ? ThemeMode.dark : ThemeMode.light),
+                    ),
+                  ),
                   _ProfileTile(
                     icon: Icons.language,
                     label: 'profile.toggle_language'.tr(),
@@ -358,12 +373,14 @@ class _ProfileTile extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.isDestructive = false,
+    this.trailing,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
   final bool isDestructive;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -371,7 +388,7 @@ class _ProfileTile extends StatelessWidget {
     return ListTile(
       leading: Icon(icon, color: color, size: 20),
       title: Text(label, style: context.textTheme.bodyMedium?.copyWith(color: color)),
-      trailing: isDestructive ? null : const Icon(Icons.chevron_right),
+      trailing: trailing ?? (isDestructive ? null : const Icon(Icons.chevron_right)),
       onTap: onTap,
     );
   }

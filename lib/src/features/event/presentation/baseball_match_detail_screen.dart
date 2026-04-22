@@ -23,8 +23,7 @@ class BaseballMatchDetailScreen extends ConsumerStatefulWidget {
   ConsumerState<BaseballMatchDetailScreen> createState() => _BaseballMatchDetailScreenState();
 }
 
-class _BaseballMatchDetailScreenState
-    extends SportDetailScaffoldState<BaseballMatchDetailScreen> {
+class _BaseballMatchDetailScreenState extends SportDetailScaffoldState<BaseballMatchDetailScreen> {
   @override
   String get matchId => widget.matchId;
 
@@ -36,14 +35,14 @@ class _BaseballMatchDetailScreenState
 
   @override
   (String?, int?) watchDetail() {
-    final v = ref.watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId))
-        .valueOrNull as BaseballMatchDetail?;
+    final v =
+        ref.watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId)).valueOrNull
+            as BaseballMatchDetail?;
     return (v?.leagueName, v?.matchTime);
   }
 
   @override
-  Widget buildHeader(BuildContext context) =>
-      _BaseballMatchHeader(matchId: matchId);
+  Widget buildHeader(BuildContext context) => _BaseballMatchHeader(matchId: matchId);
 
   @override
   List<Tab> buildTabs(BuildContext context) => [
@@ -69,7 +68,9 @@ class _BaseballMatchHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final detailAsync = ref.watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId));
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.baseball).select((map) => map[matchId] as BaseballRealtimeData?),
+      sportRealtimeProvider(
+        SportType.baseball,
+      ).select((map) => map[matchId] as BaseballRealtimeData?),
     );
 
     return SportDetailHeaderShell<BaseballMatchDetail>(
@@ -227,9 +228,6 @@ class _InningGrid extends StatelessWidget {
   final BaseballMatchDetail detail;
   final BaseballMatchEventsData? events;
 
-  static const _headerBg = Color(0xFFEEF2F7);
-  static const _awayRowBg = Color(0xFFFFF4F0);
-  static const _homeRowBg = Color(0xFFEFF6FF);
 
   List<String> _inningScores(Map<String, dynamic> scores, int sideIndex, int count) {
     return List.generate(count, (i) {
@@ -300,7 +298,7 @@ class _InningGrid extends StatelessWidget {
     final headerStyle = TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w600,
-      color: Colors.grey.shade600,
+      color: context.appTheme.greyText,
     );
 
     return LayoutBuilder(
@@ -318,7 +316,7 @@ class _InningGrid extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: weight ?? FontWeight.w500,
-                color: color ?? Colors.black87,
+                color: color ?? context.appTheme.baseText,
               ),
             ),
           );
@@ -329,28 +327,28 @@ class _InningGrid extends StatelessWidget {
           children: [
             // Inning grid
             Container(
-              color: Colors.white,
+              color: context.appTheme.surface,
               margin: const EdgeInsets.only(top: 12, bottom: 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Header row: blank + inning numbers
                   Container(
-                    color: _headerBg,
+                    color: context.appTheme.inningHeaderBg,
                     padding: EdgeInsets.symmetric(vertical: 8),
                     child: Row(
                       children: [
                         SizedBox(width: nameColWidth),
                         ...List.generate(
                           displayCount,
-                          (i) => buildCell('${i + 1}', color: Colors.grey.shade600),
+                          (i) => buildCell('${i + 1}', color: context.appTheme.grey_5),
                         ),
                       ],
                     ),
                   ),
                   // Away row
                   Container(
-                    color: _awayRowBg,
+                    color: context.appTheme.inningAwayRowBg,
                     child: Row(
                       children: [
                         SizedBox(
@@ -382,7 +380,7 @@ class _InningGrid extends StatelessWidget {
                   ),
                   // Home row
                   Container(
-                    color: _homeRowBg,
+                    color: context.appTheme.inningHomeRowBg,
                     child: Row(
                       children: [
                         SizedBox(
@@ -419,7 +417,7 @@ class _InningGrid extends StatelessWidget {
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.appTheme.surface,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -428,7 +426,7 @@ class _InningGrid extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
-                      color: _headerBg,
+                      color: context.appTheme.inningHeaderBg,
                       borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(8),
                         topRight: Radius.circular(8),
@@ -467,7 +465,7 @@ class _InningGrid extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Divider(height: 1, thickness: 0.5, color: Colors.grey.shade200),
+                  Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerBase),
                   // Away team row
                   _RheRow(
                     name: detail.awayName,
@@ -475,7 +473,7 @@ class _InningGrid extends StatelessWidget {
                     hits: awayHits,
                     errors: awayErrors,
                   ),
-                  Divider(height: 1, thickness: 0.5, color: Colors.grey.shade100),
+                  Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerHighlight),
                   // Home team row
                   _RheRow(
                     name: detail.homeName,
@@ -566,7 +564,9 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
 
   @override
   Widget build(BuildContext context) {
-    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.baseball, matchId: widget.matchId));
+    final eventsAsync = ref.watch(
+      matchEventsProvider(sport: SportType.baseball, matchId: widget.matchId),
+    );
 
     return eventsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
@@ -603,7 +603,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
                       decoration: BoxDecoration(
-                        color: isSelected ? AppColors.primary : Colors.grey.shade200,
+                        color: isSelected ? AppColors.primary : context.appTheme.grey_3,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -611,7 +611,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: isSelected ? Colors.white : Colors.grey.shade700,
+                          color: isSelected ? Colors.white : context.appTheme.grey_4,
                         ),
                       ),
                     ),
@@ -657,7 +657,7 @@ class _BaseballStatRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey.shade200, width: 0.5)),
+        border: Border(bottom: BorderSide(color: context.appTheme.shimmerBase, width: 0.5)),
       ),
       child: Column(
         children: [
@@ -675,7 +675,7 @@ class _BaseballStatRow extends StatelessWidget {
                 child: Text(
                   stat.labelKey.isNotEmpty ? stat.labelKey.tr() : '${stat.typeCode}',
                   textAlign: TextAlign.center,
-                  style: context.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+                  style: context.textTheme.bodySmall?.copyWith(color: context.appTheme.greyText),
                 ),
               ),
               SizedBox(
@@ -696,7 +696,7 @@ class _BaseballStatRow extends StatelessWidget {
               if (total <= 0) {
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(3),
-                  child: Container(height: barHeight, color: Colors.grey.shade200),
+                  child: Container(height: barHeight, color: context.appTheme.shimmerBase),
                 );
               }
               final halfWidth = constraints.maxWidth / 2;
@@ -706,7 +706,7 @@ class _BaseballStatRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(3),
                 child: Container(
                   height: barHeight,
-                  color: Colors.grey.shade200,
+                  color: context.appTheme.shimmerBase,
                   child: Row(
                     children: [
                       SizedBox(

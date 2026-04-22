@@ -54,7 +54,6 @@ class _DefaultMatchCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
       child: Column(
         children: [
           // League header
@@ -68,7 +67,7 @@ class _DefaultMatchCard extends StatelessWidget {
                   child: Text(
                     match.leagueName,
                     style: context.textTheme.labelSmall?.copyWith(
-                      color: Colors.grey.shade700,
+                      color: AppTheme.of(context).greyText,
                       fontWeight: FontWeight.w500,
                     ),
                     maxLines: 1,
@@ -177,7 +176,7 @@ class _MatchScore extends StatelessWidget {
       );
     }
 
-    final scoreColor = _isLive ? AppColors.primary : Colors.black87;
+    final scoreColor = _isLive ? AppColors.primary : AppTheme.of(context).baseText;
     return RichText(
       text: TextSpan(
         style: context.textTheme.titleMedium?.copyWith(

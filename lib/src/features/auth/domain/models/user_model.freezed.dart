@@ -24,7 +24,7 @@ mixin _$UserModel {
   int get uid => throw _privateConstructorUsedError;
   String get telephone => throw _privateConstructorUsedError;
   String get nickname => throw _privateConstructorUsedError;
-  @JsonKey(name: 'avatarUrl')
+  @JsonKey(name: 'avatarUrl', fromJson: _avatarUrlFromJson)
   String? get avatarUrl => throw _privateConstructorUsedError;
   int get gender => throw _privateConstructorUsedError;
   @JsonKey(defaultValue: 0)
@@ -53,7 +53,7 @@ abstract class $UserModelCopyWith<$Res> {
     int uid,
     String telephone,
     String nickname,
-    @JsonKey(name: 'avatarUrl') String? avatarUrl,
+    @JsonKey(name: 'avatarUrl', fromJson: _avatarUrlFromJson) String? avatarUrl,
     int gender,
     @JsonKey(defaultValue: 0) int profit,
     @JsonKey(defaultValue: 0) int balance,
@@ -138,7 +138,7 @@ abstract class _$$UserModelImplCopyWith<$Res>
     int uid,
     String telephone,
     String nickname,
-    @JsonKey(name: 'avatarUrl') String? avatarUrl,
+    @JsonKey(name: 'avatarUrl', fromJson: _avatarUrlFromJson) String? avatarUrl,
     int gender,
     @JsonKey(defaultValue: 0) int profit,
     @JsonKey(defaultValue: 0) int balance,
@@ -215,7 +215,8 @@ class _$UserModelImpl implements _UserModel {
     required this.uid,
     required this.telephone,
     required this.nickname,
-    @JsonKey(name: 'avatarUrl') required this.avatarUrl,
+    @JsonKey(name: 'avatarUrl', fromJson: _avatarUrlFromJson)
+    required this.avatarUrl,
     required this.gender,
     @JsonKey(defaultValue: 0) required this.profit,
     @JsonKey(defaultValue: 0) required this.balance,
@@ -232,7 +233,7 @@ class _$UserModelImpl implements _UserModel {
   @override
   final String nickname;
   @override
-  @JsonKey(name: 'avatarUrl')
+  @JsonKey(name: 'avatarUrl', fromJson: _avatarUrlFromJson)
   final String? avatarUrl;
   @override
   final int gender;
@@ -303,7 +304,8 @@ abstract class _UserModel implements UserModel {
     required final int uid,
     required final String telephone,
     required final String nickname,
-    @JsonKey(name: 'avatarUrl') required final String? avatarUrl,
+    @JsonKey(name: 'avatarUrl', fromJson: _avatarUrlFromJson)
+    required final String? avatarUrl,
     required final int gender,
     @JsonKey(defaultValue: 0) required final int profit,
     @JsonKey(defaultValue: 0) required final int balance,
@@ -320,7 +322,7 @@ abstract class _UserModel implements UserModel {
   @override
   String get nickname;
   @override
-  @JsonKey(name: 'avatarUrl')
+  @JsonKey(name: 'avatarUrl', fromJson: _avatarUrlFromJson)
   String? get avatarUrl;
   @override
   int get gender;

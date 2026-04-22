@@ -157,8 +157,8 @@ class _LoadingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
+      baseColor: AppTheme.of(context).shimmerBase,
+      highlightColor: AppTheme.of(context).shimmerHighlight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

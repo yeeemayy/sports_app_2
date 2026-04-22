@@ -20,8 +20,7 @@ class VolleyballMatchDetailScreen extends ConsumerStatefulWidget {
   final String matchId;
 
   @override
-  ConsumerState<VolleyballMatchDetailScreen> createState() =>
-      _VolleyballMatchDetailScreenState();
+  ConsumerState<VolleyballMatchDetailScreen> createState() => _VolleyballMatchDetailScreenState();
 }
 
 class _VolleyballMatchDetailScreenState
@@ -37,9 +36,9 @@ class _VolleyballMatchDetailScreenState
 
   @override
   (String?, int?) watchDetail() {
-    final v = ref
-        .watch(matchDetailProvider(sport: SportType.volleyball, matchId: matchId))
-        .valueOrNull as VolleyballMatchDetail?;
+    final v =
+        ref.watch(matchDetailProvider(sport: SportType.volleyball, matchId: matchId)).valueOrNull
+            as VolleyballMatchDetail?;
     return (v?.leagueName, v?.matchTime);
   }
 
@@ -48,15 +47,15 @@ class _VolleyballMatchDetailScreenState
 
   @override
   List<Tab> buildTabs(BuildContext context) => [
-        Tab(text: 'event.volleyball.detail.score'.tr()),
-        Tab(text: 'event.volleyball.detail.stats'.tr()),
-      ];
+    Tab(text: 'event.volleyball.detail.score'.tr()),
+    Tab(text: 'event.volleyball.detail.stats'.tr()),
+  ];
 
   @override
   List<Widget> buildTabViews(BuildContext context) => [
-        _ScoreTab(matchId: matchId),
-        _StatsTab(matchId: matchId),
-      ];
+    _ScoreTab(matchId: matchId),
+    _StatsTab(matchId: matchId),
+  ];
 }
 
 // ─── Header ───────────────────────────────────────────────────────────────────
@@ -68,11 +67,13 @@ class _VolleyballMatchHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync =
-        ref.watch(matchDetailProvider(sport: SportType.volleyball, matchId: matchId));
+    final detailAsync = ref.watch(
+      matchDetailProvider(sport: SportType.volleyball, matchId: matchId),
+    );
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.volleyball)
-          .select((map) => map[matchId] as VolleyballRealtimeData?),
+      sportRealtimeProvider(
+        SportType.volleyball,
+      ).select((map) => map[matchId] as VolleyballRealtimeData?),
     );
 
     return SportDetailHeaderShell<VolleyballMatchDetail>(
@@ -163,9 +164,7 @@ class _VolleyballHeaderContent extends StatelessWidget {
                       child: Text(
                         statusLabel.isNotEmpty ? statusLabel : 'common.unknown'.tr(),
                         textAlign: TextAlign.center,
-                        style: context.textTheme.labelSmall?.copyWith(
-                          color: Colors.white,
-                        ),
+                        style: context.textTheme.labelSmall?.copyWith(color: Colors.white),
                       ),
                     ),
                   ],
@@ -209,7 +208,9 @@ class _TeamLogo extends StatelessWidget {
       width: size,
       height: size,
       decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),
-      child: ClipOval(child: SportLogo(url: url, size: size)),
+      child: ClipOval(
+        child: SportLogo(url: url, size: size),
+      ),
     );
   }
 }
@@ -223,20 +224,22 @@ class _ScoreTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync =
-        ref.watch(matchDetailProvider(sport: SportType.volleyball, matchId: matchId));
-    final eventsAsync =
-        ref.watch(matchEventsProvider(sport: SportType.volleyball, matchId: matchId));
+    final detailAsync = ref.watch(
+      matchDetailProvider(sport: SportType.volleyball, matchId: matchId),
+    );
+    final eventsAsync = ref.watch(
+      matchEventsProvider(sport: SportType.volleyball, matchId: matchId),
+    );
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.volleyball)
-          .select((map) => map[matchId] as VolleyballRealtimeData?),
+      sportRealtimeProvider(
+        SportType.volleyball,
+      ).select((map) => map[matchId] as VolleyballRealtimeData?),
     );
 
     return detailAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.orange)),
+      loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
       error: (_, __) => Center(
-        child: Text('event.error.load_failed'.tr(),
-            style: TextStyle(color: Colors.grey.shade500)),
+        child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
       data: (obj) {
         final detail = obj as VolleyballMatchDetail;
@@ -320,7 +323,7 @@ class _SetScoreTable extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 20),
       children: [
         Container(
-          color: Colors.white,
+          color: context.appTheme.surface,
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Column(
             children: [
@@ -336,9 +339,10 @@ class _SetScoreTable extends StatelessWidget {
                           'event.volleyball.detail.set_n'.tr(namedArgs: {'n': '1'}),
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey.shade600),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: context.appTheme.greyText,
+                          ),
                         ),
                       ),
                     ] else
@@ -351,7 +355,7 @@ class _SetScoreTable extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: isActive ? Colors.orange : Colors.grey.shade600,
+                              color: isActive ? Colors.pink : context.appTheme.greyText,
                             ),
                           ),
                         );
@@ -361,31 +365,32 @@ class _SetScoreTable extends StatelessWidget {
                         'event.volleyball.detail.total'.tr(),
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade600),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: context.appTheme.greyText,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              Divider(height: 1, thickness: 0.5, color: Colors.grey.shade200),
+              Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerBase),
               _PlayerScoreRow(
                 name: homeName,
                 logo: homeLogo,
                 setScores: homeSets,
                 total: homeTotal,
                 activeIdx: activeIdx,
-                accentColor: Colors.orange,
+                accentColor: Colors.pink,
               ),
-              Divider(height: 1, thickness: 0.5, color: Colors.grey.shade100),
+              Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerHighlight),
               _PlayerScoreRow(
                 name: awayName,
                 logo: awayLogo,
                 setScores: awaySets,
                 total: awayTotal,
                 activeIdx: activeIdx,
-                accentColor: Colors.orange,
+                accentColor: Colors.pink,
               ),
             ],
           ),
@@ -443,7 +448,7 @@ class _PlayerScoreRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? accentColor : Colors.black87,
+                  color: isActive ? accentColor : context.appTheme.baseText,
                 ),
               ),
             );
@@ -452,8 +457,7 @@ class _PlayerScoreRow extends StatelessWidget {
             child: Text(
               '$total',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 14, fontWeight: FontWeight.w800, color: accentColor),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: accentColor),
             ),
           ),
         ],
@@ -478,14 +482,14 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
 
   @override
   Widget build(BuildContext context) {
-    final eventsAsync =
-        ref.watch(matchEventsProvider(sport: SportType.volleyball, matchId: widget.matchId));
+    final eventsAsync = ref.watch(
+      matchEventsProvider(sport: SportType.volleyball, matchId: widget.matchId),
+    );
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.orange)),
+      loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
       error: (_, __) => Center(
-        child: Text('event.error.load_failed'.tr(),
-            style: TextStyle(color: Colors.grey.shade500)),
+        child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
       data: (obj) {
         final events = obj as VolleyballMatchEventsData?;
@@ -514,7 +518,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
         return Column(
           children: [
             Container(
-              color: Colors.white,
+              color: context.appTheme.surface,
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -528,7 +532,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                         margin: const EdgeInsets.only(right: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.orange : Colors.grey.shade200,
+                          color: isSelected ? Colors.pink : context.appTheme.grey_3,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -536,7 +540,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: isSelected ? Colors.white : Colors.grey.shade700,
+                            color: isSelected ? Colors.white : context.appTheme.grey_4,
                           ),
                         ),
                       ),
@@ -591,7 +595,7 @@ class _VolleyballStatRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey.shade200, width: 0.5)),
+        border: Border(bottom: BorderSide(color: context.appTheme.shimmerBase, width: 0.5)),
       ),
       child: Column(
         children: [
@@ -609,7 +613,7 @@ class _VolleyballStatRow extends StatelessWidget {
                 child: Text(
                   stat.labelKey.isNotEmpty ? stat.labelKey.tr() : '${stat.typeCode}',
                   textAlign: TextAlign.center,
-                  style: context.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+                  style: context.textTheme.bodySmall?.copyWith(color: context.appTheme.greyText),
                 ),
               ),
               SizedBox(
@@ -630,7 +634,7 @@ class _VolleyballStatRow extends StatelessWidget {
               if (total <= 0) {
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(3),
-                  child: Container(height: barHeight, color: Colors.grey.shade200),
+                  child: Container(height: barHeight, color: context.appTheme.shimmerBase),
                 );
               }
               final halfWidth = constraints.maxWidth / 2;
@@ -640,7 +644,7 @@ class _VolleyballStatRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(3),
                 child: Container(
                   height: barHeight,
-                  color: Colors.grey.shade200,
+                  color: context.appTheme.shimmerBase,
                   child: Row(
                     children: [
                       SizedBox(
@@ -652,8 +656,7 @@ class _VolleyballStatRow extends StatelessWidget {
                             height: barHeight,
                             decoration: const BoxDecoration(
                               color: Colors.blue,
-                              borderRadius: BorderRadius.only(
-                                  topLeft: radius, bottomLeft: radius),
+                              borderRadius: BorderRadius.only(topLeft: radius, bottomLeft: radius),
                             ),
                           ),
                         ),
@@ -666,9 +669,11 @@ class _VolleyballStatRow extends StatelessWidget {
                             width: awayWidth,
                             height: barHeight,
                             decoration: const BoxDecoration(
-                              color: Colors.orange,
+                              color: Colors.pink,
                               borderRadius: BorderRadius.only(
-                                  topRight: radius, bottomRight: radius),
+                                topRight: radius,
+                                bottomRight: radius,
+                              ),
                             ),
                           ),
                         ),
@@ -704,9 +709,8 @@ class _BlinkingLiveIndicatorState extends State<_BlinkingLiveIndicator>
   @override
   void initState() {
     super.initState();
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 800))
-          ..repeat(reverse: true);
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 800))
+      ..repeat(reverse: true);
     _opacity = Tween<double>(begin: 1.0, end: 0.2).animate(_controller);
   }
 
@@ -730,8 +734,7 @@ class _BlinkingLiveIndicatorState extends State<_BlinkingLiveIndicator>
               Container(
                 width: 7,
                 height: 7,
-                decoration: BoxDecoration(
-                    color: AppColors.primaryShade50, shape: BoxShape.circle),
+                decoration: BoxDecoration(color: AppColors.primaryShade50, shape: BoxShape.circle),
               ),
               const SizedBox(width: 4),
               Text(

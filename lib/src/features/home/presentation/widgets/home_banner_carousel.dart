@@ -94,8 +94,8 @@ class _HomeBannerCarouselState extends ConsumerState<HomeBannerCarousel> {
                       width: double.maxFinite,
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Shimmer.fromColors(
-                        baseColor: Colors.grey.shade300,
-                        highlightColor: Colors.grey.shade100,
+                        baseColor: AppTheme.of(context).shimmerBase,
+                        highlightColor: AppTheme.of(context).shimmerHighlight,
                         child: const ColoredBox(color: Colors.grey),
                       ),
                       errorBuilder: (context, url, error) =>
@@ -163,8 +163,8 @@ class _HomeBannerCarouselState extends ConsumerState<HomeBannerCarousel> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: Shimmer.fromColors(
-          baseColor: Colors.grey.shade300,
-          highlightColor: Colors.grey.shade100,
+          baseColor: AppTheme.of(context).shimmerBase,
+          highlightColor: AppTheme.of(context).shimmerHighlight,
           child: const SizedBox(height: 180, child: ColoredBox(color: Colors.grey)),
         ),
       ),

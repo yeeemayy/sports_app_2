@@ -42,7 +42,6 @@ class BaseballMatchCard extends ConsumerWidget {
     return GestureDetector(
       onTap: () => context.push(AppRoutes.baseballMatchDetailPath(match.id)),
       child: Container(
-        color: Colors.white,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -57,7 +56,7 @@ class BaseballMatchCard extends ConsumerWidget {
                     child: Text(
                       effective.leagueName,
                       style: context.textTheme.labelSmall?.copyWith(
-                        color: Colors.grey.shade700,
+                        color: AppTheme.of(context).greyText,
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,
@@ -173,7 +172,7 @@ class _BaseballScoreDisplay extends StatelessWidget {
       );
     }
 
-    final scoreColor = isLive ? AppColors.primary : Colors.black87;
+    final scoreColor = isLive ? AppColors.primary : AppTheme.of(context).baseText;
     return RichText(
       text: TextSpan(
         style: context.textTheme.titleMedium?.copyWith(

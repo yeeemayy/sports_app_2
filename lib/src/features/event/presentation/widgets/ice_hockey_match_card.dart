@@ -39,7 +39,6 @@ class IceHockeyMatchCard extends ConsumerWidget {
     return GestureDetector(
       onTap: () => context.push(AppRoutes.iceHockeyMatchDetailPath(match.id)),
       child: Container(
-        color: Colors.white,
         child: Column(
           children: [
             Padding(
@@ -52,7 +51,7 @@ class IceHockeyMatchCard extends ConsumerWidget {
                     child: Text(
                       match.leagueName,
                       style: context.textTheme.labelSmall?.copyWith(
-                        color: Colors.grey.shade700,
+                        color: AppTheme.of(context).greyText,
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,
@@ -164,7 +163,7 @@ class _IceHockeyScore extends StatelessWidget {
       );
     }
 
-    final scoreColor = _liveStatuses.contains(statusId) ? AppColors.primary : Colors.black87;
+    final scoreColor = _liveStatuses.contains(statusId) ? AppColors.primary : AppTheme.of(context).baseText;
     return Column(
       children: [
         RichText(
