@@ -554,7 +554,7 @@ class _IceHockeyStatRow extends StatelessWidget {
                           width: awayWidth,
                           height: barHeight,
                           decoration: BoxDecoration(
-                            color: Colors.blue.shade300,
+                            color: Colors.blue.shade300, // ice hockey uses blue per design spec
                             borderRadius: const BorderRadius.only(
                                 topRight: radius, bottomRight: radius),
                           ),
@@ -698,6 +698,7 @@ class _IncidentCell extends StatelessWidget {
   final IceHockeyIncident incident;
   final bool isHome;
 
+  // Ice hockey incident colours use blue for goals per design spec
   static const _incidentColors = {
     2: Colors.blue, // Goal
     3: Colors.amber, // Card

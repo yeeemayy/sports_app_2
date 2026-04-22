@@ -23,6 +23,8 @@ import 'package:sports_app/src/features/event/presentation/widgets/ice_hockey_ma
 import 'package:sports_app/src/features/event/presentation/widgets/table_tennis_match_card.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/tennis_match_card.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/volleyball_match_card.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/match_score_display.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/sport_status_badge.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
 class EventMatchCard extends StatelessWidget {
@@ -53,6 +55,15 @@ class _DefaultMatchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLive = match.statusId > 0 && match.statusId < 100;
+    final statusLabel = isLive
+        ? (match.statusDescription?.isNotEmpty == true
+            ? match.statusDescription!
+            : 'event.status.live'.tr())
+        : match.statusId == 0
+            ? match.matchTimeSim
+            : 'event.status.finished'.tr();
+
     return Container(
       child: Column(
         children: [
@@ -110,17 +121,14 @@ class _DefaultMatchCard extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _MatchScore(
+                      MatchScoreDisplay(
                         homeScore: match.homeScore,
                         awayScore: match.awayScore,
-                        statusId: match.statusId,
+                        isNotStarted: match.statusId == 0,
+                        isLive: isLive,
                       ),
                       const SizedBox(height: 6),
-                      _StatusBadge(
-                        statusId: match.statusId,
-                        statusDescription: match.statusDescription,
-                        matchTimeSim: match.matchTimeSim,
-                      ),
+                      SportStatusBadge(label: statusLabel, isLive: isLive),
                     ],
                   ),
                 ),
@@ -151,94 +159,3 @@ class _DefaultMatchCard extends StatelessWidget {
   }
 }
 
-class _MatchScore extends StatelessWidget {
-  const _MatchScore({
-    required this.homeScore,
-    required this.awayScore,
-    required this.statusId,
-  });
-
-  final String homeScore;
-  final String awayScore;
-  final int statusId;
-
-  bool get _isLive => statusId > 0 && statusId < 100;
-
-  @override
-  Widget build(BuildContext context) {
-    if (statusId == 0) {
-      return Text(
-        '-',
-        style: context.textTheme.titleMedium?.copyWith(
-          color: Colors.grey.shade400,
-          fontWeight: FontWeight.w700,
-        ),
-      );
-    }
-
-    final scoreColor = _isLive ? AppColors.primary : AppTheme.of(context).baseText;
-    return RichText(
-      text: TextSpan(
-        style: context.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w900,
-          color: scoreColor,
-        ),
-        children: [
-          TextSpan(text: homeScore),
-          TextSpan(
-            text: ' - ',
-            style: TextStyle(color: Colors.grey.shade400),
-          ),
-          TextSpan(text: awayScore),
-        ],
-      ),
-    );
-  }
-}
-
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({
-    required this.statusId,
-    required this.statusDescription,
-    required this.matchTimeSim,
-  });
-
-  final int statusId;
-  final String? statusDescription;
-  final String matchTimeSim;
-
-  bool get _isLive => statusId > 0 && statusId < 100;
-  bool get _isUpcoming => statusId == 0;
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isUpcoming) {
-      return Text(
-        matchTimeSim,
-        style: context.textTheme.labelSmall?.copyWith(color: Colors.grey.shade500),
-      );
-    }
-
-    final isLive = _isLive;
-    final label = isLive
-        ? (statusDescription?.isNotEmpty == true ? statusDescription! : 'event.status.live'.tr())
-        : 'event.status.finished'.tr();
-    final bgColor = isLive ? AppColors.primaryShade50 : Colors.orange.shade50;
-    final textColor = isLive ? AppColors.primary : Colors.orange.shade800;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Text(
-        label,
-        style: context.textTheme.labelSmall?.copyWith(
-          color: textColor,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-}
