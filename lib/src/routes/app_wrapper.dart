@@ -83,6 +83,9 @@ class _AppWrapperState extends ConsumerState<AppWrapper> with TickerProviderStat
 
   void _onTap(int index) {
     ref.read(currentNavIndexProvider.notifier).state = index;
+    if (index == 0) {
+      ref.invalidate(newsFirstPageProvider(context.localeCode));
+    }
     if (index <= 1 && index != widget.navigationShell.currentIndex) {
       ref.invalidate(anchorListProvider);
       // ref.invalidate(bannerProvider);

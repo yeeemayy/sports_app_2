@@ -11,7 +11,9 @@ import 'package:sports_app/src/features/event/presentation/providers/realtime_pr
 import 'package:sports_app/src/features/event/presentation/widgets/event_match_card.dart';
 import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
 import 'package:sports_app/src/features/home/presentation/widgets/home_anchor_live_grid.dart';
+import 'package:sports_app/src/features/home/presentation/widgets/home_banner_carousel.dart';
 import 'package:sports_app/src/features/home/presentation/widgets/home_section_title.dart';
+import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
 import 'package:sports_app/src/providers/nav_providers.dart';
 import 'package:sports_app/src/shared_widgets/shimmer_loading_list.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
@@ -252,14 +254,17 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
       children: [
         _StatusFilterBar(
           selected: _matchStatus,
-          onSelected: (status) => setState(() {
-            _matchStatus = status;
-            if (status == 'finished') {
-              _scheduledDate = DateTime.now();
-            } else if (status == 'scheduled') {
-              _scheduledDate = DateTime.now().add(const Duration(days: 1));
-            }
-          }),
+          onSelected: (status) {
+            setState(() {
+              _matchStatus = status;
+              if (status == 'finished') {
+                _scheduledDate = DateTime.now();
+              } else if (status == 'scheduled') {
+                _scheduledDate = DateTime.now().add(const Duration(days: 1));
+              }
+            });
+            ref.invalidate(newsFirstPageProvider(context.localeCode));
+          },
           statuses: _availableStatuses,
         ),
         if (_isScheduled || (widget.sport == SportType.football && _isFinished))
@@ -282,9 +287,18 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
                 await ref.read(_paginatedProvider.future);
               }
               ref.invalidate(anchorListProvider);
+              ref.invalidate(newsFirstPageProvider(context.localeCode));
             },
             child: matchesAsync.when(
-              loading: () => const ShimmerLoadingList(),
+              loading: () => Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: HomeBannerCarousel(),
+                    ),
+                    const Expanded(child: ShimmerLoadingList()),
+                  ],
+                ),
               error: (e, st) {
                 debugPrint('$e, $st');
                 return LayoutBuilder(
@@ -313,6 +327,12 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
                   controller: _scrollController,
                   physics: const AlwaysScrollableScrollPhysics(),
                   slivers: [
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 16, bottom: _isHot? 0 : 16),
+                        child: HomeBannerCarousel(),
+                      ),
+                    ),
                     if (_isHot)
                       SliverToBoxAdapter(
                         child: anchorsAsync.when(

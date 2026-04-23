@@ -42,6 +42,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
   @override
   void initState() {
     super.initState();
+    _onVideoTap();
     _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.invalidate(bannerProvider);
@@ -263,7 +264,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
             ),
 
           // Fullscreen button
-          if (_videoInitialized && !_videoError)
+          // if (_videoInitialized && !_videoError)
             AnimatedOpacity(
               opacity: _showControls ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 300),

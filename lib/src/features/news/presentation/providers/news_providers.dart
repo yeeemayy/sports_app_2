@@ -157,7 +157,7 @@ Future<List<NewsArticle>> newsFirstPage(NewsFirstPageRef ref, String locale) asy
   final keyword = locale == 'cn' ? '足球' : 'Football';
   final response = await ref
       .watch(newsRepositoryProvider.notifier)
-      .searchNews(locale: locale, keywords: keyword, page: 1, perPage: 9);
+      .searchNews(locale: locale, keywords: keyword, page: 1, perPage: 10);
   return response.data;
 }
 

@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sports_app/src/core/services/api_service.dart';
+import 'package:sports_app/src/core/utils/app_info.dart';
 import 'package:sports_app/src/features/news/domain/models/news_detail.dart';
 import 'package:sports_app/src/features/news/domain/models/news_list_response.dart';
 import 'package:sports_app/src/features/news/domain/models/news_search_response.dart';
@@ -19,17 +20,20 @@ class NewsRepository extends _$NewsRepository {
     final dio = ref.read(newsApiServiceProvider);
     final response = await dio.get(
       '/post-list/$locale/$page',
-      queryParameters: dayOffsets != null ? {'dayoffsets': dayOffsets} : null,
+      queryParameters: {
+        if (dayOffsets != null) 'dayoffsets': dayOffsets,
+        'appid': AppInfo.packageName,
+      },
     );
     return NewsListResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<NewsDetail> getNewsDetail({
-    required String locale,
-    required int id,
-  }) async {
+  Future<NewsDetail> getNewsDetail({required String locale, required int id}) async {
     final dio = ref.read(newsApiServiceProvider);
-    final response = await dio.get('/post/$locale/$id');
+    final response = await dio.get(
+      '/post/$locale/$id',
+      queryParameters: {'appid': AppInfo.packageName},
+    );
     return NewsDetail.fromJson(response.data as Map<String, dynamic>);
   }
 
@@ -42,7 +46,7 @@ class NewsRepository extends _$NewsRepository {
     final dio = ref.read(newsApiServiceProvider);
     final response = await dio.get(
       '/post-keyword/$locale/$keywords',
-      queryParameters: {'page': page, 'perPage': perPage},
+      queryParameters: {'page': page, 'perPage': perPage, 'appid': AppInfo.packageName},
     );
     return NewsSearchResponse.fromJson(response.data as Map<String, dynamic>);
   }
