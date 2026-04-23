@@ -103,14 +103,18 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
     _onVideoTap(); // reset the hide timer after interaction
   }
 
-  void _openFullscreen() {
+  Future<void> _openFullscreen() async {
     if (_videoController == null || !_videoInitialized) return;
-    Navigator.of(context).push(
+    final wasPlaying = _videoController!.value.isPlaying;
+    await Navigator.of(context).push(
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => AnchorVideoFullscreenPage(controller: _videoController!),
       ),
     );
+    if (mounted && wasPlaying && _videoController != null) {
+      _videoController!.play();
+    }
   }
 
   Future<void> _retryVideo() async {
@@ -244,8 +248,6 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.signal_wifi_off, color: Colors.white54, size: 40),
-                    const SizedBox(height: 12),
                     Text(
                       'anchor.detail.video.error'.tr(),
                       style: const TextStyle(color: Colors.white70, fontSize: 13),

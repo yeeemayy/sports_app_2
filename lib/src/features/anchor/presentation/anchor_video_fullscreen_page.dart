@@ -76,9 +76,9 @@ class _AnchorVideoFullscreenPageState
   }
 
   Future<void> _exitFullscreen() async {
-    await SystemChrome.setPreferredOrientations(
-      DeviceOrientation.values,
-    );
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
     await SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.edgeToEdge,
     );
