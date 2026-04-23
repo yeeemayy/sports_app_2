@@ -69,7 +69,7 @@ class _FootballMatchDetailScreenState extends SportDetailScaffoldState<FootballM
   List<Widget> buildTabViews(BuildContext context) => [
     _StatsTab(matchId: matchId),
     _EventsTab(matchId: matchId),
-    _LineupsTab(matchId: matchId),
+    _LineupsTab(matchId: matchId, initialMatch: widget.initialMatch),
   ];
 }
 
@@ -717,9 +717,10 @@ class _IncidentText extends StatelessWidget {
 // ─── Lineups Tab ─────────────────────────────────────────────────────────────
 
 class _LineupsTab extends ConsumerStatefulWidget {
-  const _LineupsTab({required this.matchId});
+  const _LineupsTab({required this.matchId, this.initialMatch});
 
   final String matchId;
+  final FootballMatch? initialMatch;
 
   @override
   ConsumerState<_LineupsTab> createState() => _LineupsTabState();
@@ -769,10 +770,10 @@ class _LineupsTabState extends ConsumerState<_LineupsTab> with SingleTickerProvi
                     .watch(matchDetailProvider(sport: SportType.football, matchId: widget.matchId))
                     .valueOrNull
                 as FootballMatchDetail?;
-        final homeIcon = detail?.homeInfo.logo;
-        final awayIcon = detail?.awayInfo.logo;
-        final homeName = detail?.homeName ?? 'Home';
-        final awayName = detail?.awayName ?? 'Away';
+        final homeIcon = detail?.homeInfo.logo ?? widget.initialMatch?.homeLogo;
+        final awayIcon = detail?.awayInfo.logo ?? widget.initialMatch?.awayLogo;
+        final homeName = detail?.homeName ?? widget.initialMatch?.homeName ?? 'Home';
+        final awayName = detail?.awayName ?? widget.initialMatch?.awayName ?? 'Away';
 
         return Column(
           children: [
