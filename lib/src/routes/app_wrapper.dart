@@ -92,10 +92,7 @@ class _AppWrapperState extends ConsumerState<AppWrapper> with TickerProviderStat
       // ref.invalidate(newsFirstPageProvider(context.localeCode));
     }
     if (index == 2 && index != widget.navigationShell.currentIndex) {
-      final newsState = ref.read(newsPaginatedProvider);
-      if (newsState.articles.isNotEmpty) {
-        ref.read(newsPaginatedProvider.notifier).silentRefresh();
-      }
+      ref.read(newsSearchProvider.notifier).refresh();
     }
     widget.navigationShell.goBranch(
       index,

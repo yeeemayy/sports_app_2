@@ -46,6 +46,15 @@ class _HomeBannerCarouselState extends ConsumerState<HomeBannerCarousel> {
   Widget build(BuildContext context) {
     final newsAsync = ref.watch(newsFirstPageProvider(context.localeCode));
 
+    ref.listen(newsFirstPageProvider(context.localeCode), (previous, next) {
+      if (next is AsyncData && previous is! AsyncData) {
+        _currentPage = 0;
+        if (_controller.hasClients) {
+          _controller.jumpToPage(0);
+        }
+      }
+    });
+
     return newsAsync.when(
       skipLoadingOnReload: false,
       skipLoadingOnRefresh: false,

@@ -18,15 +18,16 @@ import 'package:sports_app/src/providers/nav_providers.dart';
 import 'package:sports_app/src/shared_widgets/shimmer_loading_list.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 
-class EventScreen extends StatefulWidget {
+class EventScreen extends ConsumerStatefulWidget {
   const EventScreen({super.key});
 
   @override
-  State<EventScreen> createState() => _EventScreenState();
+  ConsumerState<EventScreen> createState() => _EventScreenState();
 }
 
-class _EventScreenState extends State<EventScreen> with SingleTickerProviderStateMixin {
+class _EventScreenState extends ConsumerState<EventScreen> with SingleTickerProviderStateMixin {
   late final TabController _tabController;
+  final ValueNotifier<int> _resetTrigger = ValueNotifier(0);
 
   static const _sports = SportType.values;
 
@@ -39,11 +40,19 @@ class _EventScreenState extends State<EventScreen> with SingleTickerProviderStat
   @override
   void dispose() {
     _tabController.dispose();
+    _resetTrigger.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(currentNavIndexProvider, (prev, curr) {
+      if (curr == 0 && prev != 0) {
+        _tabController.animateTo(0);
+        _resetTrigger.value++;
+      }
+    });
+
     return Column(
       children: [
         Container(
@@ -75,7 +84,12 @@ class _EventScreenState extends State<EventScreen> with SingleTickerProviderStat
             controller: _tabController,
             children: [
               for (var i = 0; i < _sports.length; i++)
-                _SportTabContent(sport: _sports[i], tabIndex: i, tabController: _tabController),
+                _SportTabContent(
+                  sport: _sports[i],
+                  tabIndex: i,
+                  tabController: _tabController,
+                  resetTrigger: _resetTrigger,
+                ),
             ],
           ),
         ),
@@ -89,11 +103,13 @@ class _SportTabContent extends ConsumerStatefulWidget {
     required this.sport,
     required this.tabIndex,
     required this.tabController,
+    required this.resetTrigger,
   });
 
   final SportType sport;
   final int tabIndex;
   final TabController tabController;
+  final ValueNotifier<int> resetTrigger;
 
   @override
   ConsumerState<_SportTabContent> createState() => _SportTabContentState();
@@ -118,14 +134,25 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
     _matchStatus = _hotLeagueSports.contains(widget.sport) ? 'hot' : 'all';
     _scrollController.addListener(_onScroll);
     widget.tabController.addListener(_onTabChanged);
+    widget.resetTrigger.addListener(_onReset);
+  }
+
+  void _onReset() {
+    setState(() {
+      _matchStatus = _hotLeagueSports.contains(widget.sport) ? 'hot' : 'all';
+      _scheduledDate = DateTime.now().add(const Duration(days: 1));
+    });
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(0);
+    }
+    ref.invalidate(_paginatedProvider);
   }
 
   void _onTabChanged() {
     if (_isActiveTab) {
-      // Tab became visible — re-register IDs from the current loaded data.
       _reRegisterRealtimeIds();
+      ref.invalidate(newsFirstPageProvider(context.localeCode));
     } else {
-      // Tab went off-screen — stop polling.
       _clearRealtimeSource();
     }
   }
@@ -193,6 +220,7 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
   @override
   void dispose() {
     widget.tabController.removeListener(_onTabChanged);
+    widget.resetTrigger.removeListener(_onReset);
     _scrollController.dispose();
     super.dispose();
   }
@@ -277,6 +305,8 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
         Expanded(
           child: RefreshIndicator(
             onRefresh: () async {
+              ref.invalidate(anchorListProvider);
+              ref.invalidate(newsFirstPageProvider(context.localeCode));
               if (_isScheduled) {
                 ref.invalidate(footballScheduledMatchesProvider(date: _formattedScheduledDate));
                 await ref.read(
@@ -286,19 +316,14 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
                 ref.invalidate(_paginatedProvider);
                 await ref.read(_paginatedProvider.future);
               }
-              ref.invalidate(anchorListProvider);
-              ref.invalidate(newsFirstPageProvider(context.localeCode));
             },
             child: matchesAsync.when(
               loading: () => Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16),
-                      child: HomeBannerCarousel(),
-                    ),
-                    const Expanded(child: ShimmerLoadingList()),
-                  ],
-                ),
+                children: [
+                  Padding(padding: const EdgeInsets.only(top: 16), child: HomeBannerCarousel()),
+                  const Expanded(child: ShimmerLoadingList()),
+                ],
+              ),
               error: (e, st) {
                 debugPrint('$e, $st');
                 return LayoutBuilder(
@@ -329,13 +354,14 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
                   slivers: [
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: EdgeInsets.only(top: 16, bottom: _isHot? 0 : 16),
+                        padding: EdgeInsets.only(top: 16, bottom: _isHot ? 0 : 16),
                         child: HomeBannerCarousel(),
                       ),
                     ),
                     if (_isHot)
                       SliverToBoxAdapter(
                         child: anchorsAsync.when(
+                          skipLoadingOnRefresh: false,
                           data: (page) => page.data.isEmpty
                               ? const SizedBox.shrink()
                               : Column(

@@ -121,6 +121,11 @@ class NewsSearch extends _$NewsSearch {
     await _loadPage(1, replace: true);
   }
 
+  Future<void> refresh() async {
+    if (_keywords.isEmpty) return;
+    await _loadPage(1, replace: true);
+  }
+
   Future<void> loadMore() async {
     if (!state.hasMore || state.isLoadingMore || _keywords.isEmpty) return;
     state = state.copyWith(isLoadingMore: true);

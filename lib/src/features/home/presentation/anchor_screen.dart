@@ -42,7 +42,7 @@ class _AnchorScreenState extends ConsumerState<AnchorScreen> {
           child: _isManualRefreshing
               ? HomeAnchorLiveGrid(padding: EdgeInsets.all(16))
               : anchorsAsync.when(
-            skipLoadingOnRefresh: true,
+            skipLoadingOnRefresh: false,
             loading: () => HomeAnchorLiveGrid(padding: EdgeInsets.all(16)),
             error: (err, stack) => Center(
               child: SizedBox(

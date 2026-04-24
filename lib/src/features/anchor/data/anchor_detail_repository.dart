@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sports_app/src/core/config/env_config.dart';
 import 'package:sports_app/src/core/services/api_service.dart';
 import 'package:sports_app/src/core/utils/app_info.dart';
 import 'package:sports_app/src/features/anchor/domain/models/anchor_detail_model.dart';
@@ -14,7 +15,7 @@ class AnchorDetailRepository extends _$AnchorDetailRepository {
     final dio = ref.read(apiServiceProvider).httpClient;
     final response = await dio.get(
       '/anchor/$anchorId',
-      queryParameters: {'appid': AppInfo.packageName},
+      queryParameters: {'appid': EnvConfig.appId},
     );
     final json = response.data as Map<String, dynamic>;
     if (json['code'] != 1) throw Exception(json['msg'] ?? 'API error');

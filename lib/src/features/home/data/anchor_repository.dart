@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sports_app/src/core/config/env_config.dart';
 import 'package:sports_app/src/core/models/paginated_response.dart';
 import 'package:sports_app/src/core/services/api_service.dart';
 import 'package:sports_app/src/core/utils/app_info.dart';
@@ -18,7 +19,7 @@ class AnchorRepository extends _$AnchorRepository {
     final dio = ref.read(apiServiceProvider).httpClient;
     final response = await dio.get('/anchor', queryParameters: {
       'page': page,
-      'appid': AppInfo.packageName,
+      'appid': EnvConfig.appId,
     });
 
     final json = response.data as Map<String, dynamic>;
