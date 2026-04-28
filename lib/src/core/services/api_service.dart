@@ -94,7 +94,10 @@ ApiClient apiService(ApiServiceRef ref) {
         dialogType: DialogType.fail,
         showCloseButton: false,
         // onButtonPressed: () => Navigator.of(context, rootNavigator: true).pop(),
-        onButtonPressed: () => context.go(AppRoutes.home),
+        onButtonPressed: () {
+          context.pop();
+          context.go(AppRoutes.home);
+        },
       );
 
       // final navContext = navigatorKey.currentContext;
