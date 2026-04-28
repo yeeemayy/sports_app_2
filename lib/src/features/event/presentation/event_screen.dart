@@ -378,37 +378,40 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
                                     ),
                                   ],
                                 ),
-                          error: (err, stack) => Column(
-                            children: [
-                              HomeSectionTitle(
-                                icon: 'assets/images/live-tv.png',
-                                title: 'home.section.anchor_live'.tr(),
-                                onPressed: () => context.push(AppRoutes.anchorList),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 48),
-                                child: Column(
-                                  children: [
-                                    Icon(
-                                      Icons.wifi_off_rounded,
-                                      size: 48,
-                                      color: Colors.grey.shade400,
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      'home.error.load_failed'.tr(),
-                                      style: TextStyle(color: Colors.grey.shade500),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    TextButton(
-                                      onPressed: () => ref.refresh(anchorListProvider().future),
-                                      child: Text('common.retry'.tr()),
-                                    ),
-                                  ],
+                          error: (err, stack) {
+                            print('$err\n$stack');
+                            return Column(
+                              children: [
+                                HomeSectionTitle(
+                                  icon: 'assets/images/live-tv.png',
+                                  title: 'home.section.anchor_live'.tr(),
+                                  onPressed: () => context.push(AppRoutes.anchorList),
                                 ),
-                              ),
-                            ],
-                          ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 48),
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        Icons.wifi_off_rounded,
+                                        size: 48,
+                                        color: Colors.grey.shade400,
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        'home.error.load_failed'.tr(),
+                                        style: TextStyle(color: Colors.grey.shade500),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      TextButton(
+                                        onPressed: () => ref.refresh(anchorListProvider().future),
+                                        child: Text('common.retry'.tr()),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                           loading: () => Column(
                             children: [
                               HomeSectionTitle(

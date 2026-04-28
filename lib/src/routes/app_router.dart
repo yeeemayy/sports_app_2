@@ -27,6 +27,7 @@ import 'package:sports_app/src/features/video/presentation/video_detail_screen.d
 import 'package:sports_app/src/features/news/presentation/news_screen.dart';
 import 'package:sports_app/src/features/profile/presentation/edit_profile_screen.dart';
 import 'package:sports_app/src/features/profile/presentation/profile_screen.dart';
+import 'package:sports_app/src/shared_widgets/web_view_screen.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/routes/app_wrapper.dart';
 
@@ -121,6 +122,22 @@ GoRouter appRouter(AppRouterRef ref) {
                     path: AppRoutes.profileEdit,
                     builder: (BuildContext context, GoRouterState state) =>
                         const EditProfileScreen(),
+                  ),
+                  GoRoute(
+                    parentNavigatorKey: rootNavigatorKey,
+                    path: 'privacy-policy',
+                    builder: (context, state) => WebViewScreen(
+                      url: 'https://qdty.gsport.day/privacy-policy.html',
+                      title: state.extra as String? ?? '',
+                    ),
+                  ),
+                  GoRoute(
+                    parentNavigatorKey: rootNavigatorKey,
+                    path: 'user-agreement',
+                    builder: (context, state) => WebViewScreen(
+                      url: 'https://qdty.gsport.day/user-agreement.html',
+                      title: state.extra as String? ?? '',
+                    ),
                   ),
                 ],
               ),

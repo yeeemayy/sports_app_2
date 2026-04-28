@@ -9,6 +9,8 @@ abstract final class AppRoutes {
   // Profile sub-routes (relative)
   static const profileEdit = 'edit';
   static const profileEditFull = '/profile/edit';
+  static const privacyPolicy = '/profile/privacy-policy';
+  static const userAgreement = '/profile/user-agreement';
 
   // Football match detail
   static const footballMatchDetail = '/event/football/:matchId';

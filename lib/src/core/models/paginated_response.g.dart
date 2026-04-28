@@ -12,7 +12,7 @@ _$PaginatedResponseImpl<T> _$$PaginatedResponseImplFromJson<T>(
 ) => _$PaginatedResponseImpl<T>(
   total: (json['total'] as num).toInt(),
   perPage: (json['per_page'] as num).toInt(),
-  currentPage: json['current_page'] as String,
+  currentPage: parseInt(json['current_page']),
   lastPage: (json['last_page'] as num).toInt(),
   data: (json['data'] as List<dynamic>).map(fromJsonT).toList(),
 );

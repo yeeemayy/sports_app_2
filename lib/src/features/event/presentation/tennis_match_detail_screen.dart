@@ -1086,7 +1086,7 @@ class _RoundCard extends StatelessWidget {
                 'event.tennis.detail.round_n'.tr(namedArgs: {'n': '${round.round}'}),
                 style: context.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Colors.pinkAccent,
+                  color: Colors.greenAccent,
                 ),
               ),
               const SizedBox(width: 8),
@@ -1150,7 +1150,7 @@ class _PointChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.pinkAccent.withValues(alpha: 0.1),
+        color: Colors.greenAccent.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(

@@ -237,7 +237,7 @@ class _ScoreTab extends ConsumerWidget {
     );
 
     return detailAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
@@ -355,7 +355,7 @@ class _SetScoreTable extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: isActive ? Colors.pink : context.appTheme.greyText,
+                              color: isActive ? AppColors.primary : context.appTheme.greyText,
                             ),
                           ),
                         );
@@ -381,7 +381,7 @@ class _SetScoreTable extends StatelessWidget {
                 setScores: homeSets,
                 total: homeTotal,
                 activeIdx: activeIdx,
-                accentColor: Colors.pink,
+                accentColor: AppColors.primary,
               ),
               Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerHighlight),
               _PlayerScoreRow(
@@ -390,7 +390,7 @@ class _SetScoreTable extends StatelessWidget {
                 setScores: awaySets,
                 total: awayTotal,
                 activeIdx: activeIdx,
-                accentColor: Colors.pink,
+                accentColor: AppColors.primary,
               ),
             ],
           ),
@@ -487,7 +487,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
     );
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
@@ -532,7 +532,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                         margin: const EdgeInsets.only(right: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.pink : context.appTheme.grey_3,
+                          color: isSelected ? AppColors.primary : context.appTheme.grey_3,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -669,7 +669,7 @@ class _VolleyballStatRow extends StatelessWidget {
                             width: awayWidth,
                             height: barHeight,
                             decoration: const BoxDecoration(
-                              color: Colors.pink,
+                              color: AppColors.primary,
                               borderRadius: BorderRadius.only(
                                 topRight: radius,
                                 bottomRight: radius,

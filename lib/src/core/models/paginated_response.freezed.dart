@@ -26,9 +26,9 @@ PaginatedResponse<T> _$PaginatedResponseFromJson<T>(
 mixin _$PaginatedResponse<T> {
   int get total => throw _privateConstructorUsedError;
   @JsonKey(name: 'per_page')
-  int get perPage => throw _privateConstructorUsedError; // API returns current_page as a String e.g. "1", not an int
-  @JsonKey(name: 'current_page')
-  String get currentPage => throw _privateConstructorUsedError;
+  int get perPage => throw _privateConstructorUsedError;
+  @JsonKey(name: 'current_page', fromJson: parseInt)
+  int get currentPage => throw _privateConstructorUsedError;
   @JsonKey(name: 'last_page')
   int get lastPage => throw _privateConstructorUsedError;
   List<T> get data => throw _privateConstructorUsedError;
@@ -54,7 +54,7 @@ abstract class $PaginatedResponseCopyWith<T, $Res> {
   $Res call({
     int total,
     @JsonKey(name: 'per_page') int perPage,
-    @JsonKey(name: 'current_page') String currentPage,
+    @JsonKey(name: 'current_page', fromJson: parseInt) int currentPage,
     @JsonKey(name: 'last_page') int lastPage,
     List<T> data,
   });
@@ -98,7 +98,7 @@ class _$PaginatedResponseCopyWithImpl<
             currentPage: null == currentPage
                 ? _value.currentPage
                 : currentPage // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as int,
             lastPage: null == lastPage
                 ? _value.lastPage
                 : lastPage // ignore: cast_nullable_to_non_nullable
@@ -125,7 +125,7 @@ abstract class _$$PaginatedResponseImplCopyWith<T, $Res>
   $Res call({
     int total,
     @JsonKey(name: 'per_page') int perPage,
-    @JsonKey(name: 'current_page') String currentPage,
+    @JsonKey(name: 'current_page', fromJson: parseInt) int currentPage,
     @JsonKey(name: 'last_page') int lastPage,
     List<T> data,
   });
@@ -164,7 +164,7 @@ class __$$PaginatedResponseImplCopyWithImpl<T, $Res>
         currentPage: null == currentPage
             ? _value.currentPage
             : currentPage // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as int,
         lastPage: null == lastPage
             ? _value.lastPage
             : lastPage // ignore: cast_nullable_to_non_nullable
@@ -184,7 +184,8 @@ class _$PaginatedResponseImpl<T> implements _PaginatedResponse<T> {
   const _$PaginatedResponseImpl({
     required this.total,
     @JsonKey(name: 'per_page') required this.perPage,
-    @JsonKey(name: 'current_page') required this.currentPage,
+    @JsonKey(name: 'current_page', fromJson: parseInt)
+    required this.currentPage,
     @JsonKey(name: 'last_page') required this.lastPage,
     required final List<T> data,
   }) : _data = data;
@@ -199,10 +200,9 @@ class _$PaginatedResponseImpl<T> implements _PaginatedResponse<T> {
   @override
   @JsonKey(name: 'per_page')
   final int perPage;
-  // API returns current_page as a String e.g. "1", not an int
   @override
-  @JsonKey(name: 'current_page')
-  final String currentPage;
+  @JsonKey(name: 'current_page', fromJson: parseInt)
+  final int currentPage;
   @override
   @JsonKey(name: 'last_page')
   final int lastPage;
@@ -266,7 +266,8 @@ abstract class _PaginatedResponse<T> implements PaginatedResponse<T> {
   const factory _PaginatedResponse({
     required final int total,
     @JsonKey(name: 'per_page') required final int perPage,
-    @JsonKey(name: 'current_page') required final String currentPage,
+    @JsonKey(name: 'current_page', fromJson: parseInt)
+    required final int currentPage,
     @JsonKey(name: 'last_page') required final int lastPage,
     required final List<T> data,
   }) = _$PaginatedResponseImpl<T>;
@@ -280,10 +281,10 @@ abstract class _PaginatedResponse<T> implements PaginatedResponse<T> {
   int get total;
   @override
   @JsonKey(name: 'per_page')
-  int get perPage; // API returns current_page as a String e.g. "1", not an int
+  int get perPage;
   @override
-  @JsonKey(name: 'current_page')
-  String get currentPage;
+  @JsonKey(name: 'current_page', fromJson: parseInt)
+  int get currentPage;
   @override
   @JsonKey(name: 'last_page')
   int get lastPage;

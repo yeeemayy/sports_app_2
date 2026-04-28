@@ -36,7 +36,7 @@ class AnchorRepository extends _$AnchorRepository {
       return PaginatedResponse<AnchorModel>(
         total: 0,
         perPage: 0,
-        currentPage: "1",
+        currentPage: 0,
         lastPage: 1,
         data: <AnchorModel>[],
       );

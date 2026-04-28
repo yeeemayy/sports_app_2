@@ -233,7 +233,7 @@ class _ScoreTab extends ConsumerWidget {
     );
 
     return detailAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(),
             style: TextStyle(color: Colors.grey.shade500)),
@@ -354,13 +354,13 @@ class _IceHockeyScoreTable extends StatelessWidget {
                   name: homeName,
                   logo: homeLogo,
                   scores: homeScores,
-                  accentColor: Colors.pink),
+                  accentColor: AppColors.primary),
               Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerHighlight),
               _ScoreRow(
                   name: awayName,
                   logo: awayLogo,
                   scores: awayScores,
-                  accentColor: Colors.pink),
+                  accentColor: AppColors.primary),
             ],
           ),
         ),
@@ -437,7 +437,7 @@ class _StatsTab extends ConsumerWidget {
         ref.watch(matchEventsProvider(sport: SportType.iceHockey, matchId: matchId));
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(),
             style: TextStyle(color: Colors.grey.shade500)),
@@ -539,7 +539,7 @@ class _IceHockeyStatRow extends StatelessWidget {
                           width: homeWidth,
                           height: barHeight,
                           decoration: const BoxDecoration(
-                            color: Colors.pink,
+                            color: AppColors.primary,
                             borderRadius:
                                 BorderRadius.only(topLeft: radius, bottomLeft: radius),
                           ),
@@ -585,7 +585,7 @@ class _EventsTab extends ConsumerWidget {
         ref.watch(matchEventsProvider(sport: SportType.iceHockey, matchId: matchId));
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.pink)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(),
             style: TextStyle(color: Colors.grey.shade500)),
@@ -729,7 +729,7 @@ class _IncidentCell extends StatelessWidget {
               children: [
                 Text(_scoreLabel(),
                     style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.w700, color: Colors.pink)),
+                        fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
                 const SizedBox(width: 6),
                 icon,
               ],
@@ -740,7 +740,7 @@ class _IncidentCell extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(_scoreLabel(),
                     style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.w700, color: Colors.pink)),
+                        fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
               ],
             ),
     );

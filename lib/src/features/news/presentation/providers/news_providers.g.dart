@@ -6,7 +6,7 @@ part of 'news_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$newsFirstPageHash() => r'153fba687ed4d63a80607da97e3a348feaaf7bdc';
+String _$newsFirstPageHash() => r'021d690c221794d90dba92382525ea6546a15101';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -295,7 +295,7 @@ final newsPaginatedProvider =
     );
 
 typedef _$NewsPaginated = AutoDisposeNotifier<NewsPaginatedState>;
-String _$newsSearchHash() => r'd85d48b4dfbf7f5d1a89eaa48e461e793aa9d269';
+String _$newsSearchHash() => r'27689acb28e39fcd16853644c0448f521b56f4c1';
 
 /// See also [NewsSearch].
 @ProviderFor(NewsSearch)

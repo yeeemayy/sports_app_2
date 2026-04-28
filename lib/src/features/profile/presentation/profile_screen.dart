@@ -310,12 +310,18 @@ class ProfileScreen extends ConsumerWidget {
                             _ProfileTile(
                               icon: Icons.privacy_tip_outlined,
                               label: 'profile.privacy_policy'.tr(),
-                              onTap: () {},
+                              onTap: () => context.push(
+                                AppRoutes.privacyPolicy,
+                                extra: 'profile.privacy_policy'.tr(),
+                              ),
                             ),
                             _ProfileTile(
                               icon: Icons.description_outlined,
                               label: 'profile.terms_of_use'.tr(),
-                              onTap: () {},
+                              onTap: () => context.push(
+                                AppRoutes.userAgreement,
+                                extra: 'profile.terms_of_use'.tr(),
+                              ),
                             ),
                           ],
                         ),

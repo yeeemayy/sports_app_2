@@ -7,7 +7,7 @@ part of 'anchor_detail_repository.dart';
 // **************************************************************************
 
 String _$anchorDetailRepositoryHash() =>
-    r'7f1a4fbfaf8ca90ab822148fcfd82b39bebd93bc';
+    r'f0ecd83b22e1c15b5206d58e91d2a85801d0f002';
 
 /// See also [AnchorDetailRepository].
 @ProviderFor(AnchorDetailRepository)
