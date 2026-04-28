@@ -57,16 +57,16 @@ class AuthRepository extends _$AuthRepository {
   Future<void> requestSms({required String telephone, required int scene}) async {
     final dio = ref.read(apiServiceProvider).httpClient;
     final response = await dio.get(
-      // '/auth/sms',
-      '/auth/sms-dev-test',
+      '/auth/sms',
+      // '/auth/sms-dev-test',
       queryParameters: {'telephone': telephone, 'scene': scene},
     );
     final json = response.data as Map<String, dynamic>;
     if (json['code'] != 1) throw AppException(json['msg'] ?? 'auth.error.sms_failed'.tr());
-    final code = (json['data'] as Map<String, dynamic>?)?['code'];
-    if (code != null) {
-      Fluttertoast.showToast(msg: '[DEBUG] Code: $code', toastLength: Toast.LENGTH_LONG);
-    }
+    // final code = (json['data'] as Map<String, dynamic>?)?['code'];
+    // if (code != null) {
+    //   Fluttertoast.showToast(msg: '[DEBUG] Code: $code', toastLength: Toast.LENGTH_LONG);
+    // }
   }
 
   Future<UserModel> fetchUser() async {

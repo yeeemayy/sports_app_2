@@ -5,8 +5,11 @@ import 'package:sports_app/src/features/home/domain/models/anchor_model.dart';
 import 'package:sports_app/src/features/home/presentation/widgets/home_anchor_live_card.dart';
 
 class HomeAnchorLiveGrid extends StatelessWidget {
-  const HomeAnchorLiveGrid({super.key, this.anchors, this.itemCount = 6});
+  const HomeAnchorLiveGrid({super.key,
+    this.padding =  const EdgeInsets.symmetric(horizontal: 16.0),
+    this.anchors, this.itemCount = 10});
 
+  final EdgeInsets padding;
   final List<AnchorModel>? anchors;
   final int itemCount;
 
@@ -19,7 +22,7 @@ class HomeAnchorLiveGrid extends StatelessWidget {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: padding,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: isTablet ? 3 : 2,
         crossAxisSpacing: 10,

@@ -159,9 +159,9 @@ class _IceHockeyHeaderContent extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: statusLabel.isNotEmpty
-                        ? Colors.blue.shade600
+                        ? Colors.orange.shade600
                         : Colors.white,
-                    border: Border.all(color: Colors.blue.shade300),
+                    border: Border.all(color: Colors.orange.shade300),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -233,7 +233,7 @@ class _ScoreTab extends ConsumerWidget {
     );
 
     return detailAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.blue)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(),
             style: TextStyle(color: Colors.grey.shade500)),
@@ -314,7 +314,7 @@ class _IceHockeyScoreTable extends StatelessWidget {
     final headerStyle = TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w600,
-      color: Colors.grey.shade600,
+      color: context.appTheme.greyText,
     );
 
     final columns = <String>[
@@ -333,7 +333,7 @@ class _IceHockeyScoreTable extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 20),
       children: [
         Container(
-          color: Colors.white,
+          color: context.appTheme.surface,
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Column(
             children: [
@@ -349,18 +349,18 @@ class _IceHockeyScoreTable extends StatelessWidget {
                   ],
                 ),
               ),
-              Divider(height: 1, thickness: 0.5, color: Colors.grey.shade200),
+              Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerBase),
               _ScoreRow(
                   name: homeName,
                   logo: homeLogo,
                   scores: homeScores,
-                  accentColor: Colors.blue),
-              Divider(height: 1, thickness: 0.5, color: Colors.grey.shade100),
+                  accentColor: AppColors.primary),
+              Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerHighlight),
               _ScoreRow(
                   name: awayName,
                   logo: awayLogo,
                   scores: awayScores,
-                  accentColor: Colors.blue),
+                  accentColor: AppColors.primary),
             ],
           ),
         ),
@@ -413,7 +413,7 @@ class _ScoreRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: isLast ? 14 : 13,
                   fontWeight: isLast ? FontWeight.w800 : FontWeight.w500,
-                  color: isLast ? accentColor : Colors.black87,
+                  color: isLast ? accentColor : context.appTheme.baseText,
                 ),
               ),
             );
@@ -437,7 +437,7 @@ class _StatsTab extends ConsumerWidget {
         ref.watch(matchEventsProvider(sport: SportType.iceHockey, matchId: matchId));
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.blue)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(),
             style: TextStyle(color: Colors.grey.shade500)),
@@ -480,7 +480,7 @@ class _IceHockeyStatRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey.shade200, width: 0.5)),
+        border: Border(bottom: BorderSide(color: context.appTheme.shimmerBase, width: 0.5)),
       ),
       child: Column(
         children: [
@@ -498,7 +498,7 @@ class _IceHockeyStatRow extends StatelessWidget {
                 child: Text(
                   stat.labelKey.isNotEmpty ? stat.labelKey.tr() : '${stat.typeCode}',
                   textAlign: TextAlign.center,
-                  style: context.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+                  style: context.textTheme.bodySmall?.copyWith(color: context.appTheme.greyText),
                 ),
               ),
               SizedBox(
@@ -518,7 +518,7 @@ class _IceHockeyStatRow extends StatelessWidget {
             if (total <= 0) {
               return ClipRRect(
                 borderRadius: BorderRadius.circular(3),
-                child: Container(height: barHeight, color: Colors.grey.shade200),
+                child: Container(height: barHeight, color: context.appTheme.shimmerBase),
               );
             }
             final halfWidth = constraints.maxWidth / 2;
@@ -528,7 +528,7 @@ class _IceHockeyStatRow extends StatelessWidget {
               borderRadius: BorderRadius.circular(3),
               child: Container(
                 height: barHeight,
-                color: Colors.grey.shade200,
+                color: context.appTheme.shimmerBase,
                 child: Row(
                   children: [
                     SizedBox(
@@ -539,7 +539,7 @@ class _IceHockeyStatRow extends StatelessWidget {
                           width: homeWidth,
                           height: barHeight,
                           decoration: const BoxDecoration(
-                            color: Colors.blue,
+                            color: AppColors.primary,
                             borderRadius:
                                 BorderRadius.only(topLeft: radius, bottomLeft: radius),
                           ),
@@ -554,7 +554,7 @@ class _IceHockeyStatRow extends StatelessWidget {
                           width: awayWidth,
                           height: barHeight,
                           decoration: BoxDecoration(
-                            color: Colors.blue.shade300,
+                            color: Colors.blue.shade300, // ice hockey uses blue per design spec
                             borderRadius: const BorderRadius.only(
                                 topRight: radius, bottomRight: radius),
                           ),
@@ -585,7 +585,7 @@ class _EventsTab extends ConsumerWidget {
         ref.watch(matchEventsProvider(sport: SportType.iceHockey, matchId: matchId));
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: Colors.blue)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(),
             style: TextStyle(color: Colors.grey.shade500)),
@@ -639,8 +639,8 @@ class _IceHockeyIncidentTimeline extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
             indicator: _TimeIndicator(timeLabel: incident.timeLabel),
           ),
-          beforeLineStyle: LineStyle(color: Colors.grey.shade300, thickness: 1),
-          afterLineStyle: LineStyle(color: Colors.grey.shade300, thickness: 1),
+          beforeLineStyle: LineStyle(color: context.appTheme.shimmerBase, thickness: 1),
+          afterLineStyle: LineStyle(color: context.appTheme.shimmerBase, thickness: 1),
           startChild: isHome ? _IncidentCell(incident: incident, isHome: true) : null,
           endChild: !isHome ? _IncidentCell(incident: incident, isHome: false) : null,
         );
@@ -658,14 +658,14 @@ class _TimeIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
+        color: context.appTheme.grey_3,
         borderRadius: BorderRadius.circular(12),
       ),
       alignment: Alignment.center,
       child: Text(
         timeLabel,
         style:
-            TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.grey.shade700),
+            TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: context.appTheme.grey_4),
       ),
     );
   }
@@ -681,7 +681,7 @@ class _PhaseMarker extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 2),
       padding: const EdgeInsets.symmetric(vertical: 5),
-      color: Colors.grey.shade100,
+      color: context.appTheme.shimmerHighlight,
       child: Center(
         child: Text(
           'event.ice_hockey.incident.${incident.type}'.tr(),
@@ -698,6 +698,7 @@ class _IncidentCell extends StatelessWidget {
   final IceHockeyIncident incident;
   final bool isHome;
 
+  // Ice hockey incident colours use blue for goals per design spec
   static const _incidentColors = {
     2: Colors.blue, // Goal
     3: Colors.amber, // Card
@@ -728,7 +729,7 @@ class _IncidentCell extends StatelessWidget {
               children: [
                 Text(_scoreLabel(),
                     style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.w700, color: Colors.blue)),
+                        fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
                 const SizedBox(width: 6),
                 icon,
               ],
@@ -739,7 +740,7 @@ class _IncidentCell extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(_scoreLabel(),
                     style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.w700, color: Colors.blue)),
+                        fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
               ],
             ),
     );

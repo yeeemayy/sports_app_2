@@ -1,4 +1,4 @@
-package com.pegasus.sports_app
+package com.ymsport2026.tiyu
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/badminton_status.dart';
@@ -38,7 +39,6 @@ class BadmintonMatchCard extends ConsumerWidget {
     return GestureDetector(
       onTap: () => context.push(AppRoutes.badmintonMatchDetailPath(match.id)),
       child: Container(
-        color: Colors.white,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -53,7 +53,7 @@ class BadmintonMatchCard extends ConsumerWidget {
                     child: Text(
                       match.leagueName,
                       style: context.textTheme.labelSmall?.copyWith(
-                        color: Colors.grey.shade700,
+                        color: AppTheme.of(context).greyText,
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,

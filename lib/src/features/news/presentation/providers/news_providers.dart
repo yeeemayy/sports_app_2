@@ -121,6 +121,11 @@ class NewsSearch extends _$NewsSearch {
     await _loadPage(1, replace: true);
   }
 
+  Future<void> refresh() async {
+    if (_keywords.isEmpty) return;
+    await _loadPage(1, replace: true);
+  }
+
   Future<void> loadMore() async {
     if (!state.hasMore || state.isLoadingMore || _keywords.isEmpty) return;
     state = state.copyWith(isLoadingMore: true);
@@ -157,7 +162,7 @@ Future<List<NewsArticle>> newsFirstPage(NewsFirstPageRef ref, String locale) asy
   final keyword = locale == 'cn' ? '足球' : 'Football';
   final response = await ref
       .watch(newsRepositoryProvider.notifier)
-      .searchNews(locale: locale, keywords: keyword, page: 1, perPage: 9);
+      .searchNews(locale: locale, keywords: keyword, page: 1, perPage: 10);
   return response.data;
 }
 

@@ -23,7 +23,7 @@ class CustomTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final int? maxLines;
   final double labelFontSize;
-  final Color labelColor;
+  final Color? labelColor;
   final EdgeInsetsGeometry contentPadding;
   final BorderRadius borderRadius;
   final TextStyle textStyle;
@@ -50,16 +50,18 @@ class CustomTextField extends StatelessWidget {
     this.validator,
     this.maxLines = 1,
     this.labelFontSize = 13,
-    this.labelColor = const Color(0xff343c44),
+    this.labelColor,
     this.borderRadius = const BorderRadius.all(Radius.circular(30)),
     this.contentPadding = const EdgeInsets.all(16),
     this.textStyle = const TextStyle(fontSize: 12),
-    this.backgroundColor = const Color(0xfff5f5f5),
+    this.backgroundColor,
     this.secondaryLabel,
   });
 
   @override
   Widget build(BuildContext context) {
+    final resolvedLabelColor = labelColor ?? context.appTheme.textFieldLabel;
+    final resolvedBgColor = backgroundColor ?? context.appTheme.textFieldBg;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
@@ -96,7 +98,7 @@ class CustomTextField extends StatelessWidget {
             controller: textEditingController,
             obscureText: obscureText,
             textAlign: TextAlign.left,
-            style: textStyle.copyWith(color: labelColor),
+            style: textStyle.copyWith(color: resolvedLabelColor),
             maxLines: maxLines,
             cursorColor: AppColors.primary,
             keyboardType: keyboardType,
@@ -127,7 +129,7 @@ class CustomTextField extends StatelessWidget {
                   : null,
               suffixIcon: suffixIcon,
               filled: true,
-              fillColor: enabled ? backgroundColor : AppColors.primary.withValues(alpha: 0.2),
+              fillColor: enabled ? resolvedBgColor : AppColors.primary.withValues(alpha: 0.2),
               helperText: helperText,
               helperMaxLines: 6,
               helperStyle: TextStyle(

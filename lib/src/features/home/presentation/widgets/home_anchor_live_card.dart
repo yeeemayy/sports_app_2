@@ -4,6 +4,7 @@ import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/home/domain/models/anchor_model.dart';
+import 'package:sports_app/src/shared_widgets/avatar.dart';
 
 class HomeAnchorLiveCard extends StatelessWidget {
   final AnchorModel? anchor;
@@ -49,7 +50,7 @@ class HomeAnchorLiveCard extends StatelessWidget {
                             },
                             errorBuilder: (context, error, stackTrace) {
                               debugPrint('Image.network failed: $error');
-                              return const ColoredBox(color: Color(0xFF333333));
+                              return const ColoredBox(color: Color(0xFF333333), child: Icon(Icons.image_not_supported_outlined));
                             },
                           ),
                           Positioned(
@@ -77,8 +78,7 @@ class HomeAnchorLiveCard extends StatelessWidget {
                                     child: ClipOval(
                                       child: CachedNetworkImage(
                                         imageUrl:
-                                            anchor?.avatarUrl ??
-                                            'https://placehold.co/400x400/FFFFFF/898989.png?text=A',
+                                            anchor?.avatarUrl ?? '',
                                         fit: BoxFit.cover,
                                         placeholder: (context, url) => Shimmer.fromColors(
                                           baseColor: Colors.grey.shade600,
@@ -86,7 +86,7 @@ class HomeAnchorLiveCard extends StatelessWidget {
                                           child: const ColoredBox(color: Colors.grey),
                                         ),
                                         errorBuilder: (context, url, error) =>
-                                            const ColoredBox(color: Color(0xFF333333)),
+                                            AvatarFallback(size: 24, iconSize: 18),
                                       ),
                                     ),
                                   ),
@@ -157,8 +157,8 @@ class _LoadingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
+      baseColor: AppTheme.of(context).shimmerBase,
+      highlightColor: AppTheme.of(context).shimmerHighlight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

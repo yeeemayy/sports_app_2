@@ -40,7 +40,7 @@ Future<void> showCustomStatusDialog({
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     pageBuilder: (context, animation, secondaryAnimation) {
       return Dialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.of(context).surface,
         insetPadding: const EdgeInsets.all(20),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(
@@ -91,7 +91,6 @@ Future<void> showCustomStatusDialog({
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF212121),
                     ),
                     textAlign: TextAlign.center,
                   ),

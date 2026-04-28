@@ -433,7 +433,7 @@ class _SetScoreTable extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 20),
       children: [
         Container(
-          color: Colors.white,
+          color: context.appTheme.surface,
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Column(
             children: [
@@ -452,7 +452,7 @@ class _SetScoreTable extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: isActive ? AppColors.primary : Colors.grey.shade600,
+                            color: isActive ? AppColors.primary : context.appTheme.greyText,
                           ),
                         ),
                       );
@@ -464,21 +464,21 @@ class _SetScoreTable extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey.shade600,
+                          color: context.appTheme.greyText,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              Divider(height: 1, thickness: 0.5, color: Colors.grey.shade200),
+              Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerBase),
               _PlayerScoreRow(
                 name: homeName,
                 setScores: homeSets,
                 total: homeTotal,
                 activeIdx: activeIdx,
               ),
-              Divider(height: 1, thickness: 0.5, color: Colors.grey.shade100),
+              Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerHighlight),
               _PlayerScoreRow(
                 name: awayName,
                 setScores: awaySets,
@@ -499,14 +499,14 @@ class _SetScoreTable extends StatelessWidget {
     final headerStyle = TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w600,
-      color: Colors.grey.shade600,
+      color: context.appTheme.greyText,
     );
 
     return ListView(
       padding: const EdgeInsets.only(bottom: 20),
       children: [
         Container(
-          color: Colors.white,
+          color: context.appTheme.surface,
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Column(
             children: [
@@ -530,9 +530,9 @@ class _SetScoreTable extends StatelessWidget {
                   ],
                 ),
               ),
-              Divider(height: 1, thickness: 0.5, color: Colors.grey.shade200),
+              Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerBase),
               _BasicPlayerRow(name: homeName, logo: homeLogo, total: homeTotal),
-              Divider(height: 1, thickness: 0.5, color: Colors.grey.shade100),
+              Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerHighlight),
               _BasicPlayerRow(name: awayName, logo: awayLogo, total: awayTotal),
             ],
           ),
@@ -578,7 +578,7 @@ class _PlayerScoreRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? AppColors.primary : Colors.black87,
+                  color: isActive ? AppColors.primary : context.appTheme.baseText,
                 ),
               ),
             );
@@ -705,7 +705,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
         return Column(
           children: [
             Container(
-              color: Colors.white,
+              color: context.appTheme.surface,
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(horizontal: 16),
@@ -719,7 +719,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                         margin: const EdgeInsets.only(right: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.primary : Colors.grey.shade200,
+                          color: isSelected ? AppColors.primary : context.appTheme.grey_3,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -727,7 +727,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: isSelected ? Colors.white : Colors.grey.shade700,
+                            color: isSelected ? Colors.white : context.appTheme.grey_4,
                           ),
                         ),
                       ),
@@ -782,7 +782,7 @@ class _BadmintonStatRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey.shade200, width: 0.5)),
+        border: Border(bottom: BorderSide(color: context.appTheme.shimmerBase, width: 0.5)),
       ),
       child: Column(
         children: [
@@ -800,7 +800,7 @@ class _BadmintonStatRow extends StatelessWidget {
                 child: Text(
                   stat.labelKey.isNotEmpty ? stat.labelKey.tr() : '${stat.typeCode}',
                   textAlign: TextAlign.center,
-                  style: context.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+                  style: context.textTheme.bodySmall?.copyWith(color: context.appTheme.greyText),
                 ),
               ),
               SizedBox(
@@ -821,7 +821,7 @@ class _BadmintonStatRow extends StatelessWidget {
               if (total <= 0) {
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(3),
-                  child: Container(height: barHeight, color: Colors.grey.shade200),
+                  child: Container(height: barHeight, color: context.appTheme.shimmerBase),
                 );
               }
               final halfWidth = constraints.maxWidth / 2;
@@ -831,7 +831,7 @@ class _BadmintonStatRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(3),
                 child: Container(
                   height: barHeight,
-                  color: Colors.grey.shade200,
+                  color: context.appTheme.shimmerBase,
                   child: Row(
                     children: [
                       SizedBox(

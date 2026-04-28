@@ -6,7 +6,7 @@ part of 'anchor_repository.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$anchorRepositoryHash() => r'261eb7a44221a4c348caf061e171455b5ba7d19b';
+String _$anchorRepositoryHash() => r'7bc357270b091f3221982ea5a582d3bef8b2237d';
 
 /// See also [AnchorRepository].
 @ProviderFor(AnchorRepository)

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 
 class HomeSectionTitle extends StatelessWidget {
@@ -23,7 +24,9 @@ class HomeSectionTitle extends StatelessWidget {
         child: Row(
           spacing: 10,
           children: [
-            CircleAvatar(radius: 20, child: icon != null ? Image.asset(icon!, height: 20) : null),
+            CircleAvatar(
+                backgroundColor: Colors.green.shade100,
+                radius: 20, child: icon != null ? Image.asset(icon!, height: 20) : null),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

@@ -7,7 +7,7 @@ part 'banner_model.g.dart';
 class RefAppModel with _$RefAppModel {
   const factory RefAppModel({
     required String icon,
-    required String name,
+    String? name,
     required String description,
     required String url,
   }) = _RefAppModel;
@@ -20,7 +20,7 @@ class RefAppModel with _$RefAppModel {
 class BannerModel with _$BannerModel {
   const factory BannerModel({
     required int id,
-    @JsonKey(name: 'app_name') required String appName,
+    @JsonKey(name: 'app_name') String? appName,
     required String cover,
     @JsonKey(name: 'ref_app') required List<RefAppModel> refApp,
     required String updated,

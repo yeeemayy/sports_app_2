@@ -5,9 +5,11 @@ import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:sports_app/src/core/utils/app_info.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/auth/data/auth_storage_service.dart';
 import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:sports_app/src/providers/theme_provider.dart';
 import 'package:sports_app/src/routes/app_router.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/avatar.dart';
@@ -138,7 +140,6 @@ class ProfileScreen extends ConsumerWidget {
     ];
 
     showModalBottomSheet<void>(
-      backgroundColor: Colors.white,
       context: rootNavigatorKey.currentContext ?? context,
       builder: (sheetContext) {
         return SafeArea(
@@ -178,129 +179,193 @@ class ProfileScreen extends ConsumerWidget {
     final isAuthenticated = authState.hasValue && (authState.value?.isAuthenticated ?? false);
     final user = authState.value?.user;
     final avatarUrl = user?.avatarUrl;
+    debugPrint(avatarUrl);
     final nickname = user?.nickname ?? '';
+    final isDark = ref.watch(themeModeProvider) == ThemeMode.dark;
 
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 48),
-              if (isAuthenticated) ...[
-                Center(
-                  child: ClipOval(
-                    child: avatarUrl != null && avatarUrl.isNotEmpty
-                        ? CachedNetworkImage(
-                            imageUrl: avatarUrl,
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Shimmer.fromColors(
-                              baseColor: Colors.grey.shade300,
-                              highlightColor: Colors.grey.shade100,
-                              child: const ColoredBox(color: Colors.white),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final safePadding = MediaQuery.paddingOf(context);
+        return SingleChildScrollView(
+          child: SafeArea(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight - safePadding.top - safePadding.bottom,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 48),
+                        if (isAuthenticated) ...[
+                          Center(
+                            child: ClipOval(
+                              child: avatarUrl != null && avatarUrl.isNotEmpty
+                                  ? CachedNetworkImage(
+                                      imageUrl: avatarUrl,
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) {
+                                        return Shimmer.fromColors(
+                                          baseColor: AppTheme.of(context).shimmerBase,
+                                          highlightColor: AppTheme.of(context).shimmerHighlight,
+                                          child: const ColoredBox(color: Colors.grey),
+                                        );
+                                      },
+                                      errorBuilder: (context, url, error) => AvatarFallback(),
+                                    )
+                                  : AvatarFallback(),
                             ),
-                            errorBuilder: (context, url, error) => AvatarFallback(),
-                          )
-                        : AvatarFallback(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Center(
-                  child: Text(
-                    nickname,
-                    style: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ] else
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextButton(
-                          onPressed: () => context.push(AppRoutes.register),
-                          style: TextButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size(0, 48),
                           ),
-                          child: Text('auth.register.register'.tr()),
+                          const SizedBox(height: 16),
+                          Center(
+                            child: Text(
+                              nickname,
+                              style: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ] else
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'profile.guest_mode_title'.tr(),
+                                  style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  'profile.guest_mode_subtitle'.tr(),
+                                  style: context.textTheme.bodyMedium?.copyWith(
+                                    color: context.appTheme.greyText,
+                                  ),
+                                ),
+                                SizedBox(height: 20),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextButton(
+                                        onPressed: () => context.push(AppRoutes.register),
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: AppColors.primary,
+                                          foregroundColor: Colors.white,
+                                          minimumSize: const Size(0, 48),
+                                        ),
+                                        child: Text('auth.register.register'.tr()),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: OutlinedButton(
+                                        onPressed: () => context.push(AppRoutes.login),
+                                        style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
+                                        child: Text('auth.login.login'.tr()),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        const SizedBox(height: 32),
+                        _ProfileSection(
+                          label: 'profile.section_settings'.tr(),
+                          tiles: [
+                            if (isAuthenticated)
+                              _ProfileTile(
+                                icon: Icons.person_outline,
+                                label: 'profile.edit_button'.tr(),
+                                onTap: () => context.push(AppRoutes.profileEditFull),
+                              ),
+                            _ProfileTile(
+                              icon: isDark ? Icons.dark_mode : Icons.light_mode,
+                              label: 'profile.toggle_dark_mode'.tr(),
+                              onTap: () => ref
+                                  .read(themeModeProvider.notifier)
+                                  .setThemeMode(isDark ? ThemeMode.light : ThemeMode.dark),
+                              trailing: Switch(
+                                value: isDark,
+                                onChanged: (v) => ref
+                                    .read(themeModeProvider.notifier)
+                                    .setThemeMode(v ? ThemeMode.dark : ThemeMode.light),
+                              ),
+                            ),
+                            _ProfileTile(
+                              icon: Icons.language,
+                              label: 'profile.toggle_language'.tr(),
+                              onTap: () => _showLanguagePicker(context),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => context.push(AppRoutes.login),
-                          style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
-                          child: Text('auth.login.login'.tr()),
+                        const SizedBox(height: 16),
+                        _ProfileSection(
+                          label: 'profile.section_legal'.tr(),
+                          tiles: [
+                            _ProfileTile(
+                              icon: Icons.privacy_tip_outlined,
+                              label: 'profile.privacy_policy'.tr(),
+                              onTap: () => context.push(
+                                AppRoutes.privacyPolicy,
+                                extra: 'profile.privacy_policy'.tr(),
+                              ),
+                            ),
+                            _ProfileTile(
+                              icon: Icons.description_outlined,
+                              label: 'profile.terms_of_use'.tr(),
+                              onTap: () => context.push(
+                                AppRoutes.userAgreement,
+                                extra: 'profile.terms_of_use'.tr(),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: 32),
-              _ProfileSection(
-                label: 'profile.section_settings'.tr(),
-                tiles: [
-                  if (isAuthenticated)
-                    _ProfileTile(
-                      icon: Icons.person_outline,
-                      label: 'profile.edit_button'.tr(),
-                      onTap: () => context.push(AppRoutes.profileEditFull),
+                        if (isAuthenticated) ...[
+                          SizedBox(height: 16),
+                          _ProfileSection(
+                            label: 'profile.section_danger_zone'.tr(),
+                            tiles: [
+                              _ProfileTile(
+                                icon: Icons.person_remove_outlined,
+                                label: 'profile.delete_account'.tr(),
+                                onTap: () => _confirmDeleteAccount(context, ref),
+                              ),
+                            ],
+                          ),
+                        ],
+                        if (isAuthenticated) ...[
+                          const SizedBox(height: 16),
+                          Center(
+                            child: TextButton.icon(
+                              onPressed: () => _confirmLogout(context, ref),
+                              icon: Icon(Icons.logout),
+                              label: Text('profile.logout'.tr()),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                  _ProfileTile(
-                    icon: Icons.language,
-                    label: 'profile.toggle_language'.tr(),
-                    onTap: () => _showLanguagePicker(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _ProfileSection(
-                label: 'profile.section_legal'.tr(),
-                tiles: [
-                  _ProfileTile(
-                    icon: Icons.privacy_tip_outlined,
-                    label: 'profile.privacy_policy'.tr(),
-                    onTap: () {},
-                  ),
-                  _ProfileTile(
-                    icon: Icons.description_outlined,
-                    label: 'profile.terms_of_use'.tr(),
-                    onTap: () {},
-                  ),
-                ],
-              ),
-              if (isAuthenticated) ...[
-                SizedBox(height: 16),
-                _ProfileSection(
-                  label: 'profile.section_danger_zone'.tr(),
-                  tiles: [
-                    _ProfileTile(
-                      icon: Icons.person_remove_outlined,
-                      label: 'profile.delete_account'.tr(),
-                      onTap: () => _confirmDeleteAccount(context, ref),
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 30.0),
+                        child: Text(
+                          '${'profile.app_version'.tr()} ${AppInfo.version}',
+                          style: context.textTheme.bodySmall?.copyWith(color: context.appTheme.greyText),
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ],
-              if (isAuthenticated) ...[
-                const SizedBox(height: 16),
-                Center(
-                  child: TextButton.icon(
-                    onPressed: () => _confirmLogout(context, ref),
-                    icon: Icon(Icons.logout),
-                    label: Text('profile.logout'.tr()),
-                  ),
-                ),
-              ],
-            ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -358,12 +423,14 @@ class _ProfileTile extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.isDestructive = false,
+    this.trailing,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
   final bool isDestructive;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -371,7 +438,7 @@ class _ProfileTile extends StatelessWidget {
     return ListTile(
       leading: Icon(icon, color: color, size: 20),
       title: Text(label, style: context.textTheme.bodyMedium?.copyWith(color: color)),
-      trailing: isDestructive ? null : const Icon(Icons.chevron_right),
+      trailing: trailing ?? (isDestructive ? null : const Icon(Icons.chevron_right)),
       onTap: onTap,
     );
   }

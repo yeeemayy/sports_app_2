@@ -8,6 +8,7 @@ import 'package:sports_app/src/features/event/domain/models/baseball_match.dart'
 import 'package:sports_app/src/features/event/domain/models/baseball_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/match_score_display.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_status_badge.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
@@ -36,13 +37,11 @@ class BaseballMatchCard extends ConsumerWidget {
 
     final isLive = baseballLiveStatuses.contains(effective.statusId);
     final isNotStarted = effective.statusId == 1;
-    final isEnded = effective.statusId == 100;
     final label = baseballStatusLabel(effective.statusId);
 
     return GestureDetector(
       onTap: () => context.push(AppRoutes.baseballMatchDetailPath(match.id)),
       child: Container(
-        color: Colors.white,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -57,7 +56,7 @@ class BaseballMatchCard extends ConsumerWidget {
                     child: Text(
                       effective.leagueName,
                       style: context.textTheme.labelSmall?.copyWith(
-                        color: Colors.grey.shade700,
+                        color: AppTheme.of(context).greyText,
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,
@@ -104,12 +103,11 @@ class BaseballMatchCard extends ConsumerWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        _BaseballScoreDisplay(
+                        MatchScoreDisplay(
                           homeScore: effective.homeScore,
                           awayScore: effective.awayScore,
                           isNotStarted: isNotStarted,
                           isLive: isLive,
-                          isEnded: isEnded,
                         ),
                         const SizedBox(height: 6),
                         SportStatusBadge(
@@ -146,46 +144,3 @@ class BaseballMatchCard extends ConsumerWidget {
   }
 }
 
-class _BaseballScoreDisplay extends StatelessWidget {
-  const _BaseballScoreDisplay({
-    required this.homeScore,
-    required this.awayScore,
-    required this.isNotStarted,
-    required this.isLive,
-    required this.isEnded,
-  });
-
-  final String homeScore;
-  final String awayScore;
-  final bool isNotStarted;
-  final bool isLive;
-  final bool isEnded;
-
-  @override
-  Widget build(BuildContext context) {
-    if (isNotStarted) {
-      return Text(
-        '-',
-        style: context.textTheme.titleSmall?.copyWith(
-          color: Colors.grey.shade400,
-          fontWeight: FontWeight.w600,
-        ),
-      );
-    }
-
-    final scoreColor = isLive ? AppColors.primary : Colors.black87;
-    return RichText(
-      text: TextSpan(
-        style: context.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w900,
-          color: scoreColor,
-        ),
-        children: [
-          TextSpan(text: homeScore),
-          const TextSpan(text: ' - '),
-          TextSpan(text: awayScore),
-        ],
-      ),
-    );
-  }
-}

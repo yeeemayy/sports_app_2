@@ -1,13 +1,12 @@
+import 'dart:async';
+
 import 'package:cached_network_image_ce/cached_network_image.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/home/presentation/providers/banner_providers.dart';
-import 'package:sports_app/src/features/news/domain/models/news_article.dart';
 import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 
@@ -21,59 +20,79 @@ class HomeBannerCarousel extends ConsumerStatefulWidget {
 class _HomeBannerCarouselState extends ConsumerState<HomeBannerCarousel> {
   final _controller = PageController();
   int _currentPage = 0;
+  Timer? _autoScrollTimer;
 
   @override
   void dispose() {
+    _autoScrollTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
 
+  void _startAutoScroll(int itemCount) {
+    _autoScrollTimer?.cancel();
+    _autoScrollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (!_controller.hasClients) return;
+      final next = (_currentPage + 1) % itemCount;
+      _controller.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final bannerAsync = ref.watch(bannerProvider);
     final newsAsync = ref.watch(newsFirstPageProvider(context.localeCode));
 
-    final bannerUrl = bannerAsync.valueOrNull?.cover;
-    final articles = newsAsync.valueOrNull ?? [];
+    ref.listen(newsFirstPageProvider(context.localeCode), (previous, next) {
+      if (next is AsyncData && previous is! AsyncData) {
+        _currentPage = 0;
+        if (_controller.hasClients) {
+          _controller.jumpToPage(0);
+        }
+      }
+    });
 
-    final int itemCount = (bannerUrl != null ? 1 : 0) + articles.length;
-    if (itemCount == 0) {
-      return _shimmerPlaceholder();
-    }
+    return newsAsync.when(
+      skipLoadingOnReload: false,
+      skipLoadingOnRefresh: false,
+      loading: _shimmerPlaceholder,
+      error: (e, _) => _shimmerPlaceholder(),
+      data: (articles) {
+        if (articles.isEmpty) return _shimmerPlaceholder();
 
-    return Column(
-      children: [
-        SizedBox(height: 20),
-        SizedBox(
-          height: 200,
-          child: PageView.builder(
-            controller: _controller,
-            itemCount: itemCount,
-            onPageChanged: (i) => setState(() => _currentPage = i),
-            itemBuilder: (context, index) {
-              if (bannerUrl != null && index == 0) {
-                return _carouselItem(
-                  bannerUrl,
-                  title: 'home.section.anchor_live'.tr(),
-                  subtitle: 'home.section.anchor_live_subtitle'.tr(),
-                  onTap: () => context.push(AppRoutes.anchorList),
-                );
-              }
-              final article = articles[index - (bannerUrl != null ? 1 : 0)];
-              return _carouselItem(
-                article.imageUrl ?? '',
-                title: article.title,
-                subtitle: article.description.replaceAll(RegExp(r'<[^>]*>'), ''),
-                onTap: article.imageUrl != null
-                    ? () => context.push(AppRoutes.newsDetailPath(article.id))
-                    : null,
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 8),
-        _PageDots(count: itemCount, current: _currentPage),
-      ],
+        if (_autoScrollTimer == null || !_autoScrollTimer!.isActive) {
+          _startAutoScroll(articles.length);
+        }
+
+        return Column(
+          children: [
+            SizedBox(
+              height: 200,
+              child: PageView.builder(
+                controller: _controller,
+                itemCount: articles.length,
+                onPageChanged: (i) => setState(() => _currentPage = i),
+                itemBuilder: (context, index) {
+                  final article = articles[index];
+                  return _carouselItem(
+                    article.imageUrl ?? '',
+                    title: article.title,
+                    subtitle: article.description.replaceAll(RegExp(r'<[^>]*>'), ''),
+                    onTap: article.imageUrl != null
+                        ? () => context.push(AppRoutes.newsDetailPath(article.id))
+                        : null,
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+            _PageDots(count: articles.length, current: _currentPage),
+          ],
+        );
+      },
     );
   }
 
@@ -94,8 +113,8 @@ class _HomeBannerCarouselState extends ConsumerState<HomeBannerCarousel> {
                       width: double.maxFinite,
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Shimmer.fromColors(
-                        baseColor: Colors.grey.shade300,
-                        highlightColor: Colors.grey.shade100,
+                        baseColor: AppTheme.of(context).shimmerBase,
+                        highlightColor: AppTheme.of(context).shimmerHighlight,
                         child: const ColoredBox(color: Colors.grey),
                       ),
                       errorBuilder: (context, url, error) =>
@@ -145,7 +164,7 @@ class _HomeBannerCarouselState extends ConsumerState<HomeBannerCarousel> {
                                   ],
                                 ),
                               ),
-                              Icon(Icons.keyboard_arrow_right, color: Colors.white,)
+                              Icon(Icons.keyboard_arrow_right, color: Colors.white),
                             ],
                           ),
                         ),
@@ -159,13 +178,17 @@ class _HomeBannerCarouselState extends ConsumerState<HomeBannerCarousel> {
 
   Widget _shimmerPlaceholder() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 30),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: Shimmer.fromColors(
-          baseColor: Colors.grey.shade300,
-          highlightColor: Colors.grey.shade100,
-          child: const SizedBox(height: 180, child: ColoredBox(color: Colors.grey)),
+          baseColor: AppTheme.of(context).shimmerBase,
+          highlightColor: AppTheme.of(context).shimmerHighlight,
+          child: const SizedBox(
+            height: 180,
+            width: double.maxFinite,
+            child: ColoredBox(color: Colors.white),
+          ),
         ),
       ),
     );

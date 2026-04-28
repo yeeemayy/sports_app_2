@@ -48,7 +48,7 @@
   },
   "nav": {
     "home": "主页",
-    "event": "赛事",
+    "anchor": "主播",
     "news": "新闻",
     "data": "数据",
     "profile": "个人"
@@ -81,6 +81,10 @@
     },
     "error": {
       "load_failed": "加载失败，请稍后再试"
+    },
+    "anchor": {
+      "no_live": "目前暂无直播",
+      "no_live_subtitle": "先看看别的吧"
     }
   },
   "video": {
@@ -112,6 +116,7 @@
     "edit_save": "保存",
     "edit_success": "资料已更新",
     "edit_error_title": "更新失败",
+    "toggle_dark_mode": "深色模式",
     "toggle_language": "切换语言",
     "language_zh_cn": "简体中文",
     "language_en_gb": "English (UK)",
@@ -133,7 +138,10 @@
     "delete_account_password_label": "密码",
     "delete_account_password_empty": "请输入密码",
     "delete_account_password_incorrect": "密码不正确，请重试。",
-    "delete_account_error_title": "注销账号失败"
+    "delete_account_error_title": "注销账号失败",
+    "guest_mode_title": "游客模式",
+    "guest_mode_subtitle": "登录以解锁全部功能",
+    "app_version": "应用版本"
   },
   "event": {
     "search": "搜索赛事",

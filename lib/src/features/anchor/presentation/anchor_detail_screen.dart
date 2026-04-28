@@ -42,6 +42,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
   @override
   void initState() {
     super.initState();
+    _onVideoTap();
     _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.invalidate(bannerProvider);
@@ -103,14 +104,18 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
     _onVideoTap(); // reset the hide timer after interaction
   }
 
-  void _openFullscreen() {
+  Future<void> _openFullscreen() async {
     if (_videoController == null || !_videoInitialized) return;
-    Navigator.of(context).push(
+    final wasPlaying = _videoController!.value.isPlaying;
+    await Navigator.of(context).push(
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => AnchorVideoFullscreenPage(controller: _videoController!),
       ),
     );
+    if (mounted && wasPlaying && _videoController != null) {
+      _videoController!.play();
+    }
   }
 
   Future<void> _retryVideo() async {
@@ -194,110 +199,81 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
   }
 
   Widget _buildVideoPlayer(AnchorDetailModel detail) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // Background: video when ready, cover image otherwise
-        if (_videoInitialized && _videoController != null)
-          VideoPlayer(_videoController!)
-        else
-          CachedNetworkImage(
-            imageUrl: detail.cover,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-            placeholder: (context, url) => Shimmer.fromColors(
-              baseColor: Colors.grey.shade900,
-              highlightColor: Colors.grey.shade700,
-              child: const ColoredBox(color: Colors.grey),
-            ),
-            errorBuilder: (context, url, error) => ColoredBox(color: Colors.grey.shade900),
-          ),
-
-        // Initializing spinner
-        if (_videoController != null && !_videoInitialized && !_videoError)
-          const Center(child: CircularProgressIndicator(color: Colors.white)),
-
-        // Buffering overlay during playback
-        if (_videoInitialized && _isBuffering)
-          Container(
-            color: Colors.black38,
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircularProgressIndicator(color: Colors.white),
-                  const SizedBox(height: 8),
-                  Text(
-                    'anchor.detail.video.buffering'.tr(),
-                    style: const TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
-                ],
+    return GestureDetector(
+      onTap: () {
+        setState(() => _showControls = !_showControls);
+      },
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background
+          if (_videoInitialized && _videoController != null)
+            FittedBox(
+              fit: BoxFit.cover,
+              child: SizedBox(
+                width: _videoController!.value.size.width,
+                height: _videoController!.value.size.height,
+                child: VideoPlayer(_videoController!),
               ),
+            )
+          else
+            CachedNetworkImage(
+              imageUrl: detail.cover,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              placeholder: (context, url) => Shimmer.fromColors(
+                baseColor: Colors.grey.shade900,
+                highlightColor: Colors.grey.shade700,
+                child: const ColoredBox(color: Colors.grey),
+              ),
+              errorBuilder: (context, url, error) => ColoredBox(color: Colors.grey.shade900),
             ),
-          ),
 
-        // Error overlay with retry
-        if (_videoError)
-          Container(
-            color: Colors.black54,
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.signal_wifi_off, color: Colors.white54, size: 40),
-                  const SizedBox(height: 12),
-                  Text(
-                    'anchor.detail.video.error'.tr(),
-                    style: const TextStyle(color: Colors.white70, fontSize: 13),
-                  ),
-                  const SizedBox(height: 12),
-                  TextButton(
-                    onPressed: _retryVideo,
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.white24,
-                      foregroundColor: Colors.white,
+          // Loading
+          if (_videoController != null && !_videoInitialized && !_videoError)
+            const Center(child: CircularProgressIndicator(color: Colors.white)),
+
+          // Buffering
+          if (_videoInitialized && _isBuffering)
+            Container(
+              color: Colors.black38,
+              child: const Center(child: CircularProgressIndicator(color: Colors.white)),
+            ),
+
+          // Error
+          if (_videoError)
+            Container(
+              color: Colors.black54,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'anchor.detail.video.error'.tr(),
+                      style: const TextStyle(color: Colors.white70, fontSize: 13),
                     ),
-                    child: Text('anchor.detail.video.retry'.tr()),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: _retryVideo,
+                      child: Text('anchor.detail.video.retry'.tr()),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
 
-        // Play/pause button (tap-to-show, auto-hides)
-        // if (_videoInitialized && !_videoError && _showControls)
-        //   Center(
-        //     child: GestureDetector(
-        //       onTap: _togglePlayPause,
-        //       child: Container(
-        //         decoration: const BoxDecoration(
-        //           color: Colors.black45,
-        //           shape: BoxShape.circle,
-        //         ),
-        //         padding: const EdgeInsets.all(10),
-        //         child: Icon(
-        //           _videoController!.value.isPlaying ? Icons.pause : Icons.play_arrow,
-        //           color: Colors.white,
-        //           size: 36,
-        //         ),
-        //       ),
-        //     ),
-        //   ),
-
-        // Fullscreen button (tap-to-show, auto-hides)
-        if (_videoInitialized && !_videoError)
-          AnimatedOpacity(
-            opacity: _showControls ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 300),
-            child: IgnorePointer(
-              ignoring: !_showControls,
-              child: AspectRatio(
-                aspectRatio: 16 / 9,
+          // Fullscreen button
+          // if (_videoInitialized && !_videoError)
+            AnimatedOpacity(
+              opacity: _showControls ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 300),
+              child: IgnorePointer(
+                ignoring: !_showControls,
                 child: Container(
-                  width: double.maxFinite,
-                  color: Colors.black54,
+                  color: Colors.black26,
                   alignment: Alignment.bottomRight,
+                  padding: const EdgeInsets.all(8),
                   child: IconButton(
                     onPressed: _openFullscreen,
                     icon: const Icon(Icons.fullscreen, color: Colors.white70, size: 28),
@@ -305,20 +281,20 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
                 ),
               ),
             ),
-          ),
 
-        // Offline overlay
-        if (!_videoError && (detail.isLive == 0 || detail.m3u8Url == null))
-          Container(
-            color: Colors.black54,
-            child: Center(
-              child: Text(
-                'anchor.detail.offline'.tr(),
-                style: const TextStyle(color: Colors.white60, fontSize: 14),
+          // Offline
+          if (!_videoError && (detail.isLive == 0 || detail.m3u8Url == null))
+            Container(
+              color: Colors.black54,
+              child: Center(
+                child: Text(
+                  'anchor.detail.offline'.tr(),
+                  style: const TextStyle(color: Colors.white60, fontSize: 14),
+                ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -328,12 +304,15 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
   ) {
     return detailAsync.when(
       loading: () => Center(
-        child: Text('anchor.detail.loading'.tr(), style: const TextStyle(color: Colors.white38)),
+        child: Text(
+          'anchor.detail.loading'.tr(),
+          style: TextStyle(color: context.appTheme.greyText),
+        ),
       ),
       error: (_, _) => Center(
         child: Text(
           'anchor.detail.error.load_failed'.tr(),
-          style: const TextStyle(color: Colors.white38),
+          style: TextStyle(color: context.appTheme.greyText),
         ),
       ),
       data: (detail) => Column(
@@ -352,7 +331,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
               ),
               rightChild: Marquee(
                 text: detail.notice,
-                style: context.textTheme.bodySmall,
+                style: context.textTheme.bodySmall?.copyWith(color: Colors.black87),
                 scrollAxis: Axis.horizontal,
                 blankSpace: 30,
                 velocity: 50,
@@ -379,22 +358,24 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
       loading: () => const SizedBox.shrink(),
       error: (_, __) => const SizedBox.shrink(),
       data: (banner) {
-        final apps = banner.refApp;
+        final apps = banner.refApp
+            .where((app) => app.name != null && app.name!.isNotEmpty)
+            .toList();
         if (apps.length == 2) {
           return DiagonalSplitBanner(
             leftColor: Color(0xff389628),
             rightColor: Color(0xffE9225C),
             cutWidth: 20,
             height: 60,
-            leftChild: _RefAppButton(icon: apps[0].icon, name: apps[0].name, url: apps[0].url),
-            rightChild: _RefAppButton(icon: apps[1].icon, name: apps[1].name, url: apps[1].url),
+            leftChild: _RefAppButton(icon: apps[0].icon, name: apps[0].name!, url: apps[0].url),
+            rightChild: _RefAppButton(icon: apps[1].icon, name: apps[1].name!, url: apps[1].url),
           );
         } else if (apps.length == 1) {
           return Container(
             height: 60,
             color: Colors.amberAccent,
             child: Center(
-              child: _RefAppButton(icon: apps[0].icon, name: apps[0].name, url: apps[0].url),
+              child: _RefAppButton(icon: apps[0].icon, name: apps[0].name!, url: apps[0].url),
             ),
           );
         }
@@ -421,7 +402,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
       children: [
         _AnchorInfoHeader(detail: detail),
         const SizedBox(height: 20),
-        Divider(height: 0, color: Colors.grey.shade300),
+        Divider(height: 0, color: context.appTheme.grey_3),
         const SizedBox(height: 16),
         _InfoRow(label: 'anchor.detail.info.title'.tr(), value: detail.title),
         const SizedBox(height: 16),
@@ -491,11 +472,11 @@ class _AnchorInfoHeader extends StatelessWidget {
               imageUrl: detail.avatarUrl,
               fit: BoxFit.cover,
               placeholder: (context, url) => Shimmer.fromColors(
-                baseColor: Colors.grey.shade300,
-                highlightColor: Colors.grey.shade100,
+                baseColor: AppTheme.of(context).shimmerBase,
+                highlightColor: AppTheme.of(context).shimmerHighlight,
                 child: const ColoredBox(color: Colors.grey),
               ),
-              errorWidget: (context, url, error) => ColoredBox(color: Colors.grey.shade300),
+              errorWidget: (context, url, error) => ColoredBox(color: context.appTheme.grey_3),
             ),
           ),
         ),
@@ -536,7 +517,10 @@ class _InfoRow extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: context.textTheme.labelMedium?.copyWith(color: Colors.black45)),
+        Text(
+          label,
+          style: context.textTheme.labelMedium?.copyWith(color: context.appTheme.greyText),
+        ),
         const SizedBox(height: 4),
         Text(value, style: context.textTheme.bodyMedium),
       ],

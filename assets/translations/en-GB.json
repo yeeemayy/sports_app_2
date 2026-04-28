@@ -48,7 +48,7 @@
   },
   "nav": {
     "home": "Home",
-    "event": "Event",
+    "anchor": "Anchor",
     "news": "News",
     "data": "Data",
     "profile": "Profile"
@@ -81,6 +81,10 @@
     },
     "error": {
       "load_failed": "Failed to load, please try again"
+    },
+    "anchor": {
+      "no_live": "No live streams right now",
+      "no_live_subtitle": "Check out something else"
     }
   },
   "video": {
@@ -112,6 +116,7 @@
     "edit_save": "Save",
     "edit_success": "Profile updated",
     "edit_error_title": "Update Failed",
+    "toggle_dark_mode": "Dark Mode",
     "toggle_language": "Change Language",
     "language_zh_cn": "简体中文",
     "language_en_gb": "English (UK)",
@@ -133,7 +138,10 @@
     "delete_account_password_label": "Password",
     "delete_account_password_empty": "Please enter your password",
     "delete_account_password_incorrect": "Incorrect password. Please try again.",
-    "delete_account_error_title": "Delete Account Failed"
+    "delete_account_error_title": "Delete Account Failed",
+    "guest_mode_title": "Guest Mode",
+    "guest_mode_subtitle": "Login to unlock all features",
+    "app_version": "App Version"
   },
   "event": {
     "search": "Search matches",

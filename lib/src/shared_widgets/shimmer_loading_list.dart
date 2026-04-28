@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 
 /// A scrollable list of shimmer-animated placeholder cards.
 class ShimmerLoadingList extends StatelessWidget {
@@ -13,18 +14,20 @@ class ShimmerLoadingList extends StatelessWidget {
     return ListView.builder(
       padding: EdgeInsets.zero,
       itemCount: itemCount,
-      itemBuilder: (context, _) => Shimmer.fromColors(
-        baseColor: Colors.grey.shade300,
-        highlightColor: Colors.grey.shade100,
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          height: itemHeight,
-          decoration: BoxDecoration(
-            color: Colors.grey,
-            borderRadius: BorderRadius.circular(8),
+      itemBuilder: (context, _) {
+        return Shimmer.fromColors(
+          baseColor: AppTheme.of(context).shimmerBase,
+          highlightColor: AppTheme.of(context).shimmerHighlight,
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            height: itemHeight,
+            decoration: BoxDecoration(
+              color: Colors.grey,
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

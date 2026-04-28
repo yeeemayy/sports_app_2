@@ -8,6 +8,7 @@ import 'package:sports_app/src/features/event/domain/models/am_football_match.da
 import 'package:sports_app/src/features/event/domain/models/am_football_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/match_score_display.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_status_badge.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
@@ -35,7 +36,6 @@ class AmFootballMatchCard extends ConsumerWidget {
     return GestureDetector(
       onTap: () => context.push(AppRoutes.amFootballMatchDetailPath(match.id)),
       child: Container(
-        color: Colors.white,
         child: Column(
           children: [
             Padding(
@@ -48,7 +48,7 @@ class AmFootballMatchCard extends ConsumerWidget {
                     child: Text(
                       match.leagueName,
                       style: context.textTheme.labelSmall?.copyWith(
-                        color: Colors.grey.shade700,
+                        color: AppTheme.of(context).greyText,
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,
@@ -88,10 +88,11 @@ class AmFootballMatchCard extends ConsumerWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        _AmFootballScore(
+                        MatchScoreDisplay(
                           homeScore: effectiveHomeScore,
                           awayScore: effectiveAwayScore,
-                          statusId: effectiveStatusId,
+                          isNotStarted: effectiveStatusId == 1,
+                          isLive: isLive,
                         ),
                         const SizedBox(height: 6),
                         SportStatusBadge(
@@ -128,46 +129,4 @@ class AmFootballMatchCard extends ConsumerWidget {
   }
 }
 
-class _AmFootballScore extends StatelessWidget {
-  const _AmFootballScore({
-    required this.homeScore,
-    required this.awayScore,
-    required this.statusId,
-  });
-
-  final String homeScore;
-  final String awayScore;
-  final int statusId;
-
-  static const _liveStatuses = {44, 45, 46, 47, 10};
-  bool get _isNotStarted => statusId == 1;
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isNotStarted) {
-      return Text(
-        '-',
-        style: context.textTheme.titleMedium?.copyWith(
-          color: Colors.grey.shade400,
-          fontWeight: FontWeight.w700,
-        ),
-      );
-    }
-
-    final scoreColor = _liveStatuses.contains(statusId) ? AppColors.primary : Colors.black87;
-    return RichText(
-      text: TextSpan(
-        style: context.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w900,
-          color: scoreColor,
-        ),
-        children: [
-          TextSpan(text: homeScore),
-          TextSpan(text: ' - ', style: TextStyle(color: Colors.grey.shade400)),
-          TextSpan(text: awayScore),
-        ],
-      ),
-    );
-  }
-}
 

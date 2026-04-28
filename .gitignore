@@ -34,6 +34,8 @@ migrate_working_dir/
 # Libraries should not include pubspec.lock, per pub.dev guidelines.
 # Generated dart files
 # See https://dart.dev/guides/libraries/private-files
+*.g.dart
+*.freezed.dart
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies

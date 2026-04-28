@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
@@ -8,18 +9,25 @@ import 'package:sports_app/src/features/event/domain/sport_config.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/event_match_card.dart';
+import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
+import 'package:sports_app/src/features/home/presentation/widgets/home_anchor_live_grid.dart';
+import 'package:sports_app/src/features/home/presentation/widgets/home_banner_carousel.dart';
+import 'package:sports_app/src/features/home/presentation/widgets/home_section_title.dart';
+import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
 import 'package:sports_app/src/providers/nav_providers.dart';
 import 'package:sports_app/src/shared_widgets/shimmer_loading_list.dart';
+import 'package:sports_app/src/routes/app_routes.dart';
 
-class EventScreen extends StatefulWidget {
+class EventScreen extends ConsumerStatefulWidget {
   const EventScreen({super.key});
 
   @override
-  State<EventScreen> createState() => _EventScreenState();
+  ConsumerState<EventScreen> createState() => _EventScreenState();
 }
 
-class _EventScreenState extends State<EventScreen> with SingleTickerProviderStateMixin {
+class _EventScreenState extends ConsumerState<EventScreen> with SingleTickerProviderStateMixin {
   late final TabController _tabController;
+  final ValueNotifier<int> _resetTrigger = ValueNotifier(0);
 
   static const _sports = SportType.values;
 
@@ -32,11 +40,19 @@ class _EventScreenState extends State<EventScreen> with SingleTickerProviderStat
   @override
   void dispose() {
     _tabController.dispose();
+    _resetTrigger.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(currentNavIndexProvider, (prev, curr) {
+      if (curr == 0 && prev != 0) {
+        _tabController.animateTo(0);
+        _resetTrigger.value++;
+      }
+    });
+
     return Column(
       children: [
         Container(
@@ -68,7 +84,12 @@ class _EventScreenState extends State<EventScreen> with SingleTickerProviderStat
             controller: _tabController,
             children: [
               for (var i = 0; i < _sports.length; i++)
-                _SportTabContent(sport: _sports[i], tabIndex: i, tabController: _tabController),
+                _SportTabContent(
+                  sport: _sports[i],
+                  tabIndex: i,
+                  tabController: _tabController,
+                  resetTrigger: _resetTrigger,
+                ),
             ],
           ),
         ),
@@ -82,11 +103,13 @@ class _SportTabContent extends ConsumerStatefulWidget {
     required this.sport,
     required this.tabIndex,
     required this.tabController,
+    required this.resetTrigger,
   });
 
   final SportType sport;
   final int tabIndex;
   final TabController tabController;
+  final ValueNotifier<int> resetTrigger;
 
   @override
   ConsumerState<_SportTabContent> createState() => _SportTabContentState();
@@ -111,21 +134,32 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
     _matchStatus = _hotLeagueSports.contains(widget.sport) ? 'hot' : 'all';
     _scrollController.addListener(_onScroll);
     widget.tabController.addListener(_onTabChanged);
+    widget.resetTrigger.addListener(_onReset);
+  }
+
+  void _onReset() {
+    setState(() {
+      _matchStatus = _hotLeagueSports.contains(widget.sport) ? 'hot' : 'all';
+      _scheduledDate = DateTime.now().add(const Duration(days: 1));
+    });
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(0);
+    }
+    ref.invalidate(_paginatedProvider);
   }
 
   void _onTabChanged() {
     if (_isActiveTab) {
-      // Tab became visible — re-register IDs from the current loaded data.
       _reRegisterRealtimeIds();
+      ref.invalidate(newsFirstPageProvider(context.localeCode));
     } else {
-      // Tab went off-screen — stop polling.
       _clearRealtimeSource();
     }
   }
 
   void _setRealtimeWatchedIds(List<String> ids) {
     if (widget.sport.config.parseRealtime == null) return;
-    if (ref.read(currentNavIndexProvider) != 1) return;
+    if (ref.read(currentNavIndexProvider) != 0) return;
     ref.read(sportRealtimeProvider(widget.sport).notifier).setWatchedIds('list', ids);
   }
 
@@ -186,6 +220,7 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
   @override
   void dispose() {
     widget.tabController.removeListener(_onTabChanged);
+    widget.resetTrigger.removeListener(_onReset);
     _scrollController.dispose();
     super.dispose();
   }
@@ -223,7 +258,7 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
 
     // Pause/resume realtime polling when the event bottom-nav tab goes off/on screen.
     ref.listen(currentNavIndexProvider, (prev, curr) {
-      const eventTabIndex = 1;
+      const eventTabIndex = 0;
       if (curr == eventTabIndex && _isActiveTab) {
         _reRegisterRealtimeIds();
       } else if (curr != eventTabIndex) {
@@ -241,18 +276,23 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
       });
     }
 
+    final anchorsAsync = ref.watch(anchorListProvider());
+
     return Column(
       children: [
         _StatusFilterBar(
           selected: _matchStatus,
-          onSelected: (status) => setState(() {
-            _matchStatus = status;
-            if (status == 'finished') {
-              _scheduledDate = DateTime.now();
-            } else if (status == 'scheduled') {
-              _scheduledDate = DateTime.now().add(const Duration(days: 1));
-            }
-          }),
+          onSelected: (status) {
+            setState(() {
+              _matchStatus = status;
+              if (status == 'finished') {
+                _scheduledDate = DateTime.now();
+              } else if (status == 'scheduled') {
+                _scheduledDate = DateTime.now().add(const Duration(days: 1));
+              }
+            });
+            ref.invalidate(newsFirstPageProvider(context.localeCode));
+          },
           statuses: _availableStatuses,
         ),
         if (_isScheduled || (widget.sport == SportType.football && _isFinished))
@@ -261,9 +301,12 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
             onSelected: (date) => setState(() => _scheduledDate = date),
             isPast: _isFinished,
           ),
+
         Expanded(
           child: RefreshIndicator(
             onRefresh: () async {
+              ref.invalidate(anchorListProvider);
+              ref.invalidate(newsFirstPageProvider(context.localeCode));
               if (_isScheduled) {
                 ref.invalidate(footballScheduledMatchesProvider(date: _formattedScheduledDate));
                 await ref.read(
@@ -275,7 +318,12 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
               }
             },
             child: matchesAsync.when(
-              loading: () => const ShimmerLoadingList(),
+              loading: () => Column(
+                children: [
+                  Padding(padding: const EdgeInsets.only(top: 16), child: HomeBannerCarousel()),
+                  const Expanded(child: ShimmerLoadingList()),
+                ],
+              ),
               error: (e, st) {
                 debugPrint('$e, $st');
                 return LayoutBuilder(
@@ -300,36 +348,104 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
                     _setRealtimeWatchedIds(result.matches.map((m) => m.id).toList());
                   });
                 }
-                if (result.matches.isEmpty) {
-                  return LayoutBuilder(
-                    builder: (context, constraints) => SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: SizedBox(
-                        height: constraints.maxHeight,
+                return CustomScrollView(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 16, bottom: _isHot ? 0 : 16),
+                        child: HomeBannerCarousel(),
+                      ),
+                    ),
+                    if (_isHot)
+                      SliverToBoxAdapter(
+                        child: anchorsAsync.when(
+                          skipLoadingOnRefresh: false,
+                          data: (page) => page.data.isEmpty
+                              ? const SizedBox.shrink()
+                              : Column(
+                                  children: [
+                                    HomeSectionTitle(
+                                      icon: 'assets/images/live-tv.png',
+                                      title: 'home.section.anchor_live'.tr(),
+                                      onPressed: () => context.push(AppRoutes.anchorList),
+                                    ),
+                                    HomeAnchorLiveGrid(
+                                      padding: const EdgeInsets.only(left: 10, right: 10),
+                                      itemCount: 4,
+                                      anchors: page.data,
+                                    ),
+                                  ],
+                                ),
+                          error: (err, stack) {
+                            print('$err\n$stack');
+                            return Column(
+                              children: [
+                                HomeSectionTitle(
+                                  icon: 'assets/images/live-tv.png',
+                                  title: 'home.section.anchor_live'.tr(),
+                                  onPressed: () => context.push(AppRoutes.anchorList),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 48),
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        Icons.wifi_off_rounded,
+                                        size: 48,
+                                        color: Colors.grey.shade400,
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        'home.error.load_failed'.tr(),
+                                        style: TextStyle(color: Colors.grey.shade500),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      TextButton(
+                                        onPressed: () => ref.refresh(anchorListProvider().future),
+                                        child: Text('common.retry'.tr()),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                          loading: () => Column(
+                            children: [
+                              HomeSectionTitle(
+                                icon: 'assets/images/live-tv.png',
+                                title: 'home.section.anchor_live'.tr(),
+                                onPressed: () => context.push(AppRoutes.anchorList),
+                              ),
+                              const HomeAnchorLiveGrid(),
+                            ],
+                          ),
+                        ),
+                      ),
+                    if (result.matches.isEmpty)
+                      SliverFillRemaining(
                         child: Center(
                           child: Text(
                             'event.empty'.tr(),
                             style: context.textTheme.bodyMedium?.copyWith(color: Colors.grey),
                           ),
                         ),
+                      )
+                    else
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          if (index == result.matches.length) {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              child: Center(child: CircularProgressIndicator()),
+                            );
+                          }
+                          return EventMatchCard(match: result.matches[index]);
+                        }, childCount: result.matches.length + (result.isLoadingMore ? 1 : 0)),
                       ),
-                    ),
-                  );
-                }
-                return ListView.builder(
-                  controller: _scrollController,
-                  padding: EdgeInsets.zero,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  itemCount: result.matches.length + (result.isLoadingMore ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index == result.matches.length) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        child: Center(child: CircularProgressIndicator()),
-                      );
-                    }
-                    return EventMatchCard(match: result.matches[index]);
-                  },
+                  ],
                 );
               },
             ),
@@ -451,7 +567,9 @@ class _DateSelectorBar extends StatelessWidget {
                 onTap: () => onSelected(date),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
-                  decoration: BoxDecoration(color: isSelected ? AppColors.primary : Colors.grey.shade100),
+                  decoration: BoxDecoration(
+                    color: isSelected ? AppColors.primary : AppTheme.of(context).shimmerHighlight,
+                  ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -480,4 +598,3 @@ class _DateSelectorBar extends StatelessWidget {
     );
   }
 }
-

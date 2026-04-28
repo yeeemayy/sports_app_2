@@ -1,7 +1,7 @@
 abstract final class AppRoutes {
   // Shell branches
   static const home = '/home';
-  static const event = '/event';
+  static const anchor = '/anchor';
   static const news = '/news';
   static const data = '/data';
   static const profile = '/profile';
@@ -9,6 +9,8 @@ abstract final class AppRoutes {
   // Profile sub-routes (relative)
   static const profileEdit = 'edit';
   static const profileEditFull = '/profile/edit';
+  static const privacyPolicy = '/profile/privacy-policy';
+  static const userAgreement = '/profile/user-agreement';
 
   // Football match detail
   static const footballMatchDetail = '/event/football/:matchId';
@@ -55,9 +57,9 @@ abstract final class AppRoutes {
   static String newsDetailPath(int id) => '/news/detail/$id';
 
   // Anchor
-  static const anchorList = '/anchors';
-  static const anchor = '/anchor/:anchorId';
-  static String anchorPath(int id) => '/anchor/$id';
+  static const anchorList = '/anchor/anchor-list';
+  static const anchorDetail = '/anchor/anchor-list/:anchorId';
+  static String anchorPath(int id) => '/anchor/anchor-list/$id';
 
   // Video highlight detail
   static const videoDetail = '/video/:videoId';
