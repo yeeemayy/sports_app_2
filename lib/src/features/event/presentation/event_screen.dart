@@ -354,7 +354,7 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
                   slivers: [
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: EdgeInsets.only(top: 16, bottom: _isHot ? 0 : 16),
+                        padding: EdgeInsets.only(top: 16, bottom: 16),
                         child: HomeBannerCarousel(),
                       ),
                     ),

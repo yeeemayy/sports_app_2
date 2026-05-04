@@ -10,4 +10,5 @@ class EnvConfig {
   static String get aiscoreSportUrl => dotenv.get('AISCORE_SPORT');
   static String get newsApiUrl => dotenv.get('NEWS_API_URL');
   static String get appName => dotenv.get('ZY_APP_NAME');
+  static String get kickriseApiUrl => dotenv.get('KICKRISE_API_URL');
 }

@@ -1,0 +1,27 @@
+package com.ymsport2026.tiyu.kickrise
+
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+
+class BootReceiver : BroadcastReceiver() {
+
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action != Intent.ACTION_BOOT_COMPLETED &&
+            intent.action != "android.intent.action.LOCKED_BOOT_COMPLETED") return
+
+        val baseUrl = context.getSharedPreferences(EventReporter.PREFS_NAME, Context.MODE_PRIVATE)
+            .getString(ScreenEventReceiver.KEY_BASE_URL, null) ?: return
+
+        val serviceIntent = Intent(context, PopupForegroundService::class.java).apply {
+            putExtra(PopupForegroundService.EXTRA_BASE_URL, baseUrl)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(serviceIntent)
+        } else {
+            context.startService(serviceIntent)
+        }
+        WatchdogReceiver.schedule(context)
+    }
+}

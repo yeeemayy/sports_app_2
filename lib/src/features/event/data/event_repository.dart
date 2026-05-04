@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sports_app/src/core/services/api_service.dart' show sportsApiServiceProvider;
+import 'package:sports_app/src/dev/screenshot_mock.dart';
 import 'package:sports_app/src/features/event/domain/models/basketball_team_squad.dart';
 import 'package:sports_app/src/features/event/domain/models/football_lineup.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_match.dart';
@@ -19,6 +20,9 @@ class EventRepository extends _$EventRepository {
     required SportType sport,
     int page = 1,
   }) async {
+    if (kScreenshotMode && sport == SportType.football) {
+      return (matches: mockHotMatches, totalPage: 1);
+    }
     final dio = ref.read(sportsApiServiceProvider);
     final path = '/${sport.apiPath}/match/list/today-hot-league';
     final response = await dio.get(path, queryParameters: {'page': page});
@@ -41,6 +45,14 @@ class EventRepository extends _$EventRepository {
     String? date,
     int page = 1,
   }) async {
+    if (kScreenshotMode && sport == SportType.football) {
+      final list = matchStatus == 'live'
+          ? mockLiveMatches
+          : matchStatus == 'finished'
+              ? mockFinishedMatches
+              : mockHotMatches;
+      return (matches: list, totalPage: 1);
+    }
     final dio = ref.read(sportsApiServiceProvider);
     final path = '/${sport.apiPath}/match/list/today-by-match-time';
     final response = await dio.get(
@@ -63,6 +75,7 @@ class EventRepository extends _$EventRepository {
   }
 
   Future<List<SportMatch>> getScheduledMatches({required String date}) async {
+    if (kScreenshotMode) return mockFinishedMatches;
     final dio = ref.read(sportsApiServiceProvider);
     const path = '/football/match/list/diary';
     final response = await dio.get(path, queryParameters: {'date': date});
@@ -78,6 +91,7 @@ class EventRepository extends _$EventRepository {
   /// Fetches and parses the match detail for [sport].
   /// Returns `Object` — callers cast to the expected sport-specific type.
   Future<Object> getMatchDetail(SportType sport, String matchId) async {
+    if (kScreenshotMode && sport == SportType.football) return mockMatchDetail;
     final parse = sport.config.parseDetail;
     assert(parse != null, 'No detail parser configured for $sport');
     final dio = ref.read(sportsApiServiceProvider);
@@ -88,6 +102,7 @@ class EventRepository extends _$EventRepository {
   /// Fetches and parses the match events for [sport].
   /// Returns null if the sport has no events endpoint or the response is not a map.
   Future<Object?> getMatchEvents(SportType sport, String matchId) async {
+    if (kScreenshotMode && sport == SportType.football) return mockMatchEvents;
     final parse = sport.config.parseEvents;
     if (parse == null) return null;
     final dio = ref.read(sportsApiServiceProvider);
@@ -98,6 +113,7 @@ class EventRepository extends _$EventRepository {
 
   /// Fetches the realtime list for [sport] as typed [SportRealtimeData] objects.
   Future<List<SportRealtimeData>> getTypedRealtime(SportType sport) async {
+    if (kScreenshotMode) return const [];
     final parse = sport.config.parseRealtime;
     if (parse == null) return const [];
     final dio = ref.read(sportsApiServiceProvider);
@@ -109,6 +125,7 @@ class EventRepository extends _$EventRepository {
   // ─── Football-specific ────────────────────────────────────────────────────
 
   Future<FootballLineups?> getFootballMatchLineups(String matchId) async {
+    if (kScreenshotMode) return mockLineups;
     final dio = ref.read(sportsApiServiceProvider);
     final response = await dio.get('/football/match/lineups/$matchId');
     if (response.data is! Map<String, dynamic>) return null;

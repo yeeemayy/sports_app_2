@@ -1,11 +1,14 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:sports_app/src/core/config/env_config.dart';
 import 'package:sports_app/src/core/utils/app_info.dart';
 import 'package:sports_app/src/core/utils/app_locale.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
@@ -15,19 +18,19 @@ import 'package:sports_app/src/routes/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await dotenv.load(fileName: '.env');
+  if (Platform.isAndroid) {
+    const kickriseChannel = MethodChannel('kickrise/popup');
+    await kickriseChannel.invokeMethod('startService', {'baseUrl': EnvConfig.kickriseApiUrl});
+  }
   await EasyLocalization.ensureInitialized();
   await AppInfo.init();
   final sharedPreferences = await SharedPreferences.getInstance();
 
   runApp(
     ProviderScope(
-      overrides: [
-        sharedPreferencesProvider.overrideWithValue(sharedPreferences),
-      ],
+      overrides: [sharedPreferencesProvider.overrideWithValue(sharedPreferences)],
       child: EasyLocalization(
         supportedLocales: const [Locale('zh', 'CN'), Locale('en', 'GB')],
         path: 'assets/translations',
@@ -46,8 +49,14 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     AppLocale.update(context.locale);
     final themeMode = ref.watch(themeModeProvider);
-    final lightTitleStyle = context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: Colors.black87);
-    final darkTitleStyle = context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: Colors.white);
+    final lightTitleStyle = context.textTheme.titleMedium?.copyWith(
+      fontWeight: FontWeight.w700,
+      color: Colors.black87,
+    );
+    final darkTitleStyle = context.textTheme.titleMedium?.copyWith(
+      fontWeight: FontWeight.w700,
+      color: Colors.white,
+    );
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       builder: (context, child) => ResponsiveBreakpoints.builder(
@@ -61,7 +70,7 @@ class MyApp extends ConsumerWidget {
           Breakpoint(start: 1200, end: double.infinity, name: DESKTOP),
         ],
       ),
-      title: 'Sports App',
+      title: '球帝体育-球迷必备体育直播神器',
       localizationsDelegates: [CountryLocalizations.delegate, ...context.localizationDelegates],
       supportedLocales: context.supportedLocales,
       locale: context.locale,
@@ -102,11 +111,7 @@ class MyApp extends ConsumerWidget {
           seedColor: AppColors.primary,
           brightness: Brightness.dark,
         ).copyWith(primaryContainer: AppColors.primaryShade300),
-        appBarTheme: AppBarTheme(
-          centerTitle: true,
-          elevation: 0.5,
-          titleTextStyle: darkTitleStyle,
-        ),
+        appBarTheme: AppBarTheme(centerTitle: true, elevation: 0.5, titleTextStyle: darkTitleStyle),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(foregroundColor: AppColors.primary),
         ),
@@ -123,9 +128,7 @@ class MyApp extends ConsumerWidget {
             foregroundColor: AppColors.primary,
           ),
         ),
-        navigationBarTheme: NavigationBarThemeData(
-          indicatorColor: AppColors.primaryShade300,
-        ),
+        navigationBarTheme: NavigationBarThemeData(indicatorColor: AppColors.primaryShade300),
       ),
       routerConfig: ref.watch(appRouterProvider),
     );

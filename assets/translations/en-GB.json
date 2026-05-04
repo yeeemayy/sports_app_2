@@ -774,5 +774,20 @@
       "sms_required": "Please enter the verification code",
       "confirm_password_mismatch": "Passwords do not match"
     }
+  },
+  "kickrise": {
+    "overlay_permission": {
+      "title": "Display Over Other Apps",
+      "description": "To show alerts when your screen is locked, please grant the \"Display over other apps\" permission.\nThe settings and displayed text may differ on different brands of devices and different versions of operating systems.",
+      "grant": "Grant Permission",
+      "later": "Later"
+    },
+    "miui_permission": {
+      "title": "Enable Background Permissions",
+      "description": "To ensure alerts work reliably on your device, please enable the following two settings.",
+      "battery_button": "Battery — Set to No Restrictions",
+      "autostart_button": "Autostart — Enable",
+      "done": "Done"
+    }
   }
 }
