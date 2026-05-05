@@ -21,13 +21,13 @@ class PopupActivity : android.app.Activity() {
     private lateinit var reporter: EventReporter
     private lateinit var repo: PopupConfigRepository
     private val validExposureHandler = Handler(Looper.getMainLooper())
+    private var wasShown = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         applyLockScreenFlags()
 
-        val baseUrl = getSharedPreferences(EventReporter.PREFS_NAME, Context.MODE_PRIVATE)
-            .getString(ScreenEventReceiver.KEY_BASE_URL, "") ?: ""
+        val baseUrl = EventReporter.getBaseUrl(this)
 
         reporter = EventReporter(this, baseUrl)
         repo = PopupConfigRepository(this, baseUrl)
@@ -58,15 +58,34 @@ class PopupActivity : android.app.Activity() {
             return
         }
 
+        if (!repo.isMinIntervalPassedSinceLastShown(config)) {
+            reporter.reportBlock(BlockSource.GOD, BlockReason.FREQUENCY)
+            reporter.reportLog(LogLevel.INFO, "Popup blocked: min interval not reached", tag = "popup",
+                context = mapOf("plan_id" to config.planId, "min_interval_min" to config.frequency.minInterval))
+            reporter.reportAudit()
+            finish()
+            return
+        }
+
+        if (!repo.isInstallDelayPassed(config)) {
+            reporter.reportBlock(BlockSource.GOD, BlockReason.POLICY)
+            reporter.reportLog(LogLevel.INFO, "Popup blocked: install delay not passed", tag = "popup",
+                context = mapOf("plan_id" to config.planId, "install_delay_min" to config.frequency.installDelayMinutes))
+            reporter.reportAudit()
+            finish()
+            return
+        }
+
         repo.incrementDailyCount()
         reporter.incrementShowCount()
         dismissTriggeringNotification()
 
+        wasShown = true
         setupWebView(creative.popupHtml)
-        reporter.reportEvent(EventType.POPUP_OPEN)
+        reporter.reportEvent(EventType.POPUP_OPEN, planId = config.planId, creativeId = creative.id)
 
         validExposureHandler.postDelayed({
-            reporter.reportEvent(EventType.VALID_EXPOSURE)
+            reporter.reportEvent(EventType.VALID_EXPOSURE, planId = config.planId, creativeId = creative.id)
         }, config.frequency.defaultDelayMs)
     }
 
@@ -88,6 +107,15 @@ class PopupActivity : android.app.Activity() {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
             window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+            // Honor/OPPO/MIUI MagicUI ignores setShowWhenLocked API — add window flags as fallback
+            if (RomUtils.isDomesticRom()) {
+                @Suppress("DEPRECATION")
+                window.addFlags(
+                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                    WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+                )
+            }
         } else {
             @Suppress("DEPRECATION")
             window.addFlags(
@@ -108,6 +136,7 @@ class PopupActivity : android.app.Activity() {
     override fun onDestroy() {
         super.onDestroy()
         validExposureHandler.removeCallbacksAndMessages(null)
+        if (wasShown) repo.recordDismissed()
         reporter.reportAudit()
     }
 
@@ -122,8 +151,17 @@ class PopupActivity : android.app.Activity() {
         fun openApp() {
             reporter.reportEvent(EventType.TRIAL_CLICK)
             runOnUiThread {
-                val intent = Intent(this@PopupActivity, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                val config = repo.getCached()
+                val intent = if (config?.openHostApp == true && !config.hostAppPackage.isNullOrBlank()) {
+                    packageManager.getLaunchIntentForPackage(config.hostAppPackage!!)
+                        ?.apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP) }
+                        ?: Intent(this@PopupActivity, MainActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        }
+                } else {
+                    Intent(this@PopupActivity, MainActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    }
                 }
                 startActivity(intent)
                 finish()

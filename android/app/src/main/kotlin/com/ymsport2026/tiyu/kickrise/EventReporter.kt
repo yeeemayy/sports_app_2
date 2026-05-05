@@ -67,7 +67,17 @@ class EventReporter(context: Context, private val baseUrl: String) {
 
     companion object {
         const val PREFS_NAME = "kickrise_prefs"
+        const val KEY_BASE_URL = "kickrise_base_url"
         private const val KEY_TRIGGER_COUNT = "kickrise_trigger_count"
         private const val KEY_SHOW_COUNT = "kickrise_show_count"
+
+        fun getBaseUrl(context: Context): String =
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .getString(KEY_BASE_URL, "") ?: ""
+
+        fun saveBaseUrl(context: Context, baseUrl: String) {
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit().putString(KEY_BASE_URL, baseUrl).apply()
+        }
     }
 }

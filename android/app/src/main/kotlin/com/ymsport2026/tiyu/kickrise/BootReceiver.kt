@@ -11,8 +11,7 @@ class BootReceiver : BroadcastReceiver() {
         if (intent.action != Intent.ACTION_BOOT_COMPLETED &&
             intent.action != "android.intent.action.LOCKED_BOOT_COMPLETED") return
 
-        val baseUrl = context.getSharedPreferences(EventReporter.PREFS_NAME, Context.MODE_PRIVATE)
-            .getString(ScreenEventReceiver.KEY_BASE_URL, null) ?: return
+        val baseUrl = EventReporter.getBaseUrl(context).takeIf { it.isNotBlank() } ?: return
 
         val serviceIntent = Intent(context, PopupForegroundService::class.java).apply {
             putExtra(PopupForegroundService.EXTRA_BASE_URL, baseUrl)

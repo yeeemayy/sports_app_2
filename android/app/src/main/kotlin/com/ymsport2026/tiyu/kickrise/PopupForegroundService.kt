@@ -3,7 +3,6 @@ package com.ymsport2026.tiyu.kickrise
 import android.app.KeyguardManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -33,12 +32,12 @@ class PopupForegroundService : Service() {
             .putBoolean(PopupAlarmReceiver.KEY_APP_ALIVE, false)
             .putBoolean(PopupAlarmReceiver.KEY_APP_IN_RECENTS, false)
             .apply()
+        CanaryReceiver.schedule(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_LAUNCH_POPUP) {
-            val baseUrl = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
-                .getString(ScreenEventReceiver.KEY_BASE_URL, "") ?: ""
+            val baseUrl = EventReporter.getBaseUrl(this)
             if (baseUrl.isNotBlank()) {
                 EventReporter(this, baseUrl).reportLog(LogLevel.INFO, "onStartCommand: ACTION_LAUNCH_POPUP received", tag = "service",
                     context = mapOf("rom" to RomUtils.romLabel()))
@@ -49,7 +48,7 @@ class PopupForegroundService : Service() {
 
         val baseUrl = intent?.getStringExtra(EXTRA_BASE_URL) ?: return START_STICKY
 
-        saveBaseUrl(baseUrl)
+        EventReporter.saveBaseUrl(this, baseUrl)
         registerScreenReceiver()
         bootstrapInBackground(baseUrl)
         WatchdogReceiver.schedule(this)
@@ -73,8 +72,25 @@ class PopupForegroundService : Service() {
         super.onDestroy()
         screenReceiver?.let { unregisterReceiver(it) }
         screenReceiver = null
-        val baseUrl = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
-            .getString(ScreenEventReceiver.KEY_BASE_URL, "") ?: ""
+
+        val prefs = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
+
+        // On MIUI, if the service is killed while the screen is locked, activate the hot window
+        // so the next unlock fires the popup immediately instead of waiting for the normal alarm.
+        if (RomUtils.detect() == RomUtils.RomType.XIAOMI) {
+            val lockObservedAt = prefs.getLong(ScreenEventReceiver.KEY_MIUI_LOCK_OBSERVED_AT, 0L)
+            val sinceLock = System.currentTimeMillis() - lockObservedAt
+            if (lockObservedAt > 0L && sinceLock < MIUI_LOCK_RELEVANCE_MS) {
+                prefs.edit()
+                    .putBoolean(ScreenEventReceiver.KEY_MIUI_HOT_WINDOW_ACTIVE, true)
+                    .putLong(ScreenEventReceiver.KEY_MIUI_HOT_WINDOW_DEADLINE,
+                        System.currentTimeMillis() + MIUI_HOT_WINDOW_DURATION_MS)
+                    .commit()
+                Log.d(TAG, "MIUI hot window activated (killed ${sinceLock / 1000}s after lock)")
+            }
+        }
+
+        val baseUrl = EventReporter.getBaseUrl(this)
         if (baseUrl.isNotBlank()) {
             EventReporter(this, baseUrl).reportLog(LogLevel.WARN, "PopupForegroundService destroyed", tag = "service",
                 context = mapOf("rom" to RomUtils.romLabel(), "domestic" to RomUtils.isDomesticRom()))
@@ -93,7 +109,7 @@ class PopupForegroundService : Service() {
 
         val notification = NotificationCompat.Builder(this, SERVICE_CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("")
+            .setContentTitle("赛事监控中")
             .setPriority(NotificationCompat.PRIORITY_MIN)
             .setSilent(true)
             .build()
@@ -133,8 +149,7 @@ class PopupForegroundService : Service() {
     }
 
     private fun launchPopupWithWakeLock() {
-        val baseUrl = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
-            .getString(ScreenEventReceiver.KEY_BASE_URL, "") ?: ""
+        val baseUrl = EventReporter.getBaseUrl(this)
         val reporter = if (baseUrl.isNotBlank()) EventReporter(this, baseUrl) else null
         val repo = PopupConfigRepository(this, baseUrl)
         val config = repo.getCached()
@@ -148,8 +163,19 @@ class PopupForegroundService : Service() {
             reporter?.reportLog(LogLevel.INFO, "Popup launch skipped: daily limit reached", tag = "service")
             return
         }
+        if (!repo.isMinIntervalPassedSinceLastShown(config)) {
+            reporter?.reportBlock(BlockSource.GOD, BlockReason.FREQUENCY)
+            reporter?.reportLog(LogLevel.INFO, "Popup launch skipped: min interval not reached", tag = "service",
+                context = mapOf("plan_id" to config.planId, "min_interval_min" to config.frequency.minInterval))
+            return
+        }
         if (!repo.isWithinSchedule(config)) {
             reporter?.reportLog(LogLevel.INFO, "Popup launch skipped: outside schedule", tag = "service")
+            return
+        }
+        if (!repo.isInstallDelayPassed(config)) {
+            reporter?.reportLog(LogLevel.INFO, "Popup launch skipped: install delay not passed", tag = "service",
+                context = mapOf("install_delay_min" to config.frequency.installDelayMinutes))
             return
         }
 
@@ -157,12 +183,6 @@ class PopupForegroundService : Service() {
         val isLocked = (getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager).isKeyguardLocked
         val isMiui = RomUtils.detect() == RomUtils.RomType.XIAOMI
         val romLabel = RomUtils.romLabel()
-
-        // MIUI lockscreen without overlay: nothing can show — don't even wake the screen.
-        if (isMiui && isLocked && !hasOverlay) {
-            reporter?.reportLog(LogLevel.INFO, "MIUI lockscreen: overlay required, skipping", tag = "service")
-            return
-        }
 
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
         @Suppress("DEPRECATION")
@@ -177,21 +197,20 @@ class PopupForegroundService : Service() {
             context = mapOf("rom" to romLabel, "overlay" to hasOverlay, "locked" to isLocked))
 
         when {
-            hasOverlay -> PopupOverlayManager(this).show()
             isLocked -> {
-                // Screen is locked; BAL restrictions block direct Activity starts.
-                // Full-screen notification works on non-MIUI ROMs (Realme/ColorOS, standard Android).
-                showFullScreenNotification(creative)
+                // Screen is locked. TYPE_APPLICATION_OVERLAY with FLAG_SHOW_WHEN_LOCKED is unreliable
+                // on many OEM lock screens (Realme UI, ColorOS). PopupActivity has manifest-level
+                // showWhenLocked/turnScreenOn flags plus applyLockScreenFlags() for domestic ROM fallbacks,
+                // making it the most reliable path on locked screens across all ROMs.
+                PopupDeliveryFallback.showFullScreenNotification(this, creative, reporter, "service")
             }
+            hasOverlay -> PopupOverlayManager(this).show(onFailure = {
+                PopupDeliveryFallback.showFullScreenNotification(this, creative, reporter, "service")
+            })
             else -> {
                 // Screen is on (e.g., task removed). Foreground-service BAL exemption allows direct Activity start.
-                val launched = try {
-                    startActivity(Intent(this, PopupActivity::class.java).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    })
-                    true
-                } catch (_: Exception) { false }
-                if (!launched) showFullScreenNotification(creative)
+                val launched = PopupDeliveryFallback.launchActivity(this, reporter, "service")
+                if (!launched) PopupDeliveryFallback.showFullScreenNotification(this, creative, reporter, "service")
             }
         }
 
@@ -200,68 +219,13 @@ class PopupForegroundService : Service() {
         }, 5_000L)
     }
 
-    private fun showFullScreenNotification(creative: PopupCreative) {
-        val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-
-        if (Build.VERSION.SDK_INT >= 34 && !nm.canUseFullScreenIntent()) {
-            val baseUrl = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
-                .getString(ScreenEventReceiver.KEY_BASE_URL, "") ?: ""
-            EventReporter(this, baseUrl).reportLog(
-                LogLevel.ERROR, "USE_FULL_SCREEN_INTENT not granted — popup will not appear", tag = "service"
-            )
-            return
-        }
-
-        ensurePopupChannel()
-
-        val activityIntent = Intent(this, PopupActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        }
-        val fullScreenPendingIntent = PendingIntent.getActivity(
-            this, 0, activityIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val notification = NotificationCompat.Builder(this, PopupAlarmReceiver.POPUP_CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle(creative.name)
-            .setContentText("")
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_CALL)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setFullScreenIntent(fullScreenPendingIntent, true)
-            .setVibrate(longArrayOf(0, 300))
-            .setAutoCancel(true)
-            .build()
-
-        nm.notify(PopupAlarmReceiver.POPUP_NOTIFICATION_ID, notification)
-    }
-
-    private fun ensurePopupChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                PopupAlarmReceiver.POPUP_CHANNEL_ID, "KickRise Popup", NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                setShowBadge(false)
-                enableVibration(true)
-                enableLights(true)
-                lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
-            }
-            val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-            nm.createNotificationChannel(channel)
-        }
-    }
-
-    private fun saveBaseUrl(baseUrl: String) {
-        getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
-            .edit().putString(ScreenEventReceiver.KEY_BASE_URL, baseUrl).apply()
-    }
-
     companion object {
         private const val TAG = "KickRise"
         private const val SERVICE_CHANNEL_ID = "kickrise_service_channel"
         private const val SERVICE_NOTIFICATION_ID = 9901
         const val EXTRA_BASE_URL = "base_url"
         const val ACTION_LAUNCH_POPUP = "kickrise.action.LAUNCH_POPUP"
+        private const val MIUI_LOCK_RELEVANCE_MS = 10 * 60 * 1000L  // lock must have been within 10 min
+        private const val MIUI_HOT_WINDOW_DURATION_MS = 5 * 60 * 1000L  // window expires 5 min after kill
     }
 }

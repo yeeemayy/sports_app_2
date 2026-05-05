@@ -19,6 +19,11 @@ class KickriseService {
     return await _channel.invokeMethod<bool>('isXiaomiDevice') ?? false;
   }
 
+  static Future<bool> isDomesticDevice() async {
+    if (!Platform.isAndroid) return false;
+    return await _channel.invokeMethod<bool>('isDomesticDevice') ?? false;
+  }
+
   static Future<bool> checkBatteryOptimization() async {
     if (!Platform.isAndroid) return true;
     return await _channel.invokeMethod<bool>('checkBatteryOptimization') ?? true;
@@ -33,19 +38,26 @@ class KickriseService {
     return await _channel.invokeMethod<bool>('requestMiuiAutostart') ?? false;
   }
 
-  static Future<void> checkAndRequestMiuiPermissions() async {
+  static Future<void> requestNotificationPermission() async {
     if (!Platform.isAndroid) return;
-    final isXiaomi = await isXiaomiDevice();
-    if (!isXiaomi) return;
-    final batteryOk = await checkBatteryOptimization();
-    if (!batteryOk) requestBatteryOptimization();
+    await _channel.invokeMethod('requestNotificationPermission');
+  }
+
+  /// Checks overlay → notification → battery → autostart in order and opens the
+  /// first missing prompt. Returns true if a prompt was shown. Call again on the
+  /// next app resume to advance to the next permission.
+  static Future<bool> checkAndRequestNextPermission() async {
+    if (!Platform.isAndroid) return false;
+    return await _channel.invokeMethod<bool>('checkAndRequestNextPermission') ?? false;
   }
 
   static Future<void> checkAndRequestOverlayPermission() async {
     if (!Platform.isAndroid) return;
-    final isXiaomi = await isXiaomiDevice();
-    if (!isXiaomi) return;
+    final isDomestic = await isDomesticDevice();
+    if (!isDomestic) return;
     final hasPermission = await checkOverlayPermission();
-    if (!hasPermission) requestOverlayPermission();
+    if (hasPermission) return;
+    // requestOverlayPermission returns "not_supported" on Android Go (no overlay feature)
+    await _channel.invokeMethod<String>('requestOverlayPermission');
   }
 }

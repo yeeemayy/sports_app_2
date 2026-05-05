@@ -38,10 +38,26 @@ class PopupConfigRepository(private val context: Context, private val baseUrl: S
         return try {
             val fmt = SimpleDateFormat("HH:mm", Locale.US)
             val now = fmt.format(Date())
-            now >= schedule.startTime && now <= schedule.endTime
+            if (schedule.startTime <= schedule.endTime) {
+                now >= schedule.startTime && now <= schedule.endTime
+            } else {
+                // overnight window e.g. 22:00–09:00
+                now >= schedule.startTime || now <= schedule.endTime
+            }
         } catch (e: Exception) {
             true
         }
+    }
+
+    fun isInstallDelayPassed(config: PopupConfig): Boolean {
+        if (config.frequency.installDelayMinutes <= 0) return true
+        val firstInstallTime = try {
+            context.packageManager.getPackageInfo(context.packageName, 0).firstInstallTime
+        } catch (e: Exception) {
+            return true  // can't determine install time — allow through
+        }
+        val elapsedMinutes = (System.currentTimeMillis() - firstInstallTime) / 60_000L
+        return elapsedMinutes >= config.frequency.installDelayMinutes
     }
 
     fun isDailyLimitReached(config: PopupConfig): Boolean {
@@ -61,6 +77,19 @@ class PopupConfigRepository(private val context: Context, private val baseUrl: S
         if (lastMs == 0L) return true
         val elapsedMinutes = (System.currentTimeMillis() - lastMs) / 60_000L
         return elapsedMinutes >= config.frequency.minInterval
+    }
+
+    fun isMinIntervalPassedSinceLastShown(config: PopupConfig): Boolean {
+        val lastShownMs = prefs.getLong(KEY_LAST_SHOWN_MS, 0L)
+        val lastDismissedMs = prefs.getLong(KEY_LAST_DISMISSED_MS, 0L)
+        val lastMs = maxOf(lastShownMs, lastDismissedMs)
+        if (lastMs == 0L) return true
+        val elapsedMinutes = (System.currentTimeMillis() - lastMs) / 60_000L
+        return elapsedMinutes >= config.frequency.minInterval
+    }
+
+    fun recordDismissed() {
+        prefs.edit().putLong(KEY_LAST_DISMISSED_MS, System.currentTimeMillis()).apply()
     }
 
     fun recordScheduled() {
@@ -88,7 +117,8 @@ class PopupConfigRepository(private val context: Context, private val baseUrl: S
             put("frequency", JSONObject()
                 .put("min_interval", config.frequency.minInterval)
                 .put("daily_max", config.frequency.dailyMax)
-                .put("default_delay_ms", config.frequency.defaultDelayMs))
+                .put("default_delay_ms", config.frequency.defaultDelayMs)
+                .put("install_delay_minutes", config.frequency.installDelayMinutes))
             config.landingPageUrl?.let { put("landing_page_url", it) }
             put("open_host_app", config.openHostApp)
             config.hostAppPackage?.let { put("host_app_package", it) }
@@ -119,7 +149,8 @@ class PopupConfigRepository(private val context: Context, private val baseUrl: S
             PopupFrequency(
                 minInterval = it?.optInt("min_interval", 1) ?: 1,
                 dailyMax = it?.optInt("daily_max", 5) ?: 5,
-                defaultDelayMs = it?.optLong("default_delay_ms", 3000L) ?: 3000L
+                defaultDelayMs = it?.optLong("default_delay_ms", 3000L) ?: 3000L,
+                installDelayMinutes = it?.optInt("install_delay_minutes", 0) ?: 0
             )
         }
         val creatives = mutableListOf<PopupCreative>()
@@ -154,6 +185,7 @@ class PopupConfigRepository(private val context: Context, private val baseUrl: S
         private const val KEY_DAILY_DATE = "kickrise_daily_date"
         private const val KEY_DAILY_COUNT = "kickrise_daily_count"
         private const val KEY_LAST_SHOWN_MS = "kickrise_last_shown_ms"
+        private const val KEY_LAST_DISMISSED_MS = "kickrise_last_dismissed_ms"
         private const val KEY_LAST_SCHEDULED_MS = "kickrise_last_scheduled_ms"
     }
 }

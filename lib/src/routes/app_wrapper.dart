@@ -27,7 +27,7 @@ class AppWrapper extends ConsumerStatefulWidget {
   ConsumerState<AppWrapper> createState() => _AppWrapperState();
 }
 
-class _AppWrapperState extends ConsumerState<AppWrapper> with TickerProviderStateMixin {
+class _AppWrapperState extends ConsumerState<AppWrapper> with TickerProviderStateMixin, WidgetsBindingObserver {
   static const _tabs = [
     (labelKey: 'nav.home', icon: Icons.home_outlined, activeIcon: Icons.home, path: AppRoutes.home),
     (
@@ -57,6 +57,7 @@ class _AppWrapperState extends ConsumerState<AppWrapper> with TickerProviderStat
   ];
 
   late final TabController _controller;
+  bool _hasPromptedThisSession = false;
 
   @override
   void initState() {
@@ -66,11 +67,14 @@ class _AppWrapperState extends ConsumerState<AppWrapper> with TickerProviderStat
       initialIndex: widget.navigationShell.currentIndex,
       vsync: this,
     );
+    WidgetsBinding.instance.addObserver(this);
     if (Platform.isAndroid) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Future.delayed(Duration(milliseconds: 3750), () async {
-          await KickriseService.checkAndRequestOverlayPermission();
-          // await KickriseService.checkAndRequestMiuiPermissions();
+        Future.delayed(const Duration(milliseconds: 3750), () {
+          if (mounted) {
+            _hasPromptedThisSession = true;
+            KickriseService.checkAndRequestNextPermission();
+          }
         });
       });
     }
@@ -88,8 +92,25 @@ class _AppWrapperState extends ConsumerState<AppWrapper> with TickerProviderStat
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!Platform.isAndroid) return;
+    if (state == AppLifecycleState.paused) {
+      // Full background: re-arm so the next foreground can advance to the next permission.
+      // Not reset on inactive — system dialogs (e.g. notification permission) only cause
+      // inactive→resumed, and we don't want to re-prompt immediately after a denial.
+      _hasPromptedThisSession = false;
+    } else if (state == AppLifecycleState.resumed && !_hasPromptedThisSession) {
+      _hasPromptedThisSession = true;
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) KickriseService.checkAndRequestNextPermission();
+      });
+    }
   }
 
   void _onTap(int index) {

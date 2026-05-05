@@ -202,7 +202,8 @@ class KickRiseApiClient(private val context: Context) {
             PopupFrequency(
                 minInterval = it?.optInt("min_interval", 1) ?: 1,
                 dailyMax = it?.optInt("daily_max", 5) ?: 5,
-                defaultDelayMs = it?.optLong("default_delay_ms", 3000L) ?: 3000L
+                defaultDelayMs = it?.optLong("default_delay_ms", 3000L) ?: 3000L,
+                installDelayMinutes = it?.optInt("install_delay_minutes", 0) ?: 0
             )
         }
         val creatives = mutableListOf<PopupCreative>()

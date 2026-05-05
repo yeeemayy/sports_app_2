@@ -11,10 +11,9 @@ import android.util.Log
 class WatchdogReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        val baseUrl = context.getSharedPreferences(EventReporter.PREFS_NAME, Context.MODE_PRIVATE)
-            .getString(ScreenEventReceiver.KEY_BASE_URL, null)
+        val baseUrl = EventReporter.getBaseUrl(context).takeIf { it.isNotBlank() }
 
-        if (baseUrl.isNullOrBlank()) {
+        if (baseUrl == null) {
             Log.w(TAG, "Watchdog fired but no baseUrl saved — skipping service restart")
             return
         }
@@ -45,12 +44,8 @@ class WatchdogReceiver : BroadcastReceiver() {
             )
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val triggerAt = System.currentTimeMillis() + INTERVAL_MS
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent)
-            } else {
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent)
-            }
-            Log.d(TAG, "Watchdog scheduled in ${INTERVAL_MS / 60_000} min")
+            alarmManager.setAlarmClock(AlarmManager.AlarmClockInfo(triggerAt, pendingIntent), pendingIntent)
+            Log.d(TAG, "Watchdog scheduled in ${INTERVAL_MS / 60_000} min via setAlarmClock")
         }
     }
 }

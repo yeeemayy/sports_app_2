@@ -18,7 +18,7 @@ data class PopupTriggers(val onLock: Boolean, val onUnlock: Boolean)
 
 data class PopupSchedule(val startTime: String, val endTime: String)
 
-data class PopupFrequency(val minInterval: Int, val dailyMax: Int, val defaultDelayMs: Long)
+data class PopupFrequency(val minInterval: Int, val dailyMax: Int, val defaultDelayMs: Long, val installDelayMinutes: Int = 0)
 
 data class PopupCreative(val id: Int, val displayId: String, val name: String, val popupHtml: String)
 

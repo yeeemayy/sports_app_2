@@ -53,11 +53,25 @@
             android:exported="false"
             android:foregroundServiceType="dataSync"/>
 
+        <!-- KickRise: static USER_PRESENT receiver — resurrects service on MIUI after aggressive kill -->
+        <receiver
+            android:name=".kickrise.UnlockReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.USER_PRESENT"/>
+            </intent-filter>
+        </receiver>
+
         <!-- KickRise: lock/unlock broadcast receiver (registered at runtime, not here) -->
 
         <!-- KickRise: alarm fires this to post the popup notification -->
         <receiver
             android:name=".kickrise.PopupAlarmReceiver"
+            android:exported="false"/>
+
+        <!-- KickRise: self-test alarm to verify alarm delivery works on this device/ROM -->
+        <receiver
+            android:name=".kickrise.CanaryReceiver"
             android:exported="false"/>
 
         <!-- KickRise: resurrects the foreground service every 10 min if MIUI/OEM kills it -->

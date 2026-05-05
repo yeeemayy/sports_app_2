@@ -25,9 +25,8 @@ class PopupOverlayManager(private val context: Context) {
     private val handler = Handler(Looper.getMainLooper())
     private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
-    fun show() {
-        val prefs = context.getSharedPreferences(EventReporter.PREFS_NAME, Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString(ScreenEventReceiver.KEY_BASE_URL, "") ?: ""
+    fun show(onFailure: (() -> Unit)? = null) {
+        val baseUrl = EventReporter.getBaseUrl(context)
         val reporter = EventReporter(context, baseUrl)
         val repo = PopupConfigRepository(context, baseUrl)
 
@@ -52,15 +51,27 @@ class PopupOverlayManager(private val context: Context) {
             reporter.reportAudit()
             return
         }
+        if (!repo.isMinIntervalPassedSinceLastShown(config)) {
+            reporter.reportBlock(BlockSource.GOD, BlockReason.FREQUENCY)
+            reporter.reportLog(LogLevel.INFO, "Overlay blocked: min interval not reached", tag = "overlay",
+                context = mapOf("plan_id" to config.planId, "min_interval_min" to config.frequency.minInterval))
+            reporter.reportAudit()
+            return
+        }
 
-        repo.incrementDailyCount()
-        reporter.incrementShowCount()
+        if (!repo.isInstallDelayPassed(config)) {
+            reporter.reportBlock(BlockSource.GOD, BlockReason.POLICY)
+            reporter.reportLog(LogLevel.INFO, "Overlay blocked: install delay not passed", tag = "overlay",
+                context = mapOf("plan_id" to config.planId, "install_delay_min" to config.frequency.installDelayMinutes))
+            reporter.reportAudit()
+            return
+        }
 
-        handler.post { addOverlayView(creative.popupHtml, config, reporter, repo) }
+        handler.post { addOverlayView(creative, config, reporter, repo, onFailure) }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    private fun addOverlayView(html: String, config: PopupConfig, reporter: EventReporter, repo: PopupConfigRepository) {
+    private fun addOverlayView(creative: PopupCreative, config: PopupConfig, reporter: EventReporter, repo: PopupConfigRepository, onFailure: (() -> Unit)? = null) {
         val webView = WebView(context).apply {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
@@ -90,19 +101,22 @@ class PopupOverlayManager(private val context: Context) {
             windowManager.addView(webView, params)
             overlayView = webView
             hideSystemBars(webView)
-            webView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null)
+            webView.loadDataWithBaseURL(null, creative.popupHtml, "text/html", "UTF-8", null)
 
-            reporter.reportEvent(EventType.POPUP_OPEN)
+            repo.incrementDailyCount()
+            reporter.incrementShowCount()
+            reporter.reportEvent(EventType.POPUP_OPEN, planId = config.planId, creativeId = creative.id)
             reporter.reportLog(LogLevel.INFO, "Overlay shown via WindowManager", tag = "overlay",
                 context = mapOf("rom" to RomUtils.romLabel()))
 
             handler.postDelayed({
-                reporter.reportEvent(EventType.VALID_EXPOSURE)
+                reporter.reportEvent(EventType.VALID_EXPOSURE, planId = config.planId, creativeId = creative.id)
             }, config.frequency.defaultDelayMs)
         } catch (e: Exception) {
             Log.e(TAG, "WindowManager.addView failed: ${e.message}")
             reporter.reportLog(LogLevel.ERROR, "WindowManager.addView failed: ${e.message}", tag = "overlay",
                 context = mapOf("error" to (e.message ?: "unknown")))
+            onFailure?.invoke()
         }
     }
 
@@ -130,6 +144,7 @@ class PopupOverlayManager(private val context: Context) {
             overlayView?.let {
                 try { windowManager.removeView(it) } catch (_: Exception) {}
                 overlayView = null
+                PopupConfigRepository(context, EventReporter.getBaseUrl(context)).recordDismissed()
             }
             reporter?.reportAudit()
         }
@@ -145,8 +160,17 @@ class PopupOverlayManager(private val context: Context) {
         @JavascriptInterface
         fun openApp() {
             reporter.reportEvent(EventType.TRIAL_CLICK)
-            val intent = Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            val config = repo.getCached()
+            val intent = if (config?.openHostApp == true && !config.hostAppPackage.isNullOrBlank()) {
+                context.packageManager.getLaunchIntentForPackage(config.hostAppPackage!!)
+                    ?.apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP) }
+                    ?: Intent(context, MainActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    }
+            } else {
+                Intent(context, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                }
             }
             context.startActivity(intent)
             dismiss(reporter)
