@@ -1,9 +1,10 @@
 package com.ymsport2026.tiyu.kickrise
 
 import android.app.KeyguardManager
-import com.ymsport2026.tiyu.OverlayPermissionCompat
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import androidx.core.app.NotificationManagerCompat
+import com.ymsport2026.tiyu.OverlayPermissionCompat
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -141,6 +142,7 @@ class PopupForegroundService : Service() {
                     Log.d(TAG, "Config fetched: enabled=${config.enabled}, onLock=${config.triggers.onLock}, onUnlock=${config.triggers.onUnlock}")
                     reporter.reportLog(LogLevel.INFO, "Config fetched successfully", tag = "bootstrap",
                         context = mapOf("enabled" to config.enabled, "plan_id" to config.planId))
+                    reporter.pruneThrottleKeys(config.planId)
                 } else {
                     Log.w(TAG, "Failed to fetch popup config, using cached if available")
                     reporter.reportLog(LogLevel.WARN, "Failed to fetch popup config, using cached if available", tag = "bootstrap")
@@ -193,23 +195,46 @@ class PopupForegroundService : Service() {
         )
         wakeLock.acquire(10_000L)
 
+        val isInteractive = pm.isInteractive
+        val batteryOptIgnored = pm.isIgnoringBatteryOptimizations(packageName)
+        val notificationEnabled = NotificationManagerCompat.from(this).areNotificationsEnabled()
+        val canUseFullScreenIntent = if (Build.VERSION.SDK_INT >= 34) {
+            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).canUseFullScreenIntent()
+        } else true
+
+        val isDomestic = RomUtils.isDomesticRom()
+        val route = when {
+            isLocked -> "fullscreen_notification"
+            hasOverlay -> "overlay"
+            // Domestic ROMs (HONOR/MagicOS, MIUI, ColorOS, etc.) suppress background activity
+            // launches after USER_PRESENT — startActivity returns silently without showing anything.
+            // Fall back to full-screen notification which is reliably delivered.
+            isDomestic -> "fullscreen_notification"
+            else -> "activity_direct"
+        }
         Log.d(TAG, "Wake lock acquired — launching popup (rom=$romLabel, overlay=$hasOverlay, locked=$isLocked)")
-        reporter?.reportLog(LogLevel.INFO, "Wake lock acquired, launching popup", tag = "service",
-            context = mapOf("rom" to romLabel, "overlay" to hasOverlay, "locked" to isLocked))
+        reporter?.reportLog(LogLevel.INFO, "Launch route selected", tag = "service",
+            context = mapOf(
+                "route" to route, "rom" to romLabel, "sdk" to Build.VERSION.SDK_INT,
+                "domestic" to isDomestic, "locked" to isLocked,
+                "interactive" to isInteractive, "overlay" to hasOverlay,
+                "battery_opt_ignored" to batteryOptIgnored,
+                "notification_enabled" to notificationEnabled,
+                "can_use_fsi" to canUseFullScreenIntent
+            ))
 
         when {
             isLocked -> {
-                // Screen is locked. TYPE_APPLICATION_OVERLAY with FLAG_SHOW_WHEN_LOCKED is unreliable
-                // on many OEM lock screens (Realme UI, ColorOS). PopupActivity has manifest-level
-                // showWhenLocked/turnScreenOn flags plus applyLockScreenFlags() for domestic ROM fallbacks,
-                // making it the most reliable path on locked screens across all ROMs.
                 PopupDeliveryFallback.showFullScreenNotification(this, creative, reporter, "service")
             }
             hasOverlay -> PopupOverlayManager(this).show(onFailure = {
                 PopupDeliveryFallback.showFullScreenNotification(this, creative, reporter, "service")
             })
+            isDomestic -> {
+                PopupDeliveryFallback.showFullScreenNotification(this, creative, reporter, "service")
+            }
             else -> {
-                // Screen is on (e.g., task removed). Foreground-service BAL exemption allows direct Activity start.
+                // Screen is on, non-domestic ROM. Foreground-service BAL exemption allows direct Activity start.
                 val launched = PopupDeliveryFallback.launchActivity(this, reporter, "service")
                 if (!launched) PopupDeliveryFallback.showFullScreenNotification(this, creative, reporter, "service")
             }

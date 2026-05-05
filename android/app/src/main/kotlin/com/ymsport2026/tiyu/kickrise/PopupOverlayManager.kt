@@ -1,6 +1,7 @@
 package com.ymsport2026.tiyu.kickrise
 
 import android.annotation.SuppressLint
+import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -18,6 +19,7 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.ymsport2026.tiyu.MainActivity
+import com.ymsport2026.tiyu.OverlayPermissionCompat
 
 class PopupOverlayManager(private val context: Context) {
 
@@ -113,9 +115,17 @@ class PopupOverlayManager(private val context: Context) {
                 reporter.reportEvent(EventType.VALID_EXPOSURE, planId = config.planId, creativeId = creative.id)
             }, config.frequency.defaultDelayMs)
         } catch (e: Exception) {
+            val isLocked = (context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager).isKeyguardLocked
+            val hasOverlay = OverlayPermissionCompat.canDrawOverlays(context)
+            val layoutType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                "TYPE_APPLICATION_OVERLAY" else "TYPE_TOAST"
             Log.e(TAG, "WindowManager.addView failed: ${e.message}")
-            reporter.reportLog(LogLevel.ERROR, "WindowManager.addView failed: ${e.message}", tag = "overlay",
-                context = mapOf("error" to (e.message ?: "unknown")))
+            reporter.reportLog(LogLevel.ERROR, "WindowManager.addView failed", tag = "overlay",
+                context = mapOf(
+                    "exception" to e.javaClass.simpleName, "message" to (e.message ?: ""),
+                    "sdk" to Build.VERSION.SDK_INT, "overlay_permission" to hasOverlay,
+                    "locked" to isLocked, "layout_type" to layoutType
+                ))
             onFailure?.invoke()
         }
     }

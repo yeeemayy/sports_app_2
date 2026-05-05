@@ -72,10 +72,8 @@ class PopupConfigRepository(private val context: Context, private val baseUrl: S
 
     fun isMinIntervalPassed(config: PopupConfig): Boolean {
         val lastShownMs = prefs.getLong(KEY_LAST_SHOWN_MS, 0L)
-        val lastScheduledMs = prefs.getLong(KEY_LAST_SCHEDULED_MS, 0L)
-        val lastMs = maxOf(lastShownMs, lastScheduledMs)
-        if (lastMs == 0L) return true
-        val elapsedMinutes = (System.currentTimeMillis() - lastMs) / 60_000L
+        if (lastShownMs == 0L) return true
+        val elapsedMinutes = (System.currentTimeMillis() - lastShownMs) / 60_000L
         return elapsedMinutes >= config.frequency.minInterval
     }
 

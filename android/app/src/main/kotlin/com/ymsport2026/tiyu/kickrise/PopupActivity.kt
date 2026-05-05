@@ -32,10 +32,20 @@ class PopupActivity : android.app.Activity() {
         reporter = EventReporter(this, baseUrl)
         repo = PopupConfigRepository(this, baseUrl)
 
+        reporter.reportLog(LogLevel.INFO, "PopupActivity created", tag = "popup",
+            context = mapOf("rom" to RomUtils.romLabel(), "sdk" to android.os.Build.VERSION.SDK_INT,
+                "domestic" to RomUtils.isDomesticRom()))
+
         val config = repo.getCached()
         val creative = config?.creatives?.firstOrNull()
         if (config == null || !config.enabled || creative == null) {
-            reporter.reportLog(LogLevel.WARN, "Popup aborted: no valid config or creative", tag = "popup")
+            val abortReason = when {
+                config == null -> "config_missing"
+                !config.enabled -> "config_disabled"
+                else -> "creative_missing"
+            }
+            reporter.reportLog(LogLevel.WARN, "Popup aborted: no valid config or creative", tag = "popup",
+                context = mapOf("reason" to abortReason))
             finish()
             return
         }

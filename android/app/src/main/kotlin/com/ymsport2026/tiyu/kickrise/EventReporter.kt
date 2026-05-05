@@ -31,10 +31,36 @@ class EventReporter(context: Context, private val baseUrl: String) {
             LogLevel.DEBUG -> Log.d(logTag, fullMessage)
             else -> Log.i(logTag, fullMessage)
         }
-        if (level == LogLevel.ERROR) {
+        val shouldUpload = level == LogLevel.ERROR || level == LogLevel.WARN ||
+            (level == LogLevel.INFO && tag != null && tag in DIAGNOSTIC_TAGS)
+        if (shouldUpload) {
             val log = LogData(level = level, message = message, tag = tag, context = context)
             executor.submit { api.postLogs(baseUrl, listOf(log)) }
         }
+    }
+
+    fun reportLogThrottled(
+        level: String, message: String, tag: String? = null,
+        context: Map<String, Any>? = null,
+        throttleKey: String, throttleMs: Long = 15 * 60 * 1_000L
+    ) {
+        val logTag = "KickRise${if (tag != null) "/$tag" else ""}"
+        val fullMessage = if (context != null) "$message $context" else message
+        when (level) {
+            LogLevel.ERROR -> Log.e(logTag, fullMessage)
+            LogLevel.WARN -> Log.w(logTag, fullMessage)
+            LogLevel.DEBUG -> Log.d(logTag, fullMessage)
+            else -> Log.i(logTag, fullMessage)
+        }
+        val shouldUpload = level == LogLevel.ERROR || level == LogLevel.WARN ||
+            (level == LogLevel.INFO && tag != null && tag in DIAGNOSTIC_TAGS)
+        if (!shouldUpload) return
+        val prefKey = "kickrise_tlog_$throttleKey"
+        val now = System.currentTimeMillis()
+        if (now - prefs.getLong(prefKey, 0L) < throttleMs) return
+        prefs.edit().putLong(prefKey, now).apply()
+        val log = LogData(level = level, message = message, tag = tag, context = context)
+        executor.submit { api.postLogs(baseUrl, listOf(log)) }
     }
 
     fun reportBlock(source: String, reason: String) {
@@ -58,6 +84,17 @@ class EventReporter(context: Context, private val baseUrl: String) {
         prefs.edit().putInt(KEY_SHOW_COUNT, current + 1).apply()
     }
 
+    fun pruneThrottleKeys(currentPlanId: Int) {
+        if (currentPlanId <= 0) return
+        val prefix = "kickrise_tlog_"
+        val globalKeys = setOf("${prefix}no_config", "${prefix}app_alive", "${prefix}app_recents")
+        val editor = prefs.edit()
+        prefs.all.keys
+            .filter { it.startsWith(prefix) && it !in globalKeys && !it.endsWith("_$currentPlanId") }
+            .forEach { editor.remove(it) }
+        editor.apply()
+    }
+
     fun resetCounts() {
         prefs.edit()
             .putInt(KEY_TRIGGER_COUNT, 0)
@@ -66,6 +103,7 @@ class EventReporter(context: Context, private val baseUrl: String) {
     }
 
     companion object {
+        private val DIAGNOSTIC_TAGS = setOf("alarm", "service", "popup", "overlay", "unlock", "bootstrap")
         const val PREFS_NAME = "kickrise_prefs"
         const val KEY_BASE_URL = "kickrise_base_url"
         private const val KEY_TRIGGER_COUNT = "kickrise_trigger_count"

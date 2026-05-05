@@ -11,14 +11,32 @@ import android.util.Log
 class ScreenEventReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d(TAG, "Screen event received: ${intent.action}")
         val baseUrl = EventReporter.getBaseUrl(context)
+        val reporter = EventReporter(context, baseUrl)
         val repo = PopupConfigRepository(context, baseUrl)
-        val config = repo.getCached() ?: run {
+        val action = intent.action ?: "unknown"
+        val rom = RomUtils.romLabel()
+
+        val config = repo.getCached()
+        reporter.reportLog(LogLevel.INFO, "Screen event received", tag = "unlock",
+            context = mapOf(
+                "action" to action, "rom" to rom,
+                "has_config" to (config != null),
+                "enabled" to (config?.enabled ?: false),
+                "plan_id" to (config?.planId ?: -1)
+            ))
+        Log.d(TAG, "Screen event received: $action")
+
+        if (config == null) {
+            reporter.reportLogThrottled(LogLevel.WARN, "Screen event: no cached config, skipping", tag = "unlock",
+                context = mapOf("action" to action, "rom" to rom), throttleKey = "no_config")
             Log.w(TAG, "Screen event received but no cached config — skipping")
             return
         }
         if (!config.enabled) {
+            reporter.reportLogThrottled(LogLevel.WARN, "Screen event: config.enabled=false, skipping", tag = "unlock",
+                context = mapOf("action" to action, "rom" to rom, "plan_id" to config.planId),
+                throttleKey = "cfg_disabled_${config.planId}")
             Log.d(TAG, "Screen event received but config.enabled=false — skipping")
             return
         }
@@ -26,16 +44,30 @@ class ScreenEventReceiver : BroadcastReceiver() {
         when (intent.action) {
             Intent.ACTION_SCREEN_OFF -> {
                 if (RomUtils.detect() == RomUtils.RomType.XIAOMI) recordMiuiLock(context)
-                if (config.triggers.onLock) schedulePopup(context, config)
+                if (config.triggers.onLock) {
+                    schedulePopup(context, config)
+                } else {
+                    reporter.reportLogThrottled(LogLevel.INFO, "Screen event: on_lock=false, skipping", tag = "unlock",
+                        context = mapOf("action" to action, "plan_id" to config.planId),
+                        throttleKey = "lock_off_${config.planId}")
+                }
             }
             Intent.ACTION_USER_PRESENT -> {
                 if (RomUtils.detect() == RomUtils.RomType.XIAOMI && checkAndConsumeHotWindow(context)) {
                     if (config.triggers.onUnlock) {
                         // MIUI hot window: service was killed during lock, fire immediately on unlock
                         schedulePopupWithDelay(context, config, HOT_WINDOW_FIRE_DELAY_MS)
+                    } else {
+                        reporter.reportLogThrottled(LogLevel.INFO, "Screen event: MIUI hot window active but on_unlock=false", tag = "unlock",
+                            context = mapOf("plan_id" to config.planId),
+                            throttleKey = "unlock_off_${config.planId}")
                     }
                 } else if (config.triggers.onUnlock) {
                     schedulePopup(context, config)
+                } else {
+                    reporter.reportLogThrottled(LogLevel.INFO, "Screen event: on_unlock=false, skipping", tag = "unlock",
+                        context = mapOf("action" to action, "plan_id" to config.planId),
+                        throttleKey = "unlock_off_${config.planId}")
                 }
             }
         }
@@ -75,10 +107,14 @@ class ScreenEventReceiver : BroadcastReceiver() {
         val baseUrl = EventReporter.getBaseUrl(context)
         val repo = PopupConfigRepository(context, baseUrl)
         val reporter = EventReporter(context, baseUrl)
+        val rom = RomUtils.romLabel()
 
         if (!repo.isWithinSchedule(config)) {
             reporter.reportBlock(BlockSource.BOOTSTRAP, BlockReason.TIME_WINDOW)
-            reporter.reportLog(LogLevel.INFO, "Popup blocked: outside schedule", tag = "bootstrap")
+            reporter.reportLog(LogLevel.INFO, "Popup blocked: outside schedule", tag = "bootstrap",
+                context = mapOf("plan_id" to config.planId, "rom" to rom,
+                    "schedule_start" to (config.schedule?.startTime ?: "none"),
+                    "schedule_end" to (config.schedule?.endTime ?: "none")))
             Log.d(TAG, "Popup blocked: outside schedule")
             return
         }
@@ -86,7 +122,8 @@ class ScreenEventReceiver : BroadcastReceiver() {
         if (repo.isDailyLimitReached(config)) {
             reporter.reportBlock(BlockSource.BOOTSTRAP, BlockReason.FREQUENCY)
             reporter.reportLog(LogLevel.INFO, "Popup blocked: daily limit reached", tag = "bootstrap",
-                context = mapOf("daily_max" to config.frequency.dailyMax))
+                context = mapOf("plan_id" to config.planId, "rom" to rom,
+                    "daily_max" to config.frequency.dailyMax))
             Log.d(TAG, "Popup blocked: daily limit reached")
             return
         }
@@ -94,7 +131,8 @@ class ScreenEventReceiver : BroadcastReceiver() {
         if (!repo.isMinIntervalPassed(config)) {
             reporter.reportBlock(BlockSource.BOOTSTRAP, BlockReason.FREQUENCY)
             reporter.reportLog(LogLevel.INFO, "Popup blocked: min interval not reached", tag = "bootstrap",
-                context = mapOf("min_interval_min" to config.frequency.minInterval))
+                context = mapOf("plan_id" to config.planId, "rom" to rom,
+                    "min_interval_min" to config.frequency.minInterval))
             Log.d(TAG, "Popup blocked: min_interval not reached (${config.frequency.minInterval} min)")
             return
         }
@@ -102,7 +140,8 @@ class ScreenEventReceiver : BroadcastReceiver() {
         if (!repo.isInstallDelayPassed(config)) {
             reporter.reportBlock(BlockSource.BOOTSTRAP, BlockReason.POLICY)
             reporter.reportLog(LogLevel.INFO, "Popup blocked: install delay not passed", tag = "bootstrap",
-                context = mapOf("install_delay_min" to config.frequency.installDelayMinutes))
+                context = mapOf("plan_id" to config.planId, "rom" to rom,
+                    "install_delay_min" to config.frequency.installDelayMinutes))
             Log.d(TAG, "Popup blocked: install_delay_minutes not passed (${config.frequency.installDelayMinutes} min)")
             return
         }
@@ -119,7 +158,10 @@ class ScreenEventReceiver : BroadcastReceiver() {
         alarmManager.setAlarmClock(AlarmManager.AlarmClockInfo(triggerAt, pendingIntent), pendingIntent)
 
         repo.recordScheduled()
-        Log.d(TAG, "Popup scheduled in ${delayMs / 1000}s via setAlarmClock (ROM: ${RomUtils.romLabel()})")
+        reporter.reportLog(LogLevel.INFO, "Popup scheduled", tag = "bootstrap",
+            context = mapOf("plan_id" to config.planId, "rom" to rom,
+                "delay_ms" to delayMs, "trigger_at_ms" to triggerAt))
+        Log.d(TAG, "Popup scheduled in ${delayMs / 1000}s via setAlarmClock (ROM: $rom)")
     }
 
     companion object {

@@ -11,6 +11,7 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.ymsport2026.tiyu.R
 
 object PopupDeliveryFallback {
@@ -36,11 +37,24 @@ object PopupDeliveryFallback {
     ): Boolean {
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        if (Build.VERSION.SDK_INT >= 34 && !nm.canUseFullScreenIntent()) {
+        val notificationEnabled = NotificationManagerCompat.from(context).areNotificationsEnabled()
+        val canUseFsi = Build.VERSION.SDK_INT < 34 || nm.canUseFullScreenIntent()
+        val channelImportance = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            nm.getNotificationChannel(PopupAlarmReceiver.POPUP_CHANNEL_ID)?.importance ?: -1
+        } else -1
+
+        reporter?.reportLog(LogLevel.INFO, "Full-screen notification attempt", tag = tag,
+            context = mapOf(
+                "sdk" to Build.VERSION.SDK_INT, "notification_enabled" to notificationEnabled,
+                "can_use_fsi" to canUseFsi, "channel_importance" to channelImportance
+            ))
+
+        if (!canUseFsi) {
             reporter?.reportLog(
                 LogLevel.WARN,
                 "USE_FULL_SCREEN_INTENT not granted, trying direct activity fallback",
-                tag = tag
+                tag = tag,
+                context = mapOf("sdk" to Build.VERSION.SDK_INT, "notification_enabled" to notificationEnabled)
             )
             return launchActivity(context, reporter, tag)
         }
@@ -69,13 +83,16 @@ object PopupDeliveryFallback {
 
         return try {
             nm.notify(PopupAlarmReceiver.POPUP_NOTIFICATION_ID, notification)
-            reporter?.reportLog(LogLevel.INFO, "Full-screen notification posted", tag = tag)
+            reporter?.reportLog(LogLevel.INFO, "Full-screen notification posted", tag = tag,
+                context = mapOf("notification_enabled" to notificationEnabled, "channel_importance" to channelImportance))
             true
         } catch (e: SecurityException) {
-            reporter?.reportLog(LogLevel.ERROR, "Notification permission denied: ${e.message}", tag = tag)
+            reporter?.reportLog(LogLevel.ERROR, "Notification permission denied", tag = tag,
+                context = mapOf("exception" to e.javaClass.simpleName, "message" to (e.message ?: "")))
             false
         } catch (e: Exception) {
-            reporter?.reportLog(LogLevel.ERROR, "Full-screen notification failed: ${e.message}", tag = tag)
+            reporter?.reportLog(LogLevel.ERROR, "Full-screen notification failed", tag = tag,
+                context = mapOf("exception" to e.javaClass.simpleName, "message" to (e.message ?: "")))
             false
         }
     }

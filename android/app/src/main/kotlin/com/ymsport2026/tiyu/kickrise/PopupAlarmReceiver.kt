@@ -32,17 +32,31 @@ class PopupAlarmReceiver : BroadcastReceiver() {
                 "rom" to RomUtils.romLabel()
             ))
 
-        if (config == null || !config.enabled || creative == null) return
+        if (config == null || !config.enabled || creative == null) {
+            val abortReason = when {
+                config == null -> "config_missing"
+                !config.enabled -> "config_disabled"
+                else -> "creative_missing"
+            }
+            reporter.reportLog(LogLevel.WARN, "Alarm received but popup aborted", tag = "alarm",
+                context = mapOf("reason" to abortReason, "rom" to RomUtils.romLabel()))
+            wl.release()
+            return
+        }
 
         if (isAppAlive(context)) {
             Log.d(TAG, "Popup skipped: app is in foreground")
-            reporter.reportLog(LogLevel.INFO, "Popup skipped: app is in foreground", tag = "alarm")
+            reporter.reportLogThrottled(LogLevel.INFO, "Popup skipped: app is in foreground", tag = "alarm",
+                throttleKey = "app_alive")
+            wl.release()
             return
         }
 
         if (isAppInRecents(context)) {
             Log.d(TAG, "Popup skipped: app is backgrounded (still in recents)")
-            reporter.reportLog(LogLevel.INFO, "Popup skipped: app is backgrounded (still in recents)", tag = "alarm")
+            reporter.reportLogThrottled(LogLevel.INFO, "Popup skipped: app is backgrounded (still in recents)", tag = "alarm",
+                throttleKey = "app_recents")
+            wl.release()
             return
         }
 
@@ -52,6 +66,7 @@ class PopupAlarmReceiver : BroadcastReceiver() {
         val serviceIntent = Intent(context, PopupForegroundService::class.java).apply {
             action = PopupForegroundService.ACTION_LAUNCH_POPUP
         }
+        var serviceException: String? = null
         val serviceStarted = try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(serviceIntent)
@@ -60,12 +75,14 @@ class PopupAlarmReceiver : BroadcastReceiver() {
             }
             true
         } catch (e: Exception) {
+            serviceException = "${e.javaClass.simpleName}: ${e.message}"
             false
         }
 
         Log.d(TAG, "Launch routed via foreground service: $serviceStarted")
-        reporter.reportLog(LogLevel.INFO, "Routing popup launch", tag = "alarm",
-            context = mapOf("via_service" to serviceStarted, "rom" to RomUtils.romLabel()))
+        val routeCtx = mutableMapOf<String, Any>("via_service" to serviceStarted, "rom" to RomUtils.romLabel())
+        if (serviceException != null) routeCtx["service_error"] = serviceException
+        reporter.reportLog(LogLevel.INFO, "Routing popup launch", tag = "alarm", context = routeCtx)
 
         if (!serviceStarted) {
             Log.d(TAG, "Service start failed — falling back to full-screen notification")
@@ -73,6 +90,8 @@ class PopupAlarmReceiver : BroadcastReceiver() {
         }
 
         wl.release()
+        reporter.reportLog(LogLevel.INFO, "Alarm handler complete, wakelock released", tag = "alarm",
+            context = mapOf("via_service" to serviceStarted))
     }
 
     private fun isAppAlive(context: Context): Boolean =
