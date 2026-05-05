@@ -1,6 +1,7 @@
 package com.ymsport2026.tiyu.kickrise
 
 import android.app.KeyguardManager
+import com.ymsport2026.tiyu.OverlayPermissionCompat
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
@@ -179,7 +180,7 @@ class PopupForegroundService : Service() {
             return
         }
 
-        val hasOverlay = android.provider.Settings.canDrawOverlays(this)
+        val hasOverlay = OverlayPermissionCompat.canDrawOverlays(this)
         val isLocked = (getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager).isKeyguardLocked
         val isMiui = RomUtils.detect() == RomUtils.RomType.XIAOMI
         val romLabel = RomUtils.romLabel()

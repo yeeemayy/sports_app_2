@@ -1,6 +1,5 @@
 package com.ymsport2026.tiyu
 
-import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
@@ -24,6 +23,7 @@ class MainActivity : FlutterActivity() {
     companion object {
         private const val REQUEST_CODE_NOTIFICATIONS = 1001
         private const val KEY_AUTOSTART_SHOWN = "kickrise_autostart_shown"
+        private const val KEY_BATTERY_SHOWN = "kickrise_battery_shown"
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -45,9 +45,17 @@ class MainActivity : FlutterActivity() {
                     result.success(null)
                 }
                 "checkOverlayPermission" -> {
-                    result.success(Settings.canDrawOverlays(this))
+                    result.success(OverlayPermissionCompat.canDrawOverlays(this))
                 }
                 "requestOverlayPermission" -> {
+                    if (!OverlayPermissionCompat.needsUserGrant(this)) {
+                        result.success("already_granted_or_not_required")
+                        return@setMethodCallHandler
+                    }
+                    if (OverlayPermissionCompat.isOverlayUnsupported(this)) {
+                        result.success("not_supported")
+                        return@setMethodCallHandler
+                    }
                     result.success(openOemOverlaySettings())
                 }
                 "isXiaomiDevice" -> {
@@ -120,11 +128,9 @@ class MainActivity : FlutterActivity() {
     private fun checkAndRequestNextPermission(): Boolean {
         val isDomestic = RomUtils.isDomesticRom()
 
-        if (isDomestic && !Settings.canDrawOverlays(this)) {
+        if (isDomestic && OverlayPermissionCompat.needsUserGrant(this) && !OverlayPermissionCompat.isOverlayUnsupported(this)) {
             val opened = openOemOverlaySettings()
-            // "not_supported" = Android Go (no overlay feature); "failed" = no intent resolved.
-            // In both cases fall through so downstream permissions can still be requested.
-            if (opened != "not_supported" && opened != "failed") return true
+            if (opened != "failed") return true
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -142,8 +148,13 @@ class MainActivity : FlutterActivity() {
         }
 
         if (isDomestic) {
-            val pm = getSystemService(POWER_SERVICE) as PowerManager
-            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+            val isXiaomi = RomUtils.detect() == RomUtils.RomType.XIAOMI
+            // MIUI's "No Restriction" does not update isIgnoringBatteryOptimizations(); use a shown-flag instead.
+            val batteryDone = if (isXiaomi)
+                getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE).getBoolean(KEY_BATTERY_SHOWN, false)
+            else
+                (getSystemService(POWER_SERVICE) as PowerManager).isIgnoringBatteryOptimizations(packageName)
+            if (!batteryDone) {
                 openBatteryOptimizationSettings()
                 return true
             }
@@ -176,25 +187,26 @@ class MainActivity : FlutterActivity() {
         val started = miuiCandidates.any { intent ->
             try { startActivity(intent); true } catch (_: Exception) { false }
         }
-        if (!started) {
-            try {
-                startActivity(Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-                    data = Uri.parse("package:$packageName")
-                })
-            } catch (_: Exception) {
-                startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                    data = Uri.parse("package:$packageName")
-                })
-            }
+        if (started) {
+            getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
+                .edit().putBoolean(KEY_BATTERY_SHOWN, true).apply()
+            return
+        }
+        try {
+            startActivity(Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                data = Uri.parse("package:$packageName")
+            })
+        } catch (_: Exception) {
+            startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.parse("package:$packageName")
+            })
         }
     }
 
     // Opens the most direct overlay permission settings screen available for this ROM.
     // Returns a label indicating which path succeeded, for analytics ("oem" | "standard" | "fallback" | "failed" | "not_supported").
     private fun openOemOverlaySettings(): String {
-        // Android Go edition (low RAM) does not have the "Display over other apps" feature.
-        val am = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        if (am.isLowRamDevice) return "not_supported"
+        if (OverlayPermissionCompat.isOverlayUnsupported(this)) return "not_supported"
 
         // Each candidate is paired with the label returned if it succeeds.
         // OEM-specific screens are tried first; they surface the exact toggle without extra navigation.
@@ -245,6 +257,10 @@ class MainActivity : FlutterActivity() {
                 // Older Honor / Huawei EMUI path
                 candidates += Intent().apply {
                     component = ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.addviewmonitor.AddViewMonitorActivity")
+                } to "oem"
+                // Huawei permission manager (some EMUI versions surface overlay toggle here)
+                candidates += Intent().apply {
+                    component = ComponentName("com.huawei.permissionmanager", "com.huawei.permissionmanager.ui.MainActivity")
                 } to "oem"
             }
             RomUtils.RomType.MEIZU -> {
