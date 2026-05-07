@@ -57,7 +57,6 @@ class KickriseService {
     if (!isDomestic) return;
     final hasPermission = await checkOverlayPermission();
     if (hasPermission) return;
-    // requestOverlayPermission returns "not_supported" on Android Go (no overlay feature)
     await _channel.invokeMethod<String>('requestOverlayPermission');
   }
 }

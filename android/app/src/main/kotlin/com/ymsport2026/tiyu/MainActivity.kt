@@ -1,14 +1,17 @@
 package com.ymsport2026.tiyu
 
+import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.ymsport2026.tiyu.kickrise.EventReporter
+import com.ymsport2026.tiyu.kickrise.LogLevel
 import com.ymsport2026.tiyu.kickrise.PopupAlarmReceiver
 import com.ymsport2026.tiyu.kickrise.PopupForegroundService
 import com.ymsport2026.tiyu.kickrise.RomUtils
@@ -24,6 +27,10 @@ class MainActivity : FlutterActivity() {
         private const val REQUEST_CODE_NOTIFICATIONS = 1001
         private const val KEY_AUTOSTART_SHOWN = "kickrise_autostart_shown"
         private const val KEY_BATTERY_SHOWN = "kickrise_battery_shown"
+        private const val KEY_LAST_OVERLAY_ROUTE = "kickrise_last_overlay_route"
+        private const val KEY_LAST_OVERLAY_ACTION = "kickrise_last_overlay_action"
+        private const val KEY_LAST_OVERLAY_COMPONENT = "kickrise_last_overlay_component"
+        private const val KEY_OVERLAY_SETTINGS_OPENED = "kickrise_overlay_settings_opened"
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -50,10 +57,6 @@ class MainActivity : FlutterActivity() {
                 "requestOverlayPermission" -> {
                     if (!OverlayPermissionCompat.needsUserGrant(this)) {
                         result.success("already_granted_or_not_required")
-                        return@setMethodCallHandler
-                    }
-                    if (OverlayPermissionCompat.isOverlayUnsupported(this)) {
-                        result.success("not_supported")
                         return@setMethodCallHandler
                     }
                     result.success(openOemOverlaySettings())
@@ -96,8 +99,22 @@ class MainActivity : FlutterActivity() {
     override fun onResume() {
         super.onResume()
         setAppAlive(true)
-        getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
-            .edit().putBoolean(PopupAlarmReceiver.KEY_APP_IN_RECENTS, true).apply()
+        val prefs = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
+        prefs.edit().putBoolean(PopupAlarmReceiver.KEY_APP_IN_RECENTS, true).apply()
+
+        if (prefs.getBoolean(KEY_OVERLAY_SETTINGS_OPENED, false)) {
+            prefs.edit().putBoolean(KEY_OVERLAY_SETTINGS_OPENED, false).apply()
+            val granted = OverlayPermissionCompat.canDrawOverlays(this)
+            val lastRoute = prefs.getString(KEY_LAST_OVERLAY_ROUTE, "unknown") ?: "unknown"
+            val lastAction = prefs.getString(KEY_LAST_OVERLAY_ACTION, "") ?: ""
+            val lastComponent = prefs.getString(KEY_LAST_OVERLAY_COMPONENT, "") ?: ""
+            logOverlay("overlay_resume_check", deviceContext() + mapOf(
+                "last_overlay_route" to lastRoute,
+                "last_overlay_action" to lastAction,
+                "last_overlay_component" to lastComponent,
+                "overlay_granted_after_resume" to granted
+            ))
+        }
     }
 
     override fun onStop() {
@@ -108,6 +125,25 @@ class MainActivity : FlutterActivity() {
     private fun setAppAlive(alive: Boolean) {
         getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
             .edit().putBoolean(PopupAlarmReceiver.KEY_APP_ALIVE, alive).apply()
+    }
+
+    private fun deviceContext(): Map<String, Any> {
+        val am = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        return mapOf(
+            "rom" to RomUtils.romLabel(),
+            "brand" to Build.BRAND,
+            "model" to Build.MODEL,
+            "sdk" to Build.VERSION.SDK_INT,
+            "is_low_ram" to am.isLowRamDevice
+        )
+    }
+
+    private fun logOverlay(message: String, ctx: Map<String, Any>) {
+        Log.i("KickRise/overlay", "$message $ctx")
+        val baseUrl = EventReporter.getBaseUrl(this)
+        if (baseUrl.isNotBlank()) {
+            EventReporter(this, baseUrl).reportLog(LogLevel.INFO, message, "overlay", ctx)
+        }
     }
 
     private fun startPopupService(baseUrl: String) {
@@ -128,7 +164,7 @@ class MainActivity : FlutterActivity() {
     private fun checkAndRequestNextPermission(): Boolean {
         val isDomestic = RomUtils.isDomesticRom()
 
-        if (isDomestic && OverlayPermissionCompat.needsUserGrant(this) && !OverlayPermissionCompat.isOverlayUnsupported(this)) {
+        if (isDomestic && OverlayPermissionCompat.needsUserGrant(this)) {
             val opened = openOemOverlaySettings()
             if (opened != "failed") return true
         }
@@ -204,10 +240,8 @@ class MainActivity : FlutterActivity() {
     }
 
     // Opens the most direct overlay permission settings screen available for this ROM.
-    // Returns a label indicating which path succeeded, for analytics ("oem" | "standard" | "fallback" | "failed" | "not_supported").
+    // Returns a label indicating which path succeeded, for analytics ("oem" | "standard" | "fallback" | "failed").
     private fun openOemOverlaySettings(): String {
-        if (OverlayPermissionCompat.isOverlayUnsupported(this)) return "not_supported"
-
         // Each candidate is paired with the label returned if it succeeds.
         // OEM-specific screens are tried first; they surface the exact toggle without extra navigation.
         val candidates = mutableListOf<Pair<Intent, String>>()
@@ -250,6 +284,7 @@ class MainActivity : FlutterActivity() {
                 } to "oem"
             }
             RomUtils.RomType.HUAWEI, RomUtils.RomType.HONOR -> {
+                candidates += Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")) to "standard"
                 // Standalone Honor devices (MagicUI 7+) use com.hihonor.systemmanager
                 candidates += Intent().apply {
                     component = ComponentName("com.hihonor.systemmanager", "com.hihonor.systemmanager.addviewmonitor.AddViewMonitorActivity")
@@ -272,19 +307,38 @@ class MainActivity : FlutterActivity() {
             else -> Unit
         }
 
-        if (romType != RomUtils.RomType.XIAOMI) {
+        if (romType != RomUtils.RomType.XIAOMI &&
+            romType != RomUtils.RomType.HUAWEI &&
+            romType != RomUtils.RomType.HONOR) {
             candidates += Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")) to "standard"
         }
         candidates += Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")) to "fallback"
 
+        val baseCtx = deviceContext()
+
         for ((intent, label) in candidates) {
+            val action = intent.action ?: ""
+            val component = intent.component?.flattenToShortString() ?: ""
             try {
                 startActivity(intent)
+                logOverlay("overlay_settings_opened", baseCtx + mapOf(
+                    "intent_label" to label,
+                    "intent_action" to action,
+                    "intent_component" to component,
+                    "start_success" to true
+                ))
+                getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE).edit()
+                    .putString(KEY_LAST_OVERLAY_ROUTE, label)
+                    .putString(KEY_LAST_OVERLAY_ACTION, action)
+                    .putString(KEY_LAST_OVERLAY_COMPONENT, component)
+                    .putBoolean(KEY_OVERLAY_SETTINGS_OPENED, true)
+                    .apply()
                 return label
             } catch (_: Exception) {
-                // Intent not resolvable on this device — try the next candidate.
+                Log.d("KickRise/overlay", "overlay_intent_failed label=$label action=$action component=$component brand=${Build.BRAND} model=${Build.MODEL}")
             }
         }
+        logOverlay("overlay_settings_failed", baseCtx + mapOf("start_success" to false))
         return "failed"
     }
 
