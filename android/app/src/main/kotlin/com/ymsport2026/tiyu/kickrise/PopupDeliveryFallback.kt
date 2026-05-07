@@ -85,6 +85,13 @@ object PopupDeliveryFallback {
             nm.notify(PopupAlarmReceiver.POPUP_NOTIFICATION_ID, notification)
             reporter?.reportLog(LogLevel.INFO, "Full-screen notification posted", tag = tag,
                 context = mapOf("notification_enabled" to notificationEnabled, "channel_importance" to channelImportance))
+            reporter?.reportLog(LogLevel.INFO, "fsi_posted", tag = "funnel",
+                context = mapOf(
+                    "sdk" to Build.VERSION.SDK_INT,
+                    "notification_enabled" to notificationEnabled,
+                    "can_use_fsi" to canUseFsi,
+                    "channel_importance" to channelImportance
+                ))
             true
         } catch (e: SecurityException) {
             reporter?.reportLog(LogLevel.ERROR, "Notification permission denied", tag = tag,

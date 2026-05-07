@@ -110,6 +110,8 @@ class PopupOverlayManager(private val context: Context) {
             reporter.reportEvent(EventType.POPUP_OPEN, planId = config.planId, creativeId = creative.id)
             reporter.reportLog(LogLevel.INFO, "Overlay shown via WindowManager", tag = "overlay",
                 context = mapOf("rom" to RomUtils.romLabel()))
+            reporter.reportLog(LogLevel.INFO, "popup_render_success", tag = "funnel",
+                context = mapOf("method" to "overlay", "rom" to RomUtils.romLabel(), "sdk" to Build.VERSION.SDK_INT))
 
             handler.postDelayed({
                 reporter.reportEvent(EventType.VALID_EXPOSURE, planId = config.planId, creativeId = creative.id)

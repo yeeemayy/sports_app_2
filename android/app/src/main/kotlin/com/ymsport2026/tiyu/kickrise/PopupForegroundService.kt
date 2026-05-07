@@ -135,6 +135,7 @@ class PopupForegroundService : Service() {
             val api = KickRiseApiClient(this)
             api.postHeartbeat(baseUrl)
 
+            // Popup config is on the critical path — fetch it first so delivery is not delayed.
             val reporter = EventReporter(this, baseUrl)
             val repo = PopupConfigRepository(this, baseUrl)
             repo.fetchAndCache { config ->
@@ -147,6 +148,13 @@ class PopupForegroundService : Service() {
                     Log.w(TAG, "Failed to fetch popup config, using cached if available")
                     reporter.reportLog(LogLevel.WARN, "Failed to fetch popup config, using cached if available", tag = "bootstrap")
                 }
+            }
+
+            // Route config is only needed for the permission settings UI, not popup delivery.
+            // Refresh it after popup config so a slow/unavailable route endpoint can't delay popups.
+            val remoteRouteConfig = RemoteRouteConfig(this, baseUrl)
+            if (remoteRouteConfig.isStale()) {
+                remoteRouteConfig.fetchAndCache()
             }
         }
     }
@@ -220,6 +228,12 @@ class PopupForegroundService : Service() {
                 "interactive" to isInteractive, "overlay" to hasOverlay,
                 "battery_opt_ignored" to batteryOptIgnored,
                 "notification_enabled" to notificationEnabled,
+                "can_use_fsi" to canUseFullScreenIntent
+            ))
+        reporter?.reportLog(LogLevel.INFO, "popup_route_selected", tag = "funnel",
+            context = mapOf(
+                "route" to route, "rom" to romLabel, "sdk" to Build.VERSION.SDK_INT,
+                "locked" to isLocked, "overlay" to hasOverlay, "domestic" to isDomestic,
                 "can_use_fsi" to canUseFullScreenIntent
             ))
 

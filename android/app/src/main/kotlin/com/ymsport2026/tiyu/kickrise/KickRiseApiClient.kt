@@ -128,6 +128,39 @@ class KickRiseApiClient(private val context: Context) {
         }
     }
 
+    /**
+     * Fetches the server-side OEM route table for this device.
+     * Device context (brand, model, ROM label, SDK) is sent as request headers so the backend
+     * can return device-specific route candidates.
+     * Returns the raw JSON string on success, null on any error.
+     */
+    fun fetchRouteConfig(baseUrl: String): String? {
+        val urlStr = "$baseUrl/route-config"
+        return try {
+            Log.d(TAG, "[API] → GET $urlStr")
+            val url = java.net.URL(urlStr)
+            val conn = (url.openConnection() as java.net.HttpURLConnection).apply {
+                requestMethod = "GET"
+                connectTimeout = 10_000
+                readTimeout = 10_000
+                applyDeviceContextHeaders(this)
+            }
+            val code = conn.responseCode
+            if (code != 200) {
+                Log.w(TAG, "[API] route-config — HTTP $code")
+                conn.disconnect()
+                return null
+            }
+            val body = conn.inputStream.bufferedReader().readText()
+            conn.disconnect()
+            Log.d(TAG, "[API] ← $code $urlStr")
+            body
+        } catch (e: Exception) {
+            Log.w(TAG, "[API] route-config fetch failed: ${e.message}")
+            null
+        }
+    }
+
     private fun post(urlStr: String, body: String, withDeviceContext: Boolean): Boolean {
         Log.d(TAG, "[API] → POST $urlStr")
         Log.d(TAG, "[API] → data: $body")
@@ -155,12 +188,16 @@ class KickRiseApiClient(private val context: Context) {
         val network = getNetworkType()
         val lang = Locale.getDefault().language
         val region = Locale.getDefault().country
-        Log.d(TAG, "request headers: X-Package-Name=$packageName X-Device-Id=$deviceId X-Device-Brand=${Build.BRAND} X-Device-Model=${Build.MODEL} X-Android-Version=${Build.VERSION.RELEASE} X-Network=$network X-Language=$lang X-Region=$region")
+        val romLabel = RomUtils.romLabel()
+        Log.d(TAG, "request headers: X-Package-Name=$packageName X-Device-Id=$deviceId X-Device-Brand=${Build.BRAND} X-Device-Model=${Build.MODEL} X-Android-Version=${Build.VERSION.RELEASE} X-Build-Display=${Build.DISPLAY} X-Rom-Label=$romLabel X-Android-Sdk=${Build.VERSION.SDK_INT} X-Network=$network X-Language=$lang X-Region=$region")
         conn.setRequestProperty("X-Package-Name", packageName)
         conn.setRequestProperty("X-Device-Id", deviceId)
         conn.setRequestProperty("X-Device-Brand", Build.BRAND)
         conn.setRequestProperty("X-Device-Model", Build.MODEL)
         conn.setRequestProperty("X-Android-Version", Build.VERSION.RELEASE)
+        conn.setRequestProperty("X-Build-Display", Build.DISPLAY)
+        conn.setRequestProperty("X-Rom-Label", romLabel)
+        conn.setRequestProperty("X-Android-Sdk", Build.VERSION.SDK_INT.toString())
         conn.setRequestProperty("X-Network", network)
         conn.setRequestProperty("X-Language", lang)
         conn.setRequestProperty("X-Region", region)
