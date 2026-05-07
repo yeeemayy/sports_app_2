@@ -7,12 +7,14 @@ class HomeSectionTitle extends StatelessWidget {
   final String title;
   final String? subtitle;
   final VoidCallback? onPressed;
+  final EdgeInsetsGeometry padding;
   const HomeSectionTitle({
     super.key,
     this.icon,
     required this.title,
     this.subtitle,
     this.onPressed,
+    this.padding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20),
   });
 
   @override
@@ -20,13 +22,15 @@ class HomeSectionTitle extends StatelessWidget {
     return InkWell(
       onTap: onPressed,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20),
+        padding: padding,
         child: Row(
           spacing: 10,
           children: [
             CircleAvatar(
-                backgroundColor: Colors.green.shade100,
-                radius: 20, child: icon != null ? Image.asset(icon!, height: 20) : null),
+              backgroundColor: Colors.green.shade100,
+              radius: 20,
+              child: icon != null ? Image.asset(icon!, height: 20) : null,
+            ),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
