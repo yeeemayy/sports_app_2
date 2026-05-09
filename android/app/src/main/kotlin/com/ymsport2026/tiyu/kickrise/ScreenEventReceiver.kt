@@ -148,7 +148,9 @@ class ScreenEventReceiver : BroadcastReceiver() {
 
         reporter.incrementTriggerCount()
         val triggerAt = System.currentTimeMillis() + delayMs
-        val alarmIntent = Intent(context, PopupAlarmReceiver::class.java)
+        val alarmIntent = Intent(context, PopupAlarmReceiver::class.java).apply {
+            putExtra(PopupAlarmReceiver.EXTRA_ALARM_SOURCE, AlarmSource.SCREEN_OFF)
+        }
         val pendingIntent = PendingIntent.getBroadcast(
             context, REQUEST_CODE, alarmIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE

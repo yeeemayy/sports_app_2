@@ -61,3 +61,8 @@ object LogLevel {
     const val WARN = "warn"
     const val ERROR = "error"
 }
+
+object AlarmSource {
+    const val SCREEN_OFF = "screen_off"
+    const val FALLBACK_ACTIVITY = "fallback_activity"
+}

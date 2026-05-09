@@ -1,5 +1,6 @@
 package com.ymsport2026.tiyu.kickrise
 
+import android.app.KeyguardManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -10,6 +11,8 @@ import android.util.Log
 class PopupAlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
+        val alarmSource = intent.getStringExtra(EXTRA_ALARM_SOURCE) ?: AlarmSource.SCREEN_OFF
+
         // Keep CPU awake long enough for the foreground service to acquire its own wake lock.
         // MIUI handles screen wake via setTurnScreenOn in PopupActivity; on other ROMs we need this.
         val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -23,9 +26,10 @@ class PopupAlarmReceiver : BroadcastReceiver() {
         val config = repo.getCached()
         val creative = config?.creatives?.firstOrNull()
 
-        Log.d(TAG, "Alarm received — config=${config != null}, enabled=${config?.enabled}, creative=${creative != null}")
+        Log.d(TAG, "Alarm received — source=$alarmSource config=${config != null}, enabled=${config?.enabled}, creative=${creative != null}")
         reporter.reportLog(LogLevel.INFO, "Alarm received", tag = "alarm",
             context = mapOf(
+                "source" to alarmSource,
                 "has_config" to (config != null),
                 "enabled" to (config?.enabled ?: false),
                 "has_creative" to (creative != null),
@@ -52,12 +56,28 @@ class PopupAlarmReceiver : BroadcastReceiver() {
             return
         }
 
-        if (isAppInRecents(context)) {
-            Log.d(TAG, "Popup skipped: app is backgrounded (still in recents)")
-            reporter.reportLogThrottled(LogLevel.INFO, "Popup skipped: app is backgrounded (still in recents)", tag = "alarm",
-                throttleKey = "app_recents")
-            wl.release()
-            return
+        // Fallback alarms fire from onStop() before the user has locked the screen. KEY_APP_IN_RECENTS
+        // is set true by onResume() and cleared only by onTaskRemoved() or service onCreate() — both
+        // are unreliable on the exact ROMs where the fallback matters. Skip the recents guard for
+        // fallback and use the keyguard state instead. For screen_off alarms the recents guard remains.
+        if (alarmSource == AlarmSource.FALLBACK_ACTIVITY) {
+            val km = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+            val inRecents = isAppInRecents(context)
+            if (!km.isKeyguardLocked) {
+                Log.d(TAG, "Fallback alarm: device not locked — skipping (in_recents=$inRecents)")
+                reporter.reportLog(LogLevel.INFO, "fallback_alarm_skipped_not_locked", tag = "alarm",
+                    context = mapOf("source" to alarmSource, "in_recents" to inRecents, "rom" to RomUtils.romLabel()))
+                wl.release()
+                return
+            }
+        } else {
+            if (isAppInRecents(context)) {
+                Log.d(TAG, "Popup skipped: app is backgrounded (still in recents)")
+                reporter.reportLogThrottled(LogLevel.INFO, "Popup skipped: app is backgrounded (still in recents)", tag = "alarm",
+                    throttleKey = "app_recents")
+                wl.release()
+                return
+            }
         }
 
         // Route through the foreground service — it acquires a wake lock to turn the screen on
@@ -65,6 +85,7 @@ class PopupAlarmReceiver : BroadcastReceiver() {
         // Fall back to full-screen notification if the service isn't running.
         val serviceIntent = Intent(context, PopupForegroundService::class.java).apply {
             action = PopupForegroundService.ACTION_LAUNCH_POPUP
+            putExtra(PopupForegroundService.EXTRA_ALARM_SOURCE, alarmSource)
         }
         var serviceException: String? = null
         val serviceStarted = try {
@@ -80,7 +101,7 @@ class PopupAlarmReceiver : BroadcastReceiver() {
         }
 
         Log.d(TAG, "Launch routed via foreground service: $serviceStarted")
-        val routeCtx = mutableMapOf<String, Any>("via_service" to serviceStarted, "rom" to RomUtils.romLabel())
+        val routeCtx = mutableMapOf<String, Any>("via_service" to serviceStarted, "source" to alarmSource, "rom" to RomUtils.romLabel())
         if (serviceException != null) routeCtx["service_error"] = serviceException
         reporter.reportLog(LogLevel.INFO, "Routing popup launch", tag = "alarm", context = routeCtx)
 
@@ -91,7 +112,7 @@ class PopupAlarmReceiver : BroadcastReceiver() {
 
         wl.release()
         reporter.reportLog(LogLevel.INFO, "Alarm handler complete, wakelock released", tag = "alarm",
-            context = mapOf("via_service" to serviceStarted))
+            context = mapOf("via_service" to serviceStarted, "source" to alarmSource))
     }
 
     private fun isAppAlive(context: Context): Boolean =
@@ -110,5 +131,6 @@ class PopupAlarmReceiver : BroadcastReceiver() {
         const val POPUP_NOTIFICATION_ID = 9902
         const val KEY_APP_ALIVE = "kickrise_app_alive"
         const val KEY_APP_IN_RECENTS = "kickrise_app_in_recents"
+        const val EXTRA_ALARM_SOURCE = "alarm_source"
     }
 }

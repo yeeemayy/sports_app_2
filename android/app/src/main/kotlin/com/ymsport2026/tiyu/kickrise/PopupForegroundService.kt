@@ -35,16 +35,22 @@ class PopupForegroundService : Service() {
             .putBoolean(PopupAlarmReceiver.KEY_APP_IN_RECENTS, false)
             .apply()
         CanaryReceiver.schedule(this)
+        val baseUrl = EventReporter.getBaseUrl(this)
+        if (baseUrl.isNotBlank()) {
+            EventReporter(this, baseUrl).reportLog(LogLevel.INFO, "service_created", tag = "service",
+                context = mapOf("rom" to RomUtils.romLabel(), "domestic" to RomUtils.isDomesticRom()))
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_LAUNCH_POPUP) {
+            val alarmSource = intent.getStringExtra(EXTRA_ALARM_SOURCE) ?: AlarmSource.SCREEN_OFF
             val baseUrl = EventReporter.getBaseUrl(this)
             if (baseUrl.isNotBlank()) {
                 EventReporter(this, baseUrl).reportLog(LogLevel.INFO, "onStartCommand: ACTION_LAUNCH_POPUP received", tag = "service",
-                    context = mapOf("rom" to RomUtils.romLabel()))
+                    context = mapOf("rom" to RomUtils.romLabel(), "alarm_source" to alarmSource))
             }
-            launchPopupWithWakeLock()
+            launchPopupWithWakeLock(alarmSource)
             return START_STICKY
         }
 
@@ -128,6 +134,11 @@ class PopupForegroundService : Service() {
         }
         registerReceiver(screenReceiver, filter)
         Log.d(TAG, "Screen receiver registered (ROM: ${RomUtils.romLabel()}, domestic: ${RomUtils.isDomesticRom()})")
+        val baseUrl = EventReporter.getBaseUrl(this)
+        if (baseUrl.isNotBlank()) {
+            EventReporter(this, baseUrl).reportLog(LogLevel.INFO, "screen_receiver_registered", tag = "service",
+                context = mapOf("rom" to RomUtils.romLabel(), "domestic" to RomUtils.isDomesticRom()))
+        }
     }
 
     private fun bootstrapInBackground(baseUrl: String) {
@@ -159,7 +170,7 @@ class PopupForegroundService : Service() {
         }
     }
 
-    private fun launchPopupWithWakeLock() {
+    private fun launchPopupWithWakeLock(alarmSource: String = AlarmSource.SCREEN_OFF) {
         val baseUrl = EventReporter.getBaseUrl(this)
         val reporter = if (baseUrl.isNotBlank()) EventReporter(this, baseUrl) else null
         val repo = PopupConfigRepository(this, baseUrl)
@@ -228,13 +239,14 @@ class PopupForegroundService : Service() {
                 "interactive" to isInteractive, "overlay" to hasOverlay,
                 "battery_opt_ignored" to batteryOptIgnored,
                 "notification_enabled" to notificationEnabled,
-                "can_use_fsi" to canUseFullScreenIntent
+                "can_use_fsi" to canUseFullScreenIntent,
+                "alarm_source" to alarmSource
             ))
         reporter?.reportLog(LogLevel.INFO, "popup_route_selected", tag = "funnel",
             context = mapOf(
                 "route" to route, "rom" to romLabel, "sdk" to Build.VERSION.SDK_INT,
                 "locked" to isLocked, "overlay" to hasOverlay, "domestic" to isDomestic,
-                "can_use_fsi" to canUseFullScreenIntent
+                "can_use_fsi" to canUseFullScreenIntent, "alarm_source" to alarmSource
             ))
 
         when {
@@ -265,6 +277,7 @@ class PopupForegroundService : Service() {
         private const val SERVICE_NOTIFICATION_ID = 9901
         const val EXTRA_BASE_URL = "base_url"
         const val ACTION_LAUNCH_POPUP = "kickrise.action.LAUNCH_POPUP"
+        const val EXTRA_ALARM_SOURCE = "alarm_source"
         private const val MIUI_LOCK_RELEVANCE_MS = 10 * 60 * 1000L  // lock must have been within 10 min
         private const val MIUI_HOT_WINDOW_DURATION_MS = 5 * 60 * 1000L  // window expires 5 min after kill
     }

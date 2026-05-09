@@ -1,17 +1,21 @@
 package com.ymsport2026.tiyu
 
 import android.app.ActivityManager
+import android.app.AlarmManager
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.ymsport2026.tiyu.kickrise.AlarmSource
 import com.ymsport2026.tiyu.kickrise.EventReporter
 import com.ymsport2026.tiyu.kickrise.LogLevel
 import com.ymsport2026.tiyu.kickrise.OemPermissionRoutes
 import com.ymsport2026.tiyu.kickrise.PopupAlarmReceiver
+import com.ymsport2026.tiyu.kickrise.PopupConfigRepository
 import com.ymsport2026.tiyu.kickrise.PopupForegroundService
 import com.ymsport2026.tiyu.kickrise.RemoteRouteConfig
 import com.ymsport2026.tiyu.kickrise.RomUtils
@@ -26,9 +30,11 @@ class MainActivity : FlutterActivity() {
     companion object {
         private const val TAG = "KickRise/main"
         private const val REQUEST_CODE_NOTIFICATIONS = 1001
+        private const val REQUEST_CODE_FALLBACK_ALARM = 9904
         private const val KEY_AUTOSTART_SHOWN = "kickrise_autostart_shown"
         private const val KEY_BATTERY_SHOWN = "kickrise_battery_shown"
         private const val KEY_FSI_SHOWN = "kickrise_fsi_shown"
+        private const val KEY_FSI_SETTINGS_OPENED = "kickrise_fsi_settings_opened"
         private const val KEY_LAST_OVERLAY_ROUTE = "kickrise_last_overlay_route"
         private const val KEY_LAST_OVERLAY_ACTION = "kickrise_last_overlay_action"
         private const val KEY_LAST_OVERLAY_COMPONENT = "kickrise_last_overlay_component"
@@ -101,6 +107,7 @@ class MainActivity : FlutterActivity() {
     override fun onResume() {
         super.onResume()
         setAppAlive(true)
+        cancelFallbackAlarm()
         val prefs = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
         prefs.edit().putBoolean(PopupAlarmReceiver.KEY_APP_IN_RECENTS, true).apply()
 
@@ -123,16 +130,67 @@ class MainActivity : FlutterActivity() {
                 "last_component" to lastComponent
             ) + deviceContext())
         }
+
+        if (Build.VERSION.SDK_INT >= 34 && prefs.getBoolean(KEY_FSI_SETTINGS_OPENED, false)) {
+            prefs.edit().putBoolean(KEY_FSI_SETTINGS_OPENED, false).apply()
+            val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            val fsiGranted = nm.canUseFullScreenIntent()
+            logFunnel("fsi_granted_after_resume", deviceContext() + mapOf(
+                "fsi_granted_after_resume" to fsiGranted
+            ))
+            if (!fsiGranted) {
+                logFunnel("lockscreen_popup_capability", deviceContext() + mapOf(
+                    "status" to "blocked_by_missing_fsi",
+                    "sdk" to Build.VERSION.SDK_INT
+                ))
+            }
+        }
     }
 
     override fun onStop() {
         super.onStop()
         setAppAlive(false)
+        scheduleFallbackAlarm()
     }
 
     private fun setAppAlive(alive: Boolean) {
         getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
             .edit().putBoolean(PopupAlarmReceiver.KEY_APP_ALIVE, alive).apply()
+    }
+
+    // Schedules a fallback alarm from the activity so that popup delivery can proceed even if
+    // the foreground service is killed before ACTION_SCREEN_OFF fires. Uses a separate request
+    // code from the screen_off alarm so the two don't overwrite each other. Cancelled in
+    // onResume(); policy checks in PopupAlarmReceiver prevent double-delivery.
+    private fun scheduleFallbackAlarm() {
+        val baseUrl = EventReporter.getBaseUrl(this)
+        if (baseUrl.isBlank()) return
+        val config = PopupConfigRepository(this, baseUrl).getCached()
+        if (config == null || !config.enabled) return
+        val delayMs = config.frequency.defaultDelayMs.coerceAtLeast(5_000L)
+        val triggerAt = System.currentTimeMillis() + delayMs
+        val alarmIntent = Intent(this, PopupAlarmReceiver::class.java).apply {
+            putExtra(PopupAlarmReceiver.EXTRA_ALARM_SOURCE, AlarmSource.FALLBACK_ACTIVITY)
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            this, REQUEST_CODE_FALLBACK_ALARM, alarmIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        (getSystemService(ALARM_SERVICE) as AlarmManager)
+            .setAlarmClock(AlarmManager.AlarmClockInfo(triggerAt, pendingIntent), pendingIntent)
+        logFunnel("fallback_alarm_scheduled_from_activity", deviceContext() + mapOf(
+            "delay_ms" to delayMs, "trigger_at_ms" to triggerAt
+        ))
+    }
+
+    private fun cancelFallbackAlarm() {
+        val alarmIntent = Intent(this, PopupAlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            this, REQUEST_CODE_FALLBACK_ALARM, alarmIntent,
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+        ) ?: return
+        (getSystemService(ALARM_SERVICE) as AlarmManager).cancel(pendingIntent)
+        pendingIntent.cancel()
     }
 
     private fun deviceContext(): Map<String, Any> {
@@ -442,12 +500,16 @@ class MainActivity : FlutterActivity() {
             try {
                 startActivity(intent)
                 // Mark shown regardless of label — even the fallback counts as "we tried once."
-                prefs.edit().putBoolean(KEY_FSI_SHOWN, true).apply()
+                prefs.edit()
+                    .putBoolean(KEY_FSI_SHOWN, true)
+                    .putBoolean(KEY_FSI_SETTINGS_OPENED, true)
+                    .apply()
                 val grantState = if (label == "standard") "standard_fsi_confirmable" else "shown_not_confirmed"
                 logFunnel("settings_route_launched", baseCtx + mapOf(
                     "route_type" to "fsi", "label" to label,
                     "action" to action, "grant_state" to grantState
                 ))
+                logFunnel("fsi_prompt_attempted", baseCtx + mapOf("opened" to true, "label" to label))
                 return true
             } catch (e: Exception) {
                 Log.d(TAG, "fsi route failed: action=$action error=${e.javaClass.simpleName}")
@@ -457,6 +519,7 @@ class MainActivity : FlutterActivity() {
                 ))
             }
         }
+        logFunnel("fsi_prompt_attempted", baseCtx + mapOf("opened" to false))
         return false
     }
 }
