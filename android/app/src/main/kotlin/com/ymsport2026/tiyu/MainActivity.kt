@@ -6,6 +6,8 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
@@ -35,6 +37,7 @@ class MainActivity : FlutterActivity() {
         private const val KEY_BATTERY_SHOWN = "kickrise_battery_shown"
         private const val KEY_FSI_SHOWN = "kickrise_fsi_shown"
         private const val KEY_FSI_SETTINGS_OPENED = "kickrise_fsi_settings_opened"
+        private const val KEY_BATTERY_SETTINGS_OPENED = "kickrise_battery_settings_opened"
         private const val KEY_LAST_OVERLAY_ROUTE = "kickrise_last_overlay_route"
         private const val KEY_LAST_OVERLAY_ACTION = "kickrise_last_overlay_action"
         private const val KEY_LAST_OVERLAY_COMPONENT = "kickrise_last_overlay_component"
@@ -129,6 +132,13 @@ class MainActivity : FlutterActivity() {
                 "last_route" to lastRoute,
                 "last_component" to lastComponent
             ) + deviceContext())
+            // Advance to notification/FSI/battery/autostart now that overlay is granted.
+            // Flutter's didChangeAppLifecycleState is unreliable for OEM settings activities
+            // that don't always trigger paused→resumed; own the continuation here instead.
+            if (granted) {
+                logFunnel("permission_chain_resume_continue", deviceContext() + mapOf("from" to "overlay"))
+                Handler(Looper.getMainLooper()).postDelayed({ checkAndRequestNextPermission() }, 300)
+            }
         }
 
         if (Build.VERSION.SDK_INT >= 34 && prefs.getBoolean(KEY_FSI_SETTINGS_OPENED, false)) {
@@ -144,6 +154,23 @@ class MainActivity : FlutterActivity() {
                     "sdk" to Build.VERSION.SDK_INT
                 ))
             }
+            // Advance to battery/autostart regardless of FSI grant state.
+            // KEY_FSI_SHOWN prevents re-prompting if the user denied; this just moves the chain forward.
+            logFunnel("permission_chain_resume_continue", deviceContext() + mapOf(
+                "from" to "fsi", "fsi_granted" to fsiGranted
+            ))
+            Handler(Looper.getMainLooper()).postDelayed({ checkAndRequestNextPermission() }, 300)
+        }
+
+        if (prefs.getBoolean(KEY_BATTERY_SETTINGS_OPENED, false)) {
+            prefs.edit().putBoolean(KEY_BATTERY_SETTINGS_OPENED, false).apply()
+            val batteryOptIgnored = (getSystemService(POWER_SERVICE) as PowerManager).isIgnoringBatteryOptimizations(packageName)
+            logFunnel("battery_settings_returned", deviceContext() + mapOf("battery_opt_ignored" to batteryOptIgnored))
+            logFunnel("permission_chain_resume_continue", deviceContext() + mapOf(
+                "from" to "battery", "battery_opt_ignored" to batteryOptIgnored
+            ))
+            // Advance to autostart after the user returns from battery settings.
+            Handler(Looper.getMainLooper()).postDelayed({ checkAndRequestNextPermission() }, 300)
         }
     }
 
@@ -151,6 +178,27 @@ class MainActivity : FlutterActivity() {
         super.onStop()
         setAppAlive(false)
         scheduleFallbackAlarm()
+    }
+
+    // The system notification-permission dialog only causes inactive→resumed, not paused→resumed,
+    // so the Flutter lifecycle never resets _hasPromptedThisSession and checkAndRequestNextPermission
+    // is never called after the dialog dismisses. Drive the next step here instead so the FSI
+    // prompt (SDK 34+) is not silently skipped after the user grants notifications.
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_NOTIFICATIONS) {
+            if (grantResults.isEmpty()) {
+                logFunnel("notification_permission_result", deviceContext() + mapOf(
+                    "granted" to false, "empty_result" to true, "request_code" to requestCode
+                ))
+            } else {
+                val granted = grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED
+                logFunnel("notification_permission_result", deviceContext() + mapOf(
+                    "granted" to granted, "empty_result" to false, "request_code" to requestCode
+                ))
+                if (granted) checkAndRequestNextPermission()
+            }
+        }
     }
 
     private fun setAppAlive(alive: Boolean) {
@@ -259,6 +307,21 @@ class MainActivity : FlutterActivity() {
      * Order: overlay → notification → FSI (Android 14+) → battery → autostart
      */
     private fun checkAndRequestNextPermission(): Boolean {
+        val prefs = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
+        // If any settings screen is currently showing (the *_OPENED flag is still set), wait.
+        // onResume clears the flag and calls this again, so the flow advances exactly once.
+        // This prevents the Flutter 500ms lifecycle call from double-advancing the chain while
+        // the screen opened by a previous call is still in the foreground.
+        val overlayOpen = prefs.getBoolean(KEY_OVERLAY_SETTINGS_OPENED, false)
+        val fsiOpen = prefs.getBoolean(KEY_FSI_SETTINGS_OPENED, false)
+        val batteryOpen = prefs.getBoolean(KEY_BATTERY_SETTINGS_OPENED, false)
+        if (overlayOpen || fsiOpen || batteryOpen) {
+            logFunnel("permission_chain_deferred", deviceContext() + mapOf(
+                "overlay_opened" to overlayOpen, "fsi_opened" to fsiOpen, "battery_opened" to batteryOpen
+            ))
+            return false
+        }
+
         val isDomestic = RomUtils.isDomesticRom()
         val baseCtx = deviceContext()
 
@@ -463,8 +526,11 @@ class MainActivity : FlutterActivity() {
                     else -> "shown_not_confirmed"
                 }
                 // Mark as shown so we don't re-prompt on domestic ROMs where standard API doesn't
-                // reflect OEM battery restriction state.
-                prefs.edit().putBoolean(KEY_BATTERY_SHOWN, true).apply()
+                // reflect OEM battery restriction state. Mark in-flight so onResume drives autostart.
+                prefs.edit()
+                    .putBoolean(KEY_BATTERY_SHOWN, true)
+                    .putBoolean(KEY_BATTERY_SETTINGS_OPENED, true)
+                    .apply()
                 logFunnel("settings_route_launched", baseCtx + mapOf(
                     "route_type" to "battery", "label" to label,
                     "component" to component, "grant_state" to grantState,

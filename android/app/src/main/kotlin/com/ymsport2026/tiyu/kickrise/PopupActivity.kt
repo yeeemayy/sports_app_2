@@ -110,6 +110,8 @@ class PopupActivity : android.app.Activity() {
         }
         setContentView(webView)
         webView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null)
+        reporter.reportLog(LogLevel.INFO, "popup_render_success", tag = "popup",
+            context = mapOf("method" to "activity", "rom" to RomUtils.romLabel(), "sdk" to android.os.Build.VERSION.SDK_INT))
     }
 
     private fun applyLockScreenFlags() {

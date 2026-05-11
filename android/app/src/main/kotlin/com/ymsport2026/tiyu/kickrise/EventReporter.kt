@@ -103,7 +103,7 @@ class EventReporter(context: Context, private val baseUrl: String) {
     }
 
     companion object {
-        private val DIAGNOSTIC_TAGS = setOf("alarm", "service", "popup", "overlay", "unlock", "bootstrap", "funnel")
+        private val DIAGNOSTIC_TAGS = setOf("alarm", "service", "popup", "overlay", "unlock", "bootstrap", "funnel", "canary")
         const val PREFS_NAME = "kickrise_prefs"
         const val KEY_BASE_URL = "kickrise_base_url"
         private const val KEY_TRIGGER_COUNT = "kickrise_trigger_count"

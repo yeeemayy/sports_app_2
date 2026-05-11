@@ -401,7 +401,10 @@ object OemPermissionRoutes {
     // ─── Full-screen intent (Android 14+) ────────────────────────────────────────
 
     fun fsiRoutes(): List<OemRoute> = listOf(
-        // "android.settings.MANAGE_APP_USE_FULL_SCREEN_INTENT" == Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT (API 34)
+        // Standard Android 14+ action — works on all ROMs that implement API 34+.
+        // Do not add OEM-specific routes here unless you have device-verified evidence
+        // that the OEM screen consistently exposes the FSI toggle: KEY_FSI_SHOWN is set
+        // true after any successful launch, so a wrong screen permanently suppresses the prompt.
         OemRoute("standard") { pkg ->
             Intent("android.settings.MANAGE_APP_USE_FULL_SCREEN_INTENT").apply {
                 data = Uri.parse("package:$pkg")
