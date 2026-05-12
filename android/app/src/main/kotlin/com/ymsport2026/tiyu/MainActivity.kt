@@ -1,4 +1,4 @@
-package com.ymsport2026.tiyu
+package com.qiudi.tiyu
 
 import android.app.ActivityManager
 import android.app.AlarmManager
