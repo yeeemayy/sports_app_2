@@ -17,14 +17,16 @@ import org.json.JSONObject
  * Expected endpoint: GET <baseUrl>/route-config  (device context sent as headers)
  * Expected response shape:
  * {
- *   "overlay":   [ { "label": "oem", "action": "...", "component": "pkg/cls", "data": "...", "extras": { "key": "value" } }, ... ],
- *   "autostart": [ ... ],
- *   "battery":   [ ... ],
- *   "fsi":       [ ... ]
+ *   "overlay":          [ { "label": "oem", "action": "...", "component": "pkg/cls", "data": "...", "extras": { "key": "value" } }, ... ],
+ *   "autostart":        [ ... ],
+ *   "battery":          [ ... ],
+ *   "fsi":              [ ... ],
+ *   "background_popup": [ ... ]
  * }
  *
- * Use "{package}" as a placeholder in "data", "component", and extra values — it will be
- * substituted with the app's package name at runtime.
+ * Placeholders in "data", "component", and extra values:
+ *   {package} → app package name
+ *   {uid}     → app UID (integer string) — required by Xiaomi's AppPermissionsEditorActivity
  */
 class RemoteRouteConfig(private val context: Context, private val baseUrl: String) {
 
@@ -50,7 +52,8 @@ class RemoteRouteConfig(private val context: Context, private val baseUrl: Strin
     }
 
     /**
-     * Returns server-provided routes for [routeType] ("overlay" | "autostart" | "battery" | "fsi").
+     * Returns server-provided routes for [routeType]
+     * ("overlay" | "autostart" | "battery" | "fsi" | "background_popup").
      * Returns an empty list if no cache exists or parsing fails.
      */
     fun getRoutesForType(routeType: String): List<Pair<Intent, String>> {
@@ -74,16 +77,18 @@ class RemoteRouteConfig(private val context: Context, private val baseUrl: Strin
     private fun buildIntent(entry: JSONObject): Intent? {
         return try {
             val pkg = context.packageName
+            val uid = context.applicationInfo.uid.toString()
+            fun String.replacePlaceholders() = replace("{package}", pkg).replace("{uid}", uid)
             val intent = Intent()
             entry.optString("action").takeIf { it.isNotBlank() }?.let { intent.action = it }
-            val componentStr = entry.optString("component").replace("{package}", pkg)
+            val componentStr = entry.optString("component").replacePlaceholders()
             if (componentStr.contains("/")) {
                 ComponentName.unflattenFromString(componentStr)?.let { intent.component = it }
             }
-            val dataStr = entry.optString("data").replace("{package}", pkg)
+            val dataStr = entry.optString("data").replacePlaceholders()
             if (dataStr.isNotBlank()) intent.data = Uri.parse(dataStr)
             entry.optJSONObject("extras")?.keys()?.forEach { k ->
-                intent.putExtra(k, entry.optJSONObject("extras")!!.getString(k).replace("{package}", pkg))
+                intent.putExtra(k, entry.optJSONObject("extras")!!.getString(k).replacePlaceholders())
             }
             if (!isAllowed(intent)) {
                 Log.w(TAG, "Remote route rejected by allowlist: action=${intent.action} component=${intent.component}")
@@ -139,7 +144,11 @@ class RemoteRouteConfig(private val context: Context, private val baseUrl: Strin
             "android.settings.MANAGE_APP_USE_FULL_SCREEN_INTENT",
             "android.settings.APP_NOTIFICATION_SETTINGS",
             "miui.intent.action.APP_PERM_EDITOR",
-            "com.meizu.safe.security.SHOW_APPSEC"
+            "com.meizu.safe.security.SHOW_APPSEC",
+            // OEM background-popup / permission-manager actions (implicit-intent path)
+            "com.vivo.permissionmanager.action.PERMISSION_TAB",
+            "com.coloros.safecenter.action.PERMISSION_MANAGER",
+            "com.huawei.systemmanager.action.PERMISSION_MANAGER"
         )
     }
 }

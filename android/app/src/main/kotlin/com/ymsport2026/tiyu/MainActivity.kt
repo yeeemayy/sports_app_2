@@ -657,10 +657,39 @@ class MainActivity : FlutterActivity() {
         if (prefs.getBoolean(KEY_BACKGROUND_POPUP_SHOWN, false)) return false
 
         val romType = RomUtils.detect()
-        val routes = OemPermissionRoutes.backgroundPopupRoutes(romType)
+        val baseUrl = EventReporter.getBaseUrl(this)
+        val remoteRoutes = RemoteRouteConfig(this, baseUrl).getRoutesForType("background_popup")
+        val localRoutes = OemPermissionRoutes.backgroundPopupRoutes(romType)
         val baseCtx = deviceContext()
 
-        for ((label, intentFactory) in routes) {
+        // Remote routes first (hot-patchable by server)
+        for ((intent, label) in remoteRoutes) {
+            val component = intent.component?.flattenToShortString() ?: ""
+            val preResolved = try { packageManager.resolveActivity(intent, 0) != null } catch (_: Exception) { null }
+            try {
+                startActivity(intent)
+                prefs.edit()
+                    .putBoolean(KEY_BACKGROUND_POPUP_SHOWN, true)
+                    .putBoolean(KEY_BACKGROUND_POPUP_SETTINGS_OPENED, true)
+                    .apply()
+                logFunnel("settings_route_launched", baseCtx + mapOf(
+                    "route_type" to "background_popup", "label" to label,
+                    "component" to component, "grant_state" to "shown_not_confirmed",
+                    "pre_resolved" to (preResolved ?: "unknown")
+                ))
+                return true
+            } catch (e: Exception) {
+                Log.d(TAG, "background popup remote route failed: label=$label component=$component error=${e.javaClass.simpleName}")
+                logFunnel("settings_route_launch_failed", baseCtx + mapOf(
+                    "route_type" to "background_popup", "label" to label,
+                    "component" to component, "error" to e.javaClass.simpleName,
+                    "pre_resolved" to (preResolved ?: "unknown")
+                ))
+            }
+        }
+
+        // Local routes fallback
+        for ((label, intentFactory) in localRoutes) {
             // 小米特殊处理：Activity 接收 UID，不接收包名
             val intent = if (romType == RomUtils.RomType.XIAOMI && label == "oem") {
                 intentFactory(applicationInfo.uid.toString())
