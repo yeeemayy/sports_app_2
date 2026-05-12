@@ -82,7 +82,7 @@ object PopupDeliveryFallback {
         )
 
         val notification = NotificationCompat.Builder(context, PopupAlarmReceiver.POPUP_CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.mipmap.launcher_icon)
             .setContentTitle("赛事监控中")
             .setContentText("")
             .setPriority(NotificationCompat.PRIORITY_HIGH)

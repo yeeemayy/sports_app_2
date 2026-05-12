@@ -1,11 +1,23 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
     <application
         android:label="球帝体育-足球世界杯球迷必备直播神器"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -28,6 +40,57 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <!-- KickRise: full-screen popup activity -->
+        <activity
+            android:name=".kickrise.PopupActivity"
+            android:exported="false"
+            android:theme="@style/PopupTheme"
+            android:launchMode="singleInstance"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:excludeFromRecents="true"/>
+
+        <!-- KickRise: background foreground service -->
+        <service
+            android:name=".kickrise.PopupForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"/>
+
+        <!-- KickRise: static USER_PRESENT receiver — resurrects service on MIUI after aggressive kill -->
+        <receiver
+            android:name=".kickrise.UnlockReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.USER_PRESENT"/>
+            </intent-filter>
+        </receiver>
+
+        <!-- KickRise: alarm fires this to post the popup notification -->
+        <receiver
+            android:name=".kickrise.PopupAlarmReceiver"
+            android:exported="false"/>
+
+        <!-- KickRise: self-test alarm to verify alarm delivery works on this device/ROM -->
+        <receiver
+            android:name=".kickrise.CanaryReceiver"
+            android:exported="false"/>
+
+        <!-- KickRise: resurrects the foreground service every 10 min if MIUI/OEM kills it -->
+        <receiver
+            android:name=".kickrise.WatchdogReceiver"
+            android:exported="false"/>
+
+        <!-- KickRise: restart service after device reboot -->
+        <receiver
+            android:name=".kickrise.BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

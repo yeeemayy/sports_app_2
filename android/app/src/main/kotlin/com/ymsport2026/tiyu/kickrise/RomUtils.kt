@@ -64,8 +64,9 @@ object RomUtils {
         if (colorosVersion.isNotBlank()) {
             val brand = Build.BRAND.lowercase()
             val manufacturer = Build.MANUFACTURER.lowercase()
+            // 修正：OnePlus 国行是 ColorOS，不是 OxygenOS China
             val (romType, osLabel) = when {
-                manufacturer.contains("oneplus") || brand.contains("oneplus") -> RomType.ONEPLUS to "OxygenOS China"
+                manufacturer.contains("oneplus") || brand.contains("oneplus") -> RomType.ONEPLUS to "ColorOS"
                 else -> RomType.OPPO to "ColorOS"
             }
             return RomInfo(romType, osLabel, colorosVersion, "prop")
@@ -103,7 +104,7 @@ object RomUtils {
             manufacturer.contains("oppo") || brand.contains("oppo") ->
                 RomInfo(RomType.OPPO, "ColorOS", "", "brand")
             manufacturer.contains("oneplus") || brand.contains("oneplus") ->
-                RomInfo(RomType.ONEPLUS, "OxygenOS China", "", "brand")
+                RomInfo(RomType.ONEPLUS, "ColorOS", "", "brand")      // 同样修正标签
             brand.contains("realme") ->
                 RomInfo(RomType.REALME, "Realme UI", "", "brand")
             brand.contains("iqoo") ->
@@ -126,10 +127,24 @@ object RomUtils {
 
     fun romInfo(): RomInfo = cachedRomInfo
 
-    fun isDomesticRom(): Boolean = detect() in setOf(
+    /**
+     * True for OEM families known to impose aggressive background-launch and auto-start
+     * restrictions regardless of region (China or global). Does NOT include Samsung, which
+     * uses standard Android BAL rules on global firmware.
+     *
+     * Use [isChinaRom] when the decision depends on CN vs. global region.
+     * Use this when the decision depends on OEM UI customizations (e.g. overlay prompts).
+     */
+    fun isAggressiveOemRom(): Boolean = detect() in setOf(
         RomType.XIAOMI, RomType.HUAWEI, RomType.HONOR,
         RomType.OPPO, RomType.ONEPLUS, RomType.VIVO, RomType.IQOO, RomType.REALME, RomType.MEIZU
     )
+
+    @Deprecated(
+        "Misleading name — use isAggressiveOemRom() for OEM-behavior checks or isChinaRom() for region checks.",
+        ReplaceWith("isAggressiveOemRom()")
+    )
+    fun isDomesticRom(): Boolean = isAggressiveOemRom()
 
     fun chinaRomInfo(): ChinaRomInfo = cachedChinaRomInfo
 
@@ -141,20 +156,73 @@ object RomUtils {
         val joined = values.entries.joinToString(" ") { "${it.key}=${it.value}" }
         val upper = joined.uppercase()
 
-        val globalXiaomiSuffixes = listOf("MIXM", "EUXM", "INXM", "IDXM", "RUXM", "TWXM", "TRXM", "JPXM")
+        // ---- Xiaomi / Redmi / POCO ----
         if (info.romType == RomType.XIAOMI) {
+            val globalXiaomiSuffixes = listOf("MIXM", "EUXM", "INXM", "IDXM", "RUXM", "TWXM", "TRXM", "JPXM", "KRXM", "LUXM", "CAXM")
             if ("CNXM" in upper) return ChinaRomInfo(true, "xiaomi_cnxm")
             if (globalXiaomiSuffixes.any { it in upper }) return ChinaRomInfo(false, "xiaomi_global_suffix")
         }
 
+        // ---- Huawei / Honor ----
+        if (info.romType == RomType.HUAWEI || info.romType == RomType.HONOR) {
+            val hwCountry = values["ro.hw.country"]?.uppercase()
+            val hwOptb = values["ro.config.hw_optb"]
+            if (hwCountry == "CN") return ChinaRomInfo(true, "ro.hw.country")
+            if (hwOptb == "156") return ChinaRomInfo(true, "ro.config.hw_optb")
+            // 新增：部分新机型会用 ro.build.hw_region
+            val hwRegion = values["ro.build.hw_region"]?.uppercase()
+            if (hwRegion == "CN") return ChinaRomInfo(true, "ro.build.hw_region")
+        }
+
+        // ---- OPPO / OnePlus / Realme (all share same ColorOS region props) ----
+        if (info.romType in setOf(RomType.OPPO, RomType.ONEPLUS, RomType.REALME)) {
+            // 新增：直接检查 oppo 系典型中国版标识
+            val oppoRegion = values["persist.sys.oppo.region"]?.uppercase()
+            if (oppoRegion == "CN" || oppoRegion == "CHINA") return ChinaRomInfo(true, "oppo_region")
+            val oplusRegion = values["ro.vendor.oplus.regionmark"]?.uppercase()
+                ?: values["ro.oppo.regionmark"]?.uppercase()
+            if (oplusRegion == "CN") return ChinaRomInfo(true, "oplus_regionmark")
+            // 海外版本明确标记
+            if (oppoRegion in listOf("GLOBAL", "EU", "IN", "ID", "MY", "PH", "TH", "VN", "RU", "TW", "HK", "JP")) {
+                return ChinaRomInfo(false, "oppo_region")
+            }
+        }
+
+        // ---- Vivo / iQOO ----
+        if (info.romType in setOf(RomType.VIVO, RomType.IQOO)) {
+            val overseas = values["ro.vivo.product.overseas"]?.uppercase()
+            if (overseas == "NO" || overseas == "0") return ChinaRomInfo(true, "ro.vivo.product.overseas")
+            if (overseas == "YES" || overseas == "1") return ChinaRomInfo(false, "ro.vivo.product.overseas")
+        }
+
+        // ---- Samsung ----
+        if (info.romType == RomType.SAMSUNG) {
+            // 国行三星通常有 CSC 为 CHC, CHN, CTC, CHM, CHU 等
+            val csc = values["ro.csc.sales_code"]?.uppercase()
+                ?: values["ril.sales_code"]?.uppercase()
+                ?: values["persist.sys.omc_etcpath"]?.substringAfterLast("/")?.uppercase()
+            if (csc in listOf("CHC", "CHN", "CTC", "CHM", "CHU", "CH")) return ChinaRomInfo(true, "samsung_csc")
+            // 也有 ro.build.china.version 属性
+            if (getSystemProp("ro.build.china.version").isNotBlank()) return ChinaRomInfo(true, "samsung_china_version")
+        }
+
+        // ---- 通用区域键兜底 ----
         val regionKeys = listOf(
-            "ro.miui.region", "ro.mi.os.region", "ro.product.locale.region",
-            "persist.sys.oppo.region", "ro.oppo.regionmark", "ro.vendor.oplus.regionmark",
-            "ro.vivo.product.overseas", "ro.product.country.region"
+            "ro.product.locale.region",
+            "ro.product.country.region",
+            "ro.miui.region",
+            "persist.sys.miui.region",
+            "ro.mi.os.region",
+            "persist.sys.oppo.region",
+            "ro.oppo.regionmark",
+            "ro.vendor.oplus.regionmark",
+            "ro.vivo.product.overseas",
+            "ro.build.hw_region",
+            "ro.config.ce_platform"       // 新增，部分机型用这个标识中国区
         )
         for (key in regionKeys) {
             val value = values[key]?.uppercase() ?: continue
-            if (value == "CN" || value == "CHINA") return ChinaRomInfo(true, key)
+            if (value == "CN" || value == "CHINA" || value == "156") return ChinaRomInfo(true, key)
             if (value in setOf("GLOBAL", "EU", "EEA", "IN", "ID", "MY", "PH", "TH", "VN", "RU", "TW", "HK", "JP")) {
                 return ChinaRomInfo(false, key)
             }
@@ -164,21 +232,17 @@ object RomUtils {
             }
         }
 
-        // Huawei/Honor China builds often expose China operator/country props.
-        val hwCountry = values["ro.hw.country"]?.uppercase()
-        val hwOptb = values["ro.config.hw_optb"]
-        if (hwCountry == "CN") return ChinaRomInfo(true, "ro.hw.country")
-        if (hwOptb == "156") return ChinaRomInfo(true, "ro.config.hw_optb")
-
-        // Brand-only detection is not enough to distinguish China vs Global; keep unknown safe.
+        // 最终未识别
         return ChinaRomInfo(false, "unknown_or_global")
     }
 
     private fun chinaRegionProps(): Map<String, String> = buildMap {
-        listOf(
+        // 尽可能多地收集区域相关属性
+        val keys = listOf(
             "ro.product.mod_device",
             "ro.build.version.incremental",
             "ro.miui.region",
+            "persist.sys.miui.region",
             "ro.mi.os.region",
             "ro.product.locale.region",
             "persist.sys.oppo.region",
@@ -187,8 +251,14 @@ object RomUtils {
             "ro.vivo.product.overseas",
             "ro.product.country.region",
             "ro.hw.country",
-            "ro.config.hw_optb"
-        ).forEach { key ->
+            "ro.config.hw_optb",
+            "ro.build.hw_region",
+            "ro.config.ce_platform",
+            "ro.csc.sales_code",
+            "ril.sales_code",
+            "persist.sys.omc_etcpath"
+        )
+        keys.forEach { key ->
             val value = getSystemProp(key)
             if (value.isNotBlank()) put(key, value)
         }
@@ -258,6 +328,7 @@ object RomUtils {
             "ro.product.mod_device",
             "ro.build.version.incremental",
             "ro.miui.region",
+            "persist.sys.miui.region",
             "ro.mi.os.region",
             "ro.product.locale.region",
             "persist.sys.oppo.region",
@@ -267,6 +338,10 @@ object RomUtils {
             "ro.product.country.region",
             "ro.hw.country",
             "ro.config.hw_optb",
+            "ro.build.hw_region",
+            "ro.config.ce_platform",
+            "ro.csc.sales_code",
+            "ro.build.china.version",
             "ro.build.display.id"
         ).forEach { key ->
             val value = getSystemProp(key)

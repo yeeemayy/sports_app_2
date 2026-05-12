@@ -57,7 +57,7 @@ class PopupForegroundService : Service() {
         val baseUrl = EventReporter.getBaseUrl(this)
         if (baseUrl.isNotBlank()) {
             EventReporter(this, baseUrl).reportLog(LogLevel.INFO, "service_created", tag = "service",
-                context = mapOf("rom" to RomUtils.romLabel(), "domestic" to RomUtils.isDomesticRom()))
+                context = mapOf("rom" to RomUtils.romLabel(), "domestic" to RomUtils.isAggressiveOemRom()))
         }
     }
 
@@ -153,7 +153,7 @@ class PopupForegroundService : Service() {
         val baseUrl = EventReporter.getBaseUrl(this)
         if (baseUrl.isNotBlank()) {
             EventReporter(this, baseUrl).reportLog(LogLevel.WARN, "PopupForegroundService destroyed", tag = "service",
-                context = mapOf("rom" to RomUtils.romLabel(), "domestic" to RomUtils.isDomesticRom()))
+                context = mapOf("rom" to RomUtils.romLabel(), "domestic" to RomUtils.isAggressiveOemRom()))
         }
         Log.w(TAG, "PopupForegroundService destroyed (ROM: ${RomUtils.romLabel()})")
     }
@@ -168,7 +168,7 @@ class PopupForegroundService : Service() {
         }
 
         val notification = NotificationCompat.Builder(this, SERVICE_CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.mipmap.launcher_icon)
             .setContentTitle("赛事监控中")
             .setPriority(NotificationCompat.PRIORITY_MIN)
             .setSilent(true)
@@ -185,17 +185,17 @@ class PopupForegroundService : Service() {
             addAction(Intent.ACTION_USER_PRESENT)
         }
         registerReceiver(screenReceiver, filter)
-        Log.d(TAG, "Screen receiver registered (ROM: ${RomUtils.romLabel()}, domestic: ${RomUtils.isDomesticRom()})")
+        Log.d(TAG, "Screen receiver registered (ROM: ${RomUtils.romLabel()}, domestic: ${RomUtils.isAggressiveOemRom()})")
         val baseUrl = EventReporter.getBaseUrl(this)
         if (baseUrl.isNotBlank()) {
             EventReporter(this, baseUrl).reportLog(LogLevel.INFO, "screen_receiver_registered", tag = "service",
-                context = mapOf("rom" to RomUtils.romLabel(), "domestic" to RomUtils.isDomesticRom()))
+                context = mapOf("rom" to RomUtils.romLabel(), "domestic" to RomUtils.isAggressiveOemRom()))
             EventReporter(this, baseUrl).reportLog(LogLevel.INFO, "screen_receiver_state", tag = "funnel",
                 context = mapOf(
                     "registered" to true,
                     "service_alive" to true,
                     "rom" to RomUtils.romLabel(),
-                    "domestic" to RomUtils.isDomesticRom()
+                    "domestic" to RomUtils.isAggressiveOemRom()
                 ))
         }
     }
@@ -296,21 +296,22 @@ class PopupForegroundService : Service() {
             (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).canUseFullScreenIntent()
         } else true
 
-        val isDomestic = RomUtils.isDomesticRom()
+        val isChinaRom = RomUtils.isChinaRom()
         val route = when {
             isLocked -> "fullscreen_notification"
             hasOverlay -> "overlay"
-            // Domestic ROMs (HONOR/MagicOS, MIUI, ColorOS, etc.) suppress background activity
-            // launches after USER_PRESENT — startActivity returns silently without showing anything.
-            // Fall back to full-screen notification which is reliably delivered.
-            isDomestic -> "fullscreen_notification"
+            // China-region ROMs suppress background activity launches after USER_PRESENT —
+            // startActivity returns silently without showing anything. Fall back to FSI.
+            isChinaRom -> "fullscreen_notification"
             else -> "activity_direct"
         }
         Log.d(TAG, "Wake lock acquired — launching popup (rom=$romLabel, overlay=$hasOverlay, locked=$isLocked)")
         reporter?.reportLog(LogLevel.INFO, "Launch route selected", tag = "service",
             context = mapOf(
                 "route" to route, "rom" to romLabel, "sdk" to Build.VERSION.SDK_INT,
-                "domestic" to isDomestic, "locked" to isLocked,
+                "china_rom" to isChinaRom,
+                "domestic" to isChinaRom,
+                "locked" to isLocked,
                 "interactive" to isInteractive, "overlay" to hasOverlay,
                 "battery_opt_ignored" to batteryOptIgnored,
                 "notification_enabled" to notificationEnabled,
@@ -322,7 +323,10 @@ class PopupForegroundService : Service() {
         reporter?.reportLog(LogLevel.INFO, "popup_route_selected", tag = "funnel",
             context = mapOf(
                 "route" to route, "rom" to romLabel, "sdk" to Build.VERSION.SDK_INT,
-                "locked" to isLocked, "overlay" to hasOverlay, "domestic" to isDomestic,
+                "locked" to isLocked,
+                "overlay" to hasOverlay,
+                "china_rom" to isChinaRom,
+                "domestic" to isChinaRom,
                 "can_use_fsi" to canUseFullScreenIntent,
                 "background_popup_allowed" to bgPopup.allowed,
                 "background_popup_check" to bgPopup.check,
@@ -336,7 +340,7 @@ class PopupForegroundService : Service() {
             hasOverlay -> PopupOverlayManager(this).show(onFailure = {
                 PopupDeliveryFallback.showFullScreenNotification(this, creative, reporter, "service")
             })
-            isDomestic -> {
+            isChinaRom -> {
                 PopupDeliveryFallback.showFullScreenNotification(this, creative, reporter, "service")
             }
             else -> {

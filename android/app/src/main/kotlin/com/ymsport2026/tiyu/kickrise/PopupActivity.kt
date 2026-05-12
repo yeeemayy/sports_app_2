@@ -38,7 +38,7 @@ class PopupActivity : android.app.Activity() {
 
         reporter.reportLog(LogLevel.INFO, "PopupActivity created", tag = "popup",
             context = mapOf("rom" to RomUtils.romLabel(), "sdk" to android.os.Build.VERSION.SDK_INT,
-                "domestic" to RomUtils.isDomesticRom(), "launch_route" to launchRoute,
+                "domestic" to RomUtils.isAggressiveOemRom(), "launch_route" to launchRoute,
                 "launch_source" to launchSource))
 
         val config = repo.getCached()
@@ -125,7 +125,7 @@ class PopupActivity : android.app.Activity() {
             setTurnScreenOn(true)
             window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
             // Honor/OPPO/MIUI MagicUI ignores setShowWhenLocked API — add window flags as fallback
-            if (RomUtils.isDomesticRom()) {
+            if (RomUtils.isAggressiveOemRom()) {
                 @Suppress("DEPRECATION")
                 window.addFlags(
                     WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or

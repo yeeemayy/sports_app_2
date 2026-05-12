@@ -19,7 +19,7 @@ class CanaryReceiver : BroadcastReceiver() {
             EventReporter(context, baseUrl).reportLog(
                 LogLevel.INFO, "Canary alarm fired — alarm delivery confirmed",
                 tag = "canary",
-                context = mapOf("rom" to RomUtils.romLabel(), "domestic" to RomUtils.isDomesticRom())
+                context = mapOf("rom" to RomUtils.romLabel(), "domestic" to RomUtils.isAggressiveOemRom())
             )
         }
     }

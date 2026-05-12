@@ -10,11 +10,11 @@ PODS:
     - Flutter
   - rongcloud_im_wrapper_plugin (0.0.1):
     - Flutter
-    - RongCloudIM/ChatRoom (= 5.36.4)
-    - RongCloudIM/IMLibCore (= 5.36.4)
-  - RongCloudIM/ChatRoom (5.36.4):
+    - RongCloudIM/ChatRoom (= 5.36.5)
+    - RongCloudIM/IMLibCore (= 5.36.5)
+  - RongCloudIM/ChatRoom (5.36.5):
     - RongCloudIM/IMLibCore
-  - RongCloudIM/IMLibCore (5.36.4)
+  - RongCloudIM/IMLibCore (5.36.5)
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -71,11 +71,11 @@ SPEC CHECKSUMS:
   fluttertoast: 21eecd6935e7064cc1fcb733a4c5a428f3f24f0f
   image_picker_ios: 4f2f91b01abdb52842a8e277617df877e40f905b
   package_info_plus: c0502532a26c7662a62a356cebe2692ec5fe4ec4
-  rongcloud_im_wrapper_plugin: 0549541819e1ff223bddafb172c68866c79c2552
-  RongCloudIM: 5447df12698ae57ab145e8ce831a343746d922c8
+  rongcloud_im_wrapper_plugin: c331abfca044a6452377e326c87acf027e82f3cf
+  RongCloudIM: 9e6b0de2553aaf986b67e35ed2e3a17291b85e1c
   shared_preferences_foundation: 5086985c1d43c5ba4d5e69a4e8083a389e2909e6
   url_launcher_ios: bb13df5870e8c4234ca12609d04010a21be43dfa
-  video_player_avfoundation: 7993f492ae0bd77edaea24d9dc051d8bb2cd7c86
+  video_player_avfoundation: e54d03b3b19f64f2c557354f72ce538387541ba6
   webview_flutter_wkwebview: 29eb20d43355b48fe7d07113835b9128f84e3af4
 
 PODFILE CHECKSUM: 3c63482e143d1b91d2d2560aee9fb04ecc74ac7e

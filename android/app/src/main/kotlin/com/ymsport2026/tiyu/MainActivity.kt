@@ -1,4 +1,4 @@
-package com.qiudi.tiyu
+package com.ymsport2026.tiyu
 
 import android.app.ActivityManager
 import android.app.AlarmManager
@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
+import android.provider.Settings
 import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
@@ -41,6 +42,8 @@ class MainActivity : FlutterActivity() {
         private const val KEY_LAST_OVERLAY_COMPONENT = "kickrise_last_overlay_component"
         private const val KEY_OVERLAY_SETTINGS_OPENED = "kickrise_overlay_settings_opened"
         private const val KEY_AUTOSTART_SETTINGS_OPENED = "kickrise_autostart_settings_opened"
+        private const val KEY_BACKGROUND_POPUP_SHOWN = "kickrise_background_popup_shown"
+        private const val KEY_BACKGROUND_POPUP_SETTINGS_OPENED = "kickrise_background_popup_settings_opened"
         // Set before requestPermissions() so onStop() doesn't schedule the fallback alarm while
         // the system notification-permission dialog is showing. Cleared in onRequestPermissionsResult.
         private const val KEY_NOTIFICATION_PERMISSION_IN_FLIGHT = "kickrise_notification_perm_in_flight"
@@ -78,7 +81,7 @@ class MainActivity : FlutterActivity() {
                     result.success(RomUtils.detect() == RomUtils.RomType.XIAOMI)
                 }
                 "isDomesticDevice" -> {
-                    result.success(RomUtils.isDomesticRom())
+                    result.success(RomUtils.isAggressiveOemRom())
                 }
                 "checkBatteryOptimization" -> {
                     val pm = getSystemService(POWER_SERVICE) as PowerManager
@@ -181,6 +184,12 @@ class MainActivity : FlutterActivity() {
         if (prefs.getBoolean(KEY_AUTOSTART_SETTINGS_OPENED, false)) {
             prefs.edit().putBoolean(KEY_AUTOSTART_SETTINGS_OPENED, false).apply()
             logFunnel("autostart_settings_returned", deviceContext())
+            checkAndRequestNextPermission()
+        }
+
+        if (prefs.getBoolean(KEY_BACKGROUND_POPUP_SETTINGS_OPENED, false)) {
+            prefs.edit().putBoolean(KEY_BACKGROUND_POPUP_SETTINGS_OPENED, false).apply()
+            logFunnel("background_popup_settings_returned", deviceContext())
             checkAndRequestNextPermission()
         }
     }
@@ -346,35 +355,36 @@ class MainActivity : FlutterActivity() {
      * Checks each permission in priority order and opens the first missing one.
      * Returns true if a prompt was shown (caller should stop and retry on next resume).
      *
-     * Order: overlay → notification → confirmed China ROM battery/autostart →
-     * Samsung Android 14+ full-screen intent.
+     * Order: overlay → notification → China ROM battery/autostart/background-popup →
+     * Samsung + China ROM Android 14+ full-screen intent.
      *
-     * Battery and autostart are only automatic for confirmed China ROM builds. Unknown/global
-     * builds are treated as non-China so Global Redmi/Honor/OPPO keep the lighter flow that
-     * field logs showed was working: overlay + notification only. FSI is Samsung-only because
-     * logs only confirmed Samsung Android 14+ needs it; other domestic brands do not.
+     * Overlay uses isAggressiveOemRom() — OEM brand behavior applies regardless of region.
+     * Battery, autostart, and background-popup are China-region only (isChinaRom()).
+     * FSI is confirmed necessary on Samsung Android 14+ and all detected China ROM Android 14+.
      */
     private fun checkAndRequestNextPermission(): Boolean {
         val prefs = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
         if (prefs.getBoolean(KEY_OVERLAY_SETTINGS_OPENED, false) ||
             prefs.getBoolean(KEY_FSI_SETTINGS_OPENED, false) ||
             prefs.getBoolean(KEY_BATTERY_SETTINGS_OPENED, false) ||
-            prefs.getBoolean(KEY_AUTOSTART_SETTINGS_OPENED, false)) {
+            prefs.getBoolean(KEY_AUTOSTART_SETTINGS_OPENED, false) ||
+            prefs.getBoolean(KEY_BACKGROUND_POPUP_SETTINGS_OPENED, false)) {
             logFunnel("permission_chain_deferred", deviceContext() + mapOf(
                 "overlay_opened" to prefs.getBoolean(KEY_OVERLAY_SETTINGS_OPENED, false),
                 "fsi_opened" to prefs.getBoolean(KEY_FSI_SETTINGS_OPENED, false),
                 "battery_opened" to prefs.getBoolean(KEY_BATTERY_SETTINGS_OPENED, false),
-                "autostart_opened" to prefs.getBoolean(KEY_AUTOSTART_SETTINGS_OPENED, false)
+                "autostart_opened" to prefs.getBoolean(KEY_AUTOSTART_SETTINGS_OPENED, false),
+                "bg_popup_opened" to prefs.getBoolean(KEY_BACKGROUND_POPUP_SETTINGS_OPENED, false)
             ))
             return false
         }
 
-        val isDomestic = RomUtils.isDomesticRom()
+        val isAggressiveOem = RomUtils.isAggressiveOemRom()
         val chinaRom = RomUtils.chinaRomInfo()
         val baseCtx = deviceContext()
 
-        // 1. 悬浮窗（国内必需）
-        if (isDomestic && OverlayPermissionCompat.needsUserGrant(this)) {
+        // 1. 悬浮窗（OEM 机型必需，不区分国行/海外）
+        if (isAggressiveOem && OverlayPermissionCompat.needsUserGrant(this)) {
             val opened = openOemOverlaySettings()
             if (opened != "failed") {
                 logFunnel("permission_prompt_opened", baseCtx + mapOf("type" to "overlay", "route" to opened))
@@ -399,11 +409,19 @@ class MainActivity : FlutterActivity() {
             }
         }
 
-        // 3. China ROM only: background survival pages needed after swipe-away / locked delivery.
+        // 3. China ROM only: battery optimisation + background-popup.
+        //    These are China-region-specific aggressive restrictions.
+        val romInfo = RomUtils.romInfo()
         if (chinaRom.isChina) {
             val pm = getSystemService(POWER_SERVICE) as PowerManager
             val batteryAlreadyShown = prefs.getBoolean(KEY_BATTERY_SHOWN, false)
-            if (!pm.isIgnoringBatteryOptimizations(packageName) && !batteryAlreadyShown) {
+            // MIUI + SDK ≤ 31: battery settings step causes popup delivery regression.
+            // Log data shows Mi 10 at SDK 29/30/31 (CNXM) all regress with battery; autostart alone
+            // is sufficient. Mi 13+ (HyperOS, SDK 33+) are unaffected and still need the battery step.
+            val skipBattery = romInfo.romType == RomUtils.RomType.XIAOMI
+                && romInfo.osLabel == "MIUI"
+                && Build.VERSION.SDK_INT <= Build.VERSION_CODES.S
+            if (!skipBattery && !pm.isIgnoringBatteryOptimizations(packageName) && !batteryAlreadyShown) {
                 val opened = openBatteryOptimizationSettings()
                 if (opened) {
                     logFunnel("permission_prompt_opened", baseCtx + mapOf(
@@ -415,11 +433,11 @@ class MainActivity : FlutterActivity() {
                 }
             }
 
-            if (!prefs.getBoolean(KEY_AUTOSTART_SHOWN, false)) {
-                val opened = openAutostartSettings()
+            if (!prefs.getBoolean(KEY_BACKGROUND_POPUP_SHOWN, false)) {
+                val opened = openBackgroundPopupSettings()
                 if (opened) {
                     logFunnel("permission_prompt_opened", baseCtx + mapOf(
-                        "type" to "autostart",
+                        "type" to "background_popup",
                         "china_rom" to true,
                         "china_rom_source" to chinaRom.source
                     ))
@@ -427,38 +445,24 @@ class MainActivity : FlutterActivity() {
                 }
             }
         }
-//        else if (chinaRom.source == "unknown_or_global" && isDomestic) {
-//            val pm = getSystemService(POWER_SERVICE) as PowerManager
-//            val batteryAlreadyShown = prefs.getBoolean(KEY_BATTERY_SHOWN, false)
-//            if (!pm.isIgnoringBatteryOptimizations(packageName) && !batteryAlreadyShown) {
-//                val opened = openBatteryOptimizationSettings()
-//                if (opened) {
-//                    logFunnel("permission_prompt_opened", baseCtx + mapOf(
-//                        "type" to "battery",
-//                        "china_rom" to false,
-//                        "china_rom_source" to chinaRom.source,
-//                        "fallback" to true
-//                    ))
-//                    return true
-//                }
-//            }
-//
-//            if (!prefs.getBoolean(KEY_AUTOSTART_SHOWN, false)) {
-//                val opened = openAutostartSettings()
-//                if (opened) {
-//                    logFunnel("permission_prompt_opened", baseCtx + mapOf(
-//                        "type" to "autostart",
-//                        "china_rom" to false,
-//                        "china_rom_source" to chinaRom.source,
-//                        "fallback" to true
-//                    ))
-//                    return true
-//                }
-//            }
-//        }
 
-        // 4. 全屏通知权限（Samsung Android 14+ 已有日志证明需要；其他品牌暂不引导）
-        if (Build.VERSION.SDK_INT >= 34 && RomUtils.detect() == RomUtils.RomType.SAMSUNG) {
+        // 3b. Autostart — MIUI enforces this on both China and Global builds.
+        if (romInfo.romType == RomUtils.RomType.XIAOMI
+            && !prefs.getBoolean(KEY_AUTOSTART_SHOWN, false)) {
+            val opened = openAutostartSettings()
+            if (opened) {
+                logFunnel("permission_prompt_opened", baseCtx + mapOf(
+                    "type" to "autostart",
+                    "china_rom" to chinaRom.isChina,
+                    "china_rom_source" to chinaRom.source
+                ))
+                return true
+            }
+        }
+
+        // 4. 全屏通知权限（Samsung Android 14+ 及所有已识别 China ROM Android 14+ 均需要）
+        if (Build.VERSION.SDK_INT >= 34 &&
+            (RomUtils.detect() == RomUtils.RomType.SAMSUNG || RomUtils.isChinaRom())) {
             val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             if (!nm.canUseFullScreenIntent() && !prefs.getBoolean(KEY_FSI_SHOWN, false)) {
                 val opened = openFsiPermissionSettings()
@@ -474,7 +478,8 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun shouldPromptFullScreenIntentAutomatically(): Boolean =
-        Build.VERSION.SDK_INT >= 34 && RomUtils.detect() == RomUtils.RomType.SAMSUNG
+        Build.VERSION.SDK_INT >= 34 &&
+            (RomUtils.detect() == RomUtils.RomType.SAMSUNG || RomUtils.isChinaRom())
 
     // ─── Settings route helpers ────────────────────────────────────────────────────
 
@@ -625,6 +630,66 @@ class MainActivity : FlutterActivity() {
                 ))
             }
         }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            try {
+                val intent = Intent(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                intent.data = android.net.Uri.parse("package:$packageName")
+                startActivity(intent)
+                prefs.edit()
+                    .putBoolean(KEY_BATTERY_SHOWN, true)
+                    .putBoolean(KEY_BATTERY_SETTINGS_OPENED, true)
+                    .apply()
+                logFunnel("settings_route_launched", baseCtx + mapOf(
+                    "route_type" to "battery",
+                    "label" to "standard_fallback",
+                    "grant_state" to "standard_android_confirmable"
+                ))
+                return true
+            } catch (_: Exception) {}
+        }
+
+        return false
+    }
+
+    private fun openBackgroundPopupSettings(): Boolean {
+        val prefs = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
+        if (prefs.getBoolean(KEY_BACKGROUND_POPUP_SHOWN, false)) return false
+
+        val romType = RomUtils.detect()
+        val routes = OemPermissionRoutes.backgroundPopupRoutes(romType)
+        val baseCtx = deviceContext()
+
+        for ((label, intentFactory) in routes) {
+            // 小米特殊处理：Activity 接收 UID，不接收包名
+            val intent = if (romType == RomUtils.RomType.XIAOMI && label == "oem") {
+                intentFactory(applicationInfo.uid.toString())
+            } else {
+                intentFactory(packageName)
+            }
+            val canOpen = try {
+                packageManager.resolveActivity(intent, 0) != null
+            } catch (_: Exception) { false }
+            if (canOpen) {
+                try {
+                    startActivity(intent)
+                    prefs.edit()
+                        .putBoolean(KEY_BACKGROUND_POPUP_SHOWN, true)
+                        .putBoolean(KEY_BACKGROUND_POPUP_SETTINGS_OPENED, true)
+                        .apply()
+                    logFunnel("settings_route_launched", baseCtx + mapOf(
+                        "route_type" to "background_popup",
+                        "label" to label,
+                        "grant_state" to "shown_not_confirmed"
+                    ))
+                    return true
+                } catch (e: Exception) {
+                    Log.d(TAG, "background popup route failed: $label")
+                }
+            }
+        }
+        // 如果全部失败，标记为已展示，不再重复尝试
+        prefs.edit().putBoolean(KEY_BACKGROUND_POPUP_SHOWN, true).apply()
         return false
     }
 

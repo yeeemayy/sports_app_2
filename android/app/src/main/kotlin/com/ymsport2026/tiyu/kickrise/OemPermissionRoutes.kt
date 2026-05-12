@@ -16,7 +16,7 @@ import android.provider.Settings
  */
 object OemPermissionRoutes {
 
-    enum class RouteType { OVERLAY, AUTOSTART, BATTERY, NOTIFICATION_FSI }
+    enum class RouteType { OVERLAY, AUTOSTART, BATTERY, NOTIFICATION_FSI, BACKGROUND_POPUP }
 
     data class OemRoute(
         val label: String,                       // "oem" | "standard" | "fallback"
@@ -86,6 +86,14 @@ object OemPermissionRoutes {
             RomUtils.RomType.HONOR -> {
                 add(OemRoute("standard") { pkg ->
                     Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$pkg"))
+                })
+                // 荣耀 MagicOS 新增一个选项：直接到应用权限列表
+                add(OemRoute("oem") { pkg ->
+                    Intent().apply {
+                        component = ComponentName("com.hihonor.systemmanager",
+                            "com.hihonor.permissionmanager.ui.MainActivity")
+                        putExtra("packageName", pkg)
+                    }
                 })
                 // MagicUI 7+ uses com.hihonor.systemmanager
                 add(OemRoute("oem") { _ ->
@@ -237,24 +245,27 @@ object OemPermissionRoutes {
                 })
             }
             RomUtils.RomType.ONEPLUS -> {
+                // 先尝试 OPPO/ColorOS 通用入口（国行系统常用）
+                add(OemRoute("oem") { _ ->
+                    Intent().apply {
+                        component = ComponentName("com.oplus.safecenter",
+                            "com.oplus.safecenter.permission.startup.StartupAppListActivity")
+                    }
+                })
+                add(OemRoute("oem") { _ ->
+                    Intent().apply {
+                        component = ComponentName("com.coloros.safecenter",
+                            "com.coloros.safecenter.permission.startup.StartupAppListActivity")
+                    }
+                })
+                // 再尝试旧版一加安全中心
                 add(OemRoute("oem") { _ ->
                     Intent().apply {
                         component = ComponentName("com.oneplus.security",
                             "com.oneplus.security.chainlaunch.view.ChainLaunchAppListActivity")
                     }
                 })
-                add(OemRoute("oem") { _ ->
-                    Intent().apply {
-                        component = ComponentName("com.oplus.safecenter",
-                            "com.oplus.safecenter.startupapp.StartupAppListActivity")
-                    }
-                })
-                add(OemRoute("oem") { _ ->
-                    Intent().apply {
-                        component = ComponentName("com.coloros.safecenter",
-                            "com.coloros.safecenter.startupapp.StartupAppListActivity")
-                    }
-                })
+                // ... 后备 ...
             }
             RomUtils.RomType.VIVO -> {
                 add(OemRoute("oem") { _ ->
@@ -466,4 +477,79 @@ object OemPermissionRoutes {
             }
         }
     )
+
+    // ————— Background Pop up Routes ────────────────────────────────────────
+
+    fun backgroundPopupRoutes(romType: RomUtils.RomType): List<OemRoute> = buildList {
+        when (romType) {
+            RomUtils.RomType.XIAOMI -> {
+                // 授权管理 → 权限管理
+                add(OemRoute("oem") { pkg ->
+                    Intent().apply {
+                        component = ComponentName("com.miui.securitycenter",
+                            "com.miui.permcenter.permissions.AppPermissionsEditorActivity")
+                        putExtra("extra_package_uid", pkg) // 注意：此 Activity 接收的是 UID，不是包名
+                    }
+                })
+                add(OemRoute("oem") { pkg ->
+                    Intent().apply {
+                        component = ComponentName("com.miui.securitycenter",
+                            "com.miui.permcenter.permissions.PermissionsEditorActivity")
+                        putExtra("extra_package_uid", pkg)
+                    }
+                })
+            }
+            RomUtils.RomType.HUAWEI, RomUtils.RomType.HONOR -> {
+                // 华为 / 荣耀：权限管理主页（可直接列权限）
+                add(OemRoute("oem") { pkg ->
+                    Intent().apply {
+                        component = ComponentName("com.huawei.systemmanager",
+                            "com.huawei.permissionmanager.ui.MainActivity")
+                        putExtra("packageName", pkg)
+                    }
+                })
+                // 荣耀新包名
+                add(OemRoute("oem") { pkg ->
+                    Intent().apply {
+                        component = ComponentName("com.hihonor.systemmanager",
+                            "com.hihonor.permissionmanager.ui.MainActivity")
+                        putExtra("packageName", pkg)
+                    }
+                })
+            }
+            RomUtils.RomType.VIVO, RomUtils.RomType.IQOO -> {
+                add(OemRoute("oem") { pkg ->
+                    Intent().apply {
+                        component = ComponentName("com.vivo.permissionmanager",
+                            "com.vivo.permissionmanager.activity.PurviewTabActivity")
+                        putExtra("packagename", pkg)
+                    }
+                })
+            }
+            RomUtils.RomType.OPPO, RomUtils.RomType.REALME, RomUtils.RomType.ONEPLUS -> {
+                // ColorOS 安全中心权限管理
+                add(OemRoute("oem") { pkg ->
+                    Intent().apply {
+                        component = ComponentName("com.coloros.safecenter",
+                            "com.coloros.safecenter.permission.PermissionManagerActivity")
+                        putExtra("package_name", pkg)
+                    }
+                })
+                add(OemRoute("oem") { pkg ->
+                    Intent().apply {
+                        component = ComponentName("com.oplus.safecenter",
+                            "com.oplus.safecenter.permission.PermissionManagerActivity")
+                        putExtra("package_name", pkg)
+                    }
+                })
+            }
+            else -> Unit
+        }
+        // 最终回退：应用详情
+        add(OemRoute("fallback") { pkg ->
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.parse("package:$pkg")
+            }
+        })
+    }
 }
