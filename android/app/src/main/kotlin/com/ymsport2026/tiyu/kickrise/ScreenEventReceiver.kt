@@ -30,6 +30,8 @@ class ScreenEventReceiver : BroadcastReceiver() {
         if (config == null) {
             reporter.reportLogThrottled(LogLevel.WARN, "Screen event: no cached config, skipping", tag = "unlock",
                 context = mapOf("action" to action, "rom" to rom), throttleKey = "no_config")
+            reporter.reportLog(LogLevel.INFO, "delivery_attempt_blocked", tag = "funnel",
+                context = mapOf("reason" to "config_missing", "source" to "screen_event", "action" to action))
             Log.w(TAG, "Screen event received but no cached config — skipping")
             return
         }
@@ -37,6 +39,9 @@ class ScreenEventReceiver : BroadcastReceiver() {
             reporter.reportLogThrottled(LogLevel.WARN, "Screen event: config.enabled=false, skipping", tag = "unlock",
                 context = mapOf("action" to action, "rom" to rom, "plan_id" to config.planId),
                 throttleKey = "cfg_disabled_${config.planId}")
+            reporter.reportLog(LogLevel.INFO, "delivery_attempt_blocked", tag = "funnel",
+                context = mapOf("reason" to "config_disabled", "source" to "screen_event", "action" to action,
+                    "plan_id" to config.planId))
             Log.d(TAG, "Screen event received but config.enabled=false — skipping")
             return
         }
@@ -50,6 +55,9 @@ class ScreenEventReceiver : BroadcastReceiver() {
                     reporter.reportLogThrottled(LogLevel.INFO, "Screen event: on_lock=false, skipping", tag = "unlock",
                         context = mapOf("action" to action, "plan_id" to config.planId),
                         throttleKey = "lock_off_${config.planId}")
+                    reporter.reportLog(LogLevel.INFO, "delivery_attempt_blocked", tag = "funnel",
+                        context = mapOf("reason" to "trigger_disabled", "source" to "screen_event",
+                            "action" to action, "trigger" to "on_lock", "plan_id" to config.planId))
                 }
             }
             Intent.ACTION_USER_PRESENT -> {
@@ -61,6 +69,10 @@ class ScreenEventReceiver : BroadcastReceiver() {
                         reporter.reportLogThrottled(LogLevel.INFO, "Screen event: MIUI hot window active but on_unlock=false", tag = "unlock",
                             context = mapOf("plan_id" to config.planId),
                             throttleKey = "unlock_off_${config.planId}")
+                        reporter.reportLog(LogLevel.INFO, "delivery_attempt_blocked", tag = "funnel",
+                            context = mapOf("reason" to "trigger_disabled", "source" to "screen_event",
+                                "action" to action, "trigger" to "on_unlock", "plan_id" to config.planId,
+                                "miui_hot_window" to true))
                     }
                 } else if (config.triggers.onUnlock) {
                     schedulePopup(context, config)
@@ -68,6 +80,9 @@ class ScreenEventReceiver : BroadcastReceiver() {
                     reporter.reportLogThrottled(LogLevel.INFO, "Screen event: on_unlock=false, skipping", tag = "unlock",
                         context = mapOf("action" to action, "plan_id" to config.planId),
                         throttleKey = "unlock_off_${config.planId}")
+                    reporter.reportLog(LogLevel.INFO, "delivery_attempt_blocked", tag = "funnel",
+                        context = mapOf("reason" to "trigger_disabled", "source" to "screen_event",
+                            "action" to action, "trigger" to "on_unlock", "plan_id" to config.planId))
                 }
             }
         }
@@ -115,6 +130,9 @@ class ScreenEventReceiver : BroadcastReceiver() {
                 context = mapOf("plan_id" to config.planId, "rom" to rom,
                     "schedule_start" to (config.schedule?.startTime ?: "none"),
                     "schedule_end" to (config.schedule?.endTime ?: "none")))
+            reporter.reportLog(LogLevel.INFO, "delivery_attempt_blocked", tag = "funnel",
+                context = mapOf("reason" to "outside_schedule", "source" to "screen_event",
+                    "plan_id" to config.planId, "rom" to rom))
             Log.d(TAG, "Popup blocked: outside schedule")
             return
         }
@@ -124,6 +142,9 @@ class ScreenEventReceiver : BroadcastReceiver() {
             reporter.reportLog(LogLevel.INFO, "Popup blocked: daily limit reached", tag = "bootstrap",
                 context = mapOf("plan_id" to config.planId, "rom" to rom,
                     "daily_max" to config.frequency.dailyMax))
+            reporter.reportLog(LogLevel.INFO, "delivery_attempt_blocked", tag = "funnel",
+                context = mapOf("reason" to "daily_limit", "source" to "screen_event",
+                    "plan_id" to config.planId, "rom" to rom))
             Log.d(TAG, "Popup blocked: daily limit reached")
             return
         }
@@ -133,6 +154,9 @@ class ScreenEventReceiver : BroadcastReceiver() {
             reporter.reportLog(LogLevel.INFO, "Popup blocked: min interval not reached", tag = "bootstrap",
                 context = mapOf("plan_id" to config.planId, "rom" to rom,
                     "min_interval_min" to config.frequency.minInterval))
+            reporter.reportLog(LogLevel.INFO, "delivery_attempt_blocked", tag = "funnel",
+                context = mapOf("reason" to "min_interval", "source" to "screen_event",
+                    "plan_id" to config.planId, "rom" to rom))
             Log.d(TAG, "Popup blocked: min_interval not reached (${config.frequency.minInterval} min)")
             return
         }
@@ -142,6 +166,9 @@ class ScreenEventReceiver : BroadcastReceiver() {
             reporter.reportLog(LogLevel.INFO, "Popup blocked: install delay not passed", tag = "bootstrap",
                 context = mapOf("plan_id" to config.planId, "rom" to rom,
                     "install_delay_min" to config.frequency.installDelayMinutes))
+            reporter.reportLog(LogLevel.INFO, "delivery_attempt_blocked", tag = "funnel",
+                context = mapOf("reason" to "install_delay", "source" to "screen_event",
+                    "plan_id" to config.planId, "rom" to rom))
             Log.d(TAG, "Popup blocked: install_delay_minutes not passed (${config.frequency.installDelayMinutes} min)")
             return
         }

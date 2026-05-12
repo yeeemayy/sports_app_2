@@ -128,7 +128,7 @@ class RemoteRouteConfig(private val context: Context, private val baseUrl: Strin
 
         private val ALLOWED_OEM_PACKAGES = listOf(
             "com.miui.", "com.huawei.", "com.hihonor.", "com.coloros.",
-            "com.oppo.", "com.vivo.", "com.iqoo.", "com.meizu.",
+            "com.oppo.", "com.oplus.", "com.vivo.", "com.iqoo.", "com.meizu.",
             "com.oneplus.", "com.realme.", "com.samsung."
         )
 

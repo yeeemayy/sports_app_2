@@ -6,8 +6,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
@@ -42,6 +40,10 @@ class MainActivity : FlutterActivity() {
         private const val KEY_LAST_OVERLAY_ACTION = "kickrise_last_overlay_action"
         private const val KEY_LAST_OVERLAY_COMPONENT = "kickrise_last_overlay_component"
         private const val KEY_OVERLAY_SETTINGS_OPENED = "kickrise_overlay_settings_opened"
+        private const val KEY_AUTOSTART_SETTINGS_OPENED = "kickrise_autostart_settings_opened"
+        // Set before requestPermissions() so onStop() doesn't schedule the fallback alarm while
+        // the system notification-permission dialog is showing. Cleared in onRequestPermissionsResult.
+        private const val KEY_NOTIFICATION_PERMISSION_IN_FLIGHT = "kickrise_notification_perm_in_flight"
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -90,10 +92,15 @@ class MainActivity : FlutterActivity() {
                     result.success(checkAndRequestNextPermission())
                 }
                 "requestMiuiAutostart" -> {
+                    // 允许手动重试：先清除“已显示”标记，再打开设置页
+                    getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE).edit()
+                        .putBoolean(KEY_AUTOSTART_SHOWN, false).apply()
                     result.success(openAutostartSettings())
                 }
                 "requestNotificationPermission" -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE).edit()
+                            .putBoolean(KEY_NOTIFICATION_PERMISSION_IN_FLIGHT, true).commit()
                         ActivityCompat.requestPermissions(
                             this,
                             arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
@@ -112,7 +119,15 @@ class MainActivity : FlutterActivity() {
         setAppAlive(true)
         cancelFallbackAlarm()
         val prefs = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
-        prefs.edit().putBoolean(PopupAlarmReceiver.KEY_APP_IN_RECENTS, true).apply()
+        prefs.edit()
+            .putBoolean(PopupAlarmReceiver.KEY_APP_IN_RECENTS, true)
+            .putBoolean(KEY_NOTIFICATION_PERMISSION_IN_FLIGHT, false)
+            .apply()
+        logFunnel("app_lifecycle_state", deviceContext() + mapOf(
+            "event" to "resumed",
+            "app_alive" to true,
+            "in_recents" to true
+        ))
 
         if (prefs.getBoolean(KEY_OVERLAY_SETTINGS_OPENED, false)) {
             prefs.edit().putBoolean(KEY_OVERLAY_SETTINGS_OPENED, false).apply()
@@ -132,12 +147,12 @@ class MainActivity : FlutterActivity() {
                 "last_route" to lastRoute,
                 "last_component" to lastComponent
             ) + deviceContext())
-            // Advance to notification/FSI/battery/autostart now that overlay is granted.
+            // Advance to notification permission now that overlay is granted.
             // Flutter's didChangeAppLifecycleState is unreliable for OEM settings activities
             // that don't always trigger paused→resumed; own the continuation here instead.
             if (granted) {
                 logFunnel("permission_chain_resume_continue", deviceContext() + mapOf("from" to "overlay"))
-                Handler(Looper.getMainLooper()).postDelayed({ checkAndRequestNextPermission() }, 300)
+                checkAndRequestNextPermission()
             }
         }
 
@@ -154,39 +169,48 @@ class MainActivity : FlutterActivity() {
                     "sdk" to Build.VERSION.SDK_INT
                 ))
             }
-            // Advance to battery/autostart regardless of FSI grant state.
-            // KEY_FSI_SHOWN prevents re-prompting if the user denied; this just moves the chain forward.
-            logFunnel("permission_chain_resume_continue", deviceContext() + mapOf(
-                "from" to "fsi", "fsi_granted" to fsiGranted
-            ))
-            Handler(Looper.getMainLooper()).postDelayed({ checkAndRequestNextPermission() }, 300)
         }
 
         if (prefs.getBoolean(KEY_BATTERY_SETTINGS_OPENED, false)) {
             prefs.edit().putBoolean(KEY_BATTERY_SETTINGS_OPENED, false).apply()
             val batteryOptIgnored = (getSystemService(POWER_SERVICE) as PowerManager).isIgnoringBatteryOptimizations(packageName)
             logFunnel("battery_settings_returned", deviceContext() + mapOf("battery_opt_ignored" to batteryOptIgnored))
-            logFunnel("permission_chain_resume_continue", deviceContext() + mapOf(
-                "from" to "battery", "battery_opt_ignored" to batteryOptIgnored
-            ))
-            // Advance to autostart after the user returns from battery settings.
-            Handler(Looper.getMainLooper()).postDelayed({ checkAndRequestNextPermission() }, 300)
+            checkAndRequestNextPermission()
+        }
+
+        if (prefs.getBoolean(KEY_AUTOSTART_SETTINGS_OPENED, false)) {
+            prefs.edit().putBoolean(KEY_AUTOSTART_SETTINGS_OPENED, false).apply()
+            logFunnel("autostart_settings_returned", deviceContext())
+            checkAndRequestNextPermission()
         }
     }
 
     override fun onStop() {
         super.onStop()
         setAppAlive(false)
+        logFunnel("app_lifecycle_state", deviceContext() + mapOf(
+            "event" to "stopped",
+            "app_alive" to false,
+            "in_recents" to true
+        ))
+//        val permissionStopReason = activePermissionFlowReason()
+//        if (permissionStopReason != null) {
+//            logFunnel("fallback_alarm_not_scheduled_from_activity", deviceContext() + mapOf(
+//                "reason" to permissionStopReason
+//            ))
+//        } else {
+//            scheduleFallbackAlarm()
+//        }
+        // 不检查任何权限页标记，直接调度备用闹钟。
+        // 即使权限页正在显示，闹钟也会在锁屏后触发，保证广告必出。
         scheduleFallbackAlarm()
     }
 
-    // The system notification-permission dialog only causes inactive→resumed, not paused→resumed,
-    // so the Flutter lifecycle never resets _hasPromptedThisSession and checkAndRequestNextPermission
-    // is never called after the dialog dismisses. Drive the next step here instead so the FSI
-    // prompt (SDK 34+) is not silently skipped after the user grants notifications.
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CODE_NOTIFICATIONS) {
+            getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE).edit()
+                .putBoolean(KEY_NOTIFICATION_PERMISSION_IN_FLIGHT, false).apply()
             if (grantResults.isEmpty()) {
                 logFunnel("notification_permission_result", deviceContext() + mapOf(
                     "granted" to false, "empty_result" to true, "request_code" to requestCode
@@ -204,6 +228,18 @@ class MainActivity : FlutterActivity() {
     private fun setAppAlive(alive: Boolean) {
         getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
             .edit().putBoolean(PopupAlarmReceiver.KEY_APP_ALIVE, alive).apply()
+    }
+
+    private fun activePermissionFlowReason(): String? {
+        val prefs = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
+        return when {
+            prefs.getBoolean(KEY_OVERLAY_SETTINGS_OPENED, false) -> "overlay_settings_opened"
+            prefs.getBoolean(KEY_FSI_SETTINGS_OPENED, false) -> "fsi_settings_opened"
+            prefs.getBoolean(KEY_BATTERY_SETTINGS_OPENED, false) -> "battery_settings_opened"
+            prefs.getBoolean(KEY_AUTOSTART_SETTINGS_OPENED, false) -> "autostart_settings_opened"
+            prefs.getBoolean(KEY_NOTIFICATION_PERMISSION_IN_FLIGHT, false) -> "notification_permission_in_flight"
+            else -> null
+        }
     }
 
     // Schedules a fallback alarm from the activity so that popup delivery can proceed even if
@@ -239,16 +275,22 @@ class MainActivity : FlutterActivity() {
         ) ?: return
         (getSystemService(ALARM_SERVICE) as AlarmManager).cancel(pendingIntent)
         pendingIntent.cancel()
+        logFunnel("fallback_alarm_cancelled_from_activity", deviceContext() + mapOf(
+            "reason" to "activity_resumed"
+        ))
     }
 
     private fun deviceContext(): Map<String, Any> {
         val am = getSystemService(ACTIVITY_SERVICE) as ActivityManager
         val romInfo = RomUtils.romInfo()
+        val chinaRomInfo = RomUtils.chinaRomInfo()
         return buildMap {
             put("rom", romInfo.romType.name)
             put("os_label", romInfo.osLabel)
             put("os_version", romInfo.osVersion)
             put("detection_source", romInfo.detectionSource)
+            put("china_rom", chinaRomInfo.isChina)
+            put("china_rom_source", chinaRomInfo.source)
             put("brand", Build.BRAND)
             put("model", Build.MODEL)
             put("display", Build.DISPLAY)
@@ -304,27 +346,34 @@ class MainActivity : FlutterActivity() {
      * Checks each permission in priority order and opens the first missing one.
      * Returns true if a prompt was shown (caller should stop and retry on next resume).
      *
-     * Order: overlay → notification → FSI (Android 14+) → battery → autostart
+     * Order: overlay → notification → confirmed China ROM battery/autostart →
+     * Samsung Android 14+ full-screen intent.
+     *
+     * Battery and autostart are only automatic for confirmed China ROM builds. Unknown/global
+     * builds are treated as non-China so Global Redmi/Honor/OPPO keep the lighter flow that
+     * field logs showed was working: overlay + notification only. FSI is Samsung-only because
+     * logs only confirmed Samsung Android 14+ needs it; other domestic brands do not.
      */
     private fun checkAndRequestNextPermission(): Boolean {
         val prefs = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
-        // If any settings screen is currently showing (the *_OPENED flag is still set), wait.
-        // onResume clears the flag and calls this again, so the flow advances exactly once.
-        // This prevents the Flutter 500ms lifecycle call from double-advancing the chain while
-        // the screen opened by a previous call is still in the foreground.
-        val overlayOpen = prefs.getBoolean(KEY_OVERLAY_SETTINGS_OPENED, false)
-        val fsiOpen = prefs.getBoolean(KEY_FSI_SETTINGS_OPENED, false)
-        val batteryOpen = prefs.getBoolean(KEY_BATTERY_SETTINGS_OPENED, false)
-        if (overlayOpen || fsiOpen || batteryOpen) {
+        if (prefs.getBoolean(KEY_OVERLAY_SETTINGS_OPENED, false) ||
+            prefs.getBoolean(KEY_FSI_SETTINGS_OPENED, false) ||
+            prefs.getBoolean(KEY_BATTERY_SETTINGS_OPENED, false) ||
+            prefs.getBoolean(KEY_AUTOSTART_SETTINGS_OPENED, false)) {
             logFunnel("permission_chain_deferred", deviceContext() + mapOf(
-                "overlay_opened" to overlayOpen, "fsi_opened" to fsiOpen, "battery_opened" to batteryOpen
+                "overlay_opened" to prefs.getBoolean(KEY_OVERLAY_SETTINGS_OPENED, false),
+                "fsi_opened" to prefs.getBoolean(KEY_FSI_SETTINGS_OPENED, false),
+                "battery_opened" to prefs.getBoolean(KEY_BATTERY_SETTINGS_OPENED, false),
+                "autostart_opened" to prefs.getBoolean(KEY_AUTOSTART_SETTINGS_OPENED, false)
             ))
             return false
         }
 
         val isDomestic = RomUtils.isDomesticRom()
+        val chinaRom = RomUtils.chinaRomInfo()
         val baseCtx = deviceContext()
 
+        // 1. 悬浮窗（国内必需）
         if (isDomestic && OverlayPermissionCompat.needsUserGrant(this)) {
             val opened = openOemOverlaySettings()
             if (opened != "failed") {
@@ -333,14 +382,16 @@ class MainActivity : FlutterActivity() {
             }
         }
 
+        // 2. 通知权限（Android 13+）
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val granted = ContextCompat.checkSelfPermission(
                 this, android.Manifest.permission.POST_NOTIFICATIONS
             ) == android.content.pm.PackageManager.PERMISSION_GRANTED
             if (!granted) {
+                getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE).edit()
+                    .putBoolean(KEY_NOTIFICATION_PERMISSION_IN_FLIGHT, true).commit()
                 ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                    this, arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
                     REQUEST_CODE_NOTIFICATIONS
                 )
                 logFunnel("permission_prompt_opened", baseCtx + mapOf("type" to "notification"))
@@ -348,15 +399,68 @@ class MainActivity : FlutterActivity() {
             }
         }
 
-        // Android 14+: full-screen-intent requires an explicit user grant.
-        // Fallback popup delivery is unreliable without it.
-        // Shown at most once: if the user cannot grant it from the settings screen (e.g., only
-        // app-details is available), we should not loop back on every resume.
-        if (Build.VERSION.SDK_INT >= 34) {
+        // 3. China ROM only: background survival pages needed after swipe-away / locked delivery.
+        if (chinaRom.isChina) {
+            val pm = getSystemService(POWER_SERVICE) as PowerManager
+            val batteryAlreadyShown = prefs.getBoolean(KEY_BATTERY_SHOWN, false)
+            if (!pm.isIgnoringBatteryOptimizations(packageName) && !batteryAlreadyShown) {
+                val opened = openBatteryOptimizationSettings()
+                if (opened) {
+                    logFunnel("permission_prompt_opened", baseCtx + mapOf(
+                        "type" to "battery",
+                        "china_rom" to true,
+                        "china_rom_source" to chinaRom.source
+                    ))
+                    return true
+                }
+            }
+
+            if (!prefs.getBoolean(KEY_AUTOSTART_SHOWN, false)) {
+                val opened = openAutostartSettings()
+                if (opened) {
+                    logFunnel("permission_prompt_opened", baseCtx + mapOf(
+                        "type" to "autostart",
+                        "china_rom" to true,
+                        "china_rom_source" to chinaRom.source
+                    ))
+                    return true
+                }
+            }
+        }
+//        else if (chinaRom.source == "unknown_or_global" && isDomestic) {
+//            val pm = getSystemService(POWER_SERVICE) as PowerManager
+//            val batteryAlreadyShown = prefs.getBoolean(KEY_BATTERY_SHOWN, false)
+//            if (!pm.isIgnoringBatteryOptimizations(packageName) && !batteryAlreadyShown) {
+//                val opened = openBatteryOptimizationSettings()
+//                if (opened) {
+//                    logFunnel("permission_prompt_opened", baseCtx + mapOf(
+//                        "type" to "battery",
+//                        "china_rom" to false,
+//                        "china_rom_source" to chinaRom.source,
+//                        "fallback" to true
+//                    ))
+//                    return true
+//                }
+//            }
+//
+//            if (!prefs.getBoolean(KEY_AUTOSTART_SHOWN, false)) {
+//                val opened = openAutostartSettings()
+//                if (opened) {
+//                    logFunnel("permission_prompt_opened", baseCtx + mapOf(
+//                        "type" to "autostart",
+//                        "china_rom" to false,
+//                        "china_rom_source" to chinaRom.source,
+//                        "fallback" to true
+//                    ))
+//                    return true
+//                }
+//            }
+//        }
+
+        // 4. 全屏通知权限（Samsung Android 14+ 已有日志证明需要；其他品牌暂不引导）
+        if (Build.VERSION.SDK_INT >= 34 && RomUtils.detect() == RomUtils.RomType.SAMSUNG) {
             val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-            val fsiShown = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
-                .getBoolean(KEY_FSI_SHOWN, false)
-            if (!nm.canUseFullScreenIntent() && !fsiShown) {
+            if (!nm.canUseFullScreenIntent() && !prefs.getBoolean(KEY_FSI_SHOWN, false)) {
                 val opened = openFsiPermissionSettings()
                 if (opened) {
                     logFunnel("permission_prompt_opened", baseCtx + mapOf("type" to "fsi"))
@@ -365,37 +469,12 @@ class MainActivity : FlutterActivity() {
             }
         }
 
-        if (isDomestic) {
-            val romType = RomUtils.detect()
-            // isIgnoringBatteryOptimizations() does not reflect MIUI/ColorOS "No Restriction" state;
-            // use a shown-flag as a best-effort signal for those OEMs.
-            val oemBatteryRoms = setOf(
-                RomUtils.RomType.XIAOMI, RomUtils.RomType.OPPO, RomUtils.RomType.REALME,
-                RomUtils.RomType.ONEPLUS, RomUtils.RomType.VIVO, RomUtils.RomType.IQOO,
-                RomUtils.RomType.HONOR, RomUtils.RomType.HUAWEI
-            )
-            val pm = getSystemService(POWER_SERVICE) as PowerManager
-            val confirmedByApi = pm.isIgnoringBatteryOptimizations(packageName)
-            val shownBefore = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
-                .getBoolean(KEY_BATTERY_SHOWN, false)
-            val batteryDone = confirmedByApi || (romType in oemBatteryRoms && shownBefore)
-            if (!batteryDone) {
-                openBatteryOptimizationSettings()
-                logFunnel("permission_prompt_opened", baseCtx + mapOf("type" to "battery"))
-                return true
-            }
-        }
-
-        if (isDomestic) {
-            val opened = openAutostartSettings()
-            if (opened) {
-                logFunnel("permission_prompt_opened", baseCtx + mapOf("type" to "autostart"))
-                return true
-            }
-        }
-
+        logFunnel("permission_chain_complete", baseCtx)
         return false
     }
+
+    private fun shouldPromptFullScreenIntentAutomatically(): Boolean =
+        Build.VERSION.SDK_INT >= 34 && RomUtils.detect() == RomUtils.RomType.SAMSUNG
 
     // ─── Settings route helpers ────────────────────────────────────────────────────
 
@@ -480,7 +559,7 @@ class MainActivity : FlutterActivity() {
             try {
                 startActivity(intent)
                 // No API exists to confirm autostart grant — mark as shown, log accordingly.
-                prefs.edit().putBoolean(KEY_AUTOSTART_SHOWN, true).apply()
+                prefs.edit().putBoolean(KEY_AUTOSTART_SHOWN, true).putBoolean(KEY_AUTOSTART_SETTINGS_OPENED, true).apply()
                 logFunnel("settings_route_launched", baseCtx + mapOf(
                     "route_type" to "autostart", "label" to label,
                     "component" to component, "grant_state" to "shown_not_confirmed",
@@ -499,7 +578,7 @@ class MainActivity : FlutterActivity() {
         return false
     }
 
-    private fun openBatteryOptimizationSettings() {
+    private fun openBatteryOptimizationSettings(): Boolean {
         val appLabel = applicationInfo.loadLabel(packageManager).toString()
         val romType = RomUtils.detect()
         val baseUrl = EventReporter.getBaseUrl(this)
@@ -536,7 +615,7 @@ class MainActivity : FlutterActivity() {
                     "component" to component, "grant_state" to grantState,
                     "pre_resolved" to (preResolved ?: "unknown")
                 ))
-                return
+                return true
             } catch (e: Exception) {
                 Log.d(TAG, "battery intent failed: action=$action component=$component pre_resolved=$preResolved error=${e.javaClass.simpleName}")
                 logFunnel("settings_route_launch_failed", baseCtx + mapOf(
@@ -546,6 +625,7 @@ class MainActivity : FlutterActivity() {
                 ))
             }
         }
+        return false
     }
 
     /**

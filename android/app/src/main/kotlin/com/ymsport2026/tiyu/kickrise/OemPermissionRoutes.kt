@@ -49,25 +49,9 @@ object OemPermissionRoutes {
                 })
             }
             RomUtils.RomType.OPPO, RomUtils.RomType.REALME, RomUtils.RomType.ONEPLUS -> {
-                // ColorOS: newer path first, then older, then OPPO Safe fallback
-                add(OemRoute("oem") { _ ->
-                    Intent().apply {
-                        component = ComponentName("com.coloros.safecenter",
-                            "com.coloros.safecenter.permission.floatwindow.FloatWindowListActivity")
-                    }
-                })
-                add(OemRoute("oem") { _ ->
-                    Intent().apply {
-                        component = ComponentName("com.coloros.safecenter",
-                            "com.coloros.safecenter.sysfloatwindow.FloatWindowListActivity")
-                    }
-                })
-                add(OemRoute("oem") { _ ->
-                    Intent().apply {
-                        component = ComponentName("com.oppo.safe",
-                            "com.oppo.safe.permission.floatwindow.FloatWindowListActivity")
-                    }
-                })
+                // ColorOS/OxygenOS: standard route works reliably across versions.
+                // The legacy com.coloros.safecenter and com.oppo.safe FloatWindowListActivity
+                // components no longer exist on ColorOS 11+ and throw ActivityNotFoundException.
                 add(OemRoute("standard") { pkg ->
                     Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$pkg"))
                 })
@@ -168,6 +152,16 @@ object OemPermissionRoutes {
     fun autostartRoutes(romType: RomUtils.RomType): List<OemRoute> = buildList {
         when (romType) {
             RomUtils.RomType.XIAOMI -> {
+                // Direct component (no action) — works when AutoStartManagementActivity exists
+                // but doesn't handle miui.intent.action.APP_PERM_EDITOR (MIUI 12/13)
+                add(OemRoute("oem") { pkg ->
+                    Intent().apply {
+                        component = ComponentName("com.miui.securitycenter",
+                            "com.miui.permcenter.autostart.AutoStartManagementActivity")
+                        putExtra("extra_pkgname", pkg)
+                    }
+                })
+                // Action-qualified variant kept as second try for older MIUI builds
                 add(OemRoute("oem") { pkg ->
                     Intent("miui.intent.action.APP_PERM_EDITOR").apply {
                         setClassName("com.miui.securitycenter",
@@ -177,6 +171,20 @@ object OemPermissionRoutes {
                 })
             }
             RomUtils.RomType.OPPO -> {
+                // com.oplus.safecenter — package name used on ColorOS 12+ / newer OPPO models
+                add(OemRoute("oem") { _ ->
+                    Intent().apply {
+                        component = ComponentName("com.oplus.safecenter",
+                            "com.oplus.safecenter.permission.startup.StartupAppListActivity")
+                    }
+                })
+                add(OemRoute("oem") { _ ->
+                    Intent().apply {
+                        component = ComponentName("com.oplus.safecenter",
+                            "com.oplus.safecenter.startupapp.StartupAppListActivity")
+                    }
+                })
+                // com.coloros.safecenter — older ColorOS path
                 add(OemRoute("oem") { _ ->
                     Intent().apply {
                         component = ComponentName("com.coloros.safecenter",
@@ -197,6 +205,18 @@ object OemPermissionRoutes {
                 })
             }
             RomUtils.RomType.REALME -> {
+                add(OemRoute("oem") { _ ->
+                    Intent().apply {
+                        component = ComponentName("com.oplus.safecenter",
+                            "com.oplus.safecenter.permission.startup.StartupAppListActivity")
+                    }
+                })
+                add(OemRoute("oem") { _ ->
+                    Intent().apply {
+                        component = ComponentName("com.oplus.safecenter",
+                            "com.oplus.safecenter.startupapp.StartupAppListActivity")
+                    }
+                })
                 add(OemRoute("oem") { _ ->
                     Intent().apply {
                         component = ComponentName("com.coloros.safecenter",
@@ -221,6 +241,12 @@ object OemPermissionRoutes {
                     Intent().apply {
                         component = ComponentName("com.oneplus.security",
                             "com.oneplus.security.chainlaunch.view.ChainLaunchAppListActivity")
+                    }
+                })
+                add(OemRoute("oem") { _ ->
+                    Intent().apply {
+                        component = ComponentName("com.oplus.safecenter",
+                            "com.oplus.safecenter.startupapp.StartupAppListActivity")
                     }
                 })
                 add(OemRoute("oem") { _ ->
@@ -300,6 +326,12 @@ object OemPermissionRoutes {
             }
             else -> Unit
         }
+        // Universal fallback: app info page shows autostart toggle on most China ROMs
+        add(OemRoute("fallback") { pkg ->
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.parse("package:$pkg")
+            }
+        })
     }
 
     // ─── Battery / background restriction ────────────────────────────────────────
@@ -329,6 +361,20 @@ object OemPermissionRoutes {
                 })
             }
             RomUtils.RomType.OPPO, RomUtils.RomType.REALME, RomUtils.RomType.ONEPLUS -> {
+                // com.oplus.safecenter — package name used on ColorOS 12+ / newer OPPO models
+                add(OemRoute("oem") { _ ->
+                    Intent().apply {
+                        component = ComponentName("com.oplus.safecenter",
+                            "com.oplus.safecenter.powermonitor.appmonitor.AppMonitorActivity")
+                    }
+                })
+                add(OemRoute("oem") { _ ->
+                    Intent().apply {
+                        component = ComponentName("com.oplus.safecenter",
+                            "com.oplus.safecenter.powermonitor.PowerManagerActivity")
+                    }
+                })
+                // com.coloros.safecenter — older ColorOS path
                 add(OemRoute("oem") { _ ->
                     Intent().apply {
                         component = ComponentName("com.coloros.safecenter",
@@ -349,12 +395,7 @@ object OemPermissionRoutes {
                 })
             }
             RomUtils.RomType.VIVO, RomUtils.RomType.IQOO -> {
-                add(OemRoute("oem") { _ ->
-                    Intent().apply {
-                        component = ComponentName("com.vivo.abe",
-                            "com.vivo.applicationbehaviorengine.ui.ExcessivePowerManagerActivity")
-                    }
-                })
+                // ExcessivePowerManagerActivity removed — requires system permission (SecurityException)
                 add(OemRoute("oem") { _ ->
                     Intent().apply {
                         component = ComponentName("com.vivo.permissionmanager",
@@ -363,6 +404,20 @@ object OemPermissionRoutes {
                 })
             }
             RomUtils.RomType.HONOR -> {
+                // MagicOS 10+ candidates — ProtectActivity removed in newer hihonor builds
+                add(OemRoute("oem") { _ ->
+                    Intent().apply {
+                        component = ComponentName("com.hihonor.systemmanager",
+                            "com.hihonor.systemmanager.appmanage.bg.ui.BgManageActivity")
+                    }
+                })
+                add(OemRoute("oem") { _ ->
+                    Intent().apply {
+                        component = ComponentName("com.hihonor.systemmanager",
+                            "com.hihonor.systemmanager.power.appmanage.BgManageActivity")
+                    }
+                })
+                // Older hihonor / huawei paths
                 add(OemRoute("oem") { _ ->
                     Intent().apply {
                         component = ComponentName("com.hihonor.systemmanager",
@@ -407,11 +462,6 @@ object OemPermissionRoutes {
         // true after any successful launch, so a wrong screen permanently suppresses the prompt.
         OemRoute("standard") { pkg ->
             Intent("android.settings.MANAGE_APP_USE_FULL_SCREEN_INTENT").apply {
-                data = Uri.parse("package:$pkg")
-            }
-        },
-        OemRoute("fallback") { pkg ->
-            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                 data = Uri.parse("package:$pkg")
             }
         }

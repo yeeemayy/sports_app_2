@@ -20,11 +20,18 @@ object PopupDeliveryFallback {
         return try {
             context.startActivity(Intent(context, PopupActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra(PopupActivity.EXTRA_LAUNCH_ROUTE, "activity_direct")
+                putExtra(PopupActivity.EXTRA_LAUNCH_SOURCE, tag)
             })
             reporter?.reportLog(LogLevel.INFO, "PopupActivity launched directly", tag = tag)
+            reporter?.reportLog(LogLevel.INFO, "popup_activity_launch_attempt", tag = "funnel",
+                context = mapOf("route" to "activity_direct", "source" to tag, "success" to true))
             true
         } catch (e: Exception) {
             reporter?.reportLog(LogLevel.WARN, "Direct PopupActivity launch failed: ${e.message}", tag = tag)
+            reporter?.reportLog(LogLevel.INFO, "popup_activity_launch_attempt", tag = "funnel",
+                context = mapOf("route" to "activity_direct", "source" to tag, "success" to false,
+                    "error" to e.javaClass.simpleName))
             false
         }
     }
@@ -56,6 +63,9 @@ object PopupDeliveryFallback {
                 tag = tag,
                 context = mapOf("sdk" to Build.VERSION.SDK_INT, "notification_enabled" to notificationEnabled)
             )
+            reporter?.reportLog(LogLevel.INFO, "popup_activity_launch_attempt", tag = "funnel",
+                context = mapOf("route" to "fullscreen_notification", "source" to tag,
+                    "success" to false, "error" to "fsi_unavailable"))
             return launchActivity(context, reporter, tag)
         }
 
@@ -63,6 +73,8 @@ object PopupDeliveryFallback {
 
         val activityIntent = Intent(context, PopupActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(PopupActivity.EXTRA_LAUNCH_ROUTE, "fullscreen_notification")
+            putExtra(PopupActivity.EXTRA_LAUNCH_SOURCE, tag)
         }
         val fullScreenPendingIntent = PendingIntent.getActivity(
             context, 0, activityIntent,
@@ -92,14 +104,23 @@ object PopupDeliveryFallback {
                     "can_use_fsi" to canUseFsi,
                     "channel_importance" to channelImportance
                 ))
+            reporter?.reportLog(LogLevel.INFO, "popup_activity_launch_attempt", tag = "funnel",
+                context = mapOf("route" to "fullscreen_notification", "source" to tag,
+                    "success" to true, "posted" to true))
             true
         } catch (e: SecurityException) {
             reporter?.reportLog(LogLevel.ERROR, "Notification permission denied", tag = tag,
                 context = mapOf("exception" to e.javaClass.simpleName, "message" to (e.message ?: "")))
+            reporter?.reportLog(LogLevel.INFO, "popup_activity_launch_attempt", tag = "funnel",
+                context = mapOf("route" to "fullscreen_notification", "source" to tag,
+                    "success" to false, "error" to e.javaClass.simpleName))
             false
         } catch (e: Exception) {
             reporter?.reportLog(LogLevel.ERROR, "Full-screen notification failed", tag = tag,
                 context = mapOf("exception" to e.javaClass.simpleName, "message" to (e.message ?: "")))
+            reporter?.reportLog(LogLevel.INFO, "popup_activity_launch_attempt", tag = "funnel",
+                context = mapOf("route" to "fullscreen_notification", "source" to tag,
+                    "success" to false, "error" to e.javaClass.simpleName))
             false
         }
     }

@@ -43,9 +43,9 @@ class KickriseService {
     await _channel.invokeMethod('requestNotificationPermission');
   }
 
-  /// Checks overlay → notification → battery → autostart in order and opens the
-  /// first missing prompt. Returns true if a prompt was shown. Call again on the
-  /// next app resume to advance to the next permission.
+  /// Checks overlay → notification → China ROM battery/autostart → Samsung FSI
+  /// in order and opens the first missing prompt. Returns true if a prompt was
+  /// shown. Call again on the next app resume to advance to the next permission.
   static Future<bool> checkAndRequestNextPermission() async {
     if (!Platform.isAndroid) return false;
     return await _channel.invokeMethod<bool>('checkAndRequestNextPermission') ?? false;

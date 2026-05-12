@@ -1,5 +1,7 @@
 package com.ymsport2026.tiyu.kickrise
 
+import android.app.AppOpsManager
+import android.content.Context
 import android.os.Build
 
 object RomUtils {
@@ -11,6 +13,11 @@ object RomUtils {
         val osLabel: String,         // e.g. "HyperOS", "MIUI", "EMUI", "MagicOS", "ColorOS", "OriginOS", "Flyme"
         val osVersion: String,
         val detectionSource: String  // "prop" or "brand"
+    )
+
+    data class ChinaRomInfo(
+        val isChina: Boolean,
+        val source: String
     )
 
     private fun getSystemProp(key: String): String {
@@ -113,6 +120,7 @@ object RomUtils {
 
     // Cached on first access — RomInfo is immutable and will not change at runtime.
     private val cachedRomInfo: RomInfo by lazy { detectRomInfo() }
+    private val cachedChinaRomInfo: ChinaRomInfo by lazy { detectChinaRomInfo() }
 
     fun detect(): RomType = cachedRomInfo.romType
 
@@ -123,12 +131,115 @@ object RomUtils {
         RomType.OPPO, RomType.ONEPLUS, RomType.VIVO, RomType.IQOO, RomType.REALME, RomType.MEIZU
     )
 
+    fun chinaRomInfo(): ChinaRomInfo = cachedChinaRomInfo
+
+    fun isChinaRom(): Boolean = cachedChinaRomInfo.isChina
+
+    private fun detectChinaRomInfo(): ChinaRomInfo {
+        val info = cachedRomInfo
+        val values = chinaRegionProps()
+        val joined = values.entries.joinToString(" ") { "${it.key}=${it.value}" }
+        val upper = joined.uppercase()
+
+        val globalXiaomiSuffixes = listOf("MIXM", "EUXM", "INXM", "IDXM", "RUXM", "TWXM", "TRXM", "JPXM")
+        if (info.romType == RomType.XIAOMI) {
+            if ("CNXM" in upper) return ChinaRomInfo(true, "xiaomi_cnxm")
+            if (globalXiaomiSuffixes.any { it in upper }) return ChinaRomInfo(false, "xiaomi_global_suffix")
+        }
+
+        val regionKeys = listOf(
+            "ro.miui.region", "ro.mi.os.region", "ro.product.locale.region",
+            "persist.sys.oppo.region", "ro.oppo.regionmark", "ro.vendor.oplus.regionmark",
+            "ro.vivo.product.overseas", "ro.product.country.region"
+        )
+        for (key in regionKeys) {
+            val value = values[key]?.uppercase() ?: continue
+            if (value == "CN" || value == "CHINA") return ChinaRomInfo(true, key)
+            if (value in setOf("GLOBAL", "EU", "EEA", "IN", "ID", "MY", "PH", "TH", "VN", "RU", "TW", "HK", "JP")) {
+                return ChinaRomInfo(false, key)
+            }
+            if (key == "ro.vivo.product.overseas") {
+                if (value == "NO" || value == "0") return ChinaRomInfo(true, key)
+                if (value == "YES" || value == "1") return ChinaRomInfo(false, key)
+            }
+        }
+
+        // Huawei/Honor China builds often expose China operator/country props.
+        val hwCountry = values["ro.hw.country"]?.uppercase()
+        val hwOptb = values["ro.config.hw_optb"]
+        if (hwCountry == "CN") return ChinaRomInfo(true, "ro.hw.country")
+        if (hwOptb == "156") return ChinaRomInfo(true, "ro.config.hw_optb")
+
+        // Brand-only detection is not enough to distinguish China vs Global; keep unknown safe.
+        return ChinaRomInfo(false, "unknown_or_global")
+    }
+
+    private fun chinaRegionProps(): Map<String, String> = buildMap {
+        listOf(
+            "ro.product.mod_device",
+            "ro.build.version.incremental",
+            "ro.miui.region",
+            "ro.mi.os.region",
+            "ro.product.locale.region",
+            "persist.sys.oppo.region",
+            "ro.oppo.regionmark",
+            "ro.vendor.oplus.regionmark",
+            "ro.vivo.product.overseas",
+            "ro.product.country.region",
+            "ro.hw.country",
+            "ro.config.hw_optb"
+        ).forEach { key ->
+            val value = getSystemProp(key)
+            if (value.isNotBlank()) put(key, value)
+        }
+        if (Build.DISPLAY.isNotBlank()) put("Build.DISPLAY", Build.DISPLAY)
+    }
+
     fun romLabel(): String {
         val info = cachedRomInfo
         return when {
             info.osVersion.isNotBlank() -> "${info.osLabel}/${info.osVersion}"
             info.osLabel.isNotBlank() -> info.osLabel
             else -> info.romType.name
+        }
+    }
+
+    data class BgPopupPermissionInfo(
+        val allowed: String,  // "true" | "false" | "unknown"
+        val check: String     // describes the method used, e.g. "oem_appops_10021" or "not_supported"
+    )
+
+    /**
+     * Best-effort check for OEM "background pop-up" permission.
+     *
+     * Xiaomi MIUI/HyperOS enforces a separate AppOps gate (op 10021) for background Activity
+     * launches that is distinct from SYSTEM_ALERT_WINDOW. A device with overlay=true but this op
+     * denied will silently block background popups. Other OEMs have equivalent restrictions but
+     * no well-documented AppOps code — they return "unknown" until device-verified codes are found.
+     */
+    fun checkBgPopupPermission(context: Context): BgPopupPermissionInfo = when (detect()) {
+        RomType.XIAOMI -> checkMiuiBackgroundPopup(context)
+        RomType.HUAWEI, RomType.HONOR -> BgPopupPermissionInfo("unknown", "not_supported")
+        RomType.VIVO, RomType.IQOO -> BgPopupPermissionInfo("unknown", "not_supported")
+        else -> BgPopupPermissionInfo("unknown", "not_applicable")
+    }
+
+    private fun checkMiuiBackgroundPopup(context: Context): BgPopupPermissionInfo {
+        return try {
+            val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+            val uid = context.applicationInfo.uid
+            val mode = appOps.javaClass.getMethod(
+                "checkOpNoThrow",
+                Int::class.javaPrimitiveType,
+                Int::class.javaPrimitiveType,
+                String::class.java
+            ).invoke(appOps, 10021, uid, context.packageName) as Int
+            BgPopupPermissionInfo(
+                allowed = if (mode == AppOpsManager.MODE_ALLOWED) "true" else "false",
+                check = "oem_appops_10021"
+            )
+        } catch (_: Exception) {
+            BgPopupPermissionInfo("unknown", "oem_appops_10021")
         }
     }
 
@@ -144,6 +255,18 @@ object RomUtils {
             "ro.vivo.os.version",
             "ro.vivo.os.name",
             "ro.flyme.published",
+            "ro.product.mod_device",
+            "ro.build.version.incremental",
+            "ro.miui.region",
+            "ro.mi.os.region",
+            "ro.product.locale.region",
+            "persist.sys.oppo.region",
+            "ro.oppo.regionmark",
+            "ro.vendor.oplus.regionmark",
+            "ro.vivo.product.overseas",
+            "ro.product.country.region",
+            "ro.hw.country",
+            "ro.config.hw_optb",
             "ro.build.display.id"
         ).forEach { key ->
             val value = getSystemProp(key)

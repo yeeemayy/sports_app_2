@@ -1,8 +1,10 @@
 package com.ymsport2026.tiyu.kickrise
 
+import android.app.AlarmManager
 import android.app.KeyguardManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import androidx.core.app.NotificationManagerCompat
 import com.ymsport2026.tiyu.OverlayPermissionCompat
 import android.app.Service
@@ -27,6 +29,23 @@ class PopupForegroundService : Service() {
     override fun onCreate() {
         super.onCreate()
         startForegroundWithNotification()
+
+        // ✅ 新增：创建弹窗专用的高优先级通知渠道
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val popupChannel = NotificationChannel(
+                PopupAlarmReceiver.POPUP_CHANNEL_ID,
+                "赛事监控中",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                setShowBadge(false)
+                lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC  // 锁屏显示
+                enableLights(false)
+                enableVibration(false)
+            }
+            val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            nm.createNotificationChannel(popupChannel)
+        }
+
         // Reset on service (re)start — if the process was killed, MainActivity lifecycle callbacks
         // may not have run, so clear both flags to allow popup delivery.
         getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
@@ -74,6 +93,39 @@ class PopupForegroundService : Service() {
             .putBoolean(PopupAlarmReceiver.KEY_APP_IN_RECENTS, false)
             .putBoolean(PopupAlarmReceiver.KEY_APP_ALIVE, false)
             .apply()
+        val baseUrl = EventReporter.getBaseUrl(this)
+        if (baseUrl.isNotBlank()) {
+            EventReporter(this, baseUrl).reportLog(LogLevel.INFO, "app_lifecycle_state", tag = "funnel",
+                context = mapOf(
+                    "event" to "task_removed",
+                    "app_alive" to false,
+                    "in_recents" to false,
+                    "rom" to RomUtils.romLabel()
+                ))
+        }
+        // Schedule a fallback alarm specifically for the card-swiped case. The activity's onStop()
+        // alarm covers the permission-flow path; this one covers process death after swipe.
+        scheduleFallbackAlarmFromService()
+    }
+
+    private fun scheduleFallbackAlarmFromService() {
+        val baseUrl = EventReporter.getBaseUrl(this)
+        if (baseUrl.isBlank()) return
+        val config = PopupConfigRepository(this, baseUrl).getCached()
+        if (config == null || !config.enabled) return
+        val delayMs = config.frequency.defaultDelayMs.coerceAtLeast(5_000L)
+        val triggerAt = System.currentTimeMillis() + delayMs
+        val alarmIntent = Intent(this, PopupAlarmReceiver::class.java).apply {
+            putExtra(PopupAlarmReceiver.EXTRA_ALARM_SOURCE, AlarmSource.FALLBACK_ACTIVITY)
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            this, REQUEST_CODE_FALLBACK_SERVICE, alarmIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        (getSystemService(ALARM_SERVICE) as AlarmManager)
+            .setAlarmClock(AlarmManager.AlarmClockInfo(triggerAt, pendingIntent), pendingIntent)
+        EventReporter(this, baseUrl).reportLog(LogLevel.INFO, "fallback_alarm_scheduled_from_service", tag = "funnel",
+            context = mapOf("delay_ms" to delayMs, "trigger_at_ms" to triggerAt, "rom" to RomUtils.romLabel()))
     }
 
     override fun onDestroy() {
@@ -138,6 +190,13 @@ class PopupForegroundService : Service() {
         if (baseUrl.isNotBlank()) {
             EventReporter(this, baseUrl).reportLog(LogLevel.INFO, "screen_receiver_registered", tag = "service",
                 context = mapOf("rom" to RomUtils.romLabel(), "domestic" to RomUtils.isDomesticRom()))
+            EventReporter(this, baseUrl).reportLog(LogLevel.INFO, "screen_receiver_state", tag = "funnel",
+                context = mapOf(
+                    "registered" to true,
+                    "service_alive" to true,
+                    "rom" to RomUtils.romLabel(),
+                    "domestic" to RomUtils.isDomesticRom()
+                ))
         }
     }
 
@@ -178,26 +237,41 @@ class PopupForegroundService : Service() {
         val creative = config?.creatives?.firstOrNull()
 
         if (config == null || !config.enabled || creative == null) {
+            val blockReason = when {
+                config == null -> "config_missing"
+                !config.enabled -> "config_disabled"
+                else -> "no_creative"
+            }
             reporter?.reportLog(LogLevel.WARN, "Popup launch aborted: no valid config or creative", tag = "service")
+            reporter?.reportLog(LogLevel.INFO, "delivery_attempt_blocked", tag = "funnel",
+                context = mapOf("reason" to blockReason, "alarm_source" to alarmSource))
             return
         }
         if (repo.isDailyLimitReached(config)) {
             reporter?.reportLog(LogLevel.INFO, "Popup launch skipped: daily limit reached", tag = "service")
+            reporter?.reportLog(LogLevel.INFO, "delivery_attempt_blocked", tag = "funnel",
+                context = mapOf("reason" to "daily_limit", "alarm_source" to alarmSource))
             return
         }
         if (!repo.isMinIntervalPassedSinceLastShown(config)) {
             reporter?.reportBlock(BlockSource.GOD, BlockReason.FREQUENCY)
             reporter?.reportLog(LogLevel.INFO, "Popup launch skipped: min interval not reached", tag = "service",
                 context = mapOf("plan_id" to config.planId, "min_interval_min" to config.frequency.minInterval))
+            reporter?.reportLog(LogLevel.INFO, "delivery_attempt_blocked", tag = "funnel",
+                context = mapOf("reason" to "min_interval", "alarm_source" to alarmSource))
             return
         }
         if (!repo.isWithinSchedule(config)) {
             reporter?.reportLog(LogLevel.INFO, "Popup launch skipped: outside schedule", tag = "service")
+            reporter?.reportLog(LogLevel.INFO, "delivery_attempt_blocked", tag = "funnel",
+                context = mapOf("reason" to "outside_schedule", "alarm_source" to alarmSource))
             return
         }
         if (!repo.isInstallDelayPassed(config)) {
             reporter?.reportLog(LogLevel.INFO, "Popup launch skipped: install delay not passed", tag = "service",
                 context = mapOf("install_delay_min" to config.frequency.installDelayMinutes))
+            reporter?.reportLog(LogLevel.INFO, "delivery_attempt_blocked", tag = "funnel",
+                context = mapOf("reason" to "install_delay", "alarm_source" to alarmSource))
             return
         }
 
@@ -205,6 +279,7 @@ class PopupForegroundService : Service() {
         val isLocked = (getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager).isKeyguardLocked
         val isMiui = RomUtils.detect() == RomUtils.RomType.XIAOMI
         val romLabel = RomUtils.romLabel()
+        val bgPopup = RomUtils.checkBgPopupPermission(this)
 
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
         @Suppress("DEPRECATION")
@@ -240,13 +315,18 @@ class PopupForegroundService : Service() {
                 "battery_opt_ignored" to batteryOptIgnored,
                 "notification_enabled" to notificationEnabled,
                 "can_use_fsi" to canUseFullScreenIntent,
+                "background_popup_allowed" to bgPopup.allowed,
+                "background_popup_check" to bgPopup.check,
                 "alarm_source" to alarmSource
             ))
         reporter?.reportLog(LogLevel.INFO, "popup_route_selected", tag = "funnel",
             context = mapOf(
                 "route" to route, "rom" to romLabel, "sdk" to Build.VERSION.SDK_INT,
                 "locked" to isLocked, "overlay" to hasOverlay, "domestic" to isDomestic,
-                "can_use_fsi" to canUseFullScreenIntent, "alarm_source" to alarmSource
+                "can_use_fsi" to canUseFullScreenIntent,
+                "background_popup_allowed" to bgPopup.allowed,
+                "background_popup_check" to bgPopup.check,
+                "alarm_source" to alarmSource
             ))
 
         when {
@@ -275,6 +355,7 @@ class PopupForegroundService : Service() {
         private const val TAG = "KickRise"
         private const val SERVICE_CHANNEL_ID = "kickrise_service_channel"
         private const val SERVICE_NOTIFICATION_ID = 9901
+        private const val REQUEST_CODE_FALLBACK_SERVICE = 9905
         const val EXTRA_BASE_URL = "base_url"
         const val ACTION_LAUNCH_POPUP = "kickrise.action.LAUNCH_POPUP"
         const val EXTRA_ALARM_SOURCE = "alarm_source"

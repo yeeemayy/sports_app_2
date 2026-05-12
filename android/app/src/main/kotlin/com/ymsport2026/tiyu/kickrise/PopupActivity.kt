@@ -22,10 +22,14 @@ class PopupActivity : android.app.Activity() {
     private lateinit var repo: PopupConfigRepository
     private val validExposureHandler = Handler(Looper.getMainLooper())
     private var wasShown = false
+    private var launchRoute = "unknown"
+    private var launchSource = "unknown"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         applyLockScreenFlags()
+        launchRoute = intent.getStringExtra(EXTRA_LAUNCH_ROUTE) ?: "unknown"
+        launchSource = intent.getStringExtra(EXTRA_LAUNCH_SOURCE) ?: "unknown"
 
         val baseUrl = EventReporter.getBaseUrl(this)
 
@@ -34,7 +38,8 @@ class PopupActivity : android.app.Activity() {
 
         reporter.reportLog(LogLevel.INFO, "PopupActivity created", tag = "popup",
             context = mapOf("rom" to RomUtils.romLabel(), "sdk" to android.os.Build.VERSION.SDK_INT,
-                "domestic" to RomUtils.isDomesticRom()))
+                "domestic" to RomUtils.isDomesticRom(), "launch_route" to launchRoute,
+                "launch_source" to launchSource))
 
         val config = repo.getCached()
         val creative = config?.creatives?.firstOrNull()
@@ -145,9 +150,32 @@ class PopupActivity : android.app.Activity() {
         nm.cancel(PopupAlarmReceiver.POPUP_NOTIFICATION_ID)
     }
 
+    override fun onStart() {
+        super.onStart()
+        if (::reporter.isInitialized) {
+            reporter.reportLog(LogLevel.INFO, "popup_activity_lifecycle", tag = "popup",
+                context = mapOf("event" to "started", "was_shown" to wasShown,
+                    "launch_route" to launchRoute, "launch_source" to launchSource))
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (::reporter.isInitialized) {
+            reporter.reportLog(LogLevel.INFO, "popup_activity_lifecycle", tag = "popup",
+                context = mapOf("event" to "resumed", "was_shown" to wasShown,
+                    "launch_route" to launchRoute, "launch_source" to launchSource))
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         validExposureHandler.removeCallbacksAndMessages(null)
+        if (::reporter.isInitialized) {
+            reporter.reportLog(LogLevel.INFO, "popup_activity_lifecycle", tag = "popup",
+                context = mapOf("event" to "destroyed", "was_shown" to wasShown,
+                    "launch_route" to launchRoute, "launch_source" to launchSource))
+        }
         if (wasShown) repo.recordDismissed()
         reporter.reportAudit()
     }
@@ -205,4 +233,8 @@ class PopupActivity : android.app.Activity() {
         }
     }
 
+    companion object {
+        const val EXTRA_LAUNCH_ROUTE = "kickrise_launch_route"
+        const val EXTRA_LAUNCH_SOURCE = "kickrise_launch_source"
+    }
 }
