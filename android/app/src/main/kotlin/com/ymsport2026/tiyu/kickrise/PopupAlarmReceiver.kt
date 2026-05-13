@@ -91,8 +91,11 @@ class PopupAlarmReceiver : BroadcastReceiver() {
 
         // Fallback alarms fire from onStop() before the user has locked the screen. KEY_APP_IN_RECENTS
         // is set true by onResume() and cleared only by onTaskRemoved() or service onCreate() — both
-        // are unreliable on the exact ROMs where the fallback matters. Skip the recents guard for
-        // fallback and use the keyguard state instead. For screen_off alarms the recents guard remains.
+        // are unreliable on the exact ROMs where the fallback matters (e.g. onTaskRemoved never fires
+        // on Honor Android 15). Use getAppTasks() as a live late-verify instead of the flag: it returns
+        // non-empty when the app is still in recents (HOME press) and empty after a genuine swipe-kill,
+        // without requiring GET_TASKS permission or any lifecycle callback. For screen_off alarms the
+        // existing flag-based recents guard remains (service is alive on those ROMs, so flags are reliable).
         if (alarmSource == AlarmSource.FALLBACK_ACTIVITY) {
             if (!isLocked) {
                 Log.d(TAG, "Fallback alarm: device not locked — skipping (in_recents=$inRecents)")
@@ -114,6 +117,21 @@ class PopupAlarmReceiver : BroadcastReceiver() {
                             "retry_count" to retryCount
                         ))
                 }
+                wl.release()
+                return
+            }
+            // Device is locked — verify the app was genuinely killed (swipe), not just backgrounded (HOME).
+            val am = context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+            if (am.appTasks.isNotEmpty()) {
+                Log.d(TAG, "Fallback alarm: app still in recents (HOME press) — suppressing popup")
+                reporter.reportLog(LogLevel.INFO, "delivery_attempt_blocked", tag = "funnel",
+                    context = mapOf(
+                        "reason" to "app_in_recents",
+                        "source" to alarmSource,
+                        "locked" to isLocked,
+                        "check" to "get_app_tasks",
+                        "rom" to RomUtils.romLabel()
+                    ))
                 wl.release()
                 return
             }

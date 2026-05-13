@@ -225,8 +225,8 @@ class KickRiseApiClient(private val context: Context) {
     private fun parsePopupConfig(json: JSONObject): PopupConfig {
         val triggers = json.optJSONObject("triggers").let {
             PopupTriggers(
-                onLock = it?.optBoolean("on_lock") ?: false,
-                onUnlock = it?.optBoolean("on_unlock") ?: true
+                onLock = it?.optBoolean("on_lock", true) ?: true,
+                onUnlock = it?.optBoolean("on_unlock", true) ?: true
             )
         }
         val schedule = json.optJSONObject("schedule")?.let {
