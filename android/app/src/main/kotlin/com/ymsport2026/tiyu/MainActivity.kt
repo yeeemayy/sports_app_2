@@ -18,7 +18,6 @@ import com.ymsport2026.tiyu.kickrise.OemPermissionRoutes
 import com.ymsport2026.tiyu.kickrise.PopupAlarmReceiver
 import com.ymsport2026.tiyu.kickrise.PopupConfigRepository
 import com.ymsport2026.tiyu.kickrise.PopupForegroundService
-import com.ymsport2026.tiyu.kickrise.RemoteRouteConfig
 import com.ymsport2026.tiyu.kickrise.RomUtils
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -490,11 +489,9 @@ class MainActivity : FlutterActivity() {
      */
     private fun openOemOverlaySettings(): String {
         val romType = RomUtils.detect()
-        val baseUrl = EventReporter.getBaseUrl(this)
-        val remoteRoutes = RemoteRouteConfig(this, baseUrl).getRoutesForType("overlay")
         val localRoutes = OemPermissionRoutes.overlayRoutes(romType)
             .map { it.intentFactory(packageName) to it.label }
-        val candidates = remoteRoutes + localRoutes
+        val candidates = localRoutes
 
         val baseCtx = deviceContext()
         for ((intent, label) in candidates) {
@@ -548,11 +545,9 @@ class MainActivity : FlutterActivity() {
         if (prefs.getBoolean(KEY_AUTOSTART_SHOWN, false)) return false
 
         val romType = RomUtils.detect()
-        val baseUrl = EventReporter.getBaseUrl(this)
-        val remoteRoutes = RemoteRouteConfig(this, baseUrl).getRoutesForType("autostart")
         val localRoutes = OemPermissionRoutes.autostartRoutes(romType)
             .map { it.intentFactory(packageName) to it.label }
-        val candidates = remoteRoutes + localRoutes
+        val candidates = localRoutes
 
         val baseCtx = deviceContext()
         for ((intent, label) in candidates) {
@@ -586,11 +581,9 @@ class MainActivity : FlutterActivity() {
     private fun openBatteryOptimizationSettings(): Boolean {
         val appLabel = applicationInfo.loadLabel(packageManager).toString()
         val romType = RomUtils.detect()
-        val baseUrl = EventReporter.getBaseUrl(this)
-        val remoteRoutes = RemoteRouteConfig(this, baseUrl).getRoutesForType("battery")
         val localRoutes = OemPermissionRoutes.batteryRoutes(romType, appLabel)
             .map { it.intentFactory(packageName) to it.label }
-        val candidates = remoteRoutes + localRoutes
+        val candidates = localRoutes
 
         val baseCtx = deviceContext()
         val prefs = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
@@ -657,38 +650,9 @@ class MainActivity : FlutterActivity() {
         if (prefs.getBoolean(KEY_BACKGROUND_POPUP_SHOWN, false)) return false
 
         val romType = RomUtils.detect()
-        val baseUrl = EventReporter.getBaseUrl(this)
-        val remoteRoutes = RemoteRouteConfig(this, baseUrl).getRoutesForType("background_popup")
         val localRoutes = OemPermissionRoutes.backgroundPopupRoutes(romType)
         val baseCtx = deviceContext()
 
-        // Remote routes first (hot-patchable by server)
-        for ((intent, label) in remoteRoutes) {
-            val component = intent.component?.flattenToShortString() ?: ""
-            val preResolved = try { packageManager.resolveActivity(intent, 0) != null } catch (_: Exception) { null }
-            try {
-                startActivity(intent)
-                prefs.edit()
-                    .putBoolean(KEY_BACKGROUND_POPUP_SHOWN, true)
-                    .putBoolean(KEY_BACKGROUND_POPUP_SETTINGS_OPENED, true)
-                    .apply()
-                logFunnel("settings_route_launched", baseCtx + mapOf(
-                    "route_type" to "background_popup", "label" to label,
-                    "component" to component, "grant_state" to "shown_not_confirmed",
-                    "pre_resolved" to (preResolved ?: "unknown")
-                ))
-                return true
-            } catch (e: Exception) {
-                Log.d(TAG, "background popup remote route failed: label=$label component=$component error=${e.javaClass.simpleName}")
-                logFunnel("settings_route_launch_failed", baseCtx + mapOf(
-                    "route_type" to "background_popup", "label" to label,
-                    "component" to component, "error" to e.javaClass.simpleName,
-                    "pre_resolved" to (preResolved ?: "unknown")
-                ))
-            }
-        }
-
-        // Local routes fallback
         for ((label, intentFactory) in localRoutes) {
             // 小米特殊处理：Activity 接收 UID，不接收包名
             val intent = if (romType == RomUtils.RomType.XIAOMI && label == "oem") {
@@ -728,10 +692,7 @@ class MainActivity : FlutterActivity() {
      * app-details fallback is available, the user cannot grant FSI there and would loop forever.
      */
     private fun openFsiPermissionSettings(): Boolean {
-        val baseUrl = EventReporter.getBaseUrl(this)
-        val remoteRoutes = RemoteRouteConfig(this, baseUrl).getRoutesForType("fsi")
-        val localRoutes = OemPermissionRoutes.fsiRoutes().map { it.intentFactory(packageName) to it.label }
-        val candidates = remoteRoutes + localRoutes
+        val candidates = OemPermissionRoutes.fsiRoutes().map { it.intentFactory(packageName) to it.label }
 
         val baseCtx = deviceContext()
         val prefs = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)

@@ -128,39 +128,6 @@ class KickRiseApiClient(private val context: Context) {
         }
     }
 
-    /**
-     * Fetches the server-side OEM route table for this device.
-     * Device context (brand, model, ROM label, SDK) is sent as request headers so the backend
-     * can return device-specific route candidates.
-     * Returns the raw JSON string on success, null on any error.
-     */
-    fun fetchRouteConfig(baseUrl: String): String? {
-        val urlStr = "$baseUrl/route-config"
-        return try {
-            Log.d(TAG, "[API] → GET $urlStr")
-            val url = java.net.URL(urlStr)
-            val conn = (url.openConnection() as java.net.HttpURLConnection).apply {
-                requestMethod = "GET"
-                connectTimeout = 10_000
-                readTimeout = 10_000
-                applyDeviceContextHeaders(this)
-            }
-            val code = conn.responseCode
-            if (code != 200) {
-                Log.w(TAG, "[API] route-config — HTTP $code")
-                conn.disconnect()
-                return null
-            }
-            val body = conn.inputStream.bufferedReader().readText()
-            conn.disconnect()
-            Log.d(TAG, "[API] ← $code $urlStr")
-            body
-        } catch (e: Exception) {
-            Log.w(TAG, "[API] route-config fetch failed: ${e.message}")
-            null
-        }
-    }
-
     private fun post(urlStr: String, body: String, withDeviceContext: Boolean): Boolean {
         Log.d(TAG, "[API] → POST $urlStr")
         Log.d(TAG, "[API] → data: $body")

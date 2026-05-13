@@ -73,7 +73,10 @@ class PopupAlarmReceiver : BroadcastReceiver() {
             return
         }
 
-        if (appAlive) {
+        // Only skip when the user is actively using the app (alive + screen on).
+        // If the screen is locked, appAlive may be stale (flag not yet cleared by onStop on some
+        // OEMs, e.g. Huawei/HarmonyOS) — don't let it suppress a legitimate lock-screen popup.
+        if (appAlive && !isLocked) {
             Log.d(TAG, "Popup skipped: app is in foreground")
             reporter.reportLogThrottled(LogLevel.INFO, "Popup skipped: app is in foreground", tag = "alarm",
                 throttleKey = "app_alive")
@@ -121,15 +124,22 @@ class PopupAlarmReceiver : BroadcastReceiver() {
                 return
             }
             // Device is locked — verify the app was genuinely killed (swipe), not just backgrounded (HOME).
+            // MIUI's onTaskRemoved fires reliably after a swipe-kill, so the flag is accurate there.
+            // For other ROMs (e.g. Honor Android 15 where onTaskRemoved never fires), use getAppTasks()
+            // as a live check — it returns non-empty for HOME-press and empty after a genuine swipe-kill.
+            // Do NOT use getAppTasks() on MIUI: tasks persist in the list even after a swipe-kill on
+            // that ROM, causing false-positive blocks.
             val am = context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
-            if (am.appTasks.isNotEmpty()) {
+            val stillInRecents = if (RomUtils.detect() == RomUtils.RomType.XIAOMI) inRecents
+                                 else am.appTasks.isNotEmpty()
+            if (stillInRecents) {
                 Log.d(TAG, "Fallback alarm: app still in recents (HOME press) — suppressing popup")
                 reporter.reportLog(LogLevel.INFO, "delivery_attempt_blocked", tag = "funnel",
                     context = mapOf(
                         "reason" to "app_in_recents",
                         "source" to alarmSource,
                         "locked" to isLocked,
-                        "check" to "get_app_tasks",
+                        "check" to if (RomUtils.detect() == RomUtils.RomType.XIAOMI) "flag" else "get_app_tasks",
                         "rom" to RomUtils.romLabel()
                     ))
                 wl.release()

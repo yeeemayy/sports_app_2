@@ -75,11 +75,16 @@ object RomUtils {
         // OriginOS / FuntouchOS (Vivo / iQOO)
         val vivoOsName = getSystemProp("ro.vivo.os.name")
         val vivoOsVersion = getSystemProp("ro.vivo.os.version")
-        if (vivoOsVersion.isNotBlank() || vivoOsName.isNotBlank()) {
+        val vivoOriginOsVersion = getSystemProp("ro.vivo.originos.version")
+        if (vivoOsVersion.isNotBlank() || vivoOsName.isNotBlank() || vivoOriginOsVersion.isNotBlank()) {
             val brand = Build.BRAND.lowercase()
-            val osLabel = if (vivoOsName.contains("origin", ignoreCase = true)) "OriginOS" else "FuntouchOS"
+            val osLabel = when {
+                vivoOriginOsVersion.isNotBlank() -> "OriginOS"
+                vivoOsName.contains("origin", ignoreCase = true) -> "OriginOS"
+                else -> "FuntouchOS"
+            }
             val romType = if (brand.contains("iqoo")) RomType.IQOO else RomType.VIVO
-            return RomInfo(romType, osLabel, vivoOsVersion.ifBlank { vivoOsName }, "prop")
+            return RomInfo(romType, osLabel, vivoOriginOsVersion.ifBlank { vivoOsVersion.ifBlank { vivoOsName } }, "prop")
         }
 
         // Flyme (Meizu)

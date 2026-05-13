@@ -220,12 +220,6 @@ class PopupForegroundService : Service() {
                 }
             }
 
-            // Route config is only needed for the permission settings UI, not popup delivery.
-            // Refresh it after popup config so a slow/unavailable route endpoint can't delay popups.
-            val remoteRouteConfig = RemoteRouteConfig(this, baseUrl)
-            if (remoteRouteConfig.isStale()) {
-                remoteRouteConfig.fetchAndCache()
-            }
         }
     }
 
