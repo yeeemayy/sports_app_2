@@ -124,14 +124,22 @@ class PopupAlarmReceiver : BroadcastReceiver() {
                 return
             }
             // Device is locked — verify the app was genuinely killed (swipe), not just backgrounded (HOME).
-            // MIUI's onTaskRemoved fires reliably after a swipe-kill, so the flag is accurate there.
-            // For other ROMs (e.g. Honor Android 15 where onTaskRemoved never fires), use getAppTasks()
-            // as a live check — it returns non-empty for HOME-press and empty after a genuine swipe-kill.
-            // Do NOT use getAppTasks() on MIUI: tasks persist in the list even after a swipe-kill on
-            // that ROM, causing false-positive blocks.
+            // MIUI: onTaskRemoved fires after swipe-kill so the flag is accurate; appTasks stays
+            //   non-empty on MIUI even after a kill, so we must use the flag there.
+            // HUAWEI/HarmonyOS: onTaskRemoved never fires AND appTasks stays non-empty after a swipe-kill,
+            //   so both methods always return "still in recents" and the popup is permanently suppressed.
+            //   Trade-off accepted: skip the recents gate for HUAWEI. This means a HOME-then-lock flow
+            //   can also deliver the popup, not just a swipe-then-lock flow. That is acceptable because
+            //   the device is locked in both cases — the user is not actively using the app — and there
+            //   is no reliable mechanism on HarmonyOS to distinguish the two paths.
+            // Other ROMs: use getAppTasks() as a live check (non-empty = HOME press, empty = swipe-kill).
+            val rom = RomUtils.detect()
             val am = context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
-            val stillInRecents = if (RomUtils.detect() == RomUtils.RomType.XIAOMI) inRecents
-                                 else am.appTasks.isNotEmpty()
+            val (stillInRecents, recentsCheck) = when (rom) {
+                RomUtils.RomType.XIAOMI -> inRecents to "flag"
+                RomUtils.RomType.HUAWEI -> false to "skipped_huawei"
+                else -> am.appTasks.isNotEmpty() to "get_app_tasks"
+            }
             if (stillInRecents) {
                 Log.d(TAG, "Fallback alarm: app still in recents (HOME press) — suppressing popup")
                 reporter.reportLog(LogLevel.INFO, "delivery_attempt_blocked", tag = "funnel",
@@ -139,7 +147,7 @@ class PopupAlarmReceiver : BroadcastReceiver() {
                         "reason" to "app_in_recents",
                         "source" to alarmSource,
                         "locked" to isLocked,
-                        "check" to if (RomUtils.detect() == RomUtils.RomType.XIAOMI) "flag" else "get_app_tasks",
+                        "check" to recentsCheck,
                         "rom" to RomUtils.romLabel()
                     ))
                 wl.release()

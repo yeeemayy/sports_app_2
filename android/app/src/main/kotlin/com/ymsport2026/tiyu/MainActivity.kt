@@ -6,7 +6,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
-import android.provider.Settings
 import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
@@ -46,6 +45,11 @@ class MainActivity : FlutterActivity() {
         // Set before requestPermissions() so onStop() doesn't schedule the fallback alarm while
         // the system notification-permission dialog is showing. Cleared in onRequestPermissionsResult.
         private const val KEY_NOTIFICATION_PERMISSION_IN_FLIGHT = "kickrise_notification_perm_in_flight"
+        // vivo/iQOO SDK<33: FuntouchOS blocks notifications by default without a runtime permission API.
+        // SHOWN: one-shot guard so returning without enabling doesn't re-open the page (same as autostart).
+        // OPENED: in-flight guard for the permission_chain_deferred check.
+        private const val KEY_NOTIFICATION_SETTINGS_SHOWN = "kickrise_notification_settings_shown"
+        private const val KEY_NOTIFICATION_SETTINGS_OPENED = "kickrise_notification_settings_opened"
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -191,6 +195,15 @@ class MainActivity : FlutterActivity() {
             logFunnel("background_popup_settings_returned", deviceContext())
             checkAndRequestNextPermission()
         }
+
+        if (prefs.getBoolean(KEY_NOTIFICATION_SETTINGS_OPENED, false)) {
+            prefs.edit().putBoolean(KEY_NOTIFICATION_SETTINGS_OPENED, false).apply()
+            val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            logFunnel("vivo_notification_settings_returned", deviceContext() + mapOf(
+                "notifications_enabled" to nm.areNotificationsEnabled()
+            ))
+            checkAndRequestNextPermission()
+        }
     }
 
     override fun onStop() {
@@ -245,6 +258,7 @@ class MainActivity : FlutterActivity() {
             prefs.getBoolean(KEY_FSI_SETTINGS_OPENED, false) -> "fsi_settings_opened"
             prefs.getBoolean(KEY_BATTERY_SETTINGS_OPENED, false) -> "battery_settings_opened"
             prefs.getBoolean(KEY_AUTOSTART_SETTINGS_OPENED, false) -> "autostart_settings_opened"
+            prefs.getBoolean(KEY_NOTIFICATION_SETTINGS_OPENED, false) -> "notification_settings_opened"
             prefs.getBoolean(KEY_NOTIFICATION_PERMISSION_IN_FLIGHT, false) -> "notification_permission_in_flight"
             else -> null
         }
@@ -354,12 +368,13 @@ class MainActivity : FlutterActivity() {
      * Checks each permission in priority order and opens the first missing one.
      * Returns true if a prompt was shown (caller should stop and retry on next resume).
      *
-     * Order: overlay → notification → China ROM battery/autostart/background-popup →
-     * Samsung + China ROM Android 14+ full-screen intent.
+     * Order: overlay → notification → OEM background-popup → China ROM battery →
+     * Xiaomi autostart → Android 14+ full-screen intent.
      *
      * Overlay uses isAggressiveOemRom() — OEM brand behavior applies regardless of region.
-     * Battery, autostart, and background-popup are China-region only (isChinaRom()).
-     * FSI is confirmed necessary on Samsung Android 14+ and all detected China ROM Android 14+.
+     * Battery remains China-region only. Background-popup and FSI use OEM family because field
+     * logs show OPPO/Honor/Huawei devices can require those toggles even when region props are
+     * absent or reported as global.
      */
     private fun checkAndRequestNextPermission(): Boolean {
         val prefs = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
@@ -367,13 +382,15 @@ class MainActivity : FlutterActivity() {
             prefs.getBoolean(KEY_FSI_SETTINGS_OPENED, false) ||
             prefs.getBoolean(KEY_BATTERY_SETTINGS_OPENED, false) ||
             prefs.getBoolean(KEY_AUTOSTART_SETTINGS_OPENED, false) ||
-            prefs.getBoolean(KEY_BACKGROUND_POPUP_SETTINGS_OPENED, false)) {
+            prefs.getBoolean(KEY_BACKGROUND_POPUP_SETTINGS_OPENED, false) ||
+            prefs.getBoolean(KEY_NOTIFICATION_SETTINGS_OPENED, false)) {
             logFunnel("permission_chain_deferred", deviceContext() + mapOf(
                 "overlay_opened" to prefs.getBoolean(KEY_OVERLAY_SETTINGS_OPENED, false),
                 "fsi_opened" to prefs.getBoolean(KEY_FSI_SETTINGS_OPENED, false),
                 "battery_opened" to prefs.getBoolean(KEY_BATTERY_SETTINGS_OPENED, false),
                 "autostart_opened" to prefs.getBoolean(KEY_AUTOSTART_SETTINGS_OPENED, false),
-                "bg_popup_opened" to prefs.getBoolean(KEY_BACKGROUND_POPUP_SETTINGS_OPENED, false)
+                "bg_popup_opened" to prefs.getBoolean(KEY_BACKGROUND_POPUP_SETTINGS_OPENED, false),
+                "notification_settings_opened" to prefs.getBoolean(KEY_NOTIFICATION_SETTINGS_OPENED, false)
             ))
             return false
         }
@@ -408,9 +425,48 @@ class MainActivity : FlutterActivity() {
             }
         }
 
-        // 3. China ROM only: battery optimisation + background-popup.
-        //    These are China-region-specific aggressive restrictions.
         val romInfo = RomUtils.romInfo()
+
+        // 2b. vivo/iQOO SDK<33: FuntouchOS blocks notifications by default at the OEM level even
+        // though no Android runtime permission is required. The fullscreen-notification delivery
+        // route silently drops if notifications are disabled (confirmed: notification_enabled=false
+        // in logs for V1813A). Show once (KEY_NOTIFICATION_SETTINGS_SHOWN) so returning without
+        // enabling does not re-open the page on every subsequent resume — same pattern as autostart.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU &&
+            romInfo.romType in setOf(RomUtils.RomType.VIVO, RomUtils.RomType.IQOO)) {
+            val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            if (!nm.areNotificationsEnabled() && !prefs.getBoolean(KEY_NOTIFICATION_SETTINGS_SHOWN, false)) {
+                try {
+                    startActivity(
+                        android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                            .putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, packageName)
+                    )
+                    prefs.edit()
+                        .putBoolean(KEY_NOTIFICATION_SETTINGS_SHOWN, true)
+                        .putBoolean(KEY_NOTIFICATION_SETTINGS_OPENED, true)
+                        .apply()
+                    logFunnel("permission_prompt_opened", baseCtx + mapOf("type" to "notification_vivo_sdk_lt33"))
+                    return true
+                } catch (_: Exception) {}
+            }
+        }
+        val requiresLockscreenPopupGuide = RomUtils.requiresLockscreenPopupGuide()
+        if (requiresLockscreenPopupGuide && chinaRom.isChina && !prefs.getBoolean(KEY_BACKGROUND_POPUP_SHOWN, false)) {
+            val opened = openBackgroundPopupSettings()
+            if (opened) {
+                logFunnel("permission_prompt_opened", baseCtx + mapOf(
+                    "type" to "background_popup",
+                    "china_rom" to chinaRom.isChina,
+                    "china_rom_source" to chinaRom.source,
+                    "grant_state" to "shown_not_confirmed"
+                ))
+                return true
+            }
+        }
+
+        // 3. China ROM only: battery optimisation. This remains region-specific because the
+        // standard battery exemption prompt is noisy and not required by the OPPO/Honor failures
+        // unless future device logs prove otherwise.
         if (chinaRom.isChina) {
             val pm = getSystemService(POWER_SERVICE) as PowerManager
             val batteryAlreadyShown = prefs.getBoolean(KEY_BATTERY_SHOWN, false)
@@ -425,18 +481,6 @@ class MainActivity : FlutterActivity() {
                 if (opened) {
                     logFunnel("permission_prompt_opened", baseCtx + mapOf(
                         "type" to "battery",
-                        "china_rom" to true,
-                        "china_rom_source" to chinaRom.source
-                    ))
-                    return true
-                }
-            }
-
-            if (!prefs.getBoolean(KEY_BACKGROUND_POPUP_SHOWN, false)) {
-                val opened = openBackgroundPopupSettings()
-                if (opened) {
-                    logFunnel("permission_prompt_opened", baseCtx + mapOf(
-                        "type" to "background_popup",
                         "china_rom" to true,
                         "china_rom_source" to chinaRom.source
                     ))
@@ -459,9 +503,9 @@ class MainActivity : FlutterActivity() {
             }
         }
 
-        // 4. 全屏通知权限（Samsung Android 14+ 及所有已识别 China ROM Android 14+ 均需要）
+        // 4. 全屏通知权限（Samsung Android 14+ 及需要锁屏弹窗引导的 OEM 均尝试一次）
         if (Build.VERSION.SDK_INT >= 34 &&
-            (RomUtils.detect() == RomUtils.RomType.SAMSUNG || RomUtils.isChinaRom())) {
+            (RomUtils.detect() == RomUtils.RomType.SAMSUNG || requiresLockscreenPopupGuide || RomUtils.isChinaRom())) {
             val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             if (!nm.canUseFullScreenIntent() && !prefs.getBoolean(KEY_FSI_SHOWN, false)) {
                 val opened = openFsiPermissionSettings()
@@ -478,7 +522,9 @@ class MainActivity : FlutterActivity() {
 
     private fun shouldPromptFullScreenIntentAutomatically(): Boolean =
         Build.VERSION.SDK_INT >= 34 &&
-            (RomUtils.detect() == RomUtils.RomType.SAMSUNG || RomUtils.isChinaRom())
+            (RomUtils.detect() == RomUtils.RomType.SAMSUNG ||
+                RomUtils.requiresLockscreenPopupGuide() ||
+                RomUtils.isChinaRom())
 
     // ─── Settings route helpers ────────────────────────────────────────────────────
 
@@ -650,39 +696,44 @@ class MainActivity : FlutterActivity() {
         if (prefs.getBoolean(KEY_BACKGROUND_POPUP_SHOWN, false)) return false
 
         val romType = RomUtils.detect()
-        val localRoutes = OemPermissionRoutes.backgroundPopupRoutes(romType)
+        val localRoutes = OemPermissionRoutes.backgroundPopupRoutes(romType, applicationInfo.uid)
         val baseCtx = deviceContext()
 
         for ((label, intentFactory) in localRoutes) {
-            // 小米特殊处理：Activity 接收 UID，不接收包名
-            val intent = if (romType == RomUtils.RomType.XIAOMI && label == "oem") {
-                intentFactory(applicationInfo.uid.toString())
-            } else {
-                intentFactory(packageName)
+            val intent = intentFactory(packageName)
+            val component = intent.component?.flattenToShortString() ?: ""
+            val action = intent.action ?: ""
+            val preResolved = try { packageManager.resolveActivity(intent, 0) != null } catch (_: Exception) { null }
+            if (preResolved == false) {
+                Log.d(TAG, "background popup pre_resolve=false (visibility restriction?): label=$label component=$component")
             }
-            val canOpen = try {
-                packageManager.resolveActivity(intent, 0) != null
-            } catch (_: Exception) { false }
-            if (canOpen) {
-                try {
-                    startActivity(intent)
-                    prefs.edit()
-                        .putBoolean(KEY_BACKGROUND_POPUP_SHOWN, true)
-                        .putBoolean(KEY_BACKGROUND_POPUP_SETTINGS_OPENED, true)
-                        .apply()
-                    logFunnel("settings_route_launched", baseCtx + mapOf(
-                        "route_type" to "background_popup",
-                        "label" to label,
-                        "grant_state" to "shown_not_confirmed"
-                    ))
-                    return true
-                } catch (e: Exception) {
-                    Log.d(TAG, "background popup route failed: $label")
-                }
+            try {
+                startActivity(intent)
+                prefs.edit()
+                    .putBoolean(KEY_BACKGROUND_POPUP_SHOWN, true)
+                    .putBoolean(KEY_BACKGROUND_POPUP_SETTINGS_OPENED, true)
+                    .apply()
+                logFunnel("settings_route_launched", baseCtx + mapOf(
+                    "route_type" to "background_popup",
+                    "label" to label,
+                    "component" to component,
+                    "action" to action,
+                    "grant_state" to "shown_not_confirmed",
+                    "pre_resolved" to (preResolved ?: "unknown")
+                ))
+                return true
+            } catch (e: Exception) {
+                Log.d(TAG, "background popup route failed: label=$label action=$action component=$component pre_resolved=$preResolved error=${e.javaClass.simpleName}")
+                logFunnel("settings_route_launch_failed", baseCtx + mapOf(
+                    "route_type" to "background_popup",
+                    "label" to label,
+                    "component" to component,
+                    "action" to action,
+                    "error" to e.javaClass.simpleName,
+                    "pre_resolved" to (preResolved ?: "unknown")
+                ))
             }
         }
-        // 如果全部失败，标记为已展示，不再重复尝试
-        prefs.edit().putBoolean(KEY_BACKGROUND_POPUP_SHOWN, true).apply()
         return false
     }
 

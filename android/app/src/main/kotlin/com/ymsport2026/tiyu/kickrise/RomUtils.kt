@@ -81,6 +81,8 @@ object RomUtils {
             val osLabel = when {
                 vivoOriginOsVersion.isNotBlank() -> "OriginOS"
                 vivoOsName.contains("origin", ignoreCase = true) -> "OriginOS"
+                // "vos" (Vivo OS) is the prop value set by OriginOS 4+ / global OriginOS devices
+                vivoOsName.equals("vos", ignoreCase = true) -> "OriginOS"
                 else -> "FuntouchOS"
             }
             val romType = if (brand.contains("iqoo")) RomType.IQOO else RomType.VIVO
@@ -154,6 +156,12 @@ object RomUtils {
     fun chinaRomInfo(): ChinaRomInfo = cachedChinaRomInfo
 
     fun isChinaRom(): Boolean = cachedChinaRomInfo.isChina
+
+    fun requiresLockscreenPopupGuide(): Boolean = detect() in setOf(
+        RomType.OPPO, RomType.ONEPLUS, RomType.REALME,
+        RomType.HONOR, RomType.HUAWEI,
+        RomType.VIVO, RomType.IQOO
+    )
 
     private fun detectChinaRomInfo(): ChinaRomInfo {
         val info = cachedRomInfo
@@ -296,6 +304,7 @@ object RomUtils {
         RomType.XIAOMI -> checkMiuiBackgroundPopup(context)
         RomType.HUAWEI, RomType.HONOR -> BgPopupPermissionInfo("unknown", "not_supported")
         RomType.VIVO, RomType.IQOO -> BgPopupPermissionInfo("unknown", "not_supported")
+        RomType.OPPO, RomType.ONEPLUS, RomType.REALME -> BgPopupPermissionInfo("unknown", "not_supported")
         else -> BgPopupPermissionInfo("unknown", "not_applicable")
     }
 
