@@ -38,6 +38,9 @@ class PopupAlarmReceiver : BroadcastReceiver() {
         val effectiveLocked = keyguardShowing || deviceLocked || !isInteractive || screenOffObserved
         val appAlive = isAppAlive(context)
         val inRecents = isAppInRecents(context)
+        val appAliveAgeMs = if (appAlive) appAliveAgeMs(context) else -1L
+        val appAliveStale = appAlive && appAliveAgeMs >= APP_ALIVE_STALE_MS
+        val lastLifecycleEvent = prefs.getString(KEY_LAST_LIFECYCLE_EVENT, "unknown") ?: "unknown"
 
         Log.d(TAG, "Alarm received — source=$alarmSource config=${config != null}, enabled=${config?.enabled}, creative=${creative != null}")
         reporter.reportLog(LogLevel.INFO, "Alarm received", tag = "alarm",
@@ -60,6 +63,9 @@ class PopupAlarmReceiver : BroadcastReceiver() {
                     else -> "none"
                 },
                 "app_alive" to appAlive,
+                "app_alive_age_ms" to appAliveAgeMs,
+                "app_alive_stale" to appAliveStale,
+                "last_lifecycle_event" to lastLifecycleEvent,
                 "in_recents" to inRecents,
                 "retry_count" to retryCount
             ))
@@ -69,6 +75,9 @@ class PopupAlarmReceiver : BroadcastReceiver() {
                 "locked" to effectiveLocked,
                 "interactive" to isInteractive,
                 "app_alive" to appAlive,
+                "app_alive_age_ms" to appAliveAgeMs,
+                "app_alive_stale" to appAliveStale,
+                "last_lifecycle_event" to lastLifecycleEvent,
                 "in_recents" to inRecents,
                 "rom" to RomUtils.romLabel(),
                 "retry_count" to retryCount
@@ -91,7 +100,12 @@ class PopupAlarmReceiver : BroadcastReceiver() {
         // Only skip when the user is actively using the app (alive + screen on).
         // If the screen is locked, appAlive may be stale (flag not yet cleared by onStop on some
         // OEMs, e.g. Huawei/HarmonyOS) — don't let it suppress a legitimate lock-screen popup.
-        if (appAlive && !effectiveLocked) {
+        // appAliveStale covers the case where onTaskRemoved() never fired (Honor/OPPO): if the
+        // flag is older than APP_ALIVE_STALE_MS we treat it as unreliable and proceed with delivery.
+        // The primary guard against stale-flag false-positives is cancelling the retry alarm in
+        // MainActivity.onResume(); the staleness window is a secondary defence.
+        val effectiveAppAlive = appAlive && !appAliveStale
+        if (effectiveAppAlive && !effectiveLocked) {
             Log.d(TAG, "Popup skipped: app is in foreground")
             reporter.reportLogThrottled(LogLevel.INFO, "Popup skipped: app is in foreground", tag = "alarm",
                 throttleKey = "app_alive")
@@ -101,6 +115,9 @@ class PopupAlarmReceiver : BroadcastReceiver() {
                     "source" to alarmSource,
                     "locked" to effectiveLocked,
                     "interactive" to isInteractive,
+                    "app_alive_age_ms" to appAliveAgeMs,
+                    "app_alive_stale" to appAliveStale,
+                    "last_lifecycle_event" to lastLifecycleEvent,
                     "in_recents" to inRecents
                 ))
             wl.release()
@@ -173,7 +190,11 @@ class PopupAlarmReceiver : BroadcastReceiver() {
                 return
             }
         } else {
-            if (inRecents) {
+            // Huawei/HarmonyOS: onTaskRemoved() is unreliable so in_recents can stay true
+            // indefinitely after a swipe-kill. When the device is locked, skip the in_recents
+            // gate on Huawei — the popup would not interrupt an active user in that state.
+            val skipRecentsOnHuawei = effectiveLocked && RomUtils.detect() == RomUtils.RomType.HUAWEI
+            if (inRecents && !skipRecentsOnHuawei) {
                 Log.d(TAG, "Popup skipped: app is backgrounded (still in recents)")
                 reporter.reportLogThrottled(LogLevel.INFO, "Popup skipped: app is backgrounded (still in recents)", tag = "alarm",
                     throttleKey = "app_recents")
@@ -187,6 +208,13 @@ class PopupAlarmReceiver : BroadcastReceiver() {
                     ))
                 wl.release()
                 return
+            } else if (inRecents) {
+                reporter.reportLog(LogLevel.INFO, "in_recents_skipped_huawei_locked", tag = "funnel",
+                    context = mapOf(
+                        "in_recents" to inRecents,
+                        "locked" to effectiveLocked,
+                        "rom" to RomUtils.romLabel()
+                    ))
             }
         }
 
@@ -239,6 +267,13 @@ class PopupAlarmReceiver : BroadcastReceiver() {
         context.getSharedPreferences(EventReporter.PREFS_NAME, Context.MODE_PRIVATE)
             .getBoolean(KEY_APP_IN_RECENTS, false)
 
+    /** Returns ms since app_alive was last set true, or Long.MAX_VALUE if never recorded. */
+    private fun appAliveAgeMs(context: Context): Long {
+        val setAt = context.getSharedPreferences(EventReporter.PREFS_NAME, Context.MODE_PRIVATE)
+            .getLong(KEY_APP_ALIVE_SET_AT, 0L)
+        return if (setAt > 0L) System.currentTimeMillis() - setAt else Long.MAX_VALUE
+    }
+
     private fun scheduleFallbackRetry(context: Context, reporter: EventReporter, retryCount: Int) {
         val triggerAt = System.currentTimeMillis() + FALLBACK_LOCK_RETRY_DELAY_MS
         val retryIntent = Intent(context, PopupAlarmReceiver::class.java).apply {
@@ -265,15 +300,23 @@ class PopupAlarmReceiver : BroadcastReceiver() {
         private const val WAKELOCK_TAG = "kickrise:alarm_receiver"
         private const val WAKELOCK_TIMEOUT_MS = 15_000L
         private const val SCREEN_OFF_STALE_MS = 30 * 60 * 1_000L
-        private const val REQUEST_CODE_FALLBACK_RETRY = 9906
+        // Public so MainActivity.onResume() can cancel the retry alarm without needing a
+        // separate request code constant. Keep in sync with scheduleFallbackRetry().
+        const val REQUEST_CODE_FALLBACK_RETRY = 9906
         // 60 s per retry — long enough for the user to finish in settings and lock the phone.
         // The old 10 s value caused the retry to fire while app_alive=true (user back in foreground
         // right after granting overlay/notification permission), permanently blocking delivery.
         private const val FALLBACK_LOCK_RETRY_DELAY_MS = 60_000L
         private const val MAX_FALLBACK_LOCK_RETRIES = 6
+        // app_alive is considered stale if it was written more than this long ago. Covers the case
+        // where onTaskRemoved() did not fire (Huawei/OPPO OEMs) so the true→false transition was
+        // never persisted. Primary guard is cancelling the retry in onResume(); this is secondary.
+        private const val APP_ALIVE_STALE_MS = 30_000L
         const val POPUP_CHANNEL_ID = "kickrise_popup_channel"
         const val POPUP_NOTIFICATION_ID = 9902
         const val KEY_APP_ALIVE = "kickrise_app_alive"
+        const val KEY_APP_ALIVE_SET_AT = "kickrise_app_alive_set_at"
+        const val KEY_LAST_LIFECYCLE_EVENT = "kickrise_last_lifecycle_event"
         const val KEY_APP_IN_RECENTS = "kickrise_app_in_recents"
         const val EXTRA_ALARM_SOURCE = "alarm_source"
         const val EXTRA_RETRY_COUNT = "retry_count"

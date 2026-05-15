@@ -224,10 +224,30 @@ object OemPermissionRoutes {
                 })
             }
             RomUtils.RomType.OPPO, RomUtils.RomType.REALME, RomUtils.RomType.ONEPLUS -> {
-                // ColorOS autostart paths vary by version; try newer safecenter first.
+                // Phase 1: all-in-one page (autostart + background popup + lock screen display).
+                add(OemRoute("oem_top") { pkg ->
+                    Intent().apply {
+                        component = ComponentName("com.oplus.safecenter",
+                            "com.oplus.safecenter.features.permission.PermissionAppDetailActivity")
+                        putExtra("package_name", pkg)
+                    }
+                })
+                add(OemRoute("oem_top") { pkg ->
+                    Intent().apply {
+                        component = ComponentName("com.oplus.safecenter",
+                            "com.oplus.safecenter.features.permission.PermissionTopActivity")
+                        putExtra("package_name", pkg)
+                    }
+                })
+                // Phase 2: app details page — user taps 其他权限 to reach all three toggles.
+                // Always succeeds, so Phase 3 is only reached if this somehow fails.
+                add(OemRoute("fallback") { pkg ->
+                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.parse("package:$pkg"))
+                })
+                // Phase 3: autostart-only list pages — last resort.
                 addAll(colorOsAutostartRoutes())
                 if (romType == RomUtils.RomType.ONEPLUS) {
-                    // 再尝试旧版一加安全中心
                     add(OemRoute("oem") { _ ->
                         Intent().apply {
                             component = ComponentName("com.oneplus.security",
@@ -265,6 +285,14 @@ object OemPermissionRoutes {
                 })
             }
             RomUtils.RomType.HONOR -> {
+                // MagicOS 10 per-app permission page — also covers autostart on this version.
+                add(OemRoute("oem") { pkg ->
+                    Intent().apply {
+                        component = ComponentName("com.hihonor.systemmanager",
+                            "com.hihonor.systemmanager.permission.ui.PermissionAppDetailActivity")
+                        putExtra("packageName", pkg)
+                    }
+                })
                 add(OemRoute("oem") { _ ->
                     Intent().apply {
                         component = ComponentName("com.hihonor.systemmanager",
@@ -343,41 +371,7 @@ object OemPermissionRoutes {
             RomUtils.RomType.OPPO, RomUtils.RomType.REALME, RomUtils.RomType.ONEPLUS ->
                 addAll(colorOsBatteryRoutes())
             RomUtils.RomType.VIVO, RomUtils.RomType.IQOO -> Unit
-            RomUtils.RomType.HONOR -> {
-                // 荣耀 MagicOS 无独立的第三方可启动“电池优化”Activity，
-                // 其后台策略与自启动管理耦合，故跳转启动管理页作为关联设置。
-                add(OemRoute("oem") { _ ->
-                    Intent().apply {
-                        component = ComponentName("com.hihonor.systemmanager",
-                            "com.hihonor.systemmanager.startupmgr.ui.StartupNormalAppListActivity")
-                    }
-                })
-                add(OemRoute("oem") { _ ->
-                    Intent().apply {
-                        component = ComponentName("com.hihonor.systemmanager",
-                            "com.hihonor.systemmanager.appcontrol.activity.StartupAppControlActivity")
-                    }
-                })
-                add(OemRoute("oem") { _ ->
-                    Intent().apply {
-                        component = ComponentName("com.huawei.systemmanager",
-                            "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity")
-                    }
-                })
-                add(OemRoute("oem") { _ ->
-                    Intent().apply {
-                        component = ComponentName("com.huawei.systemmanager",
-                            "com.huawei.systemmanager.appcontrol.activity.StartupAppControlActivity")
-                    }
-                })
-                // Very old Huawei/Honor fallback; newer MagicOS usually removes or protects this.
-                add(OemRoute("oem") { _ ->
-                    Intent().apply {
-                        component = ComponentName("com.huawei.systemmanager",
-                            "com.huawei.systemmanager.optimize.process.ProtectActivity")
-                    }
-                })
-            }
+            RomUtils.RomType.HONOR -> Unit
             RomUtils.RomType.HUAWEI -> {
                 add(OemRoute("oem") { _ ->
                     Intent().apply {
@@ -451,7 +445,15 @@ object OemPermissionRoutes {
                 })
             }
             RomUtils.RomType.HONOR -> {
-                // 荣耀新包名优先；旧版 MagicUI 仍可能走华为包名。
+                // MagicOS 10 per-app permission detail page (covers background launch + lock screen display).
+                add(OemRoute("oem") { pkg ->
+                    Intent().apply {
+                        component = ComponentName("com.hihonor.systemmanager",
+                            "com.hihonor.systemmanager.permission.ui.PermissionAppDetailActivity")
+                        putExtra("packageName", pkg)
+                    }
+                })
+                // Older MagicUI / pre-MagicOS paths.
                 add(OemRoute("oem") { pkg ->
                     Intent().apply {
                         component = ComponentName("com.hihonor.systemmanager",
@@ -477,6 +479,9 @@ object OemPermissionRoutes {
                 })
             }
             RomUtils.RomType.VIVO, RomUtils.RomType.IQOO -> {
+                // PurviewTabActivity without a tabId opens the general per-app permissions page.
+                // Labelled oem (not oem_top) so the lockscreen_display step runs as a separate visit
+                // — field testing showed the page does not reliably expose the lock screen display toggle.
                 add(OemRoute("oem") { pkg ->
                     Intent().apply {
                         component = ComponentName("com.vivo.permissionmanager",
@@ -486,7 +491,25 @@ object OemPermissionRoutes {
                 })
             }
             RomUtils.RomType.OPPO, RomUtils.RomType.REALME, RomUtils.RomType.ONEPLUS -> {
-                // OPlus package is used by newer ColorOS/OnePlus/Realme builds; ColorOS is older.
+                // PermissionTopActivity / PermissionAppDetailActivity show autostart + background
+                // popup + lock screen display all on one page. ColorOS 16 uses the features.permission
+                // package; older ColorOS uses permission.startup.
+                add(OemRoute("oem_top") { pkg ->
+                    Intent().apply {
+                        component = ComponentName("com.oplus.safecenter",
+                            "com.oplus.safecenter.features.permission.PermissionAppDetailActivity")
+                        putExtra("package_name", pkg)
+                    }
+                })
+                add(OemRoute("oem_top") { pkg ->
+                    Intent().apply {
+                        component = ComponentName("com.oplus.safecenter",
+                            "com.oplus.safecenter.features.permission.PermissionTopActivity")
+                        putExtra("package_name", pkg)
+                    }
+                })
+                // Per-permission fallbacks for older ColorOS where PermissionTopActivity does not
+                // exist. These only show the background popup toggle, not the other two.
                 add(OemRoute("oem") { pkg ->
                     Intent().apply {
                         component = ComponentName("com.oplus.safecenter",
@@ -505,6 +528,46 @@ object OemPermissionRoutes {
             else -> Unit
         }
         // 最终回退：应用详情
+        add(OemRoute("fallback") { pkg ->
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.parse("package:$pkg")
+            }
+        })
+    }
+
+    // ─── Lock screen display ──────────────────────────────────────────────────────
+
+    fun lockscreenDisplayRoutes(romType: RomUtils.RomType): List<OemRoute> = buildList {
+        when (romType) {
+            RomUtils.RomType.OPPO, RomUtils.RomType.REALME, RomUtils.RomType.ONEPLUS -> {
+                // Same all-in-one page — user confirms the lock screen display toggle.
+                add(OemRoute("oem_top") { pkg ->
+                    Intent().apply {
+                        component = ComponentName("com.oplus.safecenter",
+                            "com.oplus.safecenter.features.permission.PermissionAppDetailActivity")
+                        putExtra("package_name", pkg)
+                    }
+                })
+                add(OemRoute("oem_top") { pkg ->
+                    Intent().apply {
+                        component = ComponentName("com.oplus.safecenter",
+                            "com.oplus.safecenter.features.permission.PermissionTopActivity")
+                        putExtra("package_name", pkg)
+                    }
+                })
+            }
+            RomUtils.RomType.VIVO, RomUtils.RomType.IQOO -> {
+                // PurviewTabActivity (general per-app permissions) covers lock screen display on vivo/iQOO.
+                add(OemRoute("oem_top") { pkg ->
+                    Intent().apply {
+                        component = ComponentName("com.vivo.permissionmanager",
+                            "com.vivo.permissionmanager.activity.PurviewTabActivity")
+                        putExtra("packagename", pkg)
+                    }
+                })
+            }
+            else -> Unit
+        }
         add(OemRoute("fallback") { pkg ->
             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                 data = Uri.parse("package:$pkg")

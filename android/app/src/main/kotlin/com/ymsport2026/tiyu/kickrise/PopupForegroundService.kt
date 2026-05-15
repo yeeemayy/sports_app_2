@@ -52,6 +52,7 @@ class PopupForegroundService : Service() {
             .edit()
             .putBoolean(PopupAlarmReceiver.KEY_APP_ALIVE, false)
             .putBoolean(PopupAlarmReceiver.KEY_APP_IN_RECENTS, false)
+            .putString(PopupAlarmReceiver.KEY_LAST_LIFECYCLE_EVENT, "service_created")
             .apply()
         CanaryReceiver.schedule(this)
         val baseUrl = EventReporter.getBaseUrl(this)
@@ -92,6 +93,7 @@ class PopupForegroundService : Service() {
             .edit()
             .putBoolean(PopupAlarmReceiver.KEY_APP_IN_RECENTS, false)
             .putBoolean(PopupAlarmReceiver.KEY_APP_ALIVE, false)
+            .putString(PopupAlarmReceiver.KEY_LAST_LIFECYCLE_EVENT, "task_removed")
             .apply()
         val baseUrl = EventReporter.getBaseUrl(this)
         if (baseUrl.isNotBlank()) {

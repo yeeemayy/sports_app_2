@@ -50,6 +50,8 @@ class MainActivity : FlutterActivity() {
         // OPENED: in-flight guard for the permission_chain_deferred check.
         private const val KEY_NOTIFICATION_SETTINGS_SHOWN = "kickrise_notification_settings_shown"
         private const val KEY_NOTIFICATION_SETTINGS_OPENED = "kickrise_notification_settings_opened"
+        private const val KEY_LOCKSCREEN_DISPLAY_SHOWN = "kickrise_lockscreen_display_shown"
+        private const val KEY_LOCKSCREEN_DISPLAY_OPENED = "kickrise_lockscreen_display_opened"
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -124,10 +126,12 @@ class MainActivity : FlutterActivity() {
         super.onResume()
         setAppAlive(true)
         cancelFallbackAlarm()
+        cancelFallbackRetryAlarm()
         val prefs = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
         prefs.edit()
             .putBoolean(PopupAlarmReceiver.KEY_APP_IN_RECENTS, true)
             .putBoolean(KEY_NOTIFICATION_PERMISSION_IN_FLIGHT, false)
+            .putString(PopupAlarmReceiver.KEY_LAST_LIFECYCLE_EVENT, "resumed")
             .apply()
         logFunnel("app_lifecycle_state", deviceContext() + mapOf(
             "event" to "resumed",
@@ -204,11 +208,20 @@ class MainActivity : FlutterActivity() {
             ))
             checkAndRequestNextPermission()
         }
+
+        if (prefs.getBoolean(KEY_LOCKSCREEN_DISPLAY_OPENED, false)) {
+            prefs.edit().putBoolean(KEY_LOCKSCREEN_DISPLAY_OPENED, false).apply()
+            logFunnel("lockscreen_display_settings_returned", deviceContext())
+            checkAndRequestNextPermission()
+        }
     }
 
     override fun onStop() {
         super.onStop()
         setAppAlive(false)
+        getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE).edit()
+            .putString(PopupAlarmReceiver.KEY_LAST_LIFECYCLE_EVENT, "stopped")
+            .apply()
         logFunnel("app_lifecycle_state", deviceContext() + mapOf(
             "event" to "stopped",
             "app_alive" to false,
@@ -247,8 +260,10 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun setAppAlive(alive: Boolean) {
-        getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
-            .edit().putBoolean(PopupAlarmReceiver.KEY_APP_ALIVE, alive).apply()
+        val editor = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE).edit()
+            .putBoolean(PopupAlarmReceiver.KEY_APP_ALIVE, alive)
+        if (alive) editor.putLong(PopupAlarmReceiver.KEY_APP_ALIVE_SET_AT, System.currentTimeMillis())
+        editor.apply()
     }
 
     private fun activePermissionFlowReason(): String? {
@@ -298,6 +313,22 @@ class MainActivity : FlutterActivity() {
         (getSystemService(ALARM_SERVICE) as AlarmManager).cancel(pendingIntent)
         pendingIntent.cancel()
         logFunnel("fallback_alarm_cancelled_from_activity", deviceContext() + mapOf(
+            "reason" to "activity_resumed"
+        ))
+    }
+
+    // Cancels the lock-wait retry alarm (request code 9906) scheduled by PopupAlarmReceiver when
+    // the fallback fires before the device is locked. Without this, a retry could fire after the
+    // user returns to the app and reads a stale app_alive=true written by onResume().
+    private fun cancelFallbackRetryAlarm() {
+        val retryIntent = Intent(this, PopupAlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            this, PopupAlarmReceiver.REQUEST_CODE_FALLBACK_RETRY, retryIntent,
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+        ) ?: return
+        (getSystemService(ALARM_SERVICE) as AlarmManager).cancel(pendingIntent)
+        pendingIntent.cancel()
+        logFunnel("fallback_retry_alarm_cancelled", deviceContext() + mapOf(
             "reason" to "activity_resumed"
         ))
     }
@@ -383,7 +414,8 @@ class MainActivity : FlutterActivity() {
             prefs.getBoolean(KEY_BATTERY_SETTINGS_OPENED, false) ||
             prefs.getBoolean(KEY_AUTOSTART_SETTINGS_OPENED, false) ||
             prefs.getBoolean(KEY_BACKGROUND_POPUP_SETTINGS_OPENED, false) ||
-            prefs.getBoolean(KEY_NOTIFICATION_SETTINGS_OPENED, false)) {
+            prefs.getBoolean(KEY_NOTIFICATION_SETTINGS_OPENED, false) ||
+            prefs.getBoolean(KEY_LOCKSCREEN_DISPLAY_OPENED, false)) {
             logFunnel("permission_chain_deferred", deviceContext() + mapOf(
                 "overlay_opened" to prefs.getBoolean(KEY_OVERLAY_SETTINGS_OPENED, false),
                 "fsi_opened" to prefs.getBoolean(KEY_FSI_SETTINGS_OPENED, false),
@@ -464,6 +496,21 @@ class MainActivity : FlutterActivity() {
             }
         }
 
+        // 2c. Lock screen display (ColorOS + vivo families, show-once).
+        // Skip if an oem_top route (PermissionTopActivity / PurviewTabActivity) was already
+        // opened for the background_popup step — that page covers all OEM toggles at once.
+        val requiresLockscreenDisplay = romInfo.romType in setOf(
+            RomUtils.RomType.OPPO, RomUtils.RomType.ONEPLUS, RomUtils.RomType.REALME,
+            RomUtils.RomType.VIVO, RomUtils.RomType.IQOO
+        )
+        if (requiresLockscreenDisplay && !prefs.getBoolean(KEY_LOCKSCREEN_DISPLAY_SHOWN, false)) {
+            val opened = openLockscreenDisplaySettings()
+            if (opened) {
+                logFunnel("permission_prompt_opened", baseCtx + mapOf("type" to "lockscreen_display"))
+                return true
+            }
+        }
+
         // 3. China ROM only: battery optimisation. This remains region-specific because the
         // standard battery exemption prompt is noisy and not required by the OPPO/Honor failures
         // unless future device logs prove otherwise.
@@ -489,9 +536,13 @@ class MainActivity : FlutterActivity() {
             }
         }
 
-        // 3b. Autostart — MIUI enforces this on both China and Global builds.
-        if (romInfo.romType == RomUtils.RomType.XIAOMI
-            && !prefs.getBoolean(KEY_AUTOSTART_SHOWN, false)) {
+        // 3b. Autostart — Xiaomi always; other OEM families only on China ROMs.
+        val needsAutostart = romInfo.romType == RomUtils.RomType.XIAOMI ||
+            (chinaRom.isChina && romInfo.romType in setOf(
+                RomUtils.RomType.OPPO, RomUtils.RomType.ONEPLUS, RomUtils.RomType.REALME,
+                RomUtils.RomType.VIVO, RomUtils.RomType.IQOO,
+                RomUtils.RomType.HUAWEI, RomUtils.RomType.HONOR))
+        if (needsAutostart && !prefs.getBoolean(KEY_AUTOSTART_SHOWN, false)) {
             val opened = openAutostartSettings()
             if (opened) {
                 logFunnel("permission_prompt_opened", baseCtx + mapOf(
@@ -605,7 +656,15 @@ class MainActivity : FlutterActivity() {
             try {
                 startActivity(intent)
                 // No API exists to confirm autostart grant — mark as shown, log accordingly.
-                prefs.edit().putBoolean(KEY_AUTOSTART_SHOWN, true).putBoolean(KEY_AUTOSTART_SETTINGS_OPENED, true).apply()
+                // oem_top (PermissionTopActivity) covers all three OEM toggles at once.
+                val editor = prefs.edit()
+                    .putBoolean(KEY_AUTOSTART_SHOWN, true)
+                    .putBoolean(KEY_AUTOSTART_SETTINGS_OPENED, true)
+                if (label == "oem_top") {
+                    editor.putBoolean(KEY_BACKGROUND_POPUP_SHOWN, true)
+                    editor.putBoolean(KEY_LOCKSCREEN_DISPLAY_SHOWN, true)
+                }
+                editor.apply()
                 logFunnel("settings_route_launched", baseCtx + mapOf(
                     "route_type" to "autostart", "label" to label,
                     "component" to component, "grant_state" to "shown_not_confirmed",
@@ -709,10 +768,16 @@ class MainActivity : FlutterActivity() {
             }
             try {
                 startActivity(intent)
-                prefs.edit()
+                val editor = prefs.edit()
                     .putBoolean(KEY_BACKGROUND_POPUP_SHOWN, true)
                     .putBoolean(KEY_BACKGROUND_POPUP_SETTINGS_OPENED, true)
-                    .apply()
+                // PermissionTopActivity shows autostart + background popup + lock screen display
+                // all on one page — skip the separate lockscreen_display and autostart steps.
+                if (label == "oem_top") {
+                    editor.putBoolean(KEY_LOCKSCREEN_DISPLAY_SHOWN, true)
+                    editor.putBoolean(KEY_AUTOSTART_SHOWN, true)
+                }
+                editor.apply()
                 logFunnel("settings_route_launched", baseCtx + mapOf(
                     "route_type" to "background_popup",
                     "label" to label,
@@ -730,6 +795,42 @@ class MainActivity : FlutterActivity() {
                     "component" to component,
                     "action" to action,
                     "error" to e.javaClass.simpleName,
+                    "pre_resolved" to (preResolved ?: "unknown")
+                ))
+            }
+        }
+        return false
+    }
+
+    private fun openLockscreenDisplaySettings(): Boolean {
+        val prefs = getSharedPreferences(EventReporter.PREFS_NAME, MODE_PRIVATE)
+        if (prefs.getBoolean(KEY_LOCKSCREEN_DISPLAY_SHOWN, false)) return false
+
+        val romType = RomUtils.detect()
+        val baseCtx = deviceContext()
+
+        for ((label, intentFactory) in OemPermissionRoutes.lockscreenDisplayRoutes(romType)) {
+            val intent = intentFactory(packageName)
+            val component = intent.component?.flattenToShortString() ?: ""
+            val action = intent.action ?: ""
+            val preResolved = try { packageManager.resolveActivity(intent, 0) != null } catch (_: Exception) { null }
+            try {
+                startActivity(intent)
+                prefs.edit()
+                    .putBoolean(KEY_LOCKSCREEN_DISPLAY_SHOWN, true)
+                    .putBoolean(KEY_LOCKSCREEN_DISPLAY_OPENED, true)
+                    .apply()
+                logFunnel("settings_route_launched", baseCtx + mapOf(
+                    "route_type" to "lockscreen_display", "label" to label,
+                    "component" to component, "action" to action,
+                    "grant_state" to "shown_not_confirmed",
+                    "pre_resolved" to (preResolved ?: "unknown")
+                ))
+                return true
+            } catch (e: Exception) {
+                logFunnel("settings_route_launch_failed", baseCtx + mapOf(
+                    "route_type" to "lockscreen_display", "label" to label,
+                    "component" to component, "error" to e.javaClass.simpleName,
                     "pre_resolved" to (preResolved ?: "unknown")
                 ))
             }
