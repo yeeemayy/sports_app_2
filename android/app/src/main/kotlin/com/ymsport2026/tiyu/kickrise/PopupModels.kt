@@ -65,4 +65,5 @@ object LogLevel {
 object AlarmSource {
     const val SCREEN_OFF = "screen_off"
     const val FALLBACK_ACTIVITY = "fallback_activity"
+    const val UNLOCK_RECEIVER = "unlock_receiver"
 }

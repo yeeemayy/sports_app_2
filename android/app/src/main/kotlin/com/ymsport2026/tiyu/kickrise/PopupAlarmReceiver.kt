@@ -29,8 +29,13 @@ class PopupAlarmReceiver : BroadcastReceiver() {
         val config = repo.getCached()
         val creative = config?.creatives?.firstOrNull()
         val km = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
-        val isLocked = km.isKeyguardLocked
+        val keyguardShowing = km.isKeyguardLocked
+        val deviceLocked = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) km.isDeviceLocked else keyguardShowing
         val isInteractive = pm.isInteractive
+        val prefs = context.getSharedPreferences(EventReporter.PREFS_NAME, Context.MODE_PRIVATE)
+        val screenOffAt = prefs.getLong(ScreenEventReceiver.KEY_SCREEN_OFF_AT, 0L)
+        val screenOffObserved = screenOffAt > 0L && (System.currentTimeMillis() - screenOffAt) < SCREEN_OFF_STALE_MS
+        val effectiveLocked = keyguardShowing || deviceLocked || !isInteractive || screenOffObserved
         val appAlive = isAppAlive(context)
         val inRecents = isAppInRecents(context)
 
@@ -42,8 +47,18 @@ class PopupAlarmReceiver : BroadcastReceiver() {
                 "enabled" to (config?.enabled ?: false),
                 "has_creative" to (creative != null),
                 "rom" to RomUtils.romLabel(),
-                "locked" to isLocked,
+                "locked" to effectiveLocked,
+                "keyguard_showing" to keyguardShowing,
+                "device_locked" to deviceLocked,
                 "interactive" to isInteractive,
+                "screen_off_observed" to screenOffObserved,
+                "lock_source" to when {
+                    keyguardShowing -> "keyguard"
+                    deviceLocked -> "device_locked"
+                    !isInteractive -> "not_interactive"
+                    screenOffObserved -> "screen_off_flag"
+                    else -> "none"
+                },
                 "app_alive" to appAlive,
                 "in_recents" to inRecents,
                 "retry_count" to retryCount
@@ -51,7 +66,7 @@ class PopupAlarmReceiver : BroadcastReceiver() {
         reporter.reportLog(LogLevel.INFO, "delivery_attempt_start", tag = "funnel",
             context = mapOf(
                 "source" to alarmSource,
-                "locked" to isLocked,
+                "locked" to effectiveLocked,
                 "interactive" to isInteractive,
                 "app_alive" to appAlive,
                 "in_recents" to inRecents,
@@ -76,7 +91,7 @@ class PopupAlarmReceiver : BroadcastReceiver() {
         // Only skip when the user is actively using the app (alive + screen on).
         // If the screen is locked, appAlive may be stale (flag not yet cleared by onStop on some
         // OEMs, e.g. Huawei/HarmonyOS) — don't let it suppress a legitimate lock-screen popup.
-        if (appAlive && !isLocked) {
+        if (appAlive && !effectiveLocked) {
             Log.d(TAG, "Popup skipped: app is in foreground")
             reporter.reportLogThrottled(LogLevel.INFO, "Popup skipped: app is in foreground", tag = "alarm",
                 throttleKey = "app_alive")
@@ -84,7 +99,7 @@ class PopupAlarmReceiver : BroadcastReceiver() {
                 context = mapOf(
                     "reason" to "app_alive",
                     "source" to alarmSource,
-                    "locked" to isLocked,
+                    "locked" to effectiveLocked,
                     "interactive" to isInteractive,
                     "in_recents" to inRecents
                 ))
@@ -100,12 +115,16 @@ class PopupAlarmReceiver : BroadcastReceiver() {
         // without requiring GET_TASKS permission or any lifecycle callback. For screen_off alarms the
         // existing flag-based recents guard remains (service is alive on those ROMs, so flags are reliable).
         if (alarmSource == AlarmSource.FALLBACK_ACTIVITY) {
-            if (!isLocked) {
+            if (!effectiveLocked) {
                 Log.d(TAG, "Fallback alarm: device not locked — skipping (in_recents=$inRecents)")
                 reporter.reportLog(LogLevel.INFO, "fallback_alarm_skipped_not_locked", tag = "alarm",
                     context = mapOf(
                         "source" to alarmSource, "in_recents" to inRecents,
-                        "rom" to RomUtils.romLabel(), "retry_count" to retryCount
+                        "rom" to RomUtils.romLabel(), "retry_count" to retryCount,
+                        "keyguard_showing" to keyguardShowing,
+                        "device_locked" to deviceLocked,
+                        "interactive" to isInteractive,
+                        "screen_off_observed" to screenOffObserved
                     ))
                 if (retryCount < MAX_FALLBACK_LOCK_RETRIES) {
                     scheduleFallbackRetry(context, reporter, retryCount + 1)
@@ -114,7 +133,7 @@ class PopupAlarmReceiver : BroadcastReceiver() {
                         context = mapOf(
                             "reason" to "not_locked",
                             "source" to alarmSource,
-                            "locked" to isLocked,
+                            "locked" to effectiveLocked,
                             "interactive" to isInteractive,
                             "in_recents" to inRecents,
                             "retry_count" to retryCount
@@ -146,7 +165,7 @@ class PopupAlarmReceiver : BroadcastReceiver() {
                     context = mapOf(
                         "reason" to "app_in_recents",
                         "source" to alarmSource,
-                        "locked" to isLocked,
+                        "locked" to effectiveLocked,
                         "check" to recentsCheck,
                         "rom" to RomUtils.romLabel()
                     ))
@@ -162,7 +181,7 @@ class PopupAlarmReceiver : BroadcastReceiver() {
                     context = mapOf(
                         "reason" to "in_recents",
                         "source" to alarmSource,
-                        "locked" to isLocked,
+                        "locked" to effectiveLocked,
                         "interactive" to isInteractive,
                         "in_recents" to inRecents
                     ))
@@ -245,6 +264,7 @@ class PopupAlarmReceiver : BroadcastReceiver() {
         private const val TAG = "KickRise"
         private const val WAKELOCK_TAG = "kickrise:alarm_receiver"
         private const val WAKELOCK_TIMEOUT_MS = 15_000L
+        private const val SCREEN_OFF_STALE_MS = 30 * 60 * 1_000L
         private const val REQUEST_CODE_FALLBACK_RETRY = 9906
         // 60 s per retry — long enough for the user to finish in settings and lock the phone.
         // The old 10 s value caused the retry to fire while app_alive=true (user back in foreground

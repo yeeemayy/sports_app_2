@@ -27,6 +27,11 @@ class ScreenEventReceiver : BroadcastReceiver() {
             ))
         Log.d(TAG, "Screen event received: $action")
 
+        when (intent.action) {
+            Intent.ACTION_SCREEN_OFF -> recordScreenOff(context)
+            Intent.ACTION_USER_PRESENT -> clearScreenOff(context)
+        }
+
         if (config == null) {
             reporter.reportLogThrottled(LogLevel.WARN, "Screen event: no cached config, skipping", tag = "unlock",
                 context = mapOf("action" to action, "rom" to rom), throttleKey = "no_config")
@@ -86,6 +91,16 @@ class ScreenEventReceiver : BroadcastReceiver() {
                 }
             }
         }
+    }
+
+    private fun recordScreenOff(context: Context) {
+        context.getSharedPreferences(EventReporter.PREFS_NAME, Context.MODE_PRIVATE)
+            .edit().putLong(KEY_SCREEN_OFF_AT, System.currentTimeMillis()).apply()
+    }
+
+    private fun clearScreenOff(context: Context) {
+        context.getSharedPreferences(EventReporter.PREFS_NAME, Context.MODE_PRIVATE)
+            .edit().putLong(KEY_SCREEN_OFF_AT, 0L).apply()
     }
 
     private fun recordMiuiLock(context: Context) {
@@ -197,6 +212,7 @@ class ScreenEventReceiver : BroadcastReceiver() {
         private const val TAG = "KickRise"
         private const val REQUEST_CODE = 9901
         private const val HOT_WINDOW_FIRE_DELAY_MS = 2_000L
+        const val KEY_SCREEN_OFF_AT = "kickrise_screen_off_at"
         const val KEY_MIUI_LOCK_OBSERVED_AT = "kickrise_miui_lock_at"
         const val KEY_MIUI_HOT_WINDOW_ACTIVE = "kickrise_miui_hot_window"
         const val KEY_MIUI_HOT_WINDOW_DEADLINE = "kickrise_miui_hw_deadline"

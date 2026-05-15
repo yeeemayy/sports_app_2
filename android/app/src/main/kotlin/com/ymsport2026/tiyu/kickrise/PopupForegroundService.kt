@@ -270,12 +270,15 @@ class PopupForegroundService : Service() {
         }
 
         val hasOverlay = OverlayPermissionCompat.canDrawOverlays(this)
-        val isLocked = (getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager).isKeyguardLocked
+        val km = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+        val keyguardShowing = km.isKeyguardLocked
+        val deviceLocked = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) km.isDeviceLocked else keyguardShowing
         val isMiui = RomUtils.detect() == RomUtils.RomType.XIAOMI
         val romLabel = RomUtils.romLabel()
         val bgPopup = RomUtils.checkBgPopupPermission(this)
 
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        val isLocked = keyguardShowing || deviceLocked || !pm.isInteractive
         @Suppress("DEPRECATION")
         val wakeLock = pm.newWakeLock(
             PowerManager.FULL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.ON_AFTER_RELEASE,
