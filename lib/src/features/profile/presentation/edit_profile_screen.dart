@@ -134,8 +134,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                     height: 100,
                                     fit: BoxFit.cover,
                                     placeholder: (context, url) => Shimmer.fromColors(
-                                      baseColor: AppTheme.of(context).shimmerBase,
-                                      highlightColor: AppTheme.of(context).shimmerHighlight,
+                                      baseColor: context.appTheme.shimmerBase,
+                                      highlightColor: context.appTheme.shimmerHighlight,
                                       child: const ColoredBox(color: Colors.white),
                                     ),
                                     errorBuilder: (context, url, error) => AvatarFallback(),
@@ -146,7 +146,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       width: 28,
                       height: 28,
                       decoration: const BoxDecoration(
-                        color: AppColors.primary,
+                        color: AppColors.accent,
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
@@ -176,7 +176,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(0, 48),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: AppColors.accent,
                     foregroundColor: Colors.white,
                   ),
                   child: _isSaving

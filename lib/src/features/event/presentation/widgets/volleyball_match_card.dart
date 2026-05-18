@@ -50,7 +50,7 @@ class VolleyballMatchCard extends ConsumerWidget {
                     child: Text(
                       match.leagueName,
                       style: context.textTheme.labelSmall?.copyWith(
-                        color: AppTheme.of(context).greyText,
+                        color: context.appTheme.greyText,
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,
@@ -162,7 +162,7 @@ class _VolleyballScore extends StatelessWidget {
       );
     }
 
-    final scoreColor = _liveStatuses.contains(statusId) ? AppColors.primary : AppTheme.of(context).baseText;
+    final scoreColor = _liveStatuses.contains(statusId) ? AppColors.accent : context.appTheme.baseText;
     return Column(
       children: [
         RichText(

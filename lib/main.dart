@@ -2,6 +2,7 @@ import 'package:country_code_picker/country_code_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,9 +16,7 @@ import 'package:sports_app/src/routes/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await dotenv.load(fileName: '.env');
   await EasyLocalization.ensureInitialized();
   await AppInfo.init();
@@ -25,9 +24,7 @@ void main() async {
 
   runApp(
     ProviderScope(
-      overrides: [
-        sharedPreferencesProvider.overrideWithValue(sharedPreferences),
-      ],
+      overrides: [sharedPreferencesProvider.overrideWithValue(sharedPreferences)],
       child: EasyLocalization(
         supportedLocales: const [Locale('zh', 'CN'), Locale('en', 'GB')],
         path: 'assets/translations',
@@ -46,8 +43,6 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     AppLocale.update(context.locale);
     final themeMode = ref.watch(themeModeProvider);
-    final lightTitleStyle = context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: Colors.black87);
-    final darkTitleStyle = context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: Colors.white);
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       builder: (context, child) => ResponsiveBreakpoints.builder(
@@ -67,64 +62,71 @@ class MyApp extends ConsumerWidget {
       locale: context.locale,
       themeMode: themeMode,
       theme: ThemeData(
+        dividerColor: const Color(0x2E0E0E0E),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-        ).copyWith(primaryContainer: AppColors.primaryShade50),
+          seedColor: AppColors.accent,
+        ).copyWith(primary: AppColors.accent, primaryContainer: AppColors.surface2),
         appBarTheme: AppBarTheme(
           centerTitle: true,
           elevation: 0.5,
           shadowColor: Colors.grey.shade100,
-          titleTextStyle: lightTitleStyle,
+          titleTextStyle: const TextStyle(
+            fontWeight: FontWeight.w700,
+            color: Colors.black87,
+            fontSize: 16,
+          ),
         ),
         textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+          style: TextButton.styleFrom(foregroundColor: AppColors.accent),
         ),
         filledButtonTheme: FilledButtonThemeData(
           style: TextButton.styleFrom(
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.accent,
             foregroundColor: Colors.white,
             minimumSize: Size(0, 48),
           ),
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            side: BorderSide(color: AppColors.primary),
-            foregroundColor: AppColors.primary,
+            side: BorderSide(color: AppColors.accent),
+            foregroundColor: AppColors.accent,
           ),
-        ),
-        navigationBarTheme: NavigationBarThemeData(
-          backgroundColor: AppColors.primaryShade50,
-          indicatorColor: AppColors.primaryShade300,
         ),
       ),
       darkTheme: ThemeData(
+        scaffoldBackgroundColor: AppColors.ink,
+        dividerColor: AppColors.lineStrong,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
+          seedColor: AppColors.accent,
           brightness: Brightness.dark,
-        ).copyWith(primaryContainer: AppColors.primaryShade300),
+        ).copyWith(surface: AppColors.surface, primary: AppColors.accent, onPrimary: AppColors.ink),
+        textTheme: GoogleFonts.spaceGroteskTextTheme(
+          ThemeData(brightness: Brightness.dark).textTheme,
+        ),
         appBarTheme: AppBarTheme(
           centerTitle: true,
-          elevation: 0.5,
-          titleTextStyle: darkTitleStyle,
+          elevation: 0,
+          titleTextStyle: GoogleFonts.spaceGrotesk(
+            fontWeight: FontWeight.w700,
+            color: AppColors.text,
+            fontSize: 16,
+          ),
         ),
         textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+          style: TextButton.styleFrom(foregroundColor: AppColors.accent),
         ),
         filledButtonTheme: FilledButtonThemeData(
           style: TextButton.styleFrom(
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.accent,
             foregroundColor: Colors.white,
             minimumSize: Size(0, 48),
           ),
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            side: BorderSide(color: AppColors.primary),
-            foregroundColor: AppColors.primary,
+            side: BorderSide(color: AppColors.accent),
+            foregroundColor: AppColors.accent,
           ),
-        ),
-        navigationBarTheme: NavigationBarThemeData(
-          indicatorColor: AppColors.primaryShade300,
         ),
       ),
       routerConfig: ref.watch(appRouterProvider),

@@ -19,7 +19,7 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
   ThemeMode build() {
     final prefs = ref.read(sharedPreferencesProvider);
     final saved = prefs.getString(_kThemeModeKey);
-    return _values[saved] ?? ThemeMode.light;
+    return _values[saved] ?? ThemeMode.dark;
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {

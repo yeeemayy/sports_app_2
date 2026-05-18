@@ -70,8 +70,8 @@ class HomeLiveEvents extends StatelessWidget {
             imageUrl: 'https://placehold.co/400x400/FFFFFF/898989.png?text=Image',
             fit: BoxFit.cover,
             placeholder: (context, url) => Shimmer.fromColors(
-              baseColor: AppTheme.of(context).shimmerBase,
-              highlightColor: AppTheme.of(context).shimmerHighlight,
+              baseColor: context.appTheme.shimmerBase,
+              highlightColor: context.appTheme.shimmerHighlight,
               child: const ColoredBox(color: Colors.grey),
             ),
             errorWidget: (context, url, error) =>

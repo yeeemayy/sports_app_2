@@ -177,7 +177,7 @@ class _TableTennisHeaderContent extends StatelessWidget {
                         statusLabel.isNotEmpty ? statusLabel : 'common.unknown'.tr(),
                         textAlign: TextAlign.center,
                         style: context.textTheme.labelSmall?.copyWith(
-                          color: statusLabel.isNotEmpty ? Colors.white : AppColors.primary,
+                          color: statusLabel.isNotEmpty ? Colors.white : AppColors.accent,
                         ),
                       ),
                     ),
@@ -252,7 +252,7 @@ class _ScoreTab extends ConsumerWidget {
     );
 
     return detailAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
       error: (_, _) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
@@ -366,7 +366,7 @@ class _SetScoreTable extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: isActive ? AppColors.primary : context.appTheme.greyText,
+                            color: isActive ? AppColors.accent : context.appTheme.greyText,
                           ),
                         ),
                       );
@@ -492,7 +492,7 @@ class _PlayerScoreRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? AppColors.primary : context.appTheme.baseText,
+                  color: isActive ? AppColors.accent : context.appTheme.baseText,
                 ),
               ),
             );
@@ -501,7 +501,7 @@ class _PlayerScoreRow extends StatelessWidget {
             child: Text(
               '$total',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.primary),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.accent),
             ),
           ),
         ],
@@ -560,7 +560,7 @@ class _BasicPlayerRow extends StatelessWidget {
             child: Text(
               '$total',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.primary),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.accent),
             ),
           ),
         ],
@@ -590,7 +590,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
     );
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
       error: (_, _) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
@@ -635,7 +635,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                         margin: const EdgeInsets.only(right: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.primary : context.appTheme.grey_3,
+                          color: isSelected ? AppColors.accent : context.appTheme.grey_3,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -772,7 +772,7 @@ class _TableTennisStatRow extends StatelessWidget {
                             width: awayWidth,
                             height: barHeight,
                             decoration: const BoxDecoration(
-                              color: AppColors.primary,
+                              color: AppColors.accent,
                               borderRadius: BorderRadius.only(
                                 topRight: radius,
                                 bottomRight: radius,
@@ -837,13 +837,13 @@ class _BlinkingLiveIndicatorState extends State<_BlinkingLiveIndicator>
               Container(
                 width: 7,
                 height: 7,
-                decoration: BoxDecoration(color: AppColors.primaryShade50, shape: BoxShape.circle),
+                decoration: BoxDecoration(color: AppColors.surface2, shape: BoxShape.circle),
               ),
               const SizedBox(width: 4),
               Text(
                 widget.label,
                 style: context.textTheme.labelSmall?.copyWith(
-                  color: AppColors.primaryShade50,
+                  color: AppColors.surface2,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.5,
                 ),

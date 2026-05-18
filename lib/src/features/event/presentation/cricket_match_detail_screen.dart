@@ -282,7 +282,7 @@ class _ScoreTab extends ConsumerWidget {
     final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.cricket, matchId: matchId));
 
     return detailAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
@@ -343,14 +343,14 @@ class _CricketScoreContent extends StatelessWidget {
             margin: const EdgeInsets.all(12),
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
             decoration: BoxDecoration(
-              color: AppColors.primaryShade50,
+              color: AppColors.surface2,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.primaryShade200),
+              border: Border.all(color: AppColors.accentEcho),
             ),
             child: Text(
               resultText,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.primary),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.accent),
             ),
           ),
         Container(
@@ -691,7 +691,7 @@ class _StatRow extends StatelessWidget {
                             width: awayWidth,
                             height: barHeight,
                             decoration: const BoxDecoration(
-                              color: AppColors.primary,
+                              color: AppColors.accent,
                               borderRadius: BorderRadius.only(
                                 topRight: radius,
                                 bottomRight: radius,
@@ -734,7 +734,7 @@ class _SituationTabState extends ConsumerState<_SituationTab> {
     final ev = eventsAsync.valueOrNull as CricketMatchEventsData?;
 
     if (eventsAsync.isLoading && ev == null) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+      return const Center(child: CircularProgressIndicator(color: AppColors.accent));
     }
 
     final timeline = ev?.timeline ?? [];
@@ -772,7 +772,7 @@ class _SituationTabState extends ConsumerState<_SituationTab> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     decoration: BoxDecoration(
-                      color: isSelected ? AppColors.primary : context.appTheme.grey_3,
+                      color: isSelected ? AppColors.accent : context.appTheme.grey_3,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -848,7 +848,7 @@ class _BallRow extends StatelessWidget {
       runTextColor = Colors.green.shade600;
     } else if (ball.runs > 0) {
       iconData = Icons.directions_run;
-      iconColor = AppColors.primary;
+      iconColor = AppColors.accent;
     } else {
       iconData = Icons.sports_cricket;
       iconColor = Colors.grey.shade400;
@@ -933,13 +933,13 @@ class _BlinkingLiveIndicatorState extends State<_BlinkingLiveIndicator>
               Container(
                 width: 7,
                 height: 7,
-                decoration: BoxDecoration(color: AppColors.primaryShade50, shape: BoxShape.circle),
+                decoration: BoxDecoration(color: AppColors.surface2, shape: BoxShape.circle),
               ),
               const SizedBox(width: 4),
               Text(
                 widget.label,
                 style: context.textTheme.labelSmall?.copyWith(
-                  color: AppColors.primaryShade50,
+                  color: AppColors.surface2,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.5,
                 ),

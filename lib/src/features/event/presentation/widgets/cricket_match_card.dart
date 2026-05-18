@@ -51,7 +51,7 @@ class CricketMatchCard extends ConsumerWidget {
                     child: Text(
                       match.leagueName,
                       style: context.textTheme.labelSmall?.copyWith(
-                        color: AppTheme.of(context).greyText,
+                        color: context.appTheme.greyText,
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,
@@ -168,7 +168,7 @@ class _CricketScore extends StatelessWidget {
       );
     }
 
-    final scoreColor = _liveStatuses.contains(statusId) ? AppColors.primary : AppTheme.of(context).baseText;
+    final scoreColor = _liveStatuses.contains(statusId) ? AppColors.accent : context.appTheme.baseText;
     final sep = TextSpan(text: ' - ', style: TextStyle(color: Colors.grey.shade400));
 
     if (homeInnings != null && awayInnings != null) {

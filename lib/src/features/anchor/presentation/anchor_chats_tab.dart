@@ -416,7 +416,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
                   text: '${msg.senderName}: ',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: msg.isOwn ? AppColors.primary : Colors.green,
+                    color: msg.isOwn ? AppColors.accent : Colors.green,
                   ),
                 ),
                 TextSpan(text: msg.text),
@@ -443,7 +443,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
             TextSpan(children: [
               TextSpan(
                 text: 'anchor.detail.chats.login_to_chat_action'.tr(),
-                style: const TextStyle(color: AppColors.primary),
+                style: const TextStyle(color: AppColors.accent),
               ),
               TextSpan(text: 'anchor.detail.chats.login_to_chat_suffix'.tr()),
             ]),
@@ -485,7 +485,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(color: AppColors.primary),
+                  borderSide: const BorderSide(color: AppColors.accent),
                 ),
               ),
             ),
@@ -494,7 +494,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
           TextButton(
             onPressed: _connected ? _sendMessage : null,
             style: TextButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: AppColors.accent,
               foregroundColor: Colors.white,
               disabledBackgroundColor: context.appTheme.shimmerBase,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),

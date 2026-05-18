@@ -105,11 +105,11 @@ abstract class SportDetailScaffoldState<T extends ConsumerStatefulWidget>
           children: [
             buildHeader(context),
             Container(
-              color: AppTheme.of(context).surface,
+              color: context.appTheme.surface,
               child: TabBar(
-                labelColor: AppColors.primary,
+                labelColor: AppColors.accent,
                 unselectedLabelColor: Colors.grey.shade600,
-                indicatorColor: AppColors.primary,
+                indicatorColor: AppColors.accent,
                 indicatorWeight: 2,
                 tabs: tabs,
               ),

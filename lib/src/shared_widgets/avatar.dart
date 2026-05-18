@@ -27,8 +27,8 @@ class AnchorAvatar extends StatelessWidget {
               imageUrl: 'https://placehold.co/400x400/FFFFFF/898989.png?text=Image',
               fit: BoxFit.cover,
               placeholder: (context, url) => Shimmer.fromColors(
-                baseColor: AppTheme.of(context).shimmerBase,
-                highlightColor: AppTheme.of(context).shimmerHighlight,
+                baseColor: context.appTheme.shimmerBase,
+                highlightColor: context.appTheme.shimmerHighlight,
                 child: const ColoredBox(color: Colors.grey),
               ),
               errorWidget: (context, url, error) => ColoredBox(color: Colors.grey.shade200),
@@ -40,7 +40,7 @@ class AnchorAvatar extends StatelessWidget {
           child: Badge(
             padding: EdgeInsets.symmetric(horizontal: 6),
             label: Text('anchor.detail.live'.tr(), style: TextStyle(fontSize: 12 * (size / 60))),
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.accent,
           ),
         ),
       ],

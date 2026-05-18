@@ -129,7 +129,7 @@ class HomeAnchorLiveCard extends StatelessWidget {
                 right: 0,
                 child: CircleAvatar(
                   radius: 16,
-                  backgroundColor: isLive ? AppColors.primary : Colors.grey.shade300,
+                  backgroundColor: isLive ? AppColors.accent : Colors.grey.shade300,
                   child: Image.asset(
                     'assets/images/equalizer.gif',
                     color: Colors.white,
@@ -157,8 +157,8 @@ class _LoadingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: AppTheme.of(context).shimmerBase,
-      highlightColor: AppTheme.of(context).shimmerHighlight,
+      baseColor: context.appTheme.shimmerBase,
+      highlightColor: context.appTheme.shimmerHighlight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

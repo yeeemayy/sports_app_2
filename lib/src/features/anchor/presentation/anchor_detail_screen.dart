@@ -387,7 +387,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
   Widget _buildTabBar() {
     return TabBar(
       controller: _tabController,
-      indicatorColor: AppColors.primary,
+      indicatorColor: AppColors.accent,
       indicatorSize: TabBarIndicatorSize.label,
       tabs: [
         Tab(text: 'anchor.detail.tab.chats'.tr()),
@@ -445,7 +445,7 @@ class _LiveBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(4)),
+      decoration: BoxDecoration(color: AppColors.accent, borderRadius: BorderRadius.circular(4)),
       child: Text(
         'anchor.detail.live'.tr(),
         style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5),
@@ -472,8 +472,8 @@ class _AnchorInfoHeader extends StatelessWidget {
               imageUrl: detail.avatarUrl,
               fit: BoxFit.cover,
               placeholder: (context, url) => Shimmer.fromColors(
-                baseColor: AppTheme.of(context).shimmerBase,
-                highlightColor: AppTheme.of(context).shimmerHighlight,
+                baseColor: context.appTheme.shimmerBase,
+                highlightColor: context.appTheme.shimmerHighlight,
                 child: const ColoredBox(color: Colors.grey),
               ),
               errorWidget: (context, url, error) => ColoredBox(color: context.appTheme.grey_3),

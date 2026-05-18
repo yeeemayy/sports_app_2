@@ -213,8 +213,8 @@ class ProfileScreen extends ConsumerWidget {
                                       fit: BoxFit.cover,
                                       placeholder: (context, url) {
                                         return Shimmer.fromColors(
-                                          baseColor: AppTheme.of(context).shimmerBase,
-                                          highlightColor: AppTheme.of(context).shimmerHighlight,
+                                          baseColor: context.appTheme.shimmerBase,
+                                          highlightColor: context.appTheme.shimmerHighlight,
                                           child: const ColoredBox(color: Colors.grey),
                                         );
                                       },
@@ -253,7 +253,7 @@ class ProfileScreen extends ConsumerWidget {
                                       child: TextButton(
                                         onPressed: () => context.push(AppRoutes.register),
                                         style: TextButton.styleFrom(
-                                          backgroundColor: AppColors.primary,
+                                          backgroundColor: AppColors.accent,
                                           foregroundColor: Colors.white,
                                           minimumSize: const Size(0, 48),
                                         ),

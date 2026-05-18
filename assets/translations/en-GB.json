@@ -51,7 +51,9 @@
     "anchor": "Anchor",
     "news": "News",
     "data": "Data",
-    "profile": "Profile"
+    "profile": "Profile",
+    "live": "LIVE",
+    "me": "ME"
   },
   "news": {
     "details": "News Details",

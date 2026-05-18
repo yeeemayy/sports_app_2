@@ -98,8 +98,8 @@ class _NewsDetailSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: AppTheme.of(context).shimmerBase,
-      highlightColor: AppTheme.of(context).shimmerHighlight,
+      baseColor: context.appTheme.shimmerBase,
+      highlightColor: context.appTheme.shimmerHighlight,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -161,8 +161,8 @@ class _CoverImage extends StatelessWidget {
       width: double.infinity,
       fit: BoxFit.cover,
       placeholder: (context, url) => Shimmer.fromColors(
-        baseColor: AppTheme.of(context).shimmerBase,
-        highlightColor: AppTheme.of(context).shimmerHighlight,
+        baseColor: context.appTheme.shimmerBase,
+        highlightColor: context.appTheme.shimmerHighlight,
         child: Container(width: double.infinity, height: 220, color: Colors.white),
       ),
       errorBuilder: (context, url, error) => Container(

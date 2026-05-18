@@ -1,75 +1,75 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
   AppColors._();
 
-  static const Color primary = Color(0xFF4CAF50);
-  static const Color primaryShade50 = Color(0xFFE8F5E9);
-  static const Color primaryShade200 = Color(0xFFA5D6A7);
-  static const Color primaryShade300 = Color(0xFF81C784);
+  static const Color ink = Color(0xFF0E0E0E);
+  static const Color ink2 = Color(0xFF161616);
+  static const Color surface = Color(0xFF1A1A1A);
+  static const Color surface2 = Color(0xFF232323);
+  static const Color line = Color(0x14F0F4FF);
+  static const Color lineStrong = Color(0x2EF0F4FF);
+  static const Color text = Color(0xFFF0F4FF);
+  static const Color text2 = Color(0x9EF0F4FF);
+  static const Color text3 = Color(0x5CF0F4FF);
+  static const Color accent = Color(0xFFFF3C00);
+  static const Color accentEcho = Color(0xFFFF7A45);
+  static const Color live = Color(0xFFFFB300);
+  static const Color success = Color(0xFF00E5A8);
+  static const Color danger = Color(0xFFE63946);
+
+  // Shimmer
+  static const Color shimmerBase = surface2;
+  static const Color shimmerHighlight = Color(0xFF2E2E2E);
+
+  // Sport-specific row colours
+  static const Color inningHeaderBg = surface2;
+  static const Color inningAwayRowBg = Color(0xFF2D1F1A);
+  static const Color inningHomeRowBg = Color(0xFF1A2435);
 }
 
-class AppTheme {
-  AppTheme._();
+class ArenaTextStyles {
+  ArenaTextStyles._();
 
-  static AppThemeColors of(BuildContext context) => AppThemeColors(Theme.of(context));
+  static TextStyle display(double size) => GoogleFonts.anton(
+    fontSize: size,
+    height: 0.85,
+    color: AppColors.text,
+  );
+
+  static TextStyle body(double size) => GoogleFonts.spaceGrotesk(
+    fontSize: size,
+    color: AppColors.text,
+  );
+
+  static TextStyle mono(double size) => GoogleFonts.jetBrainsMono(
+    fontSize: size,
+    letterSpacing: size * 0.16,
+    color: AppColors.text,
+  );
 }
 
+/// Thin wrapper kept so existing `context.appTheme.*` call sites compile
+/// without change. All values are now Arena dark-first constants.
 class AppThemeColors {
-  const AppThemeColors(this._theme);
-  final ThemeData _theme;
+  const AppThemeColors();
 
-  Color get surface => _theme.colorScheme.surface;
-
-  Color get greyText => _theme.brightness == Brightness.dark
-      ? Colors.grey.shade400
-      : Colors.grey.shade700;
-
-  Color get baseText => _theme.brightness == Brightness.dark
-      ? Colors.white70
-      : Colors.black87;
-
-  Color get shimmerBase => _theme.brightness == Brightness.dark
-      ? Colors.grey.shade600
-      : Colors.grey.shade300;
-
-  Color get shimmerHighlight => _theme.brightness == Brightness.dark
-      ? Colors.grey.shade800
-      : Colors.grey.shade100;
-
-  Color get grey_3 => _theme.brightness == Brightness.dark
-      ? Colors.grey.shade700
-      : Colors.grey.shade200;
-
-  Color get grey_4 => _theme.brightness == Brightness.dark
-      ? Colors.grey.shade200
-      : Colors.grey.shade700;
-
-  Color get grey_5 => _theme.brightness == Brightness.dark
-      ? Colors.grey.shade300
-      : Colors.grey.shade600;
-
-  Color get inningHeaderBg => _theme.brightness == Brightness.dark
-      ? const Color(0xFF252D3A)
-      : const Color(0xFFEEF2F7);
-
-  Color get inningAwayRowBg => _theme.brightness == Brightness.dark
-      ? const Color(0xFF2D1F1A)
-      : const Color(0xFFFFF4F0);
-
-  Color get inningHomeRowBg => _theme.brightness == Brightness.dark
-      ? const Color(0xFF1A2435)
-      : const Color(0xFFEFF6FF);
-
-  Color get textFieldBg => _theme.brightness == Brightness.dark
-      ? Colors.grey.shade800
-      : const Color(0xFFF5F5F5);
-
-  Color get textFieldLabel => _theme.brightness == Brightness.dark
-      ? Colors.white70
-      : const Color(0xFF343C44);
+  Color get surface => AppColors.surface;
+  Color get greyText => AppColors.text2;
+  Color get baseText => AppColors.text;
+  Color get shimmerBase => AppColors.shimmerBase;
+  Color get shimmerHighlight => AppColors.shimmerHighlight;
+  Color get grey_3 => AppColors.lineStrong;
+  Color get grey_4 => AppColors.text2;
+  Color get grey_5 => AppColors.text3;
+  Color get inningHeaderBg => AppColors.inningHeaderBg;
+  Color get inningAwayRowBg => AppColors.inningAwayRowBg;
+  Color get inningHomeRowBg => AppColors.inningHomeRowBg;
+  Color get textFieldBg => AppColors.surface2;
+  Color get textFieldLabel => AppColors.text2;
 }
 
 extension AppThemeColorExtension on BuildContext {
-  AppThemeColors get appTheme => AppThemeColors(Theme.of(this));
+  AppThemeColors get appTheme => const AppThemeColors();
 }

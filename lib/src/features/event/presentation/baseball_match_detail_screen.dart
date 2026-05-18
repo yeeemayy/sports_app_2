@@ -209,7 +209,7 @@ class _ScoreTab extends ConsumerWidget {
     final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.baseball, matchId: matchId));
 
     return detailAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
@@ -569,7 +569,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
     );
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
@@ -603,7 +603,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
                       decoration: BoxDecoration(
-                        color: isSelected ? AppColors.primary : context.appTheme.grey_3,
+                        color: isSelected ? AppColors.accent : context.appTheme.grey_3,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -731,7 +731,7 @@ class _BaseballStatRow extends StatelessWidget {
                             width: awayWidth,
                             height: barHeight,
                             decoration: const BoxDecoration(
-                              color: AppColors.primary,
+                              color: AppColors.accent,
                               borderRadius: BorderRadius.only(
                                 topRight: radius,
                                 bottomRight: radius,

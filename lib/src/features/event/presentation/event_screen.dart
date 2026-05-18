@@ -56,7 +56,7 @@ class _EventScreenState extends ConsumerState<EventScreen> with SingleTickerProv
     return Column(
       children: [
         Container(
-          color: AppColors.primary,
+          color: AppColors.accent,
           child: SafeArea(
             child: Row(
               children: [
@@ -511,7 +511,7 @@ class _StatusFilterBarState extends State<_StatusFilterBar> with SingleTickerPro
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: AppColors.primary,
+      color: AppColors.accent,
       child: TabBar(
         controller: _controller,
         isScrollable: true,
@@ -568,7 +568,7 @@ class _DateSelectorBar extends StatelessWidget {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primary : AppTheme.of(context).shimmerHighlight,
+                    color: isSelected ? AppColors.accent : context.appTheme.shimmerHighlight,
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,

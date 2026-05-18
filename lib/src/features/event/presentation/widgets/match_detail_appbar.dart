@@ -23,7 +23,7 @@ class MatchDetailAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final ts = matchTimestamp;
     return AppBar(
-      backgroundColor: AppColors.primary,
+      backgroundColor: AppColors.accent,
       foregroundColor: Colors.white,
       elevation: 0,
       title: Column(

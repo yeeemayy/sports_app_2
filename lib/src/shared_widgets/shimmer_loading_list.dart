@@ -16,8 +16,8 @@ class ShimmerLoadingList extends StatelessWidget {
       itemCount: itemCount,
       itemBuilder: (context, _) {
         return Shimmer.fromColors(
-          baseColor: AppTheme.of(context).shimmerBase,
-          highlightColor: AppTheme.of(context).shimmerHighlight,
+          baseColor: context.appTheme.shimmerBase,
+          highlightColor: context.appTheme.shimmerHighlight,
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             height: itemHeight,

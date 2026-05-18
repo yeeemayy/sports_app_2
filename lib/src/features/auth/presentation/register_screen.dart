@@ -191,7 +191,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                     _isSendingOtp ||
                                     _telephoneController.text.trim().isEmpty
                                 ? Colors.grey
-                                : AppColors.primary,
+                                : AppColors.accent,
                           ),
                         ),
                         onPressed:

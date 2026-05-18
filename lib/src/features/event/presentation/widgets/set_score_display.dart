@@ -32,8 +32,8 @@ class SetScoreDisplay extends StatelessWidget {
     final scoreColor = isNotStarted
         ? Colors.grey.shade400
         : isLive
-            ? AppColors.primary
-            : AppTheme.of(context).baseText;
+            ? AppColors.accent
+            : context.appTheme.baseText;
 
     return Column(
       mainAxisSize: MainAxisSize.min,

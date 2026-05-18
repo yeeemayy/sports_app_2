@@ -268,7 +268,7 @@ class _BasketballMatchBody extends ConsumerWidget {
 
     return eventsAsync.when(
       loading: () =>
-          const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+          const Center(child: CircularProgressIndicator(color: AppColors.accent)),
       error: (_, __) {
         // Show detail data only if events fail
         final detail = detailAsync.valueOrNull as BasketballMatchDetail?;
@@ -464,7 +464,7 @@ class _QuarterScoreTable extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: isActive ? AppColors.primary : context.appTheme.greyText,
+                        color: isActive ? AppColors.accent : context.appTheme.greyText,
                       ),
                     ),
                   );
@@ -550,7 +550,7 @@ class _ScoreRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? AppColors.primary : context.appTheme.baseText,
+                  color: isActive ? AppColors.accent : context.appTheme.baseText,
                 ),
               ),
             );
@@ -563,7 +563,7 @@ class _ScoreRow extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
-                color: AppColors.primary,
+                color: AppColors.accent,
               ),
             ),
           ),
@@ -671,7 +671,7 @@ class _SquadTabState extends ConsumerState<_SquadTab>
     final awayName = detail?.awayName ?? '';
 
     if (homeTeamId.isEmpty && awayTeamId.isEmpty) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+      return const Center(child: CircularProgressIndicator(color: AppColors.accent));
     }
 
     return Column(
@@ -688,7 +688,7 @@ class _SquadTabState extends ConsumerState<_SquadTab>
             controller: _tabController,
             indicator: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: AppColors.primary,
+              color: AppColors.accent,
             ),
             indicatorSize: TabBarIndicatorSize.tab,
             labelStyle: const TextStyle(
@@ -758,7 +758,7 @@ class _TeamSquadList extends ConsumerWidget {
 
     return squadAsync.when(
       loading: () =>
-          const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+          const Center(child: CircularProgressIndicator(color: AppColors.accent)),
       error: (e, st) {
         debugPrint('$e\n$st');
         return Center(
@@ -805,7 +805,7 @@ class _PlayerRow extends StatelessWidget {
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: AppColors.accent.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             alignment: Alignment.center,
@@ -814,7 +814,7 @@ class _PlayerRow extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: AppColors.primary,
+                color: AppColors.accent,
               ),
             ),
           ),

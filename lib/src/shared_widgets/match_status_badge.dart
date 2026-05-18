@@ -13,7 +13,7 @@ class MatchStatusBadge extends StatefulWidget {
     super.key,
     required this.statusId,
     required this.label,
-    this.liveColor = AppColors.primary,
+    this.liveColor = AppColors.accent,
     this.staticColor,
   });
 

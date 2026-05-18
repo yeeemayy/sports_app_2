@@ -79,8 +79,8 @@ class _VideoCardSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: AppTheme.of(context).shimmerBase,
-      highlightColor: AppTheme.of(context).shimmerHighlight,
+      baseColor: context.appTheme.shimmerBase,
+      highlightColor: context.appTheme.shimmerHighlight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

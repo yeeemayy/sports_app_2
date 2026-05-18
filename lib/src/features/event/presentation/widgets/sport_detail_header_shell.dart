@@ -26,7 +26,7 @@ class SportDetailHeaderShell<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.maxFinite,
-      color: backgroundColor ?? AppColors.primary,
+      color: backgroundColor ?? AppColors.accent,
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
       child: detailAsync.when(
         loading: () => fallback ?? SizedBox(height: skeletonHeight),

@@ -56,7 +56,7 @@ class BaseballMatchCard extends ConsumerWidget {
                     child: Text(
                       effective.leagueName,
                       style: context.textTheme.labelSmall?.copyWith(
-                        color: AppTheme.of(context).greyText,
+                        color: context.appTheme.greyText,
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,

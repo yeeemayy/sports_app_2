@@ -46,8 +46,8 @@ class HomeTabRecommended extends ConsumerWidget {
                   width: double.maxFinite,
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Shimmer.fromColors(
-                    baseColor: AppTheme.of(context).shimmerBase,
-                    highlightColor: AppTheme.of(context).shimmerHighlight,
+                    baseColor: context.appTheme.shimmerBase,
+                    highlightColor: context.appTheme.shimmerHighlight,
                     child: const SizedBox(
                       height: 180,
                       child: ColoredBox(color: Colors.grey),

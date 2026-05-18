@@ -429,7 +429,7 @@ class _EventsTab extends ConsumerWidget {
     final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
       error: (e, st) {
         debugPrint('$e\n$st');
         return Center(
@@ -610,7 +610,7 @@ class _IncidentCell extends StatelessWidget {
   }
 
   static const _incidentColors = {
-    1: AppColors.primary, // Goal
+    1: AppColors.accent, // Goal
     2: Colors.orange, // Corner
     3: Colors.amber, // Yellow card
     4: Colors.red, // Red card
@@ -697,7 +697,7 @@ class _IncidentText extends StatelessWidget {
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: AppColors.primary,
+              color: AppColors.accent,
             ),
             textAlign: align,
           ),
@@ -745,7 +745,7 @@ class _LineupsTabState extends ConsumerState<_LineupsTab> with SingleTickerProvi
     final lineupsAsync = ref.watch(footballMatchLineupsProvider(matchId: widget.matchId));
 
     return lineupsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
       error: (e, st) {
         debugPrint('$e\n$st');
         return Center(
@@ -789,7 +789,7 @@ class _LineupsTabState extends ConsumerState<_LineupsTab> with SingleTickerProvi
                 controller: _tabController,
                 indicator: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  color: AppColors.primary,
+                  color: AppColors.accent,
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
                 labelStyle: const TextStyle(
@@ -914,7 +914,7 @@ class _PlayerRow extends StatelessWidget {
             width: 24,
             height: 24,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: AppColors.accent.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             alignment: Alignment.center,
@@ -923,7 +923,7 @@ class _PlayerRow extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: AppColors.primary,
+                color: AppColors.accent,
               ),
             ),
           ),
@@ -961,7 +961,7 @@ class _StatsTab extends ConsumerWidget {
     final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),

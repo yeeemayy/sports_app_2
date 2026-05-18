@@ -75,7 +75,7 @@ class _CountryPhoneNumberTextFieldState extends State<CountryPhoneNumberTextFiel
       //       borderRadius: BorderRadius.all(Radius.circular(30)),
       //     ),
       //     focusedBorder: const OutlineInputBorder(
-      //       borderSide: BorderSide(color: AppColors.primary),
+      //       borderSide: BorderSide(color: ArenaColors.accent),
       //       borderRadius: BorderRadius.all(Radius.circular(30)),
       //     ),
       //   ),

@@ -1,192 +1,160 @@
-import 'package:cached_network_image_ce/cached_network_image.dart';
-import 'package:convex_bottom_bar/convex_bottom_bar.dart';
+import 'dart:ui';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
-import 'package:sports_app/src/features/home/presentation/providers/banner_providers.dart';
 import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
 import 'package:sports_app/src/providers/nav_providers.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
-import 'package:sports_app/src/shared_widgets/avatar.dart';
 
-class AppWrapper extends ConsumerStatefulWidget {
+class AppWrapper extends ConsumerWidget {
   const AppWrapper({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
-  @override
-  ConsumerState<AppWrapper> createState() => _AppWrapperState();
-}
-
-class _AppWrapperState extends ConsumerState<AppWrapper> with TickerProviderStateMixin {
   static const _tabs = [
     (labelKey: 'nav.home', icon: Icons.home_outlined, activeIcon: Icons.home, path: AppRoutes.home),
-    (
-      labelKey: 'nav.anchor',
-      icon: Icons.video_camera_front_outlined,
-      activeIcon: Icons.video_camera_front_outlined,
-      path: AppRoutes.anchor,
-    ),
-    (
-      labelKey: 'nav.news',
-      icon: Icons.article_outlined,
-      activeIcon: Icons.article,
-      path: AppRoutes.news,
-    ),
-    // (
-    //   labelKey: 'nav.data',
-    //   icon: Icons.bar_chart_outlined,
-    //   activeIcon: Icons.bar_chart,
-    //   path: AppRoutes.data,
-    // ),
-    (
-      labelKey: 'nav.profile',
-      icon: Icons.person_outline,
-      activeIcon: Icons.person,
-      path: AppRoutes.profile,
-    ),
+    (labelKey: 'nav.live', icon: Icons.play_circle_outline, activeIcon: Icons.play_circle, path: AppRoutes.anchor),
+    (labelKey: 'nav.news', icon: Icons.article_outlined, activeIcon: Icons.article, path: AppRoutes.news),
+    (labelKey: 'nav.me', icon: Icons.person_outline, activeIcon: Icons.person, path: AppRoutes.profile),
   ];
 
-  late final TabController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TabController(
-      length: _tabs.length,
-      initialIndex: widget.navigationShell.currentIndex,
-      vsync: this,
-    );
-  }
-
-  @override
-  void didUpdateWidget(AppWrapper oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Sync controller when go_router changes index externally (e.g. deep link, back).
-    final newIndex = widget.navigationShell.currentIndex;
-    if (oldWidget.navigationShell.currentIndex != newIndex) {
-      _controller.index = newIndex;
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _onTap(int index) {
+  void _onTap(WidgetRef ref, BuildContext context, int index) {
     ref.read(currentNavIndexProvider.notifier).state = index;
-    if (index <= 1 && index != widget.navigationShell.currentIndex) {
+    if (index <= 1 && index != navigationShell.currentIndex) {
       ref.invalidate(anchorListProvider);
       if (index == 0) {
         ref.invalidate(newsFirstPageProvider(context.localeCode));
       }
-      // ref.invalidate(bannerProvider);
-      // ref.invalidate(newsFirstPageProvider(context.localeCode));
     }
-    if (index == 2 && index != widget.navigationShell.currentIndex) {
+    if (index == 2 && index != navigationShell.currentIndex) {
       ref.read(newsSearchProvider.notifier).refresh();
     }
-    widget.navigationShell.goBranch(
+    navigationShell.goBranch(
       index,
-      initialLocation: index == widget.navigationShell.currentIndex,
+      initialLocation: index == navigationShell.currentIndex,
     );
   }
 
   @override
-  Widget build(BuildContext context) {
-    // Rebuild when locale changes so .tr() calls update.
+  Widget build(BuildContext context, WidgetRef ref) {
     context.locale;
-    final currentIndex = widget.navigationShell.currentIndex;
-    final authState = ref.watch(authNotifierProvider);
-    final isAuthenticated = authState.hasValue && (authState.value?.isAuthenticated ?? false);
+    final currentIndex = navigationShell.currentIndex;
 
     return Scaffold(
-      appBar:
-          // currentIndex == 0
-          //     ? AppBar(
-          //         centerTitle: false,
-          //         elevation: 0,
-          //         title: Placeholder(child: SizedBox(height: 40, width: 100)),
-          //         actions: [
-          //           if (authState.isLoading)
-          //             Padding(
-          //               padding: const EdgeInsets.only(right: 10.0),
-          //               child: Builder(
-          //                 builder: (context) {
-          //                   return Shimmer.fromColors(
-          //                     baseColor: AppTheme.of(context).shimmerBase,
-          //                     highlightColor: AppTheme.of(context).shimmerHighlight,
-          //                     child: const CircleAvatar(),
-          //                   );
-          //                 },
-          //               ),
-          //             )
-          //           else if (!isAuthenticated) ...[
-          //             TextButton(
-          //               onPressed: () => context.push(AppRoutes.register),
-          //               style: TextButton.styleFrom(
-          //                 backgroundColor: AppColors.primary,
-          //                 foregroundColor: Colors.white,
-          //               ),
-          //               child: Text('auth.register.register'.tr()),
-          //             ),
-          //             SizedBox(width: 8),
-          //             OutlinedButton(
-          //               onPressed: () => context.push(AppRoutes.login),
-          //               child: Text('auth.login.login'.tr()),
-          //             ),
-          //             SizedBox(width: 10),
-          //           ] else
-          //             Padding(
-          //               padding: const EdgeInsets.only(right: 10.0),
-          //               child: GestureDetector(
-          //                 onTap: () => context.go(AppRoutes.profile),
-          //                 child: ClipOval(
-          //                   child: () {
-          //                     final avatarUrl = authState.value?.user?.avatarUrl;
-          //                     if (avatarUrl != null && avatarUrl.isNotEmpty) {
-          //                       return CachedNetworkImage(
-          //                         imageUrl: avatarUrl,
-          //                         width: 40,
-          //                         height: 40,
-          //                         fit: BoxFit.cover,
-          //                         placeholder: (context, url) {
-          //                           return Shimmer.fromColors(
-          //                             baseColor: AppTheme.of(context).shimmerBase,
-          //                             highlightColor: AppTheme.of(context).shimmerHighlight,
-          //                             child: const ColoredBox(color: Colors.grey),
-          //                           );
-          //                         },
-          //                         errorBuilder: (context, url, error) =>
-          //                             AvatarFallback(size: 40, iconSize: 20),
-          //                       );
-          //                     }
-          //                     return AvatarFallback(size: 40, iconSize: 20);
-          //                   }(),
-          //                 ),
-          //               ),
-          //             ),
-          //         ],
-          //       ) :
-          currentIndex == 1 || currentIndex == 3
-          ? AppBar(centerTitle: true, title: Text(_tabs[currentIndex].labelKey.tr()))
-          : null,
-      body: widget.navigationShell,
-      bottomNavigationBar: ConvexAppBar(
-        style: TabStyle.react,
-        backgroundColor: AppColors.primary,
-        controller: _controller,
-        initialActiveIndex: currentIndex,
-        items: _tabs.map((t) => TabItem(icon: t.icon, title: t.labelKey.tr())).toList(),
-        onTap: _onTap,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 100),
+            child: navigationShell,
+          ),
+          Positioned(
+            bottom: 18,
+            left: 14,
+            right: 14,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.72),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: Theme.of(context).dividerColor, width: 0.5),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color.fromRGBO(0, 0, 0, 0.5),
+                        blurRadius: 40,
+                        offset: Offset(0, 12),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      for (int i = 0; i < _tabs.length; i++)
+                        if (currentIndex == i)
+                          Expanded(
+                            child: _ActiveNavItem(
+                              label: _tabs[i].labelKey.tr(),
+                              icon: _tabs[i].activeIcon,
+                              onTap: () => _onTap(ref, context, i),
+                            ),
+                          )
+                        else
+                          _InactiveNavItem(
+                            icon: _tabs[i].icon,
+                            onTap: () => _onTap(ref, context, i),
+                          ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActiveNavItem extends StatelessWidget {
+  const _ActiveNavItem({required this.label, required this.icon, required this.onTap});
+
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: Theme.of(context).colorScheme.onPrimary, size: 18),
+            const SizedBox(width: 6),
+            Text(
+              label.toUpperCase(),
+              style: ArenaTextStyles.display(12).copyWith(
+                color: Theme.of(context).colorScheme.onPrimary,
+                letterSpacing: 12 * 0.08,
+                height: 1.2,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _InactiveNavItem extends StatelessWidget {
+  const _InactiveNavItem({required this.icon, required this.onTap});
+
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Icon(icon, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.62), size: 18),
       ),
     );
   }

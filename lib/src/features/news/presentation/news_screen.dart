@@ -107,8 +107,8 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
       child: Column(
         children: [
           TabBar(
-            labelColor: AppColors.primary,
-            indicatorColor: AppColors.primary,
+            labelColor: AppColors.accent,
+            indicatorColor: AppColors.accent,
             controller: _tabController,
             tabs: [
               Tab(text: 'news.tab.football'.tr()),

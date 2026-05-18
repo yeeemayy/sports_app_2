@@ -175,7 +175,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 padding: const EdgeInsets.only(top: 8),
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: countdown > 0 || _isSendingOtp || _telephoneController.text.trim().isEmpty ? Colors.grey : AppColors.primary),
+                    side: BorderSide(color: countdown > 0 || _isSendingOtp || _telephoneController.text.trim().isEmpty ? Colors.grey : AppColors.accent),
                   ),
                   onPressed: countdown > 0 || _isSendingOtp || _telephoneController.text.trim().isEmpty ? null : _sendOtp,
                   child: _isSendingOtp

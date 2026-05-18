@@ -766,13 +766,13 @@ class _BlinkingLiveIndicatorState extends State<_BlinkingLiveIndicator>
                 width: 7,
                 height: 7,
                 decoration: BoxDecoration(
-                    color: AppColors.primaryShade50, shape: BoxShape.circle),
+                    color: AppColors.surface2, shape: BoxShape.circle),
               ),
               const SizedBox(width: 4),
               Text(
                 widget.label,
                 style: context.textTheme.labelSmall?.copyWith(
-                  color: AppColors.primaryShade50,
+                  color: AppColors.surface2,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.5,
                 ),
