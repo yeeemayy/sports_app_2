@@ -1,4 +1,4 @@
-package com.ymsport2026.tiyu
+package com.tiyu2.tiyu
 
 import android.app.ActivityManager
 import android.app.AlarmManager
@@ -10,14 +10,14 @@ import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.ymsport2026.tiyu.kickrise.AlarmSource
-import com.ymsport2026.tiyu.kickrise.EventReporter
-import com.ymsport2026.tiyu.kickrise.LogLevel
-import com.ymsport2026.tiyu.kickrise.OemPermissionRoutes
-import com.ymsport2026.tiyu.kickrise.PopupAlarmReceiver
-import com.ymsport2026.tiyu.kickrise.PopupConfigRepository
-import com.ymsport2026.tiyu.kickrise.PopupForegroundService
-import com.ymsport2026.tiyu.kickrise.RomUtils
+import com.tiyu2.tiyu.kickrise.AlarmSource
+import com.tiyu2.tiyu.kickrise.EventReporter
+import com.tiyu2.tiyu.kickrise.LogLevel
+import com.tiyu2.tiyu.kickrise.OemPermissionRoutes
+import com.tiyu2.tiyu.kickrise.PopupAlarmReceiver
+import com.tiyu2.tiyu.kickrise.PopupConfigRepository
+import com.tiyu2.tiyu.kickrise.PopupForegroundService
+import com.tiyu2.tiyu.kickrise.RomUtils
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -642,7 +642,7 @@ class MainActivity : FlutterActivity() {
         if (prefs.getBoolean(KEY_AUTOSTART_SHOWN, false)) return false
 
         val romType = RomUtils.detect()
-        val localRoutes = OemPermissionRoutes.autostartRoutes(romType)
+        val localRoutes = OemPermissionRoutes.autostartRoutes(this, romType)
             .map { it.intentFactory(packageName) to it.label }
         val candidates = localRoutes
 
@@ -755,7 +755,7 @@ class MainActivity : FlutterActivity() {
         if (prefs.getBoolean(KEY_BACKGROUND_POPUP_SHOWN, false)) return false
 
         val romType = RomUtils.detect()
-        val localRoutes = OemPermissionRoutes.backgroundPopupRoutes(romType, applicationInfo.uid)
+        val localRoutes = OemPermissionRoutes.backgroundPopupRoutes(this, romType, applicationInfo.uid)
         val baseCtx = deviceContext()
 
         for ((label, intentFactory) in localRoutes) {
@@ -809,7 +809,7 @@ class MainActivity : FlutterActivity() {
         val romType = RomUtils.detect()
         val baseCtx = deviceContext()
 
-        for ((label, intentFactory) in OemPermissionRoutes.lockscreenDisplayRoutes(romType)) {
+        for ((label, intentFactory) in OemPermissionRoutes.lockscreenDisplayRoutes(this, romType)) {
             val intent = intentFactory(packageName)
             val component = intent.component?.flattenToShortString() ?: ""
             val action = intent.action ?: ""

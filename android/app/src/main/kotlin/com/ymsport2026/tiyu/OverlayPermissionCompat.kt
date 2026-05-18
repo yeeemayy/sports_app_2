@@ -1,4 +1,4 @@
-package com.ymsport2026.tiyu
+package com.tiyu2.tiyu
 
 import android.app.ActivityManager
 import android.content.Context

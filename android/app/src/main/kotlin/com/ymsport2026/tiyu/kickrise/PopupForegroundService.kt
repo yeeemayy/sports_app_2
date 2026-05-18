@@ -1,4 +1,4 @@
-package com.ymsport2026.tiyu.kickrise
+package com.tiyu2.tiyu.kickrise
 
 import android.app.AlarmManager
 import android.app.KeyguardManager
@@ -6,7 +6,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import androidx.core.app.NotificationManagerCompat
-import com.ymsport2026.tiyu.OverlayPermissionCompat
+import com.tiyu2.tiyu.OverlayPermissionCompat
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -18,7 +18,7 @@ import android.os.Looper
 import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import com.ymsport2026.tiyu.R
+import com.tiyu2.tiyu.R
 import java.util.concurrent.Executors
 
 class PopupForegroundService : Service() {

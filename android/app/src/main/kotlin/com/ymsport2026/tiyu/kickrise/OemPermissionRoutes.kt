@@ -1,6 +1,7 @@
-package com.ymsport2026.tiyu.kickrise
+package com.tiyu2.tiyu.kickrise
 
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
@@ -22,6 +23,13 @@ object OemPermissionRoutes {
         val label: String,                       // "oem" | "standard" | "fallback"
         val intentFactory: (pkg: String) -> Intent
     )
+
+    private fun oemAppLaunchRoutes(context: Context, vararg packageNames: String, label: String = "oem"): List<OemRoute> =
+        packageNames.mapNotNull { oemPkg ->
+            context.packageManager.getLaunchIntentForPackage(oemPkg)?.let { launchIntent ->
+                OemRoute(label) { _ -> launchIntent }
+            }
+        }
 
     private fun colorOsAutostartRoutes(): List<OemRoute> = listOf(
         OemRoute("oem") { _ ->
@@ -195,14 +203,26 @@ object OemPermissionRoutes {
                 })
             }
         }
-        add(OemRoute("fallback") { pkg ->
-            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$pkg"))
-        })
+        // ColorOS: pass isGetPermission + permissionList so the page scrolls to and highlights
+        // the overlay toggle. Documented at open.oppomobile.com/new/developmentDoc/info?id=12983.
+        // Other OEMs: standard app details fallback.
+        if (romType in setOf(RomUtils.RomType.OPPO, RomUtils.RomType.REALME, RomUtils.RomType.ONEPLUS)) {
+            add(OemRoute("fallback") { pkg ->
+                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$pkg")).apply {
+                    putExtra("isGetPermission", true)
+                    putStringArrayListExtra("permissionList", arrayListOf("android.permission.SYSTEM_ALERT_WINDOW"))
+                }
+            })
+        } else {
+            add(OemRoute("fallback") { pkg ->
+                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$pkg"))
+            })
+        }
     }
 
     // ─── Autostart (background launch) ───────────────────────────────────────────
 
-    fun autostartRoutes(romType: RomUtils.RomType): List<OemRoute> = buildList {
+    fun autostartRoutes(context: Context, romType: RomUtils.RomType): List<OemRoute> = buildList {
         when (romType) {
             RomUtils.RomType.XIAOMI -> {
                 // Direct component (no action) — works when AutoStartManagementActivity exists
@@ -239,8 +259,11 @@ object OemPermissionRoutes {
                         putExtra("package_name", pkg)
                     }
                 })
-                // Phase 2: app details page — user taps 其他权限 to reach all three toggles.
-                // Always succeeds, so Phase 3 is only reached if this somehow fails.
+                // Phase 2: safecenter app main page — opens whichever safecenter package is
+                // installed. Labelled oem_top so all three OEM steps are marked done at once;
+                // the page covers autostart + background popup + lockscreen display together.
+                addAll(oemAppLaunchRoutes(context, "com.coloros.safecenter", "com.oplus.safecenter", "com.color.safecenter", "com.oppo.safe", label = "oem_top"))
+                // Phase 3: app details page fallback.
                 add(OemRoute("fallback") { pkg ->
                     Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                         Uri.parse("package:$pkg"))
@@ -317,6 +340,8 @@ object OemPermissionRoutes {
                             "com.huawei.systemmanager.appcontrol.activity.StartupAppControlActivity")
                     }
                 })
+                // XXPermissions fallback: open system manager app main page
+                addAll(oemAppLaunchRoutes(context, "com.hihonor.systemmanager", "com.huawei.systemmanager"))
             }
             RomUtils.RomType.HUAWEI -> {
                 add(OemRoute("oem") { _ ->
@@ -331,6 +356,8 @@ object OemPermissionRoutes {
                             "com.huawei.systemmanager.optimize.process.ProtectActivity")
                     }
                 })
+                // XXPermissions fallback: open system manager app main page
+                addAll(oemAppLaunchRoutes(context, "com.huawei.systemmanager"))
             }
             else -> Unit
         }
@@ -422,7 +449,7 @@ object OemPermissionRoutes {
 
     // ————— Background Pop up Routes ────────────────────────────────────────
 
-    fun backgroundPopupRoutes(romType: RomUtils.RomType, appUid: Int? = null): List<OemRoute> = buildList {
+    fun backgroundPopupRoutes(context: Context, romType: RomUtils.RomType, appUid: Int? = null): List<OemRoute> = buildList {
         when (romType) {
             RomUtils.RomType.XIAOMI -> {
                 // 授权管理 → 权限管理
@@ -524,6 +551,9 @@ object OemPermissionRoutes {
                         putExtra("package_name", pkg)
                     }
                 })
+                // Safecenter app main page — labelled oem_top so all three OEM steps are
+                // marked done at once; the page covers all three toggles together.
+                addAll(oemAppLaunchRoutes(context, "com.coloros.safecenter", "com.oplus.safecenter", "com.color.safecenter", "com.oppo.safe", label = "oem_top"))
             }
             else -> Unit
         }
@@ -537,7 +567,7 @@ object OemPermissionRoutes {
 
     // ─── Lock screen display ──────────────────────────────────────────────────────
 
-    fun lockscreenDisplayRoutes(romType: RomUtils.RomType): List<OemRoute> = buildList {
+    fun lockscreenDisplayRoutes(context: Context, romType: RomUtils.RomType): List<OemRoute> = buildList {
         when (romType) {
             RomUtils.RomType.OPPO, RomUtils.RomType.REALME, RomUtils.RomType.ONEPLUS -> {
                 // Same all-in-one page — user confirms the lock screen display toggle.
@@ -555,16 +585,15 @@ object OemPermissionRoutes {
                         putExtra("package_name", pkg)
                     }
                 })
+                // Safecenter app main page — labelled oem_top so all three OEM steps are
+                // marked done at once; the page covers all three toggles together.
+                addAll(oemAppLaunchRoutes(context, "com.coloros.safecenter", "com.oplus.safecenter", "com.color.safecenter", "com.oppo.safe", label = "oem_top"))
             }
             RomUtils.RomType.VIVO, RomUtils.RomType.IQOO -> {
-                // PurviewTabActivity (general per-app permissions) covers lock screen display on vivo/iQOO.
-                add(OemRoute("oem_top") { pkg ->
-                    Intent().apply {
-                        component = ComponentName("com.vivo.permissionmanager",
-                            "com.vivo.permissionmanager.activity.PurviewTabActivity")
-                        putExtra("packagename", pkg)
-                    }
-                })
+                // PurviewTabActivity without a tabId does not reliably expose the lock screen
+                // display toggle. Following XXPermissions: open the permission manager app main
+                // page so the user can find and enable it manually.
+                addAll(oemAppLaunchRoutes(context, "com.vivo.permissionmanager", "com.bairenkeji.icaller", "com.iqoo.secure"))
             }
             else -> Unit
         }

@@ -1,4 +1,4 @@
-package com.ymsport2026.tiyu.kickrise
+package com.tiyu2.tiyu.kickrise
 
 import android.app.AlarmManager
 import android.app.PendingIntent

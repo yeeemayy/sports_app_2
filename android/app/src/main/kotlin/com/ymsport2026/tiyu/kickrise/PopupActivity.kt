@@ -1,4 +1,4 @@
-package com.ymsport2026.tiyu.kickrise
+package com.tiyu2.tiyu.kickrise
 
 import android.annotation.SuppressLint
 import android.app.NotificationManager
@@ -13,7 +13,7 @@ import android.view.WindowManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import com.ymsport2026.tiyu.MainActivity
+import com.tiyu2.tiyu.MainActivity
 
 class PopupActivity : android.app.Activity() {
 

@@ -1,4 +1,4 @@
-package com.ymsport2026.tiyu.kickrise
+package com.tiyu2.tiyu.kickrise
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -12,7 +12,7 @@ import android.os.VibratorManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.ymsport2026.tiyu.R
+import com.tiyu2.tiyu.R
 
 object PopupDeliveryFallback {
 
