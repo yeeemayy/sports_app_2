@@ -1,17 +1,17 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sports_app/src/routes/app_routes.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/auth/data/auth_repository.dart';
+import 'package:sports_app/src/features/auth/presentation/auth_form_helpers.dart';
 import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:sports_app/src/features/auth/presentation/providers/otp_timer_notifier.dart';
-import 'package:sports_app/src/shared_widgets/country_phone_number_text_field.dart';
+import 'package:sports_app/src/routes/app_routes.dart';
+import 'package:sports_app/src/shared_widgets/custom_app_bar.dart';
 import 'package:sports_app/src/shared_widgets/custom_status_dialog.dart';
-import 'package:sports_app/src/shared_widgets/custom_text_field.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -58,12 +58,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     }
     setState(() => _isSendingOtp = true);
     try {
-      await ref
-          .read(authRepositoryProvider.notifier)
-          .requestSms(
-            telephone: telephone,
-            scene: 11, // 11 = resetPassword
-          );
+      await ref.read(authRepositoryProvider.notifier).requestSms(telephone: telephone, scene: 11);
       ref.read(otpTimerNotifierProvider.notifier).start();
     } catch (e) {
       if (mounted) {
@@ -128,124 +123,265 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         if (!didPop) _goToStep1();
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text('auth.forgot.title'.tr()),
-          leading: _step == 2
-              ? IconButton(icon: const Icon(Icons.arrow_back), onPressed: _goToStep1)
-              : null,
-        ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: _step == 1 ? _buildStep1(countdown) : _buildStep2(isLoading),
-          ),
+        extendBodyBehindAppBar: true,
+        appBar: CustomAppBar(),
+        body: Column(
+          children: [
+            _buildHeroStrip(context),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(22, 20, 22, 40),
+                child: _step == 1
+                    ? _buildStep1(context, countdown)
+                    : _buildStep2(context, isLoading),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildStep1(int countdown) {
+  Widget _buildHeroStrip(BuildContext context) {
+    final scaffoldBg = Theme.of(context).scaffoldBackgroundColor;
+    return SizedBox(
+      height: 180,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            'assets/images/image_04.jpg',
+            fit: BoxFit.cover,
+          ),
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [scaffoldBg.withValues(alpha: 0.3), scaffoldBg],
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 20,
+            left: 24,
+            right: 24,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'auth.forgot.hero_title'.tr(),
+                  style: AppTextStyles.display(38, context).copyWith(height: 0.9),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _step == 1 ? 'auth.forgot.step1_label'.tr() : 'auth.forgot.step2_label'.tr(),
+                  style: AppTextStyles.mono(10).copyWith(letterSpacing: 1.5),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStep1(BuildContext context, int countdown) {
+    final scheme = Theme.of(context).colorScheme;
     return Form(
       key: _step1FormKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 24),
-          CountryPhoneNumberTextField(
-            textEditingController: _telephoneController,
-            onCountryCodeChanged: (_) {},
-            validator: (v) =>
-                v == null || v.trim().isEmpty ? 'auth.validation.telephone_required'.tr() : null,
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: CustomTextField(
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  textEditingController: _smsController,
-                  hintText: 'auth.field.sms_code'.tr(),
-                  validator: (v) =>
-                      v == null || v.trim().isEmpty ? 'auth.validation.sms_required'.tr() : null,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: countdown > 0 || _isSendingOtp || _telephoneController.text.trim().isEmpty ? Colors.grey : AppColors.accent),
+          LabeledField(
+            label: 'auth.field.telephone'.tr(),
+            child: TextFormField(
+              controller: _telephoneController,
+              keyboardType: TextInputType.phone,
+              style: AppTextStyles.mono(15).copyWith(color: scheme.onSurface),
+              cursorColor: scheme.primary,
+              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+              decoration: authInputDecoration(
+                context,
+                hintText: 'auth.field.telephone_hint'.tr(),
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('+86', style: AppTextStyles.mono(13).copyWith(color: scheme.onSurface)),
+                      const SizedBox(width: 8),
+                      Container(
+                        width: 0.5,
+                        height: 18,
+                        color: scheme.onSurface.withValues(alpha: 0.18),
+                      ),
+                    ],
                   ),
-                  onPressed: countdown > 0 || _isSendingOtp || _telephoneController.text.trim().isEmpty ? null : _sendOtp,
-                  child: _isSendingOtp
-                      ? const SizedBox(
-                          height: 16,
-                          width: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(
-                          countdown > 0
-                              ? 'auth.otp.resend_countdown'.tr(namedArgs: {'seconds': '$countdown'})
-                              : 'auth.otp.send'.tr(),
-                        ),
                 ),
               ),
-            ],
+              validator: (v) =>
+                  v == null || v.trim().isEmpty ? 'auth.validation.telephone_required'.tr() : null,
+            ),
           ),
-          const SizedBox(height: 32),
-          FilledButton(onPressed: _goToStep2, child: Text('auth.forgot.next'.tr())),
+          const SizedBox(height: 14),
+          LabeledField(
+            label: 'auth.field.sms_code'.tr(),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _smsController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    style: AppTextStyles.mono(15).copyWith(color: scheme.onSurface),
+                    cursorColor: scheme.primary,
+                    onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                    decoration: authInputDecoration(context, hintText: 'auth.field.sms_code'.tr()),
+                    validator: (v) =>
+                        v == null || v.trim().isEmpty ? 'auth.validation.sms_required'.tr() : null,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                _OtpSendButton(
+                  countdown: countdown,
+                  isSending: _isSendingOtp,
+                  phoneEmpty: _telephoneController.text.trim().isEmpty,
+                  onTap: _sendOtp,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 28),
+          PrimaryCtaButton(label: 'auth.forgot.next'.tr(), isLoading: false, onTap: _goToStep2),
         ],
       ),
     );
   }
 
-  Widget _buildStep2(bool isLoading) {
+  Widget _buildStep2(BuildContext context, bool isLoading) {
+    final scheme = Theme.of(context).colorScheme;
     return Form(
       key: _step2FormKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 24),
-          CustomTextField(
-            textEditingController: _passwordController,
-            obscureText: _obscurePassword,
-            hintText: 'auth.field.new_password'.tr(),
-            suffixIcon: IconButton(
-              icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+          LabeledField(
+            label: 'auth.field.new_password'.tr(),
+            child: TextFormField(
+              controller: _passwordController,
+              obscureText: _obscurePassword,
+              style: AppTextStyles.mono(15).copyWith(color: scheme.onSurface),
+              cursorColor: scheme.primary,
+              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+              decoration: authInputDecoration(
+                context,
+                hintText: 'auth.field.new_password_hint'.tr(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    color: scheme.onSurface.withValues(alpha: 0.62),
+                    size: 18,
+                  ),
+                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                ),
+              ),
+              validator: (v) =>
+                  v == null || v.isEmpty ? 'auth.validation.password_required'.tr() : null,
             ),
-            validator: (v) =>
-                v == null || v.isEmpty ? 'auth.validation.password_required'.tr() : null,
           ),
-          CustomTextField(
-            textEditingController: _confirmPasswordController,
-            obscureText: _obscureConfirmPassword,
-            hintText: 'auth.field.confirm_password'.tr(),
-            suffixIcon: IconButton(
-              icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility),
-              onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+          const SizedBox(height: 14),
+          LabeledField(
+            label: 'auth.field.confirm_password'.tr(),
+            child: TextFormField(
+              controller: _confirmPasswordController,
+              obscureText: _obscureConfirmPassword,
+              style: AppTextStyles.mono(15).copyWith(color: scheme.onSurface),
+              cursorColor: scheme.primary,
+              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+              decoration: authInputDecoration(
+                context,
+                hintText: 'auth.field.confirm_password_hint'.tr(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                    color: scheme.onSurface.withValues(alpha: 0.62),
+                    size: 18,
+                  ),
+                  onPressed: () =>
+                      setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                ),
+              ),
+              validator: (v) {
+                if (v == null || v.isEmpty) return 'auth.validation.password_required'.tr();
+                if (v != _passwordController.text) {
+                  return 'auth.validation.confirm_password_mismatch'.tr();
+                }
+                return null;
+              },
             ),
-            validator: (v) {
-              if (v == null || v.isEmpty) return 'auth.validation.password_required'.tr();
-              if (v != _passwordController.text) {
-                return 'auth.validation.confirm_password_mismatch'.tr();
-              }
-              return null;
-            },
           ),
-          const SizedBox(height: 32),
-          FilledButton(
-            onPressed: isLoading ? null : _submit,
-            child: isLoading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                  )
-                : Text('auth.forgot.submit'.tr()),
+          const SizedBox(height: 28),
+          PrimaryCtaButton(
+            label: 'auth.forgot.submit'.tr(),
+            isLoading: isLoading,
+            onTap: isLoading ? null : _submit,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _OtpSendButton extends StatelessWidget {
+  final int countdown;
+  final bool isSending;
+  final bool phoneEmpty;
+  final VoidCallback onTap;
+
+  const _OtpSendButton({
+    required this.countdown,
+    required this.isSending,
+    required this.phoneEmpty,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final disabled = countdown > 0 || isSending || phoneEmpty;
+    return GestureDetector(
+      onTap: disabled ? null : onTap,
+      child: Container(
+        height: 54,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: disabled ? Theme.of(context).dividerColor : scheme.primary,
+            width: 0.5,
+          ),
+        ),
+        child: Center(
+          child: isSending
+              ? SizedBox(
+                  height: 16,
+                  width: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: scheme.primary),
+                )
+              : Text(
+                  countdown > 0
+                      ? 'auth.otp.resend_countdown'.tr(namedArgs: {'seconds': '$countdown'})
+                      : 'auth.otp.send'.tr(),
+                  style: AppTextStyles.mono(11).copyWith(
+                    color: disabled ? scheme.onSurface.withValues(alpha: 0.36) : scheme.primary,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+        ),
       ),
     );
   }

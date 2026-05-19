@@ -727,7 +727,11 @@
       "no_account": "还没有账号？",
       "register": "立即注册",
       "login": "登录",
-      "error_title": "登录失败"
+      "error_title": "登录失败",
+      "hero_title": "登录您的账号",
+      "welcome_back": "● 欢迎回来",
+      "subtitle": "继续您上次的体验。",
+      "cta": "进入AA体育"
     },
     "register": {
       "title": "账号注册",
@@ -739,7 +743,9 @@
       "error_title": "注册失败",
       "success_title": "注册成功",
       "success_description": "您的账号已创建成功。",
-      "login_now": "立即登录"
+      "login_now": "立即登录",
+      "hero_title": "加入AA体育",
+      "cta": "创建账户"
     },
     "forgot": {
       "title": "重置密码",
@@ -748,7 +754,10 @@
       "go_to_login": "去登录",
       "otp_error_title": "验证码错误",
       "error_title": "重置密码失败",
-      "next": "下一步"
+      "next": "下一步",
+      "hero_title": "忘记密码",
+      "step1_label": "第 1 / 2 步 · 验证身份",
+      "step2_label": "第 2 / 2 步 · 设置新密码"
     },
     "field": {
       "select_country_region": "选择国家/地区",

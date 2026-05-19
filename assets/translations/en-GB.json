@@ -727,7 +727,11 @@
       "no_account": "Don't have an account?",
       "register": "Register",
       "login": "Login",
-      "error_title": "Login Failed"
+      "error_title": "Login Failed",
+      "hero_title": "SIGN BACK IN.",
+      "welcome_back": "● Welcome back",
+      "subtitle": "Pick up where you left off.",
+      "cta": "ENTER THE ARENA"
     },
     "register": {
       "title": "Register",
@@ -739,7 +743,9 @@
       "error_title": "Registration Failed",
       "success_title": "Registration Successful",
       "success_description": "Your account has been created.",
-      "login_now": "Log In Now"
+      "login_now": "Log In Now",
+      "hero_title": "JOIN THE ARENA.",
+      "cta": "CREATE ACCOUNT"
     },
     "forgot": {
       "title": "Reset Password",
@@ -748,7 +754,10 @@
       "go_to_login": "Go to Login",
       "otp_error_title": "Verification Code Error",
       "error_title": "Reset Password Failed",
-      "next": "Next"
+      "next": "Next",
+      "hero_title": "RESET ACCESS.",
+      "step1_label": "STEP 1 OF 2 · VERIFY IDENTITY",
+      "step2_label": "STEP 2 OF 2 · NEW PASSWORD"
     },
     "field": {
       "select_country_region": "Select Country/Region",

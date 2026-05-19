@@ -128,7 +128,7 @@ class _ActiveNavItem extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               label.toUpperCase(),
-              style: ArenaTextStyles.display(12).copyWith(
+              style: AppTextStyles.display(12, context).copyWith(
                 color: Theme.of(context).colorScheme.onPrimary,
                 letterSpacing: 12 * 0.08,
                 height: 1.2,

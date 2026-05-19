@@ -29,24 +29,23 @@ class AppColors {
   static const Color inningHomeRowBg = Color(0xFF1A2435);
 }
 
-class ArenaTextStyles {
-  ArenaTextStyles._();
+class AppTextStyles {
+  AppTextStyles._();
 
-  static TextStyle display(double size) => GoogleFonts.anton(
-    fontSize: size,
-    height: 0.85,
-    color: AppColors.text,
-  );
+  static TextStyle display(double size, BuildContext context) {
+    final isChinese = Localizations.localeOf(context).languageCode == 'zh';
+    return isChinese
+        ? GoogleFonts.wdxlLubrifontSc(fontSize: size, height: 0.85)
+        : GoogleFonts.anton(fontSize: size, height: 0.85);
+  }
 
   static TextStyle body(double size) => GoogleFonts.spaceGrotesk(
     fontSize: size,
-    color: AppColors.text,
   );
 
   static TextStyle mono(double size) => GoogleFonts.jetBrainsMono(
     fontSize: size,
     letterSpacing: size * 0.16,
-    color: AppColors.text,
   );
 }
 
