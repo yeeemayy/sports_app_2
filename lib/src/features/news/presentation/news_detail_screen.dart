@@ -105,7 +105,7 @@ class NewsDetailScreen extends ConsumerWidget {
                     shape: BoxShape.circle,
                     border: Border.all(color: colors.lineStrong, width: 0.5),
                   ),
-                  child: Icon(Icons.arrow_circle_left_outlined, color: colors.text, size: 24),
+                  child: Icon(Icons.arrow_circle_left_outlined, color: Colors.white, size: 24),
                 ),
               ),
               flexibleSpace: hasImage || isLoading
@@ -214,7 +214,7 @@ class NewsDetailScreen extends ConsumerWidget {
             shape: BoxShape.circle,
             border: Border.all(color: colors.lineStrong, width: 0.5),
           ),
-          child: Icon(Icons.arrow_circle_left_outlined, color: colors.text, size: 24),
+          child: Icon(Icons.arrow_circle_left_outlined, color: Colors.white, size: 24),
         ),
       ),
     );
