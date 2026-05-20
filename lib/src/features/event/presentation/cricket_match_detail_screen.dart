@@ -12,6 +12,7 @@ import 'package:sports_app/src/features/event/presentation/providers/event_provi
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_header_shell.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
+import 'package:sports_app/src/shared_widgets/arena_stat_bar.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
 class CricketMatchDetailScreen extends ConsumerStatefulWidget {
@@ -42,7 +43,16 @@ class _CricketMatchDetailScreenState extends SportDetailScaffoldState<CricketMat
   }
 
   @override
-  Widget buildHeader(BuildContext context) => _CricketMatchHeader(matchId: matchId);
+  Widget buildHeader(
+    BuildContext context, {
+    String? leagueName,
+    int? matchTimestamp,
+  }) =>
+      _CricketMatchHeader(
+        matchId: matchId,
+        leagueName: leagueName,
+        matchTimestamp: matchTimestamp,
+      );
 
   @override
   List<Tab> buildTabs(BuildContext context) => [
@@ -62,9 +72,15 @@ class _CricketMatchDetailScreenState extends SportDetailScaffoldState<CricketMat
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 class _CricketMatchHeader extends ConsumerWidget {
-  const _CricketMatchHeader({required this.matchId});
+  const _CricketMatchHeader({
+    required this.matchId,
+    this.leagueName,
+    this.matchTimestamp,
+  });
 
   final String matchId;
+  final String? leagueName;
+  final int? matchTimestamp;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -77,6 +93,8 @@ class _CricketMatchHeader extends ConsumerWidget {
 
     return SportDetailHeaderShell<CricketMatchDetail>(
       detailAsync: detailAsync,
+      leagueName: leagueName,
+      matchTimestamp: matchTimestamp,
       skeletonHeight: 80,
       builder: (detail) => _CricketHeaderContent(detail: detail, rt: rt),
     );
@@ -96,175 +114,121 @@ class _CricketHeaderContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final effStatusId = rt?.statusId ?? detail.statusId;
-    final homeScore = rt?.homeScore.toString() ?? '-';
-    final awayScore = rt?.awayScore.toString() ?? '-';
 
     final innings = rt?.innings ?? detail.innings;
     final homeInnings = innings.where((i) => i.team == 1).lastOrNull;
     final awayInnings = innings.where((i) => i.team == 2).lastOrNull;
 
     final isNotStarted = effStatusId == 1;
-    const liveStatuses = {
-      2,
-      3,
-      532,
-      533,
-      534,
-      535,
-      536,
-      537,
-      538,
-      539,
-      540,
-      541,
-      542,
-      543,
-      544,
-      545,
-    };
+    const liveStatuses = {2, 3, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545};
     final isLive = liveStatuses.contains(effStatusId);
     final statusLabel = cricketStatusLabel(effStatusId, detail.statusDescription);
+    final statusColor = isLive ? colors.live : colors.text3;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+    return Column(
       children: [
-        Expanded(
-          child: Column(
-            children: [
-              _TeamLogo(url: detail.homeInfo.logo, size: 48),
-              const SizedBox(height: 6),
-              Text(
-                detail.homeName,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: context.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Home team
+            Expanded(
+              flex: 2,
+              child: Column(
+                children: [
+                  SportLogo(url: detail.homeInfo.logo, size: 52),
+                  const SizedBox(height: 6),
+                  Text(
+                    detail.homeName.toUpperCase(),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.display(12, context).copyWith(color: colors.text),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (isLive)
-                _BlinkingLiveIndicator(label: statusLabel)
-              else
-                Text(
-                  statusLabel.isNotEmpty ? statusLabel : 'common.unknown'.tr(),
-                  textAlign: TextAlign.center,
-                  style: context.textTheme.labelSmall?.copyWith(color: Colors.white),
-                ),
-              if (isNotStarted)
-                Text(
-                  '-',
-                  style: context.textTheme.headlineSmall?.copyWith(
-                    color: Colors.grey.shade300,
-                    fontWeight: FontWeight.w900,
-                  ),
-                )
-              else ...[
-                if (homeInnings != null && awayInnings != null) ...[
-                  RichText(
-                    text: TextSpan(
-                      style: context.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                      ),
-                      children: [
-                        TextSpan(text: '${homeInnings.runs}/${homeInnings.wickets}'),
-                        const TextSpan(text: ' - '),
-                        TextSpan(text: '${awayInnings.runs}/${awayInnings.wickets}'),
-                      ],
-                    ),
-                  ),
-                  RichText(
-                    text: TextSpan(
-                      style: context.textTheme.labelSmall?.copyWith(color: Colors.white70),
-                      children: [
-                        TextSpan(text: '(${_formatOvers(homeInnings.overs)})'),
-                        const TextSpan(text: ' - '),
-                        TextSpan(text: '(${_formatOvers(awayInnings.overs)})'),
-                      ],
-                    ),
-                  ),
-                ] else
-                  RichText(
-                    text: TextSpan(
-                      style: context.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                      ),
-                      children: [
-                        TextSpan(text: homeScore),
-                        const TextSpan(text: ' - '),
-                        TextSpan(text: awayScore),
-                      ],
-                    ),
-                  ),
-                if (isLive)
+            ),
+            // Centre: status + score
+            Expanded(
+              flex: 3,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   Container(
-                    margin: const EdgeInsets.only(top: 6),
-                    constraints: const BoxConstraints(minWidth: 50),
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: statusLabel.isNotEmpty ? Colors.orange : Colors.white,
-                      border: Border.all(color: Colors.orange),
-                      borderRadius: BorderRadius.circular(20),
+                      color: statusColor,
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      statusLabel.isNotEmpty ? statusLabel : 'common.unknown'.tr(),
-                      textAlign: TextAlign.center,
-                      style: context.textTheme.labelSmall?.copyWith(color: Colors.white),
+                      statusLabel.toUpperCase(),
+                      style: AppTextStyles.display(11, context).copyWith(
+                        color: const Color(0xFF0E0E0E),
+                        letterSpacing: 0.1 * 11,
+                      ),
                     ),
                   ),
-              ],
-            ],
-          ),
-        ),
-        Expanded(
-          child: Column(
-            children: [
-              _TeamLogo(url: detail.awayInfo.logo, size: 48),
-              const SizedBox(height: 6),
-              Text(
-                detail.awayName,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: context.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
+                  const SizedBox(height: 10),
+                  if (isNotStarted)
+                    Text(
+                      '–  –',
+                      style: AppTextStyles.display(40, context).copyWith(color: colors.text3),
+                    )
+                  else if (homeInnings != null && awayInnings != null) ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '${homeInnings.runs}/${homeInnings.wickets}',
+                          style: AppTextStyles.display(26, context).copyWith(color: colors.text),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Text(
+                            ':',
+                            style: AppTextStyles.display(26, context).copyWith(color: colors.text3),
+                          ),
+                        ),
+                        Text(
+                          '${awayInnings.runs}/${awayInnings.wickets}',
+                          style: AppTextStyles.display(26, context).copyWith(color: colors.text),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '(${_formatOvers(homeInnings.overs)}) · (${_formatOvers(awayInnings.overs)})',
+                      style: AppTextStyles.mono(10).copyWith(color: colors.text3),
+                    ),
+                  ] else
+                    Text(
+                      '–  –',
+                      style: AppTextStyles.display(40, context).copyWith(color: colors.text3),
+                    ),
+                ],
               ),
-            ],
-          ),
+            ),
+            // Away team
+            Expanded(
+              flex: 2,
+              child: Column(
+                children: [
+                  SportLogo(url: detail.awayInfo.logo, size: 52),
+                  const SizedBox(height: 6),
+                  Text(
+                    detail.awayName.toUpperCase(),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.display(12, context).copyWith(color: colors.text),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ],
-    );
-  }
-}
-
-class _TeamLogo extends StatelessWidget {
-  const _TeamLogo({required this.url, required this.size});
-
-  final String url;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white),
-      child: ClipOval(
-        child: SportLogo(url: url, size: size),
-      ),
     );
   }
 }
@@ -284,7 +248,10 @@ class _ScoreTab extends ConsumerWidget {
     return detailAsync.when(
       loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
       error: (_, __) => Center(
-        child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
+        child: Text(
+          'event.error.load_failed'.tr(),
+          style: AppTextStyles.body(13).copyWith(color: context.appColors.text3),
+        ),
       ),
       data: (obj) {
         final detail = obj as CricketMatchDetail;
@@ -333,110 +300,94 @@ class _CricketScoreContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final resultText = _resultText(context);
 
     return ListView(
-      padding: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
       children: [
         if (resultText.isNotEmpty)
           Container(
-            margin: const EdgeInsets.all(12),
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+            margin: const EdgeInsets.only(bottom: 14),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
             decoration: BoxDecoration(
-              color: context.appColors.surface2,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: context.appColors.accentEcho),
+              color: colors.surface,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: colors.accent.withValues(alpha: 0.4), width: 0.5),
             ),
             child: Text(
               resultText,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: context.appColors.accent),
+              style: AppTextStyles.body(13).copyWith(color: colors.accent),
             ),
           ),
         Container(
-          color: context.appColors.surface,
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: colors.line, width: 0.5),
+          ),
           child: Column(
             children: [
               // Header row
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 child: Row(
                   children: [
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        '',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: context.appColors.text2,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        'R',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: context.appColors.text2,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        'W',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: context.appColors.text2,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        'Ov',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: context.appColors.text2,
+                    const Expanded(flex: 2, child: SizedBox()),
+                    ...[
+                      'event.cricket.detail.col_runs'.tr(),
+                      'event.cricket.detail.col_wickets'.tr(),
+                      'event.cricket.detail.col_overs'.tr(),
+                    ].map(
+                      (h) => Expanded(
+                        child: Text(
+                          h.toUpperCase(),
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.mono(9).copyWith(
+                            color: colors.text3,
+                            letterSpacing: 0.14 * 9,
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerBase),
+              Divider(height: 1, thickness: 0.5, color: colors.line),
               if (innings.isEmpty)
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Text('-', style: TextStyle(color: Colors.grey.shade500)),
+                  child: Text(
+                    '–',
+                    style: AppTextStyles.mono(13).copyWith(color: colors.text3),
+                  ),
                 )
               else
                 ...innings.asMap().entries.map((e) {
                   final idx = e.key;
                   final inning = e.value;
                   final teamLogo = inning.team == 1 ? detail.homeInfo.logo : detail.awayInfo.logo;
+                  final teamName = inning.team == 1 ? detail.homeName : detail.awayName;
+                  final isLast = idx == innings.length - 1;
                   return Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                         child: Row(
                           children: [
                             Expanded(
                               flex: 2,
                               child: Row(
                                 children: [
-                                  SportLogo(url: teamLogo, size: 18),
+                                  SportLogo(url: teamLogo, size: 20),
                                   const SizedBox(width: 6),
                                   Flexible(
                                     child: Text(
-                                      inning.team == 1 ? detail.homeName : detail.awayName,
-                                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                                      teamName,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppTextStyles.body(12).copyWith(color: colors.text2),
                                     ),
                                   ),
                                 ],
@@ -446,27 +397,30 @@ class _CricketScoreContent extends StatelessWidget {
                               child: Text(
                                 '${inning.runs}',
                                 textAlign: TextAlign.center,
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                                style: AppTextStyles.mono(13).copyWith(
+                                  color: colors.text,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                             Expanded(
                               child: Text(
                                 '${inning.wickets}',
                                 textAlign: TextAlign.center,
-                                style: TextStyle(fontSize: 13),
+                                style: AppTextStyles.mono(13).copyWith(color: colors.text2),
                               ),
                             ),
                             Expanded(
                               child: Text(
                                 inning.overs.toStringAsFixed(1),
                                 textAlign: TextAlign.center,
-                                style: TextStyle(fontSize: 13),
+                                style: AppTextStyles.mono(13).copyWith(color: colors.text2),
                               ),
                             ),
                           ],
                         ),
                       ),
-                      Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerHighlight),
+                      if (!isLast) Divider(height: 1, thickness: 0.5, color: colors.line),
                     ],
                   );
                 }),
@@ -502,7 +456,6 @@ class _CricketStats {
   for (final stat in inningStats) {
     final idx = stat.inning - 1;
     if (idx < 0 || idx >= innings.length) continue;
-    // innings[idx].team: 1 = home batting, 2 = away batting
     final battingTeam = innings[idx].team;
     final batting = battingTeam == 1 ? home : away;
     final bowling = battingTeam == 1 ? away : home;
@@ -537,7 +490,7 @@ class _StatsTab extends ConsumerWidget {
       return Center(
         child: Text(
           'event.cricket.detail.no_stats'.tr(),
-          style: TextStyle(color: Colors.grey.shade500),
+          style: AppTextStyles.body(13).copyWith(color: context.appColors.text3),
         ),
       );
     }
@@ -545,169 +498,76 @@ class _StatsTab extends ConsumerWidget {
     final innings = ev.innings.isNotEmpty ? ev.innings : (detail?.innings ?? []);
     final stats = _computeCricketStats(innings, ev.inningStats);
 
-    List<_StatRow> buildRows(List<(String, int, int)> candidates) => candidates
-        // .where((r) => r.$2 > 0 || r.$3 > 0)
-        .map((r) => _StatRow(label: r.$1.tr(), home: r.$2, away: r.$3))
-        .toList();
-
-    final battingRows = buildRows([
+    final battingRows = <(String, int, int)>[
       ('event.cricket.detail.stat_runs', stats.home.battingRuns, stats.away.battingRuns),
       ('event.cricket.detail.stat_balls_faced', stats.home.ballsFaced, stats.away.ballsFaced),
       ('event.cricket.detail.stat_fours', stats.home.fours, stats.away.fours),
       ('event.cricket.detail.stat_sixes', stats.home.sixes, stats.away.sixes),
-    ]);
+    ];
 
-    final bowlingRows = buildRows([
+    final bowlingRows = <(String, int, int)>[
       ('event.cricket.detail.stat_wides', stats.home.wides, stats.away.wides),
       ('event.cricket.detail.stat_byes', stats.home.byes, stats.away.byes),
       ('event.cricket.detail.stat_leg_byes', stats.home.legByes, stats.away.legByes),
       ('event.cricket.detail.stat_penalty', stats.home.penalty, stats.away.penalty),
       ('event.cricket.detail.stat_no_balls', stats.home.noBalls, stats.away.noBalls),
       ('event.cricket.detail.stat_extra', stats.home.extra, stats.away.extra),
-    ]);
+    ];
 
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: 12),
       children: [
         if (battingRows.isNotEmpty)
-          _StatSection(title: 'event.cricket.detail.batting_comparison'.tr(), rows: battingRows),
+          _ArenaStatSection(
+            title: 'event.cricket.detail.batting_comparison'.tr(),
+            rows: battingRows,
+          ),
         if (battingRows.isNotEmpty && bowlingRows.isNotEmpty) const SizedBox(height: 12),
         if (bowlingRows.isNotEmpty)
-          _StatSection(title: 'event.cricket.detail.bowling_comparison'.tr(), rows: bowlingRows),
+          _ArenaStatSection(
+            title: 'event.cricket.detail.bowling_comparison'.tr(),
+            rows: bowlingRows,
+          ),
       ],
     );
   }
 }
 
-class _StatSection extends StatelessWidget {
-  const _StatSection({required this.title, required this.rows});
+class _ArenaStatSection extends StatelessWidget {
+  const _ArenaStatSection({required this.title, required this.rows});
 
   final String title;
-  final List<_StatRow> rows;
+  final List<(String, int, int)> rows;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: context.appColors.surface,
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-          ),
-          ...rows,
-        ],
-      ),
-    );
-  }
-}
-
-class _StatRow extends StatelessWidget {
-  const _StatRow({required this.label, required this.home, required this.away});
-
-  final String label;
-  final int home;
-  final int away;
-
-  @override
-  Widget build(BuildContext context) {
-    int total = home + away;
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: context.appColors.shimmerBase, width: 0.5)),
-      ),
-      child: Column(
-        children: [
-          Row(
+    final colors = context.appColors;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: Row(
             children: [
-              SizedBox(
-                width: 64,
-                child: Text(
-                  home.toString(),
-                  style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-                  textAlign: TextAlign.left,
+              Container(
+                width: 3,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: colors.accent,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              Expanded(
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: context.textTheme.bodySmall?.copyWith(color: context.appColors.text2),
-                ),
-              ),
-              SizedBox(
-                width: 64,
-                child: Text(
-                  away.toString(),
-                  style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-                  textAlign: TextAlign.right,
-                ),
+              const SizedBox(width: 8),
+              Text(
+                title.toUpperCase(),
+                style: AppTextStyles.display(12, context).copyWith(color: colors.text),
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              const barHeight = 6.0;
-              const radius = Radius.circular(3);
-              if (total <= 0) {
-                return ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: Container(height: barHeight, color: context.appColors.shimmerBase),
-                );
-              }
-              final halfWidth = constraints.maxWidth / 2;
-              final homeWidth = halfWidth * (home / total);
-              final awayWidth = halfWidth * (away / total);
-              return ClipRRect(
-                borderRadius: BorderRadius.circular(3),
-                child: Container(
-                  height: barHeight,
-                  color: context.appColors.shimmerBase,
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: halfWidth,
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: Container(
-                            width: homeWidth,
-                            height: barHeight,
-                            decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.only(topLeft: radius, bottomLeft: radius),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: halfWidth,
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Container(
-                            width: awayWidth,
-                            height: barHeight,
-                            decoration: BoxDecoration(
-                              color: context.appColors.accent,
-                              borderRadius: BorderRadius.only(
-                                topRight: radius,
-                                bottomRight: radius,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+        ),
+        ...rows.map((r) => ArenaStatBar(label: r.$1.tr(), home: r.$2, away: r.$3)),
+        const SizedBox(height: 4),
+      ],
     );
   }
 }
@@ -728,13 +588,14 @@ class _SituationTabState extends ConsumerState<_SituationTab> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final eventsAsync = ref.watch(
       matchEventsProvider(sport: SportType.cricket, matchId: widget.matchId),
     );
     final ev = eventsAsync.valueOrNull as CricketMatchEventsData?;
 
     if (eventsAsync.isLoading && ev == null) {
-      return Center(child: CircularProgressIndicator(color: context.appColors.accent));
+      return Center(child: CircularProgressIndicator(color: colors.accent));
     }
 
     final timeline = ev?.timeline ?? [];
@@ -742,7 +603,7 @@ class _SituationTabState extends ConsumerState<_SituationTab> {
       return Center(
         child: Text(
           'event.cricket.detail.no_situation'.tr(),
-          style: TextStyle(color: Colors.grey.shade500),
+          style: AppTextStyles.body(13).copyWith(color: colors.text3),
         ),
       );
     }
@@ -759,49 +620,57 @@ class _SituationTabState extends ConsumerState<_SituationTab> {
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: timeline.asMap().entries.map((e) {
-              final isSelected = e.key == validIndex;
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: GestureDetector(
-                  onTap: () => setState(() => _selectedIndex = e.key),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isSelected ? context.appColors.accent : context.appColors.lineStrong,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      'event.cricket.detail.inning_btn'.tr(namedArgs: {'n': '${e.value.inning}'}),
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: isSelected ? Colors.white : context.appColors.text2,
+        Container(
+          color: colors.surface,
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: timeline.asMap().entries.map((e) {
+                final isSelected = e.key == validIndex;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: GestureDetector(
+                    onTap: () => setState(() => _selectedIndex = e.key),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isSelected ? colors.accent : colors.surface2,
+                        borderRadius: BorderRadius.circular(20),
+                        border: isSelected
+                            ? null
+                            : Border.all(color: colors.line, width: 0.5),
+                      ),
+                      child: Text(
+                        'event.cricket.detail.inning_btn'
+                            .tr(namedArgs: {'n': '${e.value.inning}'})
+                            .toUpperCase(),
+                        style: AppTextStyles.mono(10).copyWith(
+                          color: isSelected ? const Color(0xFF0E0E0E) : colors.text2,
+                          letterSpacing: 0.1 * 10,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            }).toList(),
+                );
+              }).toList(),
+            ),
           ),
         ),
+        Divider(height: 1, thickness: 0.5, color: colors.line),
         Expanded(
           child: balls.isEmpty
               ? Center(
                   child: Text(
                     'event.cricket.detail.no_situation'.tr(),
-                    style: TextStyle(color: Colors.grey.shade500),
+                    style: AppTextStyles.body(13).copyWith(color: colors.text3),
                   ),
                 )
               : ListView.separated(
                   padding: const EdgeInsets.only(bottom: 20),
                   itemCount: balls.length,
                   separatorBuilder: (_, __) =>
-                      Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerBase),
+                      Divider(height: 1, thickness: 0.5, color: colors.line),
                   itemBuilder: (context, i) {
                     final (overNum, ball) = balls[i];
                     return _BallRow(overNumber: overNum, ball: ball);
@@ -821,132 +690,67 @@ class _BallRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     final IconData iconData;
     final Color iconColor;
-    Color runTextColor = context.appColors.text2;
-    String? extraLabel; // e.g. "+ 1 (WD)"
+    Color runTextColor = colors.text2;
+    String? extraLabel;
 
     if (ball.isWicket) {
       iconData = Icons.close;
-      iconColor = Colors.red;
+      iconColor = colors.danger;
+      runTextColor = colors.danger;
     } else if (ball.extraType == 'WD' ||
         ball.extraType == 'NB' ||
         ball.extraType == 'B' ||
         ball.extraType == 'LB') {
       iconData = Icons.add_alert;
-      iconColor = Colors.orange;
+      iconColor = colors.live;
       if (ball.extraRuns > 0) {
         extraLabel = '+ ${ball.extraRuns} (${ball.extraType})';
       }
     } else if (ball.runs == 6) {
       iconData = Icons.sports_cricket;
-      iconColor = Colors.purple.shade600;
-      runTextColor = Colors.purple.shade600;
+      iconColor = colors.accent;
+      runTextColor = colors.accent;
     } else if (ball.runs == 4) {
       iconData = Icons.square_foot;
-      iconColor = Colors.green.shade600;
-      runTextColor = Colors.green.shade600;
+      iconColor = colors.text;
+      runTextColor = colors.text;
     } else if (ball.runs > 0) {
       iconData = Icons.directions_run;
-      iconColor = context.appColors.accent;
+      iconColor = colors.text2;
     } else {
       iconData = Icons.sports_cricket;
-      iconColor = Colors.grey.shade400;
+      iconColor = colors.text3;
     }
 
-    return Container(
-      color: context.appColors.surface,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
           SizedBox(
             width: 48,
             child: Text(
               '$overNumber.${ball.ballNumber}',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+              style: AppTextStyles.mono(13).copyWith(color: colors.text),
             ),
           ),
-          Icon(iconData, color: iconColor, size: 22),
+          Icon(iconData, color: iconColor, size: 20),
           const SizedBox(width: 12),
           Text(
             'event.cricket.detail.ball_runs'.tr(namedArgs: {'n': '${ball.runs}'}),
-            style: TextStyle(fontSize: 14, color: runTextColor),
+            style: AppTextStyles.mono(13).copyWith(color: runTextColor),
           ),
           if (extraLabel != null) ...[
             const SizedBox(width: 6),
             Text(
               extraLabel,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.orange.shade700,
-              ),
+              style: AppTextStyles.mono(12).copyWith(color: colors.live),
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-// ─── Blinking Live Indicator ──────────────────────────────────────────────────
-
-class _BlinkingLiveIndicator extends StatefulWidget {
-  const _BlinkingLiveIndicator({required this.label});
-
-  final String label;
-
-  @override
-  State<_BlinkingLiveIndicator> createState() => _BlinkingLiveIndicatorState();
-}
-
-class _BlinkingLiveIndicatorState extends State<_BlinkingLiveIndicator>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _opacity;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 800))
-      ..repeat(reverse: true);
-    _opacity = Tween<double>(begin: 1.0, end: 0.2).animate(_controller);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: AnimatedBuilder(
-        animation: _opacity,
-        builder: (context, _) => Opacity(
-          opacity: _opacity.value,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 7,
-                height: 7,
-                decoration: BoxDecoration(color: context.appColors.surface2, shape: BoxShape.circle),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                widget.label,
-                style: context.textTheme.labelSmall?.copyWith(
-                  color: context.appColors.surface2,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

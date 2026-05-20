@@ -1,5 +1,7 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,6 +20,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await dotenv.load(fileName: '.env');
+  await Firebase.initializeApp();
+  if (FirebaseAuth.instance.currentUser == null) {
+    await FirebaseAuth.instance.signInAnonymously();
+  }
   await EasyLocalization.ensureInitialized();
   await AppInfo.init();
   final sharedPreferences = await SharedPreferences.getInstance();
@@ -65,15 +71,16 @@ class MyApp extends ConsumerWidget {
         extensions: const [AppColors.light],
         scaffoldBackgroundColor: AppColors.light.ink,
         dividerColor: AppColors.light.lineStrong,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.light.accent,
-          brightness: Brightness.light,
-        ).copyWith(
-          surface: AppColors.light.surface,
-          primary: AppColors.light.accent,
-          onPrimary: AppColors.light.surface,
-          primaryContainer: AppColors.light.surface2,
-        ),
+        colorScheme:
+            ColorScheme.fromSeed(
+              seedColor: AppColors.light.accent,
+              brightness: Brightness.light,
+            ).copyWith(
+              surface: AppColors.light.surface,
+              primary: AppColors.light.accent,
+              onPrimary: AppColors.light.surface,
+              primaryContainer: AppColors.light.surface2,
+            ),
         textTheme: GoogleFonts.spaceGroteskTextTheme(
           ThemeData(brightness: Brightness.light).textTheme,
         ),
@@ -108,10 +115,15 @@ class MyApp extends ConsumerWidget {
         extensions: const [AppColors.dark],
         scaffoldBackgroundColor: AppColors.dark.ink,
         dividerColor: AppColors.dark.lineStrong,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.dark.accent,
-          brightness: Brightness.dark,
-        ).copyWith(surface: AppColors.dark.surface, primary: AppColors.dark.accent, onPrimary: AppColors.dark.ink),
+        colorScheme:
+            ColorScheme.fromSeed(
+              seedColor: AppColors.dark.accent,
+              brightness: Brightness.dark,
+            ).copyWith(
+              surface: AppColors.dark.surface,
+              primary: AppColors.dark.accent,
+              onPrimary: AppColors.dark.ink,
+            ),
         textTheme: GoogleFonts.spaceGroteskTextTheme(
           ThemeData(brightness: Brightness.dark).textTheme,
         ),

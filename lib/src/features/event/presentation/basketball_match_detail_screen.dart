@@ -12,6 +12,8 @@ import 'package:sports_app/src/features/event/presentation/providers/event_provi
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_header_shell.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
+import 'package:sports_app/src/features/prediction/presentation/widgets/fan_prediction_card.dart';
+import 'package:sports_app/src/shared_widgets/arena_stat_bar.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
 class BasketballMatchDetailScreen extends ConsumerStatefulWidget {
@@ -37,14 +39,23 @@ class _BasketballMatchDetailScreenState
 
   @override
   (String?, int?) watchDetail() {
-    final v = ref.watch(matchDetailProvider(sport: SportType.basketball, matchId: matchId))
+    final v = ref
+        .watch(matchDetailProvider(sport: SportType.basketball, matchId: matchId))
         .valueOrNull as BasketballMatchDetail?;
     return (v?.leagueName, v?.matchTime);
   }
 
   @override
-  Widget buildHeader(BuildContext context) =>
-      _BasketballMatchHeader(matchId: matchId);
+  Widget buildHeader(
+    BuildContext context, {
+    String? leagueName,
+    int? matchTimestamp,
+  }) =>
+      _BasketballHeader(
+        matchId: matchId,
+        leagueName: leagueName,
+        matchTimestamp: matchTimestamp,
+      );
 
   @override
   List<Tab> buildTabs(BuildContext context) => [
@@ -54,17 +65,23 @@ class _BasketballMatchDetailScreenState
 
   @override
   List<Widget> buildTabViews(BuildContext context) => [
-    _BasketballMatchBody(matchId: matchId),
+    _OverviewTab(matchId: matchId),
     _SquadTab(matchId: matchId),
   ];
 }
 
-// ─── Match Header ─────────────────────────────────────────────────────────────
+// ─── Header ───────────────────────────────────────────────────────────────────
 
-class _BasketballMatchHeader extends ConsumerWidget {
-  const _BasketballMatchHeader({required this.matchId});
+class _BasketballHeader extends ConsumerWidget {
+  const _BasketballHeader({
+    required this.matchId,
+    this.leagueName,
+    this.matchTimestamp,
+  });
 
   final String matchId;
+  final String? leagueName;
+  final int? matchTimestamp;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -73,176 +90,196 @@ class _BasketballMatchHeader extends ConsumerWidget {
     final eventsAsync =
         ref.watch(matchEventsProvider(sport: SportType.basketball, matchId: matchId));
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.basketball).select((map) => map[matchId] as BasketballRealtimeData?),
+      sportRealtimeProvider(SportType.basketball)
+          .select((map) => map[matchId] as BasketballRealtimeData?),
     );
 
     return SportDetailHeaderShell<BasketballMatchDetail>(
       detailAsync: detailAsync,
-      builder: (detail) => _BasketballMatchHeaderContent(
-        detail: detail,
-        rt: rt,
-        eventsData: eventsAsync.valueOrNull as BasketballMatchEventsData?,
-      ),
+      leagueName: leagueName,
+      matchTimestamp: matchTimestamp,
+      builder: (detail) {
+        final eventsData =
+            eventsAsync.valueOrNull as BasketballMatchEventsData?;
+        final effStatusId =
+            eventsData?.statusId ?? rt?.statusId ?? detail.statusId;
+        final homeTotal =
+            eventsData?.homeTotal ?? rt?.homeTotal ?? detail.homeInfo.total;
+        final awayTotal =
+            eventsData?.awayTotal ?? rt?.awayTotal ?? detail.awayInfo.total;
+
+        final periodKey = _periodKey(effStatusId);
+        final periodLabel =
+            periodKey.isNotEmpty ? periodKey.tr() : (detail.statusDescription ?? '');
+
+        final showClock = eventsData?.showClock ?? rt?.showClock ?? false;
+        final clockDisplay =
+            eventsData?.clockDisplay ?? rt?.clockDisplay ?? '';
+        final isNoScore = const {0, 1}.contains(effStatusId);
+
+        final statusColor = _statusColor(effStatusId, context.appColors);
+
+        return _ScoreBlock(
+          homeLogo: detail.homeInfo.logo,
+          homeName: detail.homeName,
+          awayLogo: detail.awayInfo.logo,
+          awayName: detail.awayName,
+          homeScore: isNoScore ? '–' : '$homeTotal',
+          awayScore: isNoScore ? '–' : '$awayTotal',
+          statusLabel: periodLabel,
+          statusColor: statusColor,
+          clockDisplay: showClock ? clockDisplay : null,
+          colors: context.appColors,
+          context: context,
+        );
+      },
     );
+  }
+
+  static String _periodKey(int statusId) => switch (statusId) {
+    1 => 'event.basketball.period.not_started',
+    2 => 'event.basketball.period.q1',
+    3 => 'event.basketball.period.q1_over',
+    4 => 'event.basketball.period.q2',
+    5 => 'event.basketball.period.q2_over',
+    6 => 'event.basketball.period.q3',
+    7 => 'event.basketball.period.q3_over',
+    8 => 'event.basketball.period.q4',
+    9 => 'event.basketball.period.ot',
+    10 => 'event.basketball.period.end',
+    11 => 'event.basketball.period.interrupt',
+    12 => 'event.basketball.period.cancel',
+    13 => 'event.basketball.period.extension',
+    14 => 'event.basketball.period.half',
+    _ => '',
+  };
+
+  static Color _statusColor(int statusId, AppColors colors) {
+    if (const {2, 4, 6, 8, 9, 13, 14}.contains(statusId)) return colors.live;
+    if (const {10}.contains(statusId)) return colors.text3;
+    if (const {11, 12}.contains(statusId)) return colors.danger;
+    return colors.text3;
   }
 }
 
-class _BasketballMatchHeaderContent extends StatelessWidget {
-  const _BasketballMatchHeaderContent({
-    required this.detail,
-    this.rt,
-    this.eventsData,
+class _ScoreBlock extends StatelessWidget {
+  const _ScoreBlock({
+    required this.homeLogo,
+    required this.homeName,
+    required this.awayLogo,
+    required this.awayName,
+    required this.homeScore,
+    required this.awayScore,
+    required this.statusLabel,
+    required this.statusColor,
+    required this.clockDisplay,
+    required this.colors,
+    required this.context,
   });
 
-  final BasketballMatchDetail detail;
-  final BasketballRealtimeData? rt;
-  final BasketballMatchEventsData? eventsData;
-
-  static String _periodKeyFromStatus(int statusId) {
-    switch (statusId) {
-      case 1:
-        return 'event.basketball.period.not_started';
-      case 2:
-        return 'event.basketball.period.q1';
-      case 3:
-        return 'event.basketball.period.q1_over';
-      case 4:
-        return 'event.basketball.period.q2';
-      case 5:
-        return 'event.basketball.period.q2_over';
-      case 6:
-        return 'event.basketball.period.q3';
-      case 7:
-        return 'event.basketball.period.q3_over';
-      case 8:
-        return 'event.basketball.period.q4';
-      case 9:
-        return 'event.basketball.period.ot';
-      case 10:
-        return 'event.basketball.period.end';
-      case 11:
-        return 'event.basketball.period.interrupt';
-      case 12:
-        return 'event.basketball.period.cancel';
-      case 13:
-        return 'event.basketball.period.extension';
-      case 14:
-        return 'event.basketball.period.half';
-      default:
-        return '';
-    }
-  }
+  final String homeLogo;
+  final String homeName;
+  final String awayLogo;
+  final String awayName;
+  final String homeScore;
+  final String awayScore;
+  final String statusLabel;
+  final Color statusColor;
+  final String? clockDisplay;
+  final AppColors colors;
+  final BuildContext context;
 
   @override
-  Widget build(BuildContext context) {
-    // Events API is the primary source; realtime is fallback.
-    final effStatusId = eventsData?.statusId ?? rt?.statusId ?? detail.statusId;
-
-    final homeTotal = eventsData?.homeTotal ??
-        rt?.homeTotal ??
-        detail.homeInfo.total;
-    final awayTotal = eventsData?.awayTotal ??
-        rt?.awayTotal ??
-        detail.awayInfo.total;
-
-    // Period label derived from statusId
-    final periodKey = _periodKeyFromStatus(effStatusId);
-    final periodLabel = periodKey.isNotEmpty
-        ? periodKey.tr()
-        : detail.statusDescription ?? '';
-
-    // Clock
-    final showClock = eventsData?.showClock ?? rt?.showClock ?? false;
-    final clockDisplay = eventsData?.clockDisplay ?? rt?.clockDisplay ?? '';
-
-    final isNoScore = const {0, 1}.contains(effStatusId);
-
+  Widget build(BuildContext _) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Home team
         Expanded(
+          flex: 2,
           child: Column(
             children: [
-              SportLogo(url: detail.homeInfo.logo, size: 48),
+              SportLogo(url: homeLogo, size: 52),
               const SizedBox(height: 6),
               Text(
-                detail.homeName,
+                homeName.toUpperCase(),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: context.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
+                style: AppTextStyles.display(13, context)
+                    .copyWith(color: colors.text),
               ),
             ],
           ),
         ),
-        // Centre: period, clock, score
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+        Expanded(
+          flex: 3,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              if (periodLabel.isNotEmpty)
-                Text(
-                  periodLabel,
-                  style: context.textTheme.labelMedium?.copyWith(
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w600,
+              if (statusLabel.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: statusColor,
+                    borderRadius: BorderRadius.circular(6),
                   ),
-                ),
-              if (showClock && clockDisplay.isNotEmpty)
-                Text(
-                  clockDisplay,
-                  style: context.textTheme.labelSmall
-                      ?.copyWith(color: Colors.white70),
-                ),
-              const SizedBox(height: 4),
-              if (isNoScore)
-                Text(
-                  '-',
-                  style: context.textTheme.headlineSmall?.copyWith(
-                    color: Colors.grey.shade400,
-                    fontWeight: FontWeight.w900,
-                  ),
-                )
-              else
-                RichText(
-                  text: TextSpan(
-                    style: context.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
+                  child: Text(
+                    statusLabel.toUpperCase(),
+                    style: AppTextStyles.display(11, context).copyWith(
+                      color: const Color(0xFF0E0E0E),
+                      letterSpacing: 0.1 * 11,
                     ),
-                    children: [
-                      TextSpan(text: '$homeTotal'),
-                      TextSpan(
-                        text: ' - ',
-                        style: TextStyle(color: Colors.grey.shade200),
-                      ),
-                      TextSpan(text: '$awayTotal'),
-                    ],
                   ),
                 ),
+              if (clockDisplay != null && clockDisplay!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 3),
+                  child: Text(
+                    clockDisplay!,
+                    style: AppTextStyles.mono(10).copyWith(color: colors.text2),
+                  ),
+                ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    homeScore,
+                    style: AppTextStyles.display(56, context)
+                        .copyWith(color: colors.text),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: Text(
+                      ':',
+                      style: AppTextStyles.display(28, context)
+                          .copyWith(color: colors.text3),
+                    ),
+                  ),
+                  Text(
+                    awayScore,
+                    style: AppTextStyles.display(56, context)
+                        .copyWith(color: colors.text),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
-        // Away team
         Expanded(
+          flex: 2,
           child: Column(
             children: [
-              SportLogo(url: detail.awayInfo.logo, size: 48),
+              SportLogo(url: awayLogo, size: 52),
               const SizedBox(height: 6),
               Text(
-                detail.awayName,
+                awayName.toUpperCase(),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: context.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
+                style: AppTextStyles.display(13, context)
+                    .copyWith(color: colors.text),
               ),
             ],
           ),
@@ -252,219 +289,243 @@ class _BasketballMatchHeaderContent extends StatelessWidget {
   }
 }
 
-// ─── Body (quarter scores + stats) ───────────────────────────────────────────
+// ─── Overview Tab ─────────────────────────────────────────────────────────────
 
-class _BasketballMatchBody extends ConsumerWidget {
-  const _BasketballMatchBody({required this.matchId});
+class _OverviewTab extends ConsumerWidget {
+  const _OverviewTab({required this.matchId});
 
   final String matchId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.appColors;
     final detailAsync =
         ref.watch(matchDetailProvider(sport: SportType.basketball, matchId: matchId));
     final eventsAsync =
         ref.watch(matchEventsProvider(sport: SportType.basketball, matchId: matchId));
 
+    final detail = detailAsync.valueOrNull as BasketballMatchDetail?;
+
     return eventsAsync.when(
       loading: () =>
-          Center(child: CircularProgressIndicator(color: context.appColors.accent)),
+          Center(child: CircularProgressIndicator(color: colors.accent)),
       error: (_, __) {
-        // Show detail data only if events fail
-        final detail = detailAsync.valueOrNull as BasketballMatchDetail?;
         if (detail == null) {
           return Center(
             child: Text(
               'event.error.load_failed'.tr(),
-              style: TextStyle(color: Colors.grey.shade500),
+              style: TextStyle(color: colors.text3),
             ),
           );
         }
-        final homeQ = detail.homeInfo.sectionScores;
-        final awayQ = detail.awayInfo.sectionScores;
-        final homeTotal = detail.homeInfo.total;
-        final awayTotal = detail.awayInfo.total;
-        return _BodyContent(
+        return _OverviewContent(
           statusId: detail.statusId,
           homeLogo: detail.homeInfo.logo,
           awayLogo: detail.awayInfo.logo,
-          homeQuarterScores: homeQ,
-          awayQuarterScores: awayQ,
-          homeTotal: homeTotal,
-          awayTotal: awayTotal,
+          homeName: detail.homeName,
+          awayName: detail.awayName,
+          homeQuarterScores: detail.homeInfo.sectionScores,
+          awayQuarterScores: detail.awayInfo.sectionScores,
+          homeTotal: detail.homeInfo.total,
+          awayTotal: detail.awayInfo.total,
           stats: const [],
+          matchId: matchId,
+          isEnded: detail.statusId >= 10,
         );
       },
       data: (obj) {
         final events = obj as BasketballMatchEventsData?;
-        final detail = detailAsync.valueOrNull as BasketballMatchDetail?;
-        // Events API is the primary source; detail is fallback.
-        final effStatusId =
-            events?.statusId ?? detail?.statusId ?? 0;
+        final effStatusId = events?.statusId ?? detail?.statusId ?? 0;
         final homeQ = events?.homeQuarterScores ??
-            detail?.homeInfo.sectionScores ??
-            [];
+            detail?.homeInfo.sectionScores ?? [];
         final awayQ = events?.awayQuarterScores ??
-            detail?.awayInfo.sectionScores ??
-            [];
+            detail?.awayInfo.sectionScores ?? [];
         final homeTotal = events?.homeTotal ?? detail?.homeInfo.total ?? 0;
         final awayTotal = events?.awayTotal ?? detail?.awayInfo.total ?? 0;
 
-        return _BodyContent(
+        return _OverviewContent(
           statusId: effStatusId,
           homeLogo: detail?.homeInfo.logo ?? '',
           awayLogo: detail?.awayInfo.logo ?? '',
+          homeName: detail?.homeName ?? '',
+          awayName: detail?.awayName ?? '',
           homeQuarterScores: homeQ,
           awayQuarterScores: awayQ,
           homeTotal: homeTotal,
           awayTotal: awayTotal,
           stats: events?.stats ?? [],
+          matchId: matchId,
+          isEnded: effStatusId >= 10,
         );
       },
     );
   }
 }
 
-class _BodyContent extends StatelessWidget {
-  const _BodyContent({
+class _OverviewContent extends StatelessWidget {
+  const _OverviewContent({
     required this.statusId,
     required this.homeLogo,
     required this.awayLogo,
+    required this.homeName,
+    required this.awayName,
     required this.homeQuarterScores,
     required this.awayQuarterScores,
     required this.homeTotal,
     required this.awayTotal,
     required this.stats,
+    required this.matchId,
+    required this.isEnded,
   });
 
   final int statusId;
   final String homeLogo;
   final String awayLogo;
+  final String homeName;
+  final String awayName;
   final List<int> homeQuarterScores;
   final List<int> awayQuarterScores;
   final int homeTotal;
   final int awayTotal;
   final List<BasketballStat> stats;
+  final String matchId;
+  final bool isEnded;
 
-  List<BasketballStat> _getPlaceholderStats() {
-    return List.generate(
-      7,
-      (i) => BasketballStat(
-        typeCode: i + 1,
-        homeValue: double.nan,
-        awayValue: double.nan,
-      ),
-    );
-  }
+  List<BasketballStat> _placeholders() =>
+      List.generate(7, (i) => BasketballStat(typeCode: i + 1, homeValue: double.nan, awayValue: double.nan));
 
   @override
   Widget build(BuildContext context) {
-    final statsToShow = stats.isNotEmpty ? stats : _getPlaceholderStats();
+    final colors = context.appColors;
+    final statsToShow = stats.isNotEmpty ? stats : _placeholders();
+
     return ListView(
-      padding: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.only(bottom: 24),
       children: [
-        _QuarterScoreTable(
+        // Fan Prediction
+        FanPredictionCard(
+          matchId: matchId,
+          homeName: homeName,
+          awayName: awayName,
+          hasDraw: false,
+          isMatchEnded: isEnded,
+        ),
+
+        // Quarter scores
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
+          child: Text(
+            'event.basketball.detail.q1'.tr().replaceAll('Q1', 'BY QUARTER'),
+            style: AppTextStyles.display(18, context).copyWith(color: colors.text),
+          ),
+        ),
+        _QuarterTable(
           statusId: statusId,
           homeLogo: homeLogo,
           awayLogo: awayLogo,
-          homeQuarterScores: homeQuarterScores,
-          awayQuarterScores: awayQuarterScores,
+          homeQ: homeQuarterScores,
+          awayQ: awayQuarterScores,
           homeTotal: homeTotal,
           awayTotal: awayTotal,
+          colors: colors,
+          context: context,
         ),
-        Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerBase),
-        ...statsToShow.map((s) => _BasketballStatRow(stat: s, isPlaceholder: stats.isEmpty)),
+
+        // Stats
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+          child: Text(
+            'event.basketball.detail.overview'.tr().toUpperCase(),
+            style: AppTextStyles.display(18, context).copyWith(color: colors.text),
+          ),
+        ),
+        ...statsToShow.map((s) {
+          final h = s.homeValue.isNaN ? 0.0 : s.homeValue;
+          final a = s.awayValue.isNaN ? 0.0 : s.awayValue;
+          final label = s.labelKey.isNotEmpty ? s.labelKey.tr() : '${s.typeCode}';
+          return ArenaStatBar(label: label, home: h, away: a);
+        }),
       ],
     );
   }
 }
 
-// ─── Quarter Score Table ──────────────────────────────────────────────────────
-
-class _QuarterScoreTable extends StatelessWidget {
-  const _QuarterScoreTable({
+class _QuarterTable extends StatelessWidget {
+  const _QuarterTable({
     required this.statusId,
     required this.homeLogo,
     required this.awayLogo,
-    required this.homeQuarterScores,
-    required this.awayQuarterScores,
+    required this.homeQ,
+    required this.awayQ,
     required this.homeTotal,
     required this.awayTotal,
+    required this.colors,
+    required this.context,
   });
 
   final int statusId;
   final String homeLogo;
   final String awayLogo;
-  final List<int> homeQuarterScores;
-  final List<int> awayQuarterScores;
+  final List<int> homeQ;
+  final List<int> awayQ;
   final int homeTotal;
   final int awayTotal;
+  final AppColors colors;
+  final BuildContext context;
 
-  /// Returns 0-based index of the currently active quarter, or null.
-  int? get _activeQuarterIndex {
-    switch (statusId) {
-      case 2:
-        return 0;
-      case 4:
-        return 1;
-      case 6:
-        return 2;
-      case 8:
-        return 3;
-      case 9:
-      case 13:
-        return 4;
-      default:
-        return null;
-    }
+  int? get _activeIdx {
+    return switch (statusId) {
+      2 => 0, 4 => 1, 6 => 2, 8 => 3, 9 || 13 => 4, _ => null,
+    };
   }
 
-  /// Whether a quarter at [index] has been reached (score should be shown).
-  bool _quarterReached(int index) {
-    if (statusId >= 10) return true; // ended
-    if (index == 4) return statusId >= 9; // OT
-    return statusId >= 2 + index * 2;
+  bool _reached(int i) {
+    if (statusId >= 10) return true;
+    if (i == 4) return statusId >= 9;
+    return statusId >= 2 + i * 2;
   }
 
   bool get _showOT {
-    final hasOtScore =
-        (homeQuarterScores.length > 4 && homeQuarterScores[4] > 0) ||
-            (awayQuarterScores.length > 4 && awayQuarterScores[4] > 0);
-    return statusId == 9 || hasOtScore;
+    final hasOt = (homeQ.length > 4 && homeQ[4] > 0) ||
+        (awayQ.length > 4 && awayQ[4] > 0);
+    return statusId == 9 || hasOt;
   }
 
   @override
-  Widget build(BuildContext context) {
-    final quarterKeys = [
-      'event.basketball.detail.q1',
-      'event.basketball.detail.q2',
-      'event.basketball.detail.q3',
-      'event.basketball.detail.q4',
-      if (_showOT) 'event.basketball.detail.ot',
+  Widget build(BuildContext _) {
+    final quarters = [
+      'event.basketball.detail.q1'.tr(),
+      'event.basketball.detail.q2'.tr(),
+      'event.basketball.detail.q3'.tr(),
+      'event.basketball.detail.q4'.tr(),
+      if (_showOT) 'event.basketball.detail.ot'.tr(),
     ];
-    final activeIdx = _activeQuarterIndex;
+    final activeIdx = _activeIdx;
 
     return Container(
-      color: context.appColors.surface,
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: colors.line, width: 0.5),
+      ),
       child: Column(
         children: [
-          // Header row
+          // Header
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
             child: Row(
               children: [
-                const SizedBox(width: 32), // logo placeholder
-                ...List.generate(quarterKeys.length, (i) {
+                const SizedBox(width: 32),
+                ...List.generate(quarters.length, (i) {
                   final isActive = i == activeIdx;
                   return Expanded(
                     child: Text(
-                      quarterKeys[i].tr(),
+                      quarters[i],
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: isActive ? context.appColors.accent : context.appColors.text2,
+                      style: AppTextStyles.mono(9).copyWith(
+                        color: isActive ? colors.accent : colors.text3,
+                        letterSpacing: 0.12 * 9,
                       ),
                     ),
                   );
@@ -474,35 +535,26 @@ class _QuarterScoreTable extends StatelessWidget {
                   child: Text(
                     'event.basketball.detail.total'.tr(),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: context.appColors.text2,
+                    style: AppTextStyles.mono(9).copyWith(
+                      color: colors.accent,
+                      letterSpacing: 0.12 * 9,
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerBase),
-          // Home row
+          Divider(height: 0.5, thickness: 0.5, color: colors.line),
           _ScoreRow(
-            logo: homeLogo,
-            quarterScores: homeQuarterScores,
-            total: homeTotal,
-            showOT: _showOT,
-            activeIdx: activeIdx,
-            quarterReached: _quarterReached,
+            logo: homeLogo, scores: homeQ, total: homeTotal,
+            showOT: _showOT, activeIdx: activeIdx, reached: _reached,
+            colors: colors, context: context, isLast: false,
           ),
-          Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerHighlight),
-          // Away row
+          Divider(height: 0.5, thickness: 0.5, color: colors.line),
           _ScoreRow(
-            logo: awayLogo,
-            quarterScores: awayQuarterScores,
-            total: awayTotal,
-            showOT: _showOT,
-            activeIdx: activeIdx,
-            quarterReached: _quarterReached,
+            logo: awayLogo, scores: awayQ, total: awayTotal,
+            showOT: _showOT, activeIdx: activeIdx, reached: _reached,
+            colors: colors, context: context, isLast: true,
           ),
         ],
       ),
@@ -513,31 +565,37 @@ class _QuarterScoreTable extends StatelessWidget {
 class _ScoreRow extends StatelessWidget {
   const _ScoreRow({
     required this.logo,
-    required this.quarterScores,
+    required this.scores,
     required this.total,
     required this.showOT,
     required this.activeIdx,
-    required this.quarterReached,
+    required this.reached,
+    required this.colors,
+    required this.context,
+    required this.isLast,
   });
 
   final String logo;
-  final List<int> quarterScores;
+  final List<int> scores;
   final int total;
   final bool showOT;
   final int? activeIdx;
-  final bool Function(int index) quarterReached;
+  final bool Function(int) reached;
+  final AppColors colors;
+  final BuildContext context;
+  final bool isLast;
 
-  String _scoreAt(int index) {
-    if (!quarterReached(index)) return '-';
-    if (index >= quarterScores.length) return '-';
-    return '${quarterScores[index]}';
+  String _at(int i) {
+    if (!reached(i)) return '-';
+    if (i >= scores.length) return '-';
+    return '${scores[i]}';
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext _) {
     final colCount = showOT ? 5 : 4;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       child: Row(
         children: [
           SportLogo(url: logo, size: 24),
@@ -545,12 +603,11 @@ class _ScoreRow extends StatelessWidget {
             final isActive = i == activeIdx;
             return Expanded(
               child: Text(
-                _scoreAt(i),
+                _at(i),
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13,
+                style: AppTextStyles.mono(13).copyWith(
+                  color: isActive ? colors.accent : colors.text,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? context.appColors.accent : context.appColors.text,
                 ),
               ),
             );
@@ -560,69 +617,8 @@ class _ScoreRow extends StatelessWidget {
             child: Text(
               '$total',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                color: context.appColors.accent,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Stats ────────────────────────────────────────────────────────────────────
-
-class _BasketballStatRow extends StatelessWidget {
-  const _BasketballStatRow({
-    required this.stat,
-    this.isPlaceholder = false,
-  });
-
-  final BasketballStat stat;
-  final bool isPlaceholder;
-
-  String _getDisplay(double value) {
-    if (isPlaceholder || value.isNaN) return '-';
-    if (value == value.truncateToDouble()) return value.toInt().toString();
-    return value.toStringAsFixed(1);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final homeDisplay = _getDisplay(stat.homeValue);
-    final awayDisplay = _getDisplay(stat.awayValue);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: context.appColors.shimmerBase, width: 0.5)),
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 60,
-            child: Text(
-              homeDisplay,
-              style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-              textAlign: TextAlign.left,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              stat.labelKey.isNotEmpty ? stat.labelKey.tr() : '${stat.typeCode}',
-              textAlign: TextAlign.center,
-              style: context.textTheme.bodySmall?.copyWith(color: context.appColors.text2),
-            ),
-          ),
-          SizedBox(
-            width: 60,
-            child: Text(
-              awayDisplay,
-              style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-              textAlign: TextAlign.right,
+              style: AppTextStyles.display(18, context)
+                  .copyWith(color: colors.accent),
             ),
           ),
         ],
@@ -660,48 +656,44 @@ class _SquadTabState extends ConsumerState<_SquadTab>
 
   @override
   Widget build(BuildContext context) {
-    final detail =
-        ref.watch(matchDetailProvider(sport: SportType.basketball, matchId: widget.matchId)).valueOrNull as BasketballMatchDetail?;
+    final colors = context.appColors;
+    final detail = ref
+        .watch(matchDetailProvider(sport: SportType.basketball, matchId: widget.matchId))
+        .valueOrNull as BasketballMatchDetail?;
 
     final homeTeamId = detail?.homeTeamId ?? '';
     final awayTeamId = detail?.awayTeamId ?? '';
-    final homeLogo = detail?.homeInfo.logo ?? '';
-    final awayLogo = detail?.awayInfo.logo ?? '';
-    final homeName = detail?.homeName ?? '';
-    final awayName = detail?.awayName ?? '';
 
     if (homeTeamId.isEmpty && awayTeamId.isEmpty) {
-      return Center(child: CircularProgressIndicator(color: context.appColors.accent));
+      return Center(
+        child: CircularProgressIndicator(color: colors.accent),
+      );
     }
 
     return Column(
       children: [
         Container(
-          margin: const EdgeInsets.all(12),
+          margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
           decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(20)),
-            border: Border.all(width: 1, color: context.appColors.shimmerBase),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: colors.line, width: 0.5),
           ),
           child: TabBar(
+            controller: _tabController,
             dividerColor: Colors.transparent,
             indicatorWeight: 0,
-            controller: _tabController,
             indicator: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: context.appColors.accent,
+              borderRadius: BorderRadius.circular(8),
+              color: colors.accent,
             ),
             indicatorSize: TabBarIndicatorSize.tab,
-            labelStyle: TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
-            unselectedLabelColor: Colors.grey,
-            splashBorderRadius: BorderRadius.circular(20),
+            labelColor: const Color(0xFF0E0E0E),
+            unselectedLabelColor: colors.text2,
+            splashBorderRadius: BorderRadius.circular(8),
             padding: const EdgeInsets.all(3),
             tabs: [
-              _TeamTab(logo: homeLogo, name: homeName),
-              _TeamTab(logo: awayLogo, name: awayName),
+              _TeamTab(logo: detail?.homeInfo.logo, name: detail?.homeName ?? ''),
+              _TeamTab(logo: detail?.awayInfo.logo, name: detail?.awayName ?? ''),
             ],
           ),
         ),
@@ -722,25 +714,21 @@ class _SquadTabState extends ConsumerState<_SquadTab>
 class _TeamTab extends StatelessWidget {
   const _TeamTab({required this.logo, required this.name});
 
-  final String logo;
+  final String? logo;
   final String name;
 
   @override
   Widget build(BuildContext context) {
     return Tab(
-      child: Text.rich(
-        TextSpan(
-          children: [
-            WidgetSpan(
-              alignment: PlaceholderAlignment.middle,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: SportLogo(url: logo, size: 20),
-              ),
-            ),
-            TextSpan(text: name),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (logo != null) ...[
+            SportLogo(url: logo!, size: 18),
+            const SizedBox(width: 6),
           ],
-        ),
+          Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
+        ],
       ),
     );
   }
@@ -753,33 +741,31 @@ class _TeamSquadList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final squadAsync =
-        ref.watch(basketballTeamSquadProvider(teamId: teamId));
+    final colors = context.appColors;
+    final squadAsync = ref.watch(basketballTeamSquadProvider(teamId: teamId));
 
     return squadAsync.when(
       loading: () =>
-          Center(child: CircularProgressIndicator(color: context.appColors.accent)),
-      error: (e, st) {
-        debugPrint('$e\n$st');
-        return Center(
-          child: Text(
-            'event.error.load_failed'.tr(),
-            style: TextStyle(color: Colors.grey.shade500),
-          ),
-        );
-      },
+          Center(child: CircularProgressIndicator(color: colors.accent)),
+      error: (_, __) => Center(
+        child: Text(
+          'event.error.load_failed'.tr(),
+          style: TextStyle(color: colors.text3),
+        ),
+      ),
       data: (players) {
         if (players.isEmpty) {
           return Center(
             child: Text(
               'event.basketball.detail.no_squad'.tr(),
-              style: TextStyle(color: Colors.grey.shade500),
+              style: TextStyle(color: colors.text3),
             ),
           );
         }
         return ListView.builder(
           itemCount: players.length,
-          itemBuilder: (context, i) => _PlayerRow(player: players[i]),
+          itemBuilder: (context, i) =>
+              _PlayerRow(player: players[i], colors: colors, context: context),
         );
       },
     );
@@ -787,17 +773,22 @@ class _TeamSquadList extends ConsumerWidget {
 }
 
 class _PlayerRow extends StatelessWidget {
-  const _PlayerRow({required this.player});
+  const _PlayerRow({
+    required this.player,
+    required this.colors,
+    required this.context,
+  });
 
   final BasketballPlayer player;
+  final AppColors colors;
+  final BuildContext context;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext _) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       decoration: BoxDecoration(
-        color: context.appColors.surface,
-        border: Border(bottom: BorderSide(color: context.appColors.shimmerHighlight, width: 0.5)),
+        border: Border(bottom: BorderSide(color: colors.line, width: 0.5)),
       ),
       child: Row(
         children: [
@@ -805,16 +796,15 @@ class _PlayerRow extends StatelessWidget {
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: context.appColors.accent.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
+              color: colors.accent.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(5),
             ),
             alignment: Alignment.center,
             child: Text(
               '${player.shirtNumber}',
-              style: TextStyle(
-                fontSize: 11,
+              style: AppTextStyles.mono(11).copyWith(
+                color: colors.accent,
                 fontWeight: FontWeight.w700,
-                color: context.appColors.accent,
               ),
             ),
           ),
@@ -827,7 +817,7 @@ class _PlayerRow extends StatelessWidget {
               children: [
                 Text(
                   player.displayName,
-                  style: TextStyle(fontSize: 13),
+                  style: TextStyle(fontSize: 13, color: colors.text),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -837,7 +827,7 @@ class _PlayerRow extends StatelessWidget {
                       if (player.height > 0) '${player.height}cm',
                       if (player.weight > 0) '${player.weight}kg',
                     ].join(' / '),
-                    style: TextStyle(fontSize: 11, color: context.appColors.text2),
+                    style: AppTextStyles.mono(10).copyWith(color: colors.text3),
                   ),
               ],
             ),
@@ -845,11 +835,10 @@ class _PlayerRow extends StatelessWidget {
           if (player.position.isNotEmpty)
             Text(
               player.position,
-              style: TextStyle(fontSize: 11, color: context.appColors.text2),
+              style: AppTextStyles.mono(10).copyWith(color: colors.text2),
             ),
         ],
       ),
     );
   }
 }
-

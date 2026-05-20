@@ -1,4 +1,4 @@
-package com.tiyu2.tiyu
+package com.arena.tiyu
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -3,58 +3,43 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/match_detail_appbar.dart';
 
 /// Base state for all sport detail screens.
-///
-/// Subclasses provide sport-specific providers and tab content.
-/// The shared lifecycle (realtime registration, events timer, status listener)
-/// and the outer scaffold shell are handled here.
 abstract class SportDetailScaffoldState<T extends ConsumerStatefulWidget>
     extends ConsumerState<T> {
   Timer? _eventsTimer;
   SportRealtime? _realtimeNotifier;
 
-  // ── Abstract interface ──────────────────────────────────────────────────────
-
   String get matchId;
   SportType get sportType;
   Duration get eventsRefreshInterval;
 
-  /// Invalidate the sport's events provider. Called on each timer tick.
-  ///
-  /// Override to add sport-specific extra invalidations (e.g. lineups).
-  /// Call [super.onEventsTimerTick] to preserve the default events invalidation.
   void onEventsTimerTick() {
     ref.invalidate(matchEventsProvider(sport: sportType, matchId: matchId));
   }
 
-  /// Invalidate the sport's detail and events providers. Called when status changes.
-  ///
-  /// Override to add sport-specific extra invalidations (e.g. lineups).
-  /// Call [super.onStatusChanged] to preserve the default invalidations.
   void onStatusChanged() {
     ref.invalidate(matchDetailProvider(sport: sportType, matchId: matchId));
     ref.invalidate(matchEventsProvider(sport: sportType, matchId: matchId));
   }
 
-  /// Called within [build]. Must call ref.watch for the detail provider and
-  /// return (leagueName, matchTimestamp) for the AppBar.
+  /// Return (leagueName, matchTimestamp) — called inside build().
   (String?, int?) watchDetail();
 
-  /// Sport-specific match header widget shown above the tab bar.
-  Widget buildHeader(BuildContext context);
+  /// Sport-specific header (gradient shell + score). Receives leagueName and
+  /// matchTimestamp so they can be forwarded to [SportDetailHeaderShell].
+  Widget buildHeader(
+    BuildContext context, {
+    String? leagueName,
+    int? matchTimestamp,
+  });
 
-  /// Tab bar tab definitions.
   List<Tab> buildTabs(BuildContext context);
-
-  /// Tab view children — must be the same length as [buildTabs].
   List<Widget> buildTabViews(BuildContext context);
-
-  // ── Lifecycle ───────────────────────────────────────────────────────────────
 
   @override
   void initState() {
@@ -77,11 +62,11 @@ abstract class SportDetailScaffoldState<T extends ConsumerStatefulWidget>
     super.dispose();
   }
 
-  // ── Build ───────────────────────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
     final (leagueName, matchTimestamp) = watchDetail();
+    final colors = context.appColors;
+    final tabs = buildTabs(context);
 
     ref.listen(
       sportRealtimeProvider(sportType).select((map) => map[matchId]?.statusId),
@@ -92,32 +77,40 @@ abstract class SportDetailScaffoldState<T extends ConsumerStatefulWidget>
       },
     );
 
-    final tabs = buildTabs(context);
-
-    return DefaultTabController(
-      length: tabs.length,
-      child: Scaffold(
-        appBar: MatchDetailAppBar(
-          leagueName: leagueName ?? '',
-          matchTimestamp: matchTimestamp,
-        ),
-        body: Column(
+    return Scaffold(
+      backgroundColor: colors.ink,
+      body: DefaultTabController(
+        length: tabs.length,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            buildHeader(context),
+            buildHeader(
+              context,
+              leagueName: leagueName,
+              matchTimestamp: matchTimestamp,
+            ),
             Container(
-              color: context.appColors.surface,
+              color: colors.surface,
               child: TabBar(
-                labelColor: context.appColors.accent,
-                unselectedLabelColor: Colors.grey.shade600,
-                indicatorColor: context.appColors.accent,
+                labelStyle: AppTextStyles.display(13, context).copyWith(
+                  letterSpacing: 0.04 * 13,
+                ),
+                unselectedLabelStyle:
+                    AppTextStyles.display(13, context).copyWith(
+                  letterSpacing: 0.04 * 13,
+                ),
+                labelColor: colors.text,
+                unselectedLabelColor: colors.text3,
+                indicatorColor: colors.accent,
                 indicatorWeight: 2,
+                indicatorSize: TabBarIndicatorSize.tab,
+                dividerColor: colors.line,
+                dividerHeight: 0.5,
                 tabs: tabs,
               ),
             ),
             Expanded(
-              child: TabBarView(
-                children: buildTabViews(context),
-              ),
+              child: TabBarView(children: buildTabViews(context)),
             ),
           ],
         ),

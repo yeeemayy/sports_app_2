@@ -722,7 +722,10 @@
         "stat_leg_byes": "腿部偏挡得分",
         "stat_penalty": "罚分",
         "stat_no_balls": "废球",
-        "stat_extra": "附加分"
+        "stat_extra": "附加分",
+        "col_runs": "得分",
+        "col_wickets": "出局",
+        "col_overs": "投球"
       }
     }
   },
@@ -801,5 +804,13 @@
       "sms_required": "请输入验证码",
       "confirm_password_mismatch": "两次密码输入不一致"
     }
+  },
+  "prediction": {
+    "title": "球迷预测",
+    "picks": "{n}人预测",
+    "team_win": "{team} 胜",
+    "draw": "平局",
+    "locked": "● 赛事已结束 · 预测已关闭",
+    "login_required": "登录后参与预测"
   }
 }

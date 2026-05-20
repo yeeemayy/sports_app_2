@@ -722,7 +722,10 @@
         "stat_leg_byes": "Leg Byes",
         "stat_penalty": "Penalty",
         "stat_no_balls": "No Ball",
-        "stat_extra": "Extra"
+        "stat_extra": "Extra",
+        "col_runs": "R",
+        "col_wickets": "W",
+        "col_overs": "Ov"
       }
     }
   },
@@ -801,5 +804,13 @@
       "sms_required": "Please enter the verification code",
       "confirm_password_mismatch": "Passwords do not match"
     }
+  },
+  "prediction": {
+    "title": "FAN PREDICTION",
+    "picks": "{n} PICKS",
+    "team_win": "{team} WIN",
+    "draw": "DRAW",
+    "locked": "● MATCH ENDED · VOTING CLOSED",
+    "login_required": "LOGIN TO PREDICT"
   }
 }

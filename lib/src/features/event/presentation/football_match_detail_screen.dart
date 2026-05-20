@@ -13,21 +13,27 @@ import 'package:sports_app/src/features/event/presentation/providers/event_provi
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_header_shell.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
-import 'package:sports_app/src/shared_widgets/match_status_badge.dart';
+import 'package:sports_app/src/features/prediction/presentation/widgets/fan_prediction_card.dart';
+import 'package:sports_app/src/shared_widgets/arena_stat_bar.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
-import 'package:timeline_tile/timeline_tile.dart';
 
 class FootballMatchDetailScreen extends ConsumerStatefulWidget {
-  const FootballMatchDetailScreen({super.key, required this.matchId, this.initialMatch});
+  const FootballMatchDetailScreen({
+    super.key,
+    required this.matchId,
+    this.initialMatch,
+  });
 
   final String matchId;
   final FootballMatch? initialMatch;
 
   @override
-  ConsumerState<FootballMatchDetailScreen> createState() => _FootballMatchDetailScreenState();
+  ConsumerState<FootballMatchDetailScreen> createState() =>
+      _FootballMatchDetailScreenState();
 }
 
-class _FootballMatchDetailScreenState extends SportDetailScaffoldState<FootballMatchDetailScreen> {
+class _FootballMatchDetailScreenState
+    extends SportDetailScaffoldState<FootballMatchDetailScreen> {
   @override
   String get matchId => widget.matchId;
 
@@ -45,9 +51,9 @@ class _FootballMatchDetailScreenState extends SportDetailScaffoldState<FootballM
 
   @override
   (String?, int?) watchDetail() {
-    final v =
-        ref.watch(matchDetailProvider(sport: SportType.football, matchId: matchId)).valueOrNull
-            as FootballMatchDetail?;
+    final v = ref
+        .watch(matchDetailProvider(sport: SportType.football, matchId: matchId))
+        .valueOrNull as FootballMatchDetail?;
     return (
       v?.leagueName ?? widget.initialMatch?.leagueName,
       v?.matchTime ?? widget.initialMatch?.matchTime,
@@ -55,8 +61,17 @@ class _FootballMatchDetailScreenState extends SportDetailScaffoldState<FootballM
   }
 
   @override
-  Widget buildHeader(BuildContext context) =>
-      _MatchHeader(matchId: matchId, initialMatch: widget.initialMatch);
+  Widget buildHeader(
+    BuildContext context, {
+    String? leagueName,
+    int? matchTimestamp,
+  }) =>
+      _MatchHeader(
+        matchId: matchId,
+        initialMatch: widget.initialMatch,
+        leagueName: leagueName,
+        matchTimestamp: matchTimestamp,
+      );
 
   @override
   List<Tab> buildTabs(BuildContext context) => [
@@ -67,42 +82,53 @@ class _FootballMatchDetailScreenState extends SportDetailScaffoldState<FootballM
 
   @override
   List<Widget> buildTabViews(BuildContext context) => [
-    _StatsTab(matchId: matchId),
+    _StatsTab(matchId: matchId, initialMatch: widget.initialMatch),
     _EventsTab(matchId: matchId),
     _LineupsTab(matchId: matchId, initialMatch: widget.initialMatch),
   ];
 }
 
-// ─── Match Header ────────────────────────────────────────────────────────────
+// ─── Match Header ─────────────────────────────────────────────────────────────
 
 class _MatchHeader extends ConsumerWidget {
-  const _MatchHeader({required this.matchId, this.initialMatch});
+  const _MatchHeader({
+    required this.matchId,
+    this.initialMatch,
+    this.leagueName,
+    this.matchTimestamp,
+  });
 
   final String matchId;
   final FootballMatch? initialMatch;
+  final String? leagueName;
+  final int? matchTimestamp;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.football, matchId: matchId));
-    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
+    final detailAsync =
+        ref.watch(matchDetailProvider(sport: SportType.football, matchId: matchId));
+    final eventsAsync =
+        ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.football).select((map) => map[matchId] as MatchRealtimeData?),
+      sportRealtimeProvider(SportType.football)
+          .select((map) => map[matchId] as MatchRealtimeData?),
     );
 
     Widget? fallback;
     if (initialMatch != null) {
-      final im = initialMatch!;
-      fallback = _MatchHeaderFallback(match: im, rt: rt);
+      fallback = _HeaderFallback(match: initialMatch!, rt: rt);
     }
 
     return SportDetailHeaderShell<FootballMatchDetail>(
       detailAsync: detailAsync,
+      leagueName: leagueName,
+      matchTimestamp: matchTimestamp,
       fallback: fallback,
       builder: (detail) {
         final effKickoff = (rt != null && rt.kickoffTimestamp != 0)
             ? rt.kickoffTimestamp
             : (eventsAsync.valueOrNull as FootballMatchEvents?)?.kickoffTimestamp;
-        return _MatchHeaderContent(
+        return _HeaderContent(
           detail: detail,
           kickoffTimestamp: effKickoff,
           rtStatusId: rt?.statusId,
@@ -116,99 +142,38 @@ class _MatchHeader extends ConsumerWidget {
   }
 }
 
-class _MatchHeaderFallback extends StatelessWidget {
-  const _MatchHeaderFallback({required this.match, this.rt});
+class _HeaderFallback extends StatelessWidget {
+  const _HeaderFallback({required this.match, this.rt});
 
   final FootballMatch match;
   final MatchRealtimeData? rt;
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final effStatusId = rt?.statusId ?? match.statusId;
-    final effHomeScore = rt?.homeScore.toString() ?? match.homeScore;
-    final effAwayScore = rt?.awayScore.toString() ?? match.awayScore;
-    final effHomeHt =
-        rt?.homeHtScore ?? (match.htHomeScore != null ? int.tryParse(match.htHomeScore!) : null);
-    final effAwayHt =
-        rt?.awayHtScore ?? (match.htAwayScore != null ? int.tryParse(match.htAwayScore!) : null);
+    final effHome = rt?.homeScore.toString() ?? match.homeScore;
+    final effAway = rt?.awayScore.toString() ?? match.awayScore;
+    final isNoScore = const {0, 1, 13}.contains(effStatusId);
 
-    return Column(
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Column(
-                children: [
-                  SportLogo(url: match.homeLogo, size: 40),
-                  const SizedBox(height: 6),
-                  Text(
-                    match.homeName,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Column(
-                children: [
-                  MatchStatusBadge(
-                    statusId: effStatusId,
-                    label: match.statusLabel,
-                    liveColor: Colors.white,
-                    staticColor: Colors.grey.shade200,
-                  ),
-                  _ScoreOrStatus(
-                    statusId: effStatusId,
-                    homeScore: effHomeScore,
-                    awayScore: effAwayScore,
-                  ),
-                  const SizedBox(height: 4),
-                  if (effStatusId != 1 &&
-                      effStatusId != 8 &&
-                      effHomeHt != null &&
-                      effAwayHt != null)
-                    Text(
-                      '${'event.football.ht'.tr()} $effHomeHt-$effAwayHt',
-                      style: context.textTheme.labelSmall?.copyWith(color: Colors.grey.shade300),
-                    ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Column(
-                children: [
-                  SportLogo(url: match.awayLogo, size: 40),
-                  const SizedBox(height: 6),
-                  Text(
-                    match.awayName,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ],
+    return _ScoreRow(
+      homeLogo: match.homeLogo,
+      homeName: match.homeName,
+      awaLogo: match.awayLogo,
+      awayName: match.awayName,
+      homeScore: isNoScore ? '–' : effHome,
+      awayScore: isNoScore ? '–' : effAway,
+      statusLabel: match.statusLabel,
+      statusColor: _statusColor(effStatusId, colors),
+      subLabel: null,
+      colors: colors,
+      context: context,
     );
   }
 }
 
-class _MatchHeaderContent extends StatelessWidget {
-  const _MatchHeaderContent({
+class _HeaderContent extends StatelessWidget {
+  const _HeaderContent({
     required this.detail,
     this.kickoffTimestamp,
     this.rtStatusId,
@@ -228,196 +193,288 @@ class _MatchHeaderContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int effStatusId = rtStatusId ?? detail.statusId;
-    final String effHomeScore = rtHomeScore?.toString() ?? detail.homeScore;
-    final String effAwayScore = rtAwayScore?.toString() ?? detail.awayScore;
-    final int? effHomeHtScore = rtHomeHtScore ?? detail.homeInfo.halfTimeScore;
-    final int? effAwayHtScore = rtAwayHtScore ?? detail.awayInfo.halfTimeScore;
+    final colors = context.appColors;
+    final effStatusId = rtStatusId ?? detail.statusId;
+    final effHome = rtHomeScore?.toString() ?? detail.homeScore;
+    final effAway = rtAwayScore?.toString() ?? detail.awayScore;
+    final effHomeHt = rtHomeHtScore ?? detail.homeInfo.halfTimeScore;
+    final effAwayHt = rtAwayHtScore ?? detail.awayInfo.halfTimeScore;
+    final isNoScore = const {0, 1, 13}.contains(effStatusId);
 
+    String? subLabel;
+    if (effStatusId != 1 &&
+        effStatusId != 8 &&
+        effHomeHt != null &&
+        effAwayHt != null) {
+      subLabel = '${'event.football.ht'.tr()} $effHomeHt-$effAwayHt';
+    }
+    if (detail.environment != null) {
+      final env = detail.environment!;
+      final parts = <String>[
+        if (env.temperature != null) env.temperature!,
+        if (env.wind != null) env.wind!,
+      ];
+      if (parts.isNotEmpty && subLabel == null) subLabel = parts.join(' · ');
+    }
+
+    return _ScoreRow(
+      homeLogo: detail.homeInfo.logo,
+      homeName: detail.homeName,
+      awaLogo: detail.awayInfo.logo,
+      awayName: detail.awayName,
+      homeScore: isNoScore ? '–' : effHome,
+      awayScore: isNoScore ? '–' : effAway,
+      statusLabel: detail.statusLabel(kickoffTimestamp: kickoffTimestamp),
+      statusColor: _statusColor(effStatusId, colors),
+      subLabel: subLabel,
+      colors: colors,
+      context: context,
+    );
+  }
+}
+
+Color _statusColor(int statusId, AppColors colors) {
+  if (const {2, 3, 4, 5, 6, 7}.contains(statusId)) return colors.live;
+  if (statusId == 8) return colors.text3;
+  if (const {9, 10, 11, 12}.contains(statusId)) return colors.danger;
+  return colors.text3;
+}
+
+class _ScoreRow extends StatelessWidget {
+  const _ScoreRow({
+    required this.homeLogo,
+    required this.homeName,
+    required this.awaLogo,
+    required this.awayName,
+    required this.homeScore,
+    required this.awayScore,
+    required this.statusLabel,
+    required this.statusColor,
+    required this.subLabel,
+    required this.colors,
+    required this.context,
+  });
+
+  final String homeLogo;
+  final String homeName;
+  final String awaLogo;
+  final String awayName;
+  final String homeScore;
+  final String awayScore;
+  final String statusLabel;
+  final Color statusColor;
+  final String? subLabel;
+  final AppColors colors;
+  final BuildContext context;
+
+  @override
+  Widget build(BuildContext _) {
     return Column(
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Home team
+            // Home
             Expanded(
+              flex: 2,
               child: Column(
                 children: [
-                  SportLogo(url: detail.homeInfo.logo, size: 40),
+                  SportLogo(url: homeLogo, size: 52),
                   const SizedBox(height: 6),
                   Text(
-                    detail.homeName,
+                    homeName.toUpperCase(),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: context.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+                    style: AppTextStyles.display(13, context)
+                        .copyWith(color: colors.text),
                   ),
                 ],
               ),
             ),
-            // Score / status
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+            // Score centre
+            Expanded(
+              flex: 3,
               child: Column(
                 children: [
-                  MatchStatusBadge(
-                    statusId: effStatusId,
-                    label: detail.statusLabel(kickoffTimestamp: kickoffTimestamp),
-                    liveColor: Colors.white,
-                    staticColor: Colors.grey.shade200,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusColor,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      statusLabel.toUpperCase(),
+                      style: AppTextStyles.display(11, context).copyWith(
+                        color: const Color(0xFF0E0E0E),
+                        letterSpacing: 0.1 * 11,
+                      ),
+                    ),
                   ),
-                  _ScoreOrStatus(
-                    statusId: effStatusId,
-                    homeScore: effHomeScore,
-                    awayScore: effAwayScore,
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        homeScore,
+                        style: AppTextStyles.display(56, context)
+                            .copyWith(color: colors.text),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: Text(
+                          ':',
+                          style: AppTextStyles.display(28, context)
+                              .copyWith(color: colors.text3),
+                        ),
+                      ),
+                      Text(
+                        awayScore,
+                        style: AppTextStyles.display(56, context)
+                            .copyWith(color: colors.text),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  if (effStatusId != 1 &&
-                      effStatusId != 8 &&
-                      effHomeHtScore != null &&
-                      effAwayHtScore != null)
-                    Text(
-                      '${'event.football.ht'.tr()} $effHomeHtScore-$effAwayHtScore',
-                      style: context.textTheme.labelSmall?.copyWith(color: Colors.grey.shade300),
+                  if (subLabel != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        subLabel!.toUpperCase(),
+                        style: AppTextStyles.mono(9).copyWith(
+                          color: colors.text3,
+                          letterSpacing: 0.14 * 9,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                 ],
               ),
             ),
-            // Away team
+            // Away
             Expanded(
+              flex: 2,
               child: Column(
                 children: [
-                  SportLogo(url: detail.awayInfo.logo, size: 40),
+                  SportLogo(url: awaLogo, size: 52),
                   const SizedBox(height: 6),
                   Text(
-                    detail.awayName,
+                    awayName.toUpperCase(),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: context.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+                    style: AppTextStyles.display(13, context)
+                        .copyWith(color: colors.text),
                   ),
                 ],
               ),
             ),
           ],
         ),
-        if (detail.environment != null) ...[
-          const SizedBox(height: 10),
-          _EnvironmentRow(env: detail.environment!),
-        ],
       ],
     );
   }
 }
 
-class _EnvironmentRow extends StatelessWidget {
-  const _EnvironmentRow({required this.env});
+// ─── Stats Tab ────────────────────────────────────────────────────────────────
 
-  final FootballMatchEnvironment env;
+class _StatsTab extends ConsumerWidget {
+  const _StatsTab({required this.matchId, this.initialMatch});
+
+  final String matchId;
+  final FootballMatch? initialMatch;
+
+  static const _minimalTypeCodes = [
+    '2', '3', '4', '8', '21', '22', '23', '24', '25',
+  ];
 
   @override
-  Widget build(BuildContext context) {
-    final items = <({IconData icon, String label, String value})>[];
-    if (env.pressure != null) {
-      items.add((
-        icon: Icons.compress,
-        label: 'event.football.detail.environment.pressure'.tr(),
-        value: env.pressure!,
-      ));
-    }
-    if (env.temperature != null) {
-      items.add((
-        icon: Icons.thermostat,
-        label: 'event.football.detail.environment.temperature'.tr(),
-        value: env.temperature!,
-      ));
-    }
-    if (env.wind != null) {
-      items.add((
-        icon: Icons.air,
-        label: 'event.football.detail.environment.wind'.tr(),
-        value: env.wind!,
-      ));
-    }
-    if (env.humidity != null) {
-      items.add((
-        icon: Icons.water_drop,
-        label: 'event.football.detail.environment.humidity'.tr(),
-        value: env.humidity!,
-      ));
-    }
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.appColors;
+    final eventsAsync =
+        ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
+    final detailAsync =
+        ref.watch(matchDetailProvider(sport: SportType.football, matchId: matchId));
 
-    if (items.isEmpty) return const SizedBox.shrink();
+    final detail = detailAsync.valueOrNull as FootballMatchDetail?;
+    final effStatusId = detail?.statusId ??
+        initialMatch?.statusId ?? 1;
+    final isEnded = effStatusId >= 8;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: items.map((item) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(item.icon, size: 12, color: Colors.white70),
-              const SizedBox(width: 3),
-              Text(
-                '${item.label} ${item.value}',
-                style: context.textTheme.labelSmall?.copyWith(color: Colors.white70, fontSize: 10),
+    final homeName = detail?.homeName ??
+        initialMatch?.homeName ?? '';
+    final awayName = detail?.awayName ??
+        initialMatch?.awayName ?? '';
+
+    return eventsAsync.when(
+      loading: () =>
+          Center(child: CircularProgressIndicator(color: colors.accent)),
+      error: (_, __) => Center(
+        child: Text(
+          'event.error.load_failed'.tr(),
+          style: TextStyle(color: colors.text3),
+        ),
+      ),
+      data: (obj) {
+        final events = obj as FootballMatchEvents?;
+        final apiStats = events?.stats
+                .where((s) => s.label != null && s.label!.isNotEmpty)
+                .toList() ??
+            [];
+        final apiByLabel = {for (final s in apiStats) s.label!: s};
+
+        final displayStats = _minimalTypeCodes.map((code) {
+          final label = 'event.football.detail.incident_type.$code'.tr();
+          return apiByLabel[label] ?? MatchStat(label: label, home: 0, away: 0);
+        }).toList();
+        final minimalLabels = displayStats.map((s) => s.label).toSet();
+        for (final s in apiStats) {
+          if (!minimalLabels.contains(s.label)) displayStats.add(s);
+        }
+
+        return ListView(
+          padding: const EdgeInsets.only(bottom: 24),
+          children: [
+            FanPredictionCard(
+              matchId: matchId,
+              homeName: homeName,
+              awayName: awayName,
+              hasDraw: true,
+              isMatchEnded: isEnded,
+            ),
+            if (displayStats.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
+                child: Row(
+                  children: [
+                    Text(
+                      'event.football.detail.stats'.tr().toUpperCase(),
+                      style: AppTextStyles.display(18, context)
+                          .copyWith(color: colors.text),
+                    ),
+                  ],
+                ),
+              ),
+              ...displayStats.map(
+                (s) => ArenaStatBar(
+                  label: s.label!,
+                  home: s.home,
+                  away: s.away,
+                ),
               ),
             ],
-          ),
+          ],
         );
-      }).toList(),
+      },
     );
   }
 }
 
-class _ScoreOrStatus extends StatelessWidget {
-  const _ScoreOrStatus({required this.statusId, required this.homeScore, required this.awayScore});
-
-  final int statusId;
-  final String homeScore;
-  final String awayScore;
-
-  static const _noScoreStatuses = {0, 1, 13};
-
-  @override
-  Widget build(BuildContext context) {
-    if (_noScoreStatuses.contains(statusId)) {
-      return Text(
-        '-',
-        style: context.textTheme.headlineSmall?.copyWith(
-          color: Colors.grey.shade400,
-          fontWeight: FontWeight.w900,
-        ),
-      );
-    }
-
-    return RichText(
-      text: TextSpan(
-        style: context.textTheme.headlineSmall?.copyWith(
-          fontWeight: FontWeight.w900,
-          color: Colors.white,
-        ),
-        children: [
-          TextSpan(text: homeScore),
-          TextSpan(
-            text: ' - ',
-            style: TextStyle(color: Colors.grey.shade200),
-          ),
-          TextSpan(text: awayScore),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Events Tab ──────────────────────────────────────────────────────────────
+// ─── Events Tab ───────────────────────────────────────────────────────────────
 
 class _EventsTab extends ConsumerWidget {
   const _EventsTab({required this.matchId});
@@ -426,115 +483,103 @@ class _EventsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
+    final colors = context.appColors;
+    final eventsAsync =
+        ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
 
     return eventsAsync.when(
-      loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
-      error: (e, st) {
-        debugPrint('$e\n$st');
-        return Center(
-          child: Text(
-            'event.error.load_failed'.tr(),
-            style: TextStyle(color: Colors.grey.shade500),
-          ),
-        );
-      },
+      loading: () =>
+          Center(child: CircularProgressIndicator(color: colors.accent)),
+      error: (_, __) => Center(
+        child: Text(
+          'event.error.load_failed'.tr(),
+          style: TextStyle(color: colors.text3),
+        ),
+      ),
       data: (obj) {
         final events = obj as FootballMatchEvents?;
         if (events == null || events.incidents.isEmpty) {
           return Center(
             child: Text(
               'event.football.detail.no_events'.tr(),
-              style: TextStyle(color: Colors.grey.shade500),
+              style: TextStyle(color: colors.text3),
             ),
           );
         }
-        return _IncidentTimeline(incidents: events.incidents);
+        return _IncidentList(incidents: events.incidents);
       },
     );
   }
 }
 
-class _IncidentTimeline extends StatelessWidget {
-  const _IncidentTimeline({required this.incidents});
+class _IncidentList extends StatelessWidget {
+  const _IncidentList({required this.incidents});
 
   final List<MatchIncident> incidents;
 
-  // Types rendered as inline phase markers rather than timeline rows
   static const _phaseTypes = {10, 12, 13, 19, 26, 27};
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final reversed = incidents.reversed.toList();
+
     return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.only(bottom: 24),
       itemCount: reversed.length,
       itemBuilder: (context, index) {
         final incident = reversed[index];
 
-        if (incident.type == 11) return _HalfTimeSeparator();
-        if (_phaseTypes.contains(incident.type)) return _PhaseMarker(incident: incident);
+        if (incident.type == 11) {
+          return _PhaseDivider(
+            label: 'event.football.detail.half_time'.tr(),
+            colors: colors,
+            context: context,
+          );
+        }
+        if (_phaseTypes.contains(incident.type)) {
+          return _PhaseDivider(
+            label: 'event.football.detail.incident_type.${incident.type}'.tr(),
+            colors: colors,
+            context: context,
+          );
+        }
 
         final isHome = incident.position == 1;
-        final isFirst = index == 0;
-        final isLast = index == reversed.length - 1;
-
-        return TimelineTile(
-          alignment: TimelineAlign.center,
-          isFirst: isFirst,
-          isLast: isLast,
-          indicatorStyle: IndicatorStyle(
-            width: 44,
-            height: 24,
-            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-            indicator: _TimeIndicator(time: incident.time),
-          ),
-          beforeLineStyle: LineStyle(color: Colors.grey.shade300, thickness: 1),
-          afterLineStyle: LineStyle(color: Colors.grey.shade300, thickness: 1),
-          startChild: isHome ? _IncidentCell(incident: incident, isHome: true) : null,
-          endChild: !isHome ? _IncidentCell(incident: incident, isHome: false) : null,
+        return _IncidentRow(
+          incident: incident,
+          isHome: isHome,
+          colors: colors,
+          context: context,
         );
       },
     );
   }
 }
 
-class _TimeIndicator extends StatelessWidget {
-  const _TimeIndicator({required this.time});
+class _PhaseDivider extends StatelessWidget {
+  const _PhaseDivider({
+    required this.label,
+    required this.colors,
+    required this.context,
+  });
 
-  final int time;
+  final String label;
+  final AppColors colors;
+  final BuildContext context;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext _) {
     return Container(
-      decoration: BoxDecoration(
-        color: context.appColors.lineStrong,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        "$time'",
-        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: context.appColors.text2),
-      ),
-    );
-  }
-}
-
-class _HalfTimeSeparator extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
+      margin: const EdgeInsets.symmetric(vertical: 2),
       padding: const EdgeInsets.symmetric(vertical: 6),
-      color: context.appColors.shimmerHighlight,
+      color: colors.surface,
       child: Center(
         child: Text(
-          'event.football.detail.half_time'.tr(),
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: context.appColors.shimmerBase,
-            letterSpacing: 0.5,
+          label.toUpperCase(),
+          style: AppTextStyles.mono(10).copyWith(
+            color: colors.text3,
+            letterSpacing: 0.14 * 10,
           ),
         ),
       ),
@@ -542,179 +587,137 @@ class _HalfTimeSeparator extends StatelessWidget {
   }
 }
 
-class _PhaseMarker extends StatelessWidget {
-  const _PhaseMarker({required this.incident});
-
-  final MatchIncident incident;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 2),
-      padding: const EdgeInsets.symmetric(vertical: 5),
-      color: context.appColors.shimmerHighlight,
-      child: Center(
-        child: Text(
-          'event.football.detail.incident_type.${incident.type}'.tr(),
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: Colors.grey.shade500),
-        ),
-      ),
-    );
-  }
-}
-
-class _IncidentCell extends StatelessWidget {
-  const _IncidentCell({required this.incident, required this.isHome});
+class _IncidentRow extends StatelessWidget {
+  const _IncidentRow({
+    required this.incident,
+    required this.isHome,
+    required this.colors,
+    required this.context,
+  });
 
   final MatchIncident incident;
   final bool isHome;
+  final AppColors colors;
+  final BuildContext context;
 
-  @override
-  Widget build(BuildContext context) {
-    final icon = _incidentIcon(incident.type, context);
-    final name = _incidentLabel(incident);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-      child: isHome
-          ? Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Flexible(
-                  child: _IncidentText(text: name, incident: incident, align: TextAlign.end),
-                ),
-                const SizedBox(width: 6),
-                icon,
-              ],
-            )
-          : Row(
-              children: [
-                icon,
-                const SizedBox(width: 6),
-                Flexible(
-                  child: _IncidentText(text: name, incident: incident, align: TextAlign.start),
-                ),
-              ],
-            ),
-    );
-  }
-
-  String _incidentLabel(MatchIncident i) {
-    if (i.type == 9) {
-      // Substitution: show in/out players
-      final inName = i.inPlayerName ?? '';
-      final outName = i.outPlayerName ?? '';
-      return '$inName ↑\n$outName ↓';
-    }
-    return i.playerName ?? '';
-  }
-
-  static Color _incidentColor(int type, AppColors colors) => {
-    1: colors.accent, // Goal
-    2: Colors.orange, // Corner
-    3: Colors.amber, // Yellow card
-    4: Colors.red, // Red card
-    5: Colors.blueGrey, // Offside
-    6: Colors.blue, // Free kick
-    7: Colors.teal, // Goal kick
-    8: Colors.deepOrange, // Penalty
-    9: Colors.green, // Substitution
-    10: Colors.teal, // Kick off
-    11: Colors.grey, // Half time
-    12: Colors.grey, // Full time
-    13: Colors.grey, // Half time score
-    15: Colors.red, // Card upgrade
-    16: Colors.red, // Penalty missed
-    17: Colors.orange, // Own goal
-    19: Colors.amber, // Injury time
-    21: Colors.blue, // Shot on target
-    22: Colors.blueGrey, // Shot off target
-    23: Colors.orange, // Attack
-    24: Colors.deepOrange, // Dangerous attack
-    25: Colors.purple, // Possession
-    26: Colors.grey, // Extra time over
-    27: Colors.grey, // Penalty shootout over
-    28: Colors.indigo, // VAR
-    29: Colors.green, // Penalty shootout scored
-    30: Colors.red, // Penalty shootout missed
+  static Color _incidentColor(int type, AppColors c) => {
+    1: c.accent,
+    2: Colors.orange,
+    3: Colors.amber,
+    4: Colors.red,
+    5: Colors.blueGrey,
+    6: Colors.blue,
+    7: Colors.teal,
+    8: Colors.deepOrange,
+    9: Colors.green,
+    15: Colors.red,
+    16: Colors.red,
+    17: Colors.orange,
+    21: Colors.blue,
+    22: Colors.blueGrey,
+    23: Colors.orange,
+    24: Colors.deepOrange,
+    25: Colors.purple,
+    28: Colors.indigo,
+    29: Colors.green,
+    30: Colors.red,
   }[type] ?? Colors.grey;
 
-  Widget _incidentIcon(int type, BuildContext context) {
-    final color = _incidentColor(type, context.appColors);
-    return _IncidentBadge(label: 'event.football.detail.incident_type.$type'.tr(), color: color);
-  }
-}
-
-class _IncidentBadge extends StatelessWidget {
-  const _IncidentBadge({required this.label, required this.color});
-
-  final String label;
-  final Color color;
-
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+  Widget build(BuildContext _) {
+    final color = _incidentColor(incident.type, colors);
+    final timeLabel = "${incident.time}'";
+
+    final playerLabel = incident.type == 9
+        ? '${incident.inPlayerName ?? ''} ↑\n${incident.outPlayerName ?? ''} ↓'
+        : (incident.playerName ?? '');
+
+    final badgeLabel =
+        'event.football.detail.incident_type.${incident.type}'.tr();
+
+    Widget badge = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(3),
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(4),
         border: Border.all(color: color.withValues(alpha: 0.4), width: 0.5),
       ),
       child: Text(
-        label,
-        style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: color),
+        badgeLabel,
+        style:
+            AppTextStyles.mono(9).copyWith(color: color, fontWeight: FontWeight.w700),
       ),
     );
-  }
-}
 
-class _IncidentText extends StatelessWidget {
-  const _IncidentText({required this.text, required this.incident, required this.align});
-
-  final String text;
-  final MatchIncident incident;
-  final TextAlign align;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: align == TextAlign.end
-          ? CrossAxisAlignment.end
-          : CrossAxisAlignment.start,
+    Widget textCell = Column(
+      crossAxisAlignment:
+          isHome ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (text.isNotEmpty)
+        if (playerLabel.isNotEmpty)
           Text(
-            text,
-            style: TextStyle(fontSize: 11),
-            textAlign: align,
+            playerLabel,
+            style: TextStyle(fontSize: 11, color: colors.text),
+            textAlign: isHome ? TextAlign.end : TextAlign.start,
             maxLines: 2,
-            overflow: TextOverflow.ellipsis,
           ),
         if (incident.homeScore != null && incident.awayScore != null)
           Text(
             '${incident.homeScore} - ${incident.awayScore}',
-            style: TextStyle(
-              fontSize: 12,
+            style: AppTextStyles.mono(11).copyWith(
+              color: colors.accent,
               fontWeight: FontWeight.w700,
-              color: context.appColors.accent,
             ),
-            textAlign: align,
-          ),
-        if (incident.reason != null && incident.reason != 0)
-          Text(
-            'event.football.detail.incident_reason.${incident.reason}'.tr(),
-            style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
-            textAlign: align,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
       ],
+    );
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: colors.line, width: 0.5),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Time
+          SizedBox(
+            width: 36,
+            child: Text(
+              timeLabel,
+              style: AppTextStyles.mono(12).copyWith(
+                color: isHome ? colors.accent : colors.text2,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          // Dot
+          Container(
+            width: 6,
+            height: 6,
+            margin: const EdgeInsets.symmetric(horizontal: 6),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isHome ? colors.accent : colors.text3,
+            ),
+          ),
+          if (isHome) ...[
+            Expanded(child: textCell),
+            const SizedBox(width: 8),
+            badge,
+          ] else ...[
+            badge,
+            const SizedBox(width: 8),
+            Expanded(child: textCell),
+          ],
+        ],
+      ),
     );
   }
 }
 
-// ─── Lineups Tab ─────────────────────────────────────────────────────────────
+// ─── Lineups Tab ──────────────────────────────────────────────────────────────
 
 class _LineupsTab extends ConsumerStatefulWidget {
   const _LineupsTab({required this.matchId, this.initialMatch});
@@ -726,8 +729,10 @@ class _LineupsTab extends ConsumerStatefulWidget {
   ConsumerState<_LineupsTab> createState() => _LineupsTabState();
 }
 
-class _LineupsTabState extends ConsumerState<_LineupsTab> with SingleTickerProviderStateMixin {
+class _LineupsTabState extends ConsumerState<_LineupsTab>
+    with SingleTickerProviderStateMixin {
   late final TabController _tabController;
+
   @override
   void initState() {
     super.initState();
@@ -742,97 +747,67 @@ class _LineupsTabState extends ConsumerState<_LineupsTab> with SingleTickerProvi
 
   @override
   Widget build(BuildContext context) {
-    final lineupsAsync = ref.watch(footballMatchLineupsProvider(matchId: widget.matchId));
+    final colors = context.appColors;
+    final lineupsAsync =
+        ref.watch(footballMatchLineupsProvider(matchId: widget.matchId));
 
     return lineupsAsync.when(
-      loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
-      error: (e, st) {
-        debugPrint('$e\n$st');
-        return Center(
-          child: Text(
-            'event.error.load_failed'.tr(),
-            style: TextStyle(color: Colors.grey.shade500),
-          ),
-        );
-      },
+      loading: () =>
+          Center(child: CircularProgressIndicator(color: colors.accent)),
+      error: (_, __) => Center(
+        child: Text(
+          'event.error.load_failed'.tr(),
+          style: TextStyle(color: colors.text3),
+        ),
+      ),
       data: (lineups) {
-        if (lineups == null || (lineups.home.isEmpty && lineups.away.isEmpty)) {
+        if (lineups == null ||
+            (lineups.home.isEmpty && lineups.away.isEmpty)) {
           return Center(
             child: Text(
               'event.football.detail.no_lineups'.tr(),
-              style: TextStyle(color: Colors.grey.shade500),
+              style: TextStyle(color: colors.text3),
             ),
           );
         }
 
-        final detail =
-            ref
-                    .watch(matchDetailProvider(sport: SportType.football, matchId: widget.matchId))
-                    .valueOrNull
-                as FootballMatchDetail?;
+        final detail = ref
+            .watch(matchDetailProvider(
+              sport: SportType.football,
+              matchId: widget.matchId,
+            ))
+            .valueOrNull as FootballMatchDetail?;
         final homeIcon = detail?.homeInfo.logo ?? widget.initialMatch?.homeLogo;
         final awayIcon = detail?.awayInfo.logo ?? widget.initialMatch?.awayLogo;
-        final homeName = detail?.homeName ?? widget.initialMatch?.homeName ?? 'Home';
-        final awayName = detail?.awayName ?? widget.initialMatch?.awayName ?? 'Away';
+        final homeName =
+            detail?.homeName ?? widget.initialMatch?.homeName ?? 'Home';
+        final awayName =
+            detail?.awayName ?? widget.initialMatch?.awayName ?? 'Away';
 
         return Column(
           children: [
             Container(
-              margin: const EdgeInsets.all(12),
+              margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(20)),
-                border: Border.all(width: 1, color: context.appColors.shimmerBase),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: colors.line, width: 0.5),
               ),
               child: TabBar(
+                controller: _tabController,
                 dividerColor: Colors.transparent,
                 indicatorWeight: 0,
-                controller: _tabController,
                 indicator: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: context.appColors.accent,
+                  borderRadius: BorderRadius.circular(8),
+                  color: colors.accent,
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
-                labelStyle: TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-                unselectedLabelColor: Colors.grey,
-                splashBorderRadius: BorderRadius.circular(20),
+                labelColor: const Color(0xFF0E0E0E),
+                unselectedLabelColor: colors.text2,
+                splashBorderRadius: BorderRadius.circular(8),
                 padding: const EdgeInsets.all(3),
                 tabs: [
-                  Tab(
-                    child: Text.rich(
-                      TextSpan(
-                        children: [
-                          WidgetSpan(
-                            alignment: PlaceholderAlignment.middle,
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: SportLogo(url: homeIcon, size: 20),
-                            ),
-                          ),
-                          TextSpan(text: homeName),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Tab(
-                    child: Text.rich(
-                      TextSpan(
-                        children: [
-                          WidgetSpan(
-                            alignment: PlaceholderAlignment.middle,
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: SportLogo(url: awayIcon, size: 20),
-                            ),
-                          ),
-                          TextSpan(text: awayName),
-                        ],
-                      ),
-                    ),
-                  ),
+                  _TeamTab(logo: homeIcon, name: homeName),
+                  _TeamTab(logo: awayIcon, name: awayName),
                 ],
               ),
             ),
@@ -852,6 +827,33 @@ class _LineupsTabState extends ConsumerState<_LineupsTab> with SingleTickerProvi
   }
 }
 
+class _TeamTab extends StatelessWidget {
+  const _TeamTab({required this.logo, required this.name});
+
+  final String? logo;
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tab(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (logo != null) ...[
+            SportLogo(url: logo!, size: 18),
+            const SizedBox(width: 6),
+          ],
+          Text(
+            name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _TeamLineupList extends StatelessWidget {
   const _TeamLineupList({required this.players});
 
@@ -859,71 +861,96 @@ class _TeamLineupList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final starters = players.where((p) => p.first == 1).toList();
     final subs = players.where((p) => p.first == 0).toList();
 
     return ListView(
       children: [
         if (starters.isNotEmpty) ...[
-          _SectionHeader(label: 'event.football.detail.starting_xi'.tr()),
-          for (final p in starters) _PlayerRow(player: p),
+          _SectionLabel(
+            label: 'event.football.detail.starting_xi'.tr(),
+            colors: colors,
+            context: context,
+          ),
+          for (final p in starters)
+            _LineupPlayerRow(player: p, colors: colors, context: context),
         ],
         if (subs.isNotEmpty) ...[
-          _SectionHeader(label: 'event.football.detail.substitutes'.tr()),
-          for (final p in subs) _PlayerRow(player: p),
+          _SectionLabel(
+            label: 'event.football.detail.substitutes'.tr(),
+            colors: colors,
+            context: context,
+          ),
+          for (final p in subs)
+            _LineupPlayerRow(player: p, colors: colors, context: context),
         ],
       ],
     );
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.label});
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel({
+    required this.label,
+    required this.colors,
+    required this.context,
+  });
 
   final String label;
+  final AppColors colors;
+  final BuildContext context;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext _) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-      color: context.appColors.lineStrong,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+      color: colors.surface,
       child: Text(
-        label,
-        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.appColors.text2),
+        label.toUpperCase(),
+        style: AppTextStyles.mono(10).copyWith(
+          color: colors.text3,
+          letterSpacing: 0.14 * 10,
+        ),
       ),
     );
   }
 }
 
-class _PlayerRow extends StatelessWidget {
-  const _PlayerRow({required this.player});
+class _LineupPlayerRow extends StatelessWidget {
+  const _LineupPlayerRow({
+    required this.player,
+    required this.colors,
+    required this.context,
+  });
 
   final LineupPlayer player;
+  final AppColors colors;
+  final BuildContext context;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext _) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey.shade100, width: 0.5)),
+        border: Border(bottom: BorderSide(color: colors.line, width: 0.5)),
       ),
       child: Row(
         children: [
           Container(
-            width: 24,
-            height: 24,
+            width: 26,
+            height: 26,
             decoration: BoxDecoration(
-              color: context.appColors.accent.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
+              color: colors.accent.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(5),
             ),
             alignment: Alignment.center,
             child: Text(
               '${player.shirtNumber}',
-              style: TextStyle(
-                fontSize: 11,
+              style: AppTextStyles.mono(11).copyWith(
+                color: colors.accent,
                 fontWeight: FontWeight.w700,
-                color: context.appColors.accent,
               ),
             ),
           ),
@@ -933,101 +960,16 @@ class _PlayerRow extends StatelessWidget {
           Expanded(
             child: Text(
               player.name,
-              style: TextStyle(fontSize: 13),
+              style: TextStyle(fontSize: 13, color: colors.text),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ),
           if (player.position.isNotEmpty)
-            Text(player.position, style: TextStyle(fontSize: 11, color: Colors.grey)),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Stats Tab ───────────────────────────────────────────────────────────────
-
-class _StatsTab extends ConsumerWidget {
-  const _StatsTab({required this.matchId});
-
-  final String matchId;
-
-  // Incident type codes for the minimal stat rows (in display order).
-  static const _minimalTypeCodes = ['2', '3', '4', '8', '21', '22', '23', '24', '25'];
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
-
-    return eventsAsync.when(
-      loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
-      error: (_, __) => Center(
-        child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
-      ),
-      data: (obj) {
-        final events = obj as FootballMatchEvents?;
-        final apiStats =
-            events?.stats.where((s) => s.label != null && s.label!.isNotEmpty).toList() ?? [];
-        final apiByLabel = {for (final s in apiStats) s.label!: s};
-
-        final displayStats = _minimalTypeCodes.map((code) {
-          final label = 'event.football.detail.incident_type.$code'.tr();
-          return apiByLabel[label] ?? MatchStat(label: label, home: 0, away: 0);
-        }).toList();
-
-        // Append any extra API stats not already covered by the minimal set.
-        final minimalLabels = displayStats.map((s) => s.label).toSet();
-        for (final s in apiStats) {
-          if (!minimalLabels.contains(s.label)) displayStats.add(s);
-        }
-
-        return ListView(
-          padding: EdgeInsets.zero,
-          children: displayStats.map((stat) => _StatRow(stat: stat)).toList(),
-        );
-      },
-    );
-  }
-}
-
-class _StatRow extends StatelessWidget {
-  const _StatRow({required this.stat});
-
-  final MatchStat stat;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: context.appColors.shimmerBase, width: 0.5)),
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 60,
-            child: Text(
-              '${stat.home}',
-              style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-              textAlign: TextAlign.left,
+            Text(
+              player.position,
+              style: AppTextStyles.mono(10).copyWith(color: colors.text3),
             ),
-          ),
-          Expanded(
-            child: Text(
-              stat.label!,
-              textAlign: TextAlign.center,
-              style: context.textTheme.bodySmall?.copyWith(color: context.appColors.text3),
-            ),
-          ),
-          SizedBox(
-            width: 60,
-            child: Text(
-              '${stat.away}',
-              style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-              textAlign: TextAlign.right,
-            ),
-          ),
         ],
       ),
     );

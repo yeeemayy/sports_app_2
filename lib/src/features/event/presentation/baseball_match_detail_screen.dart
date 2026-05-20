@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/baseball_status.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/domain/models/baseball_match_detail.dart';
@@ -12,6 +11,7 @@ import 'package:sports_app/src/features/event/presentation/providers/event_provi
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_header_shell.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
+import 'package:sports_app/src/shared_widgets/arena_stat_bar.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
 class BaseballMatchDetailScreen extends ConsumerStatefulWidget {
@@ -20,10 +20,12 @@ class BaseballMatchDetailScreen extends ConsumerStatefulWidget {
   final String matchId;
 
   @override
-  ConsumerState<BaseballMatchDetailScreen> createState() => _BaseballMatchDetailScreenState();
+  ConsumerState<BaseballMatchDetailScreen> createState() =>
+      _BaseballMatchDetailScreenState();
 }
 
-class _BaseballMatchDetailScreenState extends SportDetailScaffoldState<BaseballMatchDetailScreen> {
+class _BaseballMatchDetailScreenState
+    extends SportDetailScaffoldState<BaseballMatchDetailScreen> {
   @override
   String get matchId => widget.matchId;
 
@@ -35,60 +37,74 @@ class _BaseballMatchDetailScreenState extends SportDetailScaffoldState<BaseballM
 
   @override
   (String?, int?) watchDetail() {
-    final v =
-        ref.watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId)).valueOrNull
-            as BaseballMatchDetail?;
+    final v = ref
+        .watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId))
+        .valueOrNull as BaseballMatchDetail?;
     return (v?.leagueName, v?.matchTime);
   }
 
   @override
-  Widget buildHeader(BuildContext context) => _BaseballMatchHeader(matchId: matchId);
+  Widget buildHeader(BuildContext context, {String? leagueName, int? matchTimestamp}) =>
+      _BaseballMatchHeader(
+        matchId: matchId,
+        leagueName: leagueName,
+        matchTimestamp: matchTimestamp,
+      );
 
   @override
   List<Tab> buildTabs(BuildContext context) => [
-    Tab(text: 'event.baseball.detail.score'.tr()),
-    Tab(text: 'event.baseball.detail.stats'.tr()),
-  ];
+        Tab(text: 'event.baseball.detail.score'.tr()),
+        Tab(text: 'event.baseball.detail.stats'.tr()),
+      ];
 
   @override
   List<Widget> buildTabViews(BuildContext context) => [
-    _ScoreTab(matchId: matchId),
-    _StatsTab(matchId: matchId),
-  ];
+        _ScoreTab(matchId: matchId),
+        _StatsTab(matchId: matchId),
+      ];
 }
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 class _BaseballMatchHeader extends ConsumerWidget {
-  const _BaseballMatchHeader({required this.matchId});
+  const _BaseballMatchHeader({
+    required this.matchId,
+    this.leagueName,
+    this.matchTimestamp,
+  });
 
   final String matchId;
+  final String? leagueName;
+  final int? matchTimestamp;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId));
+    final detailAsync =
+        ref.watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId));
     final rt = ref.watch(
-      sportRealtimeProvider(
-        SportType.baseball,
-      ).select((map) => map[matchId] as BaseballRealtimeData?),
+      sportRealtimeProvider(SportType.baseball)
+          .select((map) => map[matchId] as BaseballRealtimeData?),
     );
 
     return SportDetailHeaderShell<BaseballMatchDetail>(
       detailAsync: detailAsync,
       skeletonHeight: 80,
-      builder: (detail) => _HeaderContent(detail: detail, rt: rt),
+      leagueName: leagueName,
+      matchTimestamp: matchTimestamp,
+      builder: (detail) => _BaseballHeaderContent(detail: detail, rt: rt),
     );
   }
 }
 
-class _HeaderContent extends StatelessWidget {
-  const _HeaderContent({required this.detail, this.rt});
+class _BaseballHeaderContent extends StatelessWidget {
+  const _BaseballHeaderContent({required this.detail, this.rt});
 
   final BaseballMatchDetail detail;
   final BaseballRealtimeData? rt;
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final statusId = rt?.statusId ?? detail.statusId;
     final homeScore =
         rt?.homeScore ??
@@ -102,94 +118,102 @@ class _HeaderContent extends StatelessWidget {
     final isLive = baseballLiveStatuses.contains(statusId);
     final isNotStarted = statusId == 1;
     final statusLabel = baseballStatusLabel(statusId);
+    final pillColor = isLive ? colors.live : colors.text2;
 
-    return Column(
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Home team
-            Expanded(
-              child: Column(
-                children: [
-                  SportLogo(url: detail.homeInfo.logo, size: 48, circular: false),
-                  const SizedBox(height: 6),
-                  Text(
-                    detail.homeName,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+        Expanded(
+          flex: 2,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SportLogo(url: detail.homeInfo.logo, size: 48, circular: false),
+              const SizedBox(height: 6),
+              Text(
+                detail.homeName,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.body(12).copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                decoration: BoxDecoration(
+                  color: pillColor.withValues(alpha: 0.15),
+                  border: Border.all(color: pillColor.withValues(alpha: 0.5)),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  statusLabel.isNotEmpty ? statusLabel : 'common.unknown'.tr(),
+                  style: AppTextStyles.mono(10).copyWith(
+                    color: pillColor,
+                    fontWeight: FontWeight.w700,
                   ),
-                ],
+                ),
               ),
-            ),
-            // Centre: status + score
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (statusLabel.isNotEmpty)
+              const SizedBox(height: 8),
+              if (isNotStarted)
+                Text(
+                  '-',
+                  style: AppTextStyles.display(32, context).copyWith(color: colors.text3),
+                )
+              else
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
                     Text(
-                      statusLabel,
-                      style: context.textTheme.labelMedium?.copyWith(
-                        color: isLive ? Colors.yellow.shade300 : Colors.white70,
-                        fontWeight: FontWeight.w700,
+                      homeScore,
+                      style: AppTextStyles.display(48, context).copyWith(color: Colors.white),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        '–',
+                        style: AppTextStyles.display(32, context).copyWith(color: colors.text3),
                       ),
                     ),
-                  const SizedBox(height: 6),
-                  if (isNotStarted)
                     Text(
-                      '-',
-                      style: context.textTheme.headlineSmall?.copyWith(
-                        color: Colors.grey.shade300,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    )
-                  else
-                    RichText(
-                      text: TextSpan(
-                        style: context.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                        ),
-                        children: [
-                          TextSpan(text: homeScore),
-                          const TextSpan(
-                            text: ' - ',
-                            style: TextStyle(color: Colors.white60),
-                          ),
-                          TextSpan(text: awayScore),
-                        ],
-                      ),
+                      awayScore,
+                      style: AppTextStyles.display(48, context).copyWith(color: Colors.white),
                     ),
-                ],
+                  ],
+                ),
+            ],
+          ),
+        ),
+        Expanded(
+          flex: 2,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SportLogo(url: detail.awayInfo.logo, size: 48, circular: false),
+              const SizedBox(height: 6),
+              Text(
+                detail.awayName,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.body(12).copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            // Away team
-            Expanded(
-              child: Column(
-                children: [
-                  SportLogo(url: detail.awayInfo.logo, size: 48, circular: false),
-                  const SizedBox(height: 6),
-                  Text(
-                    detail.awayName,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -205,13 +229,16 @@ class _ScoreTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId));
-    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.baseball, matchId: matchId));
+    final detailAsync =
+        ref.watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId));
+    final eventsAsync =
+        ref.watch(matchEventsProvider(sport: SportType.baseball, matchId: matchId));
 
     return detailAsync.when(
       loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
       error: (_, __) => Center(
-        child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
+        child: Text('event.error.load_failed'.tr(),
+            style: TextStyle(color: context.appColors.text3)),
       ),
       data: (obj) {
         final detail = obj as BaseballMatchDetail;
@@ -228,7 +255,6 @@ class _InningGrid extends StatelessWidget {
   final BaseballMatchDetail detail;
   final BaseballMatchEventsData? events;
 
-
   List<String> _inningScores(Map<String, dynamic> scores, int sideIndex, int count) {
     return List.generate(count, (i) {
       final val = scores['p${i + 1}'] as List<dynamic>?;
@@ -240,10 +266,10 @@ class _InningGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Determine inning count
+    final colors = context.appColors;
+
     int inningCount = events?.inningCount ?? 0;
     if (inningCount == 0) {
-      // Fall back to detail scores
       for (var i = 1; i <= 20; i++) {
         if (detail.scores.containsKey('p$i')) {
           inningCount = i;
@@ -254,7 +280,6 @@ class _InningGrid extends StatelessWidget {
     }
     final displayCount = inningCount < 9 ? 9 : inningCount;
 
-    // Home/away inning scores
     final List<String> awayInnings;
     final List<String> homeInnings;
     final String homeRuns, homeHits, homeErrors;
@@ -295,29 +320,19 @@ class _InningGrid extends StatelessWidget {
       awayErrors = e?.elementAtOrNull(1)?.toString() ?? '-';
     }
 
-    final headerStyle = TextStyle(
-      fontSize: 12,
-      fontWeight: FontWeight.w600,
-      color: context.appColors.text2,
-    );
-
     return LayoutBuilder(
       builder: (context, constraints) {
         final totalWidth = constraints.maxWidth;
         final nameColWidth = totalWidth * 0.30;
         final cellWidth = (totalWidth * 0.70) / displayCount;
 
-        Widget buildCell(String text, {Color? color, FontWeight? weight}) {
+        Widget buildCell(String text, {Color? color}) {
           return SizedBox(
             width: cellWidth,
             child: Text(
               text,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: weight ?? FontWeight.w500,
-                color: color ?? context.appColors.text,
-              ),
+              style: AppTextStyles.mono(12).copyWith(color: color ?? colors.text2),
             ),
           );
         }
@@ -327,34 +342,44 @@ class _InningGrid extends StatelessWidget {
           children: [
             // Inning grid
             Container(
-              color: context.appColors.surface,
-              margin: const EdgeInsets.only(top: 12, bottom: 8),
+              margin: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: colors.line),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header row: blank + inning numbers
+                  // Header row
                   Container(
-                    color: context.appColors.inningHeaderBg,
-                    padding: EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: colors.inningHeaderBg,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
+                      ),
+                    ),
                     child: Row(
                       children: [
                         SizedBox(width: nameColWidth),
                         ...List.generate(
                           displayCount,
-                          (i) => buildCell('${i + 1}', color: context.appColors.text3),
+                          (i) => buildCell('${i + 1}', color: colors.text3),
                         ),
                       ],
                     ),
                   ),
                   // Away row
                   Container(
-                    color: context.appColors.inningAwayRowBg,
+                    color: colors.inningAwayRowBg,
                     child: Row(
                       children: [
                         SizedBox(
                           width: nameColWidth,
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                             child: Row(
                               children: [
                                 SportLogo(url: detail.awayInfo.logo, size: 22),
@@ -364,9 +389,9 @@ class _InningGrid extends StatelessWidget {
                                     detail.awayName,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 11,
+                                    style: AppTextStyles.body(11).copyWith(
                                       fontWeight: FontWeight.w600,
+                                      color: colors.text,
                                     ),
                                   ),
                                 ),
@@ -380,13 +405,19 @@ class _InningGrid extends StatelessWidget {
                   ),
                   // Home row
                   Container(
-                    color: context.appColors.inningHomeRowBg,
+                    decoration: BoxDecoration(
+                      color: colors.inningHomeRowBg,
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(12),
+                        bottomRight: Radius.circular(12),
+                      ),
+                    ),
                     child: Row(
                       children: [
                         SizedBox(
                           width: nameColWidth,
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                             child: Row(
                               children: [
                                 SportLogo(url: detail.homeInfo.logo, size: 22),
@@ -396,9 +427,9 @@ class _InningGrid extends StatelessWidget {
                                     detail.homeName,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 11,
+                                    style: AppTextStyles.body(11).copyWith(
                                       fontWeight: FontWeight.w600,
+                                      color: colors.text,
                                     ),
                                   ),
                                 ),
@@ -415,10 +446,11 @@ class _InningGrid extends StatelessWidget {
             ),
             // RHE summary table
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 8),
+              margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
               decoration: BoxDecoration(
-                color: context.appColors.surface,
-                borderRadius: BorderRadius.circular(8),
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: colors.line),
               ),
               child: Column(
                 children: [
@@ -426,10 +458,10 @@ class _InningGrid extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
-                      color: context.appColors.inningHeaderBg,
+                      color: colors.inningHeaderBg,
                       borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(8),
-                        topRight: Radius.circular(8),
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
                       ),
                     ),
                     child: Row(
@@ -437,10 +469,13 @@ class _InningGrid extends StatelessWidget {
                         const Expanded(child: SizedBox()),
                         SizedBox(
                           width: 64,
-                          child: Text(
-                            'event.baseball.detail.runs'.tr(),
-                            textAlign: TextAlign.center,
-                            style: headerStyle,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            child: Text(
+                              'event.baseball.detail.runs'.tr(),
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.mono(10).copyWith(color: colors.text3),
+                            ),
                           ),
                         ),
                         SizedBox(
@@ -448,51 +483,41 @@ class _InningGrid extends StatelessWidget {
                           child: Text(
                             'event.baseball.detail.hits'.tr(),
                             textAlign: TextAlign.center,
-                            style: headerStyle,
+                            style: AppTextStyles.mono(10).copyWith(color: colors.text3),
                           ),
                         ),
                         SizedBox(
                           width: 64,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: Text(
-                              'event.baseball.detail.errors'.tr(),
-                              textAlign: TextAlign.center,
-                              style: headerStyle,
-                            ),
+                          child: Text(
+                            'event.baseball.detail.errors'.tr(),
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.mono(10).copyWith(color: colors.text3),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerBase),
-                  // Away team row
-                  _RheRow(
-                    name: detail.awayName,
-                    runs: awayRuns,
-                    hits: awayHits,
-                    errors: awayErrors,
-                  ),
-                  Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerHighlight),
-                  // Home team row
-                  _RheRow(
-                    name: detail.homeName,
-                    runs: homeRuns,
-                    hits: homeHits,
-                    errors: homeErrors,
-                  ),
+                  Divider(height: 1, thickness: 0.5, color: colors.line),
+                  _RheRow(name: detail.awayName, runs: awayRuns, hits: awayHits, errors: awayErrors),
+                  Divider(height: 1, thickness: 0.5, color: colors.line),
+                  _RheRow(name: detail.homeName, runs: homeRuns, hits: homeHits, errors: homeErrors),
                 ],
               ),
             ),
           ],
         );
-      }, // end LayoutBuilder builder
-    ); // end LayoutBuilder
+      },
+    );
   }
 }
 
 class _RheRow extends StatelessWidget {
-  const _RheRow({required this.name, required this.runs, required this.hits, required this.errors});
+  const _RheRow({
+    required this.name,
+    required this.runs,
+    required this.hits,
+    required this.errors,
+  });
 
   final String name;
   final String runs;
@@ -501,6 +526,7 @@ class _RheRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
       child: Row(
@@ -508,7 +534,10 @@ class _RheRow extends StatelessWidget {
           Expanded(
             child: Text(
               name,
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              style: AppTextStyles.body(13).copyWith(
+                fontWeight: FontWeight.w600,
+                color: colors.text,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -518,7 +547,10 @@ class _RheRow extends StatelessWidget {
             child: Text(
               runs,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+              style: AppTextStyles.mono(14).copyWith(
+                color: colors.accent,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
           SizedBox(
@@ -526,7 +558,7 @@ class _RheRow extends StatelessWidget {
             child: Text(
               hits,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+              style: AppTextStyles.mono(13).copyWith(color: colors.text2),
             ),
           ),
           SizedBox(
@@ -534,7 +566,7 @@ class _RheRow extends StatelessWidget {
             child: Text(
               errors,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+              style: AppTextStyles.mono(13).copyWith(color: colors.text2),
             ),
           ),
         ],
@@ -564,14 +596,16 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final eventsAsync = ref.watch(
       matchEventsProvider(sport: SportType.baseball, matchId: widget.matchId),
     );
 
     return eventsAsync.when(
-      loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
+      loading: () => Center(child: CircularProgressIndicator(color: colors.accent)),
       error: (_, __) => Center(
-        child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
+        child: Text('event.error.load_failed'.tr(),
+            style: TextStyle(color: colors.text3)),
       ),
       data: (obj) {
         final events = obj as BaseballMatchEventsData?;
@@ -579,7 +613,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
           return Center(
             child: Text(
               'event.baseball.detail.no_stats'.tr(),
-              style: TextStyle(color: Colors.grey.shade500),
+              style: TextStyle(color: colors.text3),
             ),
           );
         }
@@ -591,7 +625,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
         return Column(
           children: [
             SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               scrollDirection: Axis.horizontal,
               child: Wrap(
                 spacing: 8,
@@ -603,15 +637,19 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
                       decoration: BoxDecoration(
-                        color: isSelected ? context.appColors.accent : context.appColors.lineStrong,
+                        color: isSelected
+                            ? colors.accent
+                            : colors.surface2,
                         borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isSelected ? colors.accent : colors.line,
+                        ),
                       ),
                       child: Text(
                         _inningLabel(setIndices[i]),
-                        style: TextStyle(
-                          fontSize: 13,
+                        style: AppTextStyles.mono(12).copyWith(
+                          color: isSelected ? Colors.white : colors.text2,
                           fontWeight: FontWeight.w600,
-                          color: isSelected ? Colors.white : context.appColors.text2,
                         ),
                       ),
                     ),
@@ -624,130 +662,28 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                 child: Center(
                   child: Text(
                     'event.baseball.detail.no_stats'.tr(),
-                    style: TextStyle(color: Colors.grey.shade500),
+                    style: TextStyle(color: colors.text3),
                   ),
                 ),
               )
             else
               Expanded(
                 child: ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 20),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   itemCount: stats.length,
-                  itemBuilder: (context, i) => _BaseballStatRow(stat: stats[i]),
+                  itemBuilder: (context, i) {
+                    final s = stats[i];
+                    return ArenaStatBar(
+                      label: s.labelKey.isNotEmpty ? s.labelKey.tr() : '${s.typeCode}',
+                      home: s.homeValue,
+                      away: s.awayValue,
+                    );
+                  },
                 ),
               ),
           ],
         );
       },
-    );
-  }
-}
-
-class _BaseballStatRow extends StatelessWidget {
-  const _BaseballStatRow({required this.stat});
-
-  final BaseballStat stat;
-
-  @override
-  Widget build(BuildContext context) {
-    final home = stat.homeValue.isNaN ? 0.0 : stat.homeValue.abs();
-    final away = stat.awayValue.isNaN ? 0.0 : stat.awayValue.abs();
-    final total = home + away;
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: context.appColors.shimmerBase, width: 0.5)),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              SizedBox(
-                width: 64,
-                child: Text(
-                  stat.homeDisplay,
-                  style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-                  textAlign: TextAlign.left,
-                ),
-              ),
-              Expanded(
-                child: Text(
-                  stat.labelKey.isNotEmpty ? stat.labelKey.tr() : '${stat.typeCode}',
-                  textAlign: TextAlign.center,
-                  style: context.textTheme.bodySmall?.copyWith(color: context.appColors.text2),
-                ),
-              ),
-              SizedBox(
-                width: 64,
-                child: Text(
-                  stat.awayDisplay,
-                  style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-                  textAlign: TextAlign.right,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              const barHeight = 6.0;
-              const radius = Radius.circular(3);
-              if (total <= 0) {
-                return ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: Container(height: barHeight, color: context.appColors.shimmerBase),
-                );
-              }
-              final halfWidth = constraints.maxWidth / 2;
-              final homeWidth = halfWidth * (home / total);
-              final awayWidth = halfWidth * (away / total);
-              return ClipRRect(
-                borderRadius: BorderRadius.circular(3),
-                child: Container(
-                  height: barHeight,
-                  color: context.appColors.shimmerBase,
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: halfWidth,
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: Container(
-                            width: homeWidth,
-                            height: barHeight,
-                            decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.only(topLeft: radius, bottomLeft: radius),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: halfWidth,
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Container(
-                            width: awayWidth,
-                            height: barHeight,
-                            decoration: BoxDecoration(
-                              color: context.appColors.accent,
-                              borderRadius: BorderRadius.only(
-                                topRight: radius,
-                                bottomRight: radius,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
     );
   }
 }

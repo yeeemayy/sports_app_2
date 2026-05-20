@@ -12,6 +12,7 @@ import 'package:sports_app/src/features/event/presentation/providers/event_provi
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_header_shell.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
+import 'package:sports_app/src/shared_widgets/arena_stat_bar.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
 class BadmintonMatchDetailScreen extends ConsumerStatefulWidget {
@@ -42,8 +43,16 @@ class _BadmintonMatchDetailScreenState
   }
 
   @override
-  Widget buildHeader(BuildContext context) =>
-      _BadmintonMatchHeader(matchId: matchId);
+  Widget buildHeader(
+    BuildContext context, {
+    String? leagueName,
+    int? matchTimestamp,
+  }) =>
+      _BadmintonMatchHeader(
+        matchId: matchId,
+        leagueName: leagueName,
+        matchTimestamp: matchTimestamp,
+      );
 
   @override
   List<Tab> buildTabs(BuildContext context) => [
@@ -61,9 +70,15 @@ class _BadmintonMatchDetailScreenState
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 class _BadmintonMatchHeader extends ConsumerWidget {
-  const _BadmintonMatchHeader({required this.matchId});
+  const _BadmintonMatchHeader({
+    required this.matchId,
+    this.leagueName,
+    this.matchTimestamp,
+  });
 
   final String matchId;
+  final String? leagueName;
+  final int? matchTimestamp;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -75,6 +90,8 @@ class _BadmintonMatchHeader extends ConsumerWidget {
 
     return SportDetailHeaderShell<BadmintonMatchDetail>(
       detailAsync: detailAsync,
+      leagueName: leagueName,
+      matchTimestamp: matchTimestamp,
       skeletonHeight: 80,
       builder: (detail) => _BadmintonHeaderContent(
         detail: detail,
@@ -94,106 +111,99 @@ class _BadmintonHeaderContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final effStatusId = eventsData?.statusId ?? rt?.statusId ?? detail.statusId;
 
     final homeTotal = eventsData?.homeTotal ?? rt?.homeTotal ?? detail.homeInfo.totalScore;
     final awayTotal = eventsData?.awayTotal ?? rt?.awayTotal ?? detail.awayInfo.totalScore;
+    final homeSets = eventsData?.homeSets ?? rt?.homeSets ?? detail.homeInfo.setScores;
+    final awaySets = eventsData?.awaySets ?? rt?.awaySets ?? detail.awayInfo.setScores;
 
     final isNotStarted = effStatusId == 1;
     final isLive = effStatusId >= 3 && effStatusId < 100;
-
     final statusLabel = badmintonStatusLabel(effStatusId, detail.statusDescription);
+    final statusColor = isLive ? colors.live : colors.text3;
 
     return Column(
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Home player
             Expanded(
+              flex: 2,
               child: Column(
                 children: [
-                  _PlayerLogo(url: detail.homeInfo.logo, size: 48),
+                  SportLogo(url: detail.homeInfo.logo, size: 48),
                   const SizedBox(height: 6),
                   Text(
-                    detail.homeName,
+                    detail.homeName.toUpperCase(),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: context.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+                    style: AppTextStyles.display(12, context).copyWith(color: colors.text),
                   ),
                 ],
               ),
             ),
-            // Centre: status + score
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+            Expanded(
+              flex: 3,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (isLive) _BlinkingLiveIndicator(label: statusLabel),
-
-                  if (isNotStarted)
-                    Text(
-                      '-',
-                      style: context.textTheme.headlineSmall?.copyWith(
-                        color: Colors.grey.shade300,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    )
-                  else ...[
-                    RichText(
-                      text: TextSpan(
-                        style: context.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                        ),
-                        children: [
-                          TextSpan(text: '$homeTotal'),
-                          const TextSpan(text: ' - '),
-                          TextSpan(text: '$awayTotal'),
-                        ],
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: statusColor,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      statusLabel.toUpperCase(),
+                      style: AppTextStyles.display(11, context).copyWith(
+                        color: const Color(0xFF0E0E0E),
+                        letterSpacing: 0.1 * 11,
                       ),
                     ),
-                    Container(
-                      margin: EdgeInsets.only(top: 6),
-                      constraints: const BoxConstraints(minWidth: 50),
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: statusLabel.isNotEmpty ? Colors.orange : Colors.white,
-                        border: Border.all(color: Colors.orange),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        statusLabel.isNotEmpty ? statusLabel : 'common.unknown'.tr(),
-                        textAlign: TextAlign.center,
-                        style: context.textTheme.labelSmall?.copyWith(
-                          color: statusLabel.isNotEmpty ? Colors.white : context.appColors.accent,
+                  ),
+                  const SizedBox(height: 10),
+                  if (isNotStarted)
+                    Text('– –', style: AppTextStyles.display(40, context).copyWith(color: colors.text3))
+                  else
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('$homeTotal', style: AppTextStyles.display(48, context).copyWith(color: colors.text)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Text(':', style: AppTextStyles.display(40, context).copyWith(color: colors.text3)),
                         ),
-                      ),
+                        Text('$awayTotal', style: AppTextStyles.display(48, context).copyWith(color: colors.text)),
+                      ],
+                    ),
+                  if (homeSets.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    _ArenaSetGrid(
+                      homeSets: homeSets,
+                      awaySets: awaySets,
+                      statusId: effStatusId,
+                      colors: colors,
+                      context: context,
                     ),
                   ],
                 ],
               ),
             ),
-            // Away player
             Expanded(
+              flex: 2,
               child: Column(
                 children: [
-                  _PlayerLogo(url: detail.awayInfo.logo, size: 48),
+                  SportLogo(url: detail.awayInfo.logo, size: 48),
                   const SizedBox(height: 6),
                   Text(
-                    detail.awayName,
+                    detail.awayName.toUpperCase(),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: context.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+                    style: AppTextStyles.display(12, context).copyWith(color: colors.text),
                   ),
                 ],
               ),
@@ -205,119 +215,51 @@ class _BadmintonHeaderContent extends StatelessWidget {
   }
 }
 
-class _SetScoreGrid extends StatelessWidget {
-  const _SetScoreGrid({
+class _ArenaSetGrid extends StatelessWidget {
+  const _ArenaSetGrid({
     required this.homeSets,
     required this.awaySets,
-    required this.homeTotal,
-    required this.awayTotal,
     required this.statusId,
+    required this.colors,
+    required this.context,
   });
 
   final List<int> homeSets;
   final List<int> awaySets;
-  final int homeTotal;
-  final int awayTotal;
   final int statusId;
+  final AppColors colors;
+  final BuildContext context;
 
-  int? get _activeSetIndex {
+  int? get _activeIdx {
     switch (statusId) {
-      case 51:
-        return 0;
-      case 52:
-        return 1;
-      case 53:
-        return 2;
-      case 54:
-        return 3;
-      case 55:
-        return 4;
-      default:
-        return null;
+      case 51: return 0;
+      case 52: return 1;
+      case 53: return 2;
+      case 54: return 3;
+      case 55: return 4;
+      default: return null;
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    final setCount = homeSets.length;
-    final activeIdx = _activeSetIndex;
-
+  Widget build(BuildContext _) {
+    final activeIdx = _activeIdx;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: [
-        ...List.generate(setCount, (i) {
-          final isActive = i == activeIdx;
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '${homeSets[i]}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: isActive ? FontWeight.w900 : FontWeight.w500,
-                    color: Colors.white,
-                  ),
-                ),
-                Text(
-                  '${awaySets[i]}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: isActive ? FontWeight.w900 : FontWeight.w500,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
-        if (setCount > 0)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Text('|', style: TextStyle(color: Colors.white54, fontSize: 18)),
+      children: List.generate(homeSets.length, (i) {
+        final isActive = i == activeIdx;
+        final color = isActive ? colors.accent : colors.text3;
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 5),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('${homeSets[i]}', style: AppTextStyles.mono(13).copyWith(color: color, fontWeight: isActive ? FontWeight.w700 : FontWeight.w400)),
+              Text('${awaySets[i]}', style: AppTextStyles.mono(13).copyWith(color: color, fontWeight: isActive ? FontWeight.w700 : FontWeight.w400)),
+            ],
           ),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '$homeTotal',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              '$awayTotal',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _PlayerLogo extends StatelessWidget {
-  const _PlayerLogo({required this.url, required this.size});
-
-  final String url;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white),
-      child: ClipOval(
-        child: SportLogo(url: url, size: size),
-      ),
+        );
+      }),
     );
   }
 }
@@ -339,21 +281,15 @@ class _ScoreTab extends ConsumerWidget {
 
     return detailAsync.when(
       loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
-      error: (_, __) => Center(
-        child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
-      ),
+      error: (_, __) => Center(child: Text('event.error.load_failed'.tr(), style: AppTextStyles.body(13).copyWith(color: context.appColors.text3))),
       data: (obj) {
         final detail = obj as BadmintonMatchDetail;
         final ev = eventsAsync.valueOrNull as BadmintonMatchEventsData?;
         final effStatusId = ev?.statusId ?? rt?.statusId ?? detail.statusId;
-        final homeSets =
-            ev?.homeSets ?? rt?.homeSets ?? detail.homeInfo.setScores;
-        final awaySets =
-            ev?.awaySets ?? rt?.awaySets ?? detail.awayInfo.setScores;
-        final homeTotal =
-            ev?.homeTotal ?? rt?.homeTotal ?? detail.homeInfo.totalScore;
-        final awayTotal =
-            ev?.awayTotal ?? rt?.awayTotal ?? detail.awayInfo.totalScore;
+        final homeSets = ev?.homeSets ?? rt?.homeSets ?? detail.homeInfo.setScores;
+        final awaySets = ev?.awaySets ?? rt?.awaySets ?? detail.awayInfo.setScores;
+        final homeTotal = ev?.homeTotal ?? rt?.homeTotal ?? detail.homeInfo.totalScore;
+        final awayTotal = ev?.awayTotal ?? rt?.awayTotal ?? detail.awayInfo.totalScore;
 
         return _SetScoreTable(
           statusId: effStatusId,
@@ -365,6 +301,8 @@ class _ScoreTab extends ConsumerWidget {
           awaySets: awaySets,
           homeTotal: homeTotal,
           awayTotal: awayTotal,
+          setKeyPrefix: 'event.badminton.detail.set_n',
+          totalKey: 'event.badminton.detail.total',
         );
       },
     );
@@ -382,6 +320,8 @@ class _SetScoreTable extends StatelessWidget {
     required this.awaySets,
     required this.homeTotal,
     required this.awayTotal,
+    required this.setKeyPrefix,
+    required this.totalKey,
   });
 
   final int statusId;
@@ -393,147 +333,78 @@ class _SetScoreTable extends StatelessWidget {
   final List<int> awaySets;
   final int homeTotal;
   final int awayTotal;
-
-  static const _liveStatuses = {3, 51, 52, 53, 54, 55};
-
-  bool get isLive => _liveStatuses.contains(statusId);
+  final String setKeyPrefix;
+  final String totalKey;
 
   int? get _activeSetIndex {
     switch (statusId) {
-      case 51:
-        return 0;
-      case 52:
-        return 1;
-      case 53:
-        return 2;
-      case 54:
-        return 3;
-      case 55:
-        return 4;
-      default:
-        return null;
+      case 51: return 0;
+      case 52: return 1;
+      case 53: return 2;
+      case 54: return 3;
+      case 55: return 4;
+      default: return null;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final setCount = homeSets.length;
     final activeIdx = _activeSetIndex;
 
-    if (setCount == 0) {
-      return _buildBasicTable(context);
-    }
-
-    final setLabels = List.generate(
-      setCount,
-      (i) => 'event.badminton.detail.set_n'.tr(namedArgs: {'n': '${i + 1}'}),
-    );
+    final setLabels = setCount > 0
+        ? List.generate(setCount, (i) => setKeyPrefix.tr(namedArgs: {'n': '${i + 1}'}))
+        : [
+            setKeyPrefix.tr(namedArgs: {'n': '1'}),
+            setKeyPrefix.tr(namedArgs: {'n': '2'}),
+          ];
+    final effectiveHomeSets = setCount > 0 ? homeSets : <int>[];
+    final effectiveAwaySets = setCount > 0 ? awaySets : <int>[];
 
     return ListView(
-      padding: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
       children: [
         Container(
-          color: context.appColors.surface,
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: colors.line, width: 0.5),
+          ),
           child: Column(
             children: [
-              // Header row
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 child: Row(
                   children: [
                     const Expanded(child: SizedBox()),
-                    ...List.generate(setCount, (i) {
-                      final isActive = i == activeIdx;
+                    ...List.generate(setLabels.length, (i) {
+                      final isActive = setCount > 0 && i == activeIdx;
                       return Expanded(
                         child: Text(
-                          setLabels[i],
+                          setLabels[i].toUpperCase(),
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: isActive ? context.appColors.accent : context.appColors.text2,
+                          style: AppTextStyles.mono(9).copyWith(
+                            color: isActive ? colors.accent : colors.text3,
+                            letterSpacing: 0.14 * 9,
                           ),
                         ),
                       );
                     }),
                     Expanded(
                       child: Text(
-                        'event.badminton.detail.total'.tr(),
+                        totalKey.tr().toUpperCase(),
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: context.appColors.text2,
-                        ),
+                        style: AppTextStyles.mono(9).copyWith(color: colors.text3, letterSpacing: 0.14 * 9),
                       ),
                     ),
                   ],
                 ),
               ),
-              Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerBase),
-              _PlayerScoreRow(
-                name: homeName,
-                setScores: homeSets,
-                total: homeTotal,
-                activeIdx: activeIdx,
-              ),
-              Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerHighlight),
-              _PlayerScoreRow(
-                name: awayName,
-                setScores: awaySets,
-                total: awayTotal,
-                activeIdx: activeIdx,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBasicTable(BuildContext context) {
-    final s1Label = 'event.badminton.detail.set_n'.tr(namedArgs: {'n': '1'});
-    final s2Label = 'event.badminton.detail.set_n'.tr(namedArgs: {'n': '2'});
-    final ftLabel = 'event.badminton.detail.total'.tr();
-    final headerStyle = TextStyle(
-      fontSize: 12,
-      fontWeight: FontWeight.w600,
-      color: context.appColors.text2,
-    );
-
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 20),
-      children: [
-        Container(
-          color: context.appColors.surface,
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                child: Row(
-                  children: [
-                    const Expanded(child: SizedBox()),
-                    SizedBox(
-                      width: 44,
-                      child: Text(s1Label, textAlign: TextAlign.center, style: headerStyle),
-                    ),
-                    SizedBox(
-                      width: 44,
-                      child: Text(s2Label, textAlign: TextAlign.center, style: headerStyle),
-                    ),
-                    SizedBox(
-                      width: 44,
-                      child: Text(ftLabel, textAlign: TextAlign.center, style: headerStyle),
-                    ),
-                  ],
-                ),
-              ),
-              Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerBase),
-              _BasicPlayerRow(name: homeName, logo: homeLogo, total: homeTotal),
-              Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerHighlight),
-              _BasicPlayerRow(name: awayName, logo: awayLogo, total: awayTotal),
+              Divider(height: 1, thickness: 0.5, color: colors.line),
+              _PlayerRow(name: homeName, logo: homeLogo, setScores: effectiveHomeSets, total: homeTotal, activeIdx: activeIdx),
+              Divider(height: 1, thickness: 0.5, color: colors.line),
+              _PlayerRow(name: awayName, logo: awayLogo, setScores: effectiveAwaySets, total: awayTotal, activeIdx: activeIdx),
             ],
           ),
         ),
@@ -542,112 +413,53 @@ class _SetScoreTable extends StatelessWidget {
   }
 }
 
-class _PlayerScoreRow extends StatelessWidget {
-  const _PlayerScoreRow({
+class _PlayerRow extends StatelessWidget {
+  const _PlayerRow({
     required this.name,
+    required this.logo,
     required this.setScores,
     required this.total,
     required this.activeIdx,
   });
 
   final String name;
+  final String logo;
   final List<int> setScores;
   final int total;
   final int? activeIdx;
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-            ),
-          ),
-          ...List.generate(setScores.length, (i) {
-            final isActive = i == activeIdx;
-            return Expanded(
-              child: Text(
-                '${setScores[i]}',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? context.appColors.accent : context.appColors.text,
-                ),
-              ),
-            );
-          }),
-          Expanded(
-            child: Text(
-              '$total',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: context.appColors.accent),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BasicPlayerRow extends StatelessWidget {
-  const _BasicPlayerRow({required this.name, required this.logo, required this.total});
-
-  final String name;
-  final String logo;
-  final int total;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       child: Row(
         children: [
           Expanded(
             child: Row(
               children: [
-                SportLogo(url: logo, size: 24),
+                SportLogo(url: logo, size: 20),
                 const SizedBox(width: 6),
                 Flexible(
-                  child: Text(
-                    name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                  ),
+                  child: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.body(13).copyWith(color: colors.text)),
                 ),
               ],
             ),
           ),
-          const SizedBox(
-            width: 44,
-            child: Text(
-              '-',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Colors.grey),
-            ),
-          ),
-          const SizedBox(
-            width: 44,
-            child: Text(
-              '-',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Colors.grey),
-            ),
-          ),
-          SizedBox(
-            width: 44,
-            child: Text(
-              '$total',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: context.appColors.accent),
-            ),
+          ...List.generate(setScores.length, (i) {
+            final isActive = i == activeIdx;
+            return Expanded(
+              child: Text('${setScores[i]}', textAlign: TextAlign.center,
+                style: AppTextStyles.mono(13).copyWith(
+                  color: isActive ? colors.accent : colors.text2,
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                )),
+            );
+          }),
+          Expanded(
+            child: Text('$total', textAlign: TextAlign.center,
+              style: AppTextStyles.mono(14).copyWith(color: colors.accent, fontWeight: FontWeight.w700)),
           ),
         ],
       ),
@@ -659,9 +471,7 @@ class _BasicPlayerRow extends StatelessWidget {
 
 class _StatsTab extends ConsumerStatefulWidget {
   const _StatsTab({required this.matchId});
-
   final String matchId;
-
   @override
   ConsumerState<_StatsTab> createState() => _StatsTabState();
 }
@@ -671,44 +481,32 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.badminton, matchId: widget.matchId));
 
     return eventsAsync.when(
-      loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
-      error: (_, __) => Center(
-        child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
-      ),
+      loading: () => Center(child: CircularProgressIndicator(color: colors.accent)),
+      error: (_, __) => Center(child: Text('event.error.load_failed'.tr(), style: AppTextStyles.body(13).copyWith(color: colors.text3))),
       data: (obj) {
         final events = obj as BadmintonMatchEventsData?;
         if (events == null || events.statSets.isEmpty) {
-          return Center(
-            child: Text(
-              'event.badminton.detail.no_stats'.tr(),
-              style: TextStyle(color: Colors.grey.shade500),
-            ),
-          );
+          return Center(child: Text('event.badminton.detail.no_stats'.tr(), style: AppTextStyles.body(13).copyWith(color: colors.text3)));
         }
 
         final setIndices = events.statSets.map((s) => s.setIndex).toSet().toList()..sort();
         final safeIdx = _selectedIdx.clamp(0, setIndices.length - 1);
-
         final tabLabels = setIndices.map((idx) {
           if (idx == 0) return 'event.badminton.detail.overall'.tr();
           return 'event.badminton.detail.set_n'.tr(namedArgs: {'n': '$idx'});
         }).toList();
-
-        final stats = events.statSets
-            .where((s) => s.setIndex == setIndices[safeIdx])
-            .expand((s) => s.stats)
-            .toList();
+        final stats = events.statSets.where((s) => s.setIndex == setIndices[safeIdx]).expand((s) => s.stats).toList();
 
         return Column(
           children: [
             Container(
-              color: context.appColors.surface,
-              padding: const EdgeInsets.symmetric(vertical: 10),
+              color: colors.surface,
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
               child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: 16),
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: List.generate(tabLabels.length, (i) {
@@ -717,17 +515,17 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                       onTap: () => setState(() => _selectedIdx = i),
                       child: Container(
                         margin: const EdgeInsets.only(right: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                         decoration: BoxDecoration(
-                          color: isSelected ? context.appColors.accent : context.appColors.lineStrong,
+                          color: isSelected ? colors.accent : colors.surface2,
                           borderRadius: BorderRadius.circular(20),
+                          border: isSelected ? null : Border.all(color: colors.line, width: 0.5),
                         ),
                         child: Text(
-                          tabLabels[i],
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: isSelected ? Colors.white : context.appColors.text2,
+                          tabLabels[i].toUpperCase(),
+                          style: AppTextStyles.mono(10).copyWith(
+                            color: isSelected ? const Color(0xFF0E0E0E) : colors.text2,
+                            letterSpacing: 0.1 * 10,
                           ),
                         ),
                       ),
@@ -736,204 +534,25 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                 ),
               ),
             ),
-            Expanded(child: _StatsList(stats: stats)),
+            Divider(height: 1, thickness: 0.5, color: colors.line),
+            Expanded(
+              child: stats.isEmpty
+                  ? Center(child: Text('event.badminton.detail.no_stats'.tr(), style: AppTextStyles.body(13).copyWith(color: colors.text3)))
+                  : ListView.builder(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      itemCount: stats.length,
+                      itemBuilder: (context, i) {
+                        final stat = stats[i];
+                        final home = stat.homeValue.isNaN ? 0.0 : stat.homeValue.abs();
+                        final away = stat.awayValue.isNaN ? 0.0 : stat.awayValue.abs();
+                        final label = stat.labelKey.isNotEmpty ? stat.labelKey.tr() : '${stat.typeCode}';
+                        return ArenaStatBar(label: label, home: home, away: away);
+                      },
+                    ),
+            ),
           ],
         );
       },
-    );
-  }
-}
-
-class _StatsList extends StatelessWidget {
-  const _StatsList({required this.stats});
-
-  final List<BadmintonStat> stats;
-
-  @override
-  Widget build(BuildContext context) {
-    if (stats.isEmpty) {
-      return Center(
-        child: Text(
-          'event.badminton.detail.no_stats'.tr(),
-          style: TextStyle(color: Colors.grey.shade500),
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 20),
-      itemCount: stats.length,
-      itemBuilder: (context, i) => _BadmintonStatRow(stat: stats[i]),
-    );
-  }
-}
-
-class _BadmintonStatRow extends StatelessWidget {
-  const _BadmintonStatRow({required this.stat});
-
-  final BadmintonStat stat;
-
-  @override
-  Widget build(BuildContext context) {
-    final home = stat.homeValue.isNaN ? 0.0 : stat.homeValue.abs();
-    final away = stat.awayValue.isNaN ? 0.0 : stat.awayValue.abs();
-    final total = home + away;
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: context.appColors.shimmerBase, width: 0.5)),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              SizedBox(
-                width: 64,
-                child: Text(
-                  stat.homeDisplay,
-                  style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-                  textAlign: TextAlign.left,
-                ),
-              ),
-              Expanded(
-                child: Text(
-                  stat.labelKey.isNotEmpty ? stat.labelKey.tr() : '${stat.typeCode}',
-                  textAlign: TextAlign.center,
-                  style: context.textTheme.bodySmall?.copyWith(color: context.appColors.text2),
-                ),
-              ),
-              SizedBox(
-                width: 64,
-                child: Text(
-                  stat.awayDisplay,
-                  style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-                  textAlign: TextAlign.right,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              const barHeight = 6.0;
-              const radius = Radius.circular(3);
-              if (total <= 0) {
-                return ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: Container(height: barHeight, color: context.appColors.shimmerBase),
-                );
-              }
-              final halfWidth = constraints.maxWidth / 2;
-              final homeWidth = halfWidth * (home / total);
-              final awayWidth = halfWidth * (away / total);
-              return ClipRRect(
-                borderRadius: BorderRadius.circular(3),
-                child: Container(
-                  height: barHeight,
-                  color: context.appColors.shimmerBase,
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: halfWidth,
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: Container(
-                            width: homeWidth,
-                            height: barHeight,
-                            decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.only(topLeft: radius, bottomLeft: radius),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: halfWidth,
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Container(
-                            width: awayWidth,
-                            height: barHeight,
-                            decoration: BoxDecoration(
-                              color: context.appColors.accent,
-                              borderRadius: BorderRadius.only(
-                                topRight: radius,
-                                bottomRight: radius,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BlinkingLiveIndicator extends StatefulWidget {
-  const _BlinkingLiveIndicator({required this.label});
-
-  final String label;
-
-  @override
-  State<_BlinkingLiveIndicator> createState() => _BlinkingLiveIndicatorState();
-}
-
-class _BlinkingLiveIndicatorState extends State<_BlinkingLiveIndicator>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _opacity;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 800))
-      ..repeat(reverse: true);
-    _opacity = Tween<double>(begin: 1.0, end: 0.2).animate(_controller);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: AnimatedBuilder(
-        animation: _opacity,
-        builder: (context, _) => Opacity(
-          opacity: _opacity.value,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 7,
-                height: 7,
-                decoration: BoxDecoration(color: context.appColors.surface2, shape: BoxShape.circle),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                widget.label,
-                style: context.textTheme.labelSmall?.copyWith(
-                  color: context.appColors.surface2,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

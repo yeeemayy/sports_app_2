@@ -61,6 +61,11 @@ dependencies:
   # Preferences persistence
   shared_preferences: ^2.3.5
 
+  # Firebase
+  firebase_core: ^3.13.0
+  firebase_auth: ^5.5.2
+  cloud_firestore: ^5.6.0
+
   # HTML rendering
   flutter_html: ^3.0.0
 
