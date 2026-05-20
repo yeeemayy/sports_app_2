@@ -171,7 +171,7 @@ class _BadmintonHeaderContent extends StatelessWidget {
                         statusLabel.isNotEmpty ? statusLabel : 'common.unknown'.tr(),
                         textAlign: TextAlign.center,
                         style: context.textTheme.labelSmall?.copyWith(
-                          color: statusLabel.isNotEmpty ? Colors.white : AppColors.accent,
+                          color: statusLabel.isNotEmpty ? Colors.white : context.appColors.accent,
                         ),
                       ),
                     ),
@@ -282,7 +282,7 @@ class _SetScoreGrid extends StatelessWidget {
           children: [
             Text(
               '$homeTotal',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w900,
                 color: Colors.white,
@@ -290,7 +290,7 @@ class _SetScoreGrid extends StatelessWidget {
             ),
             Text(
               '$awayTotal',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w900,
                 color: Colors.white,
@@ -338,7 +338,7 @@ class _ScoreTab extends ConsumerWidget {
     );
 
     return detailAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
+      loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
@@ -433,7 +433,7 @@ class _SetScoreTable extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 20),
       children: [
         Container(
-          color: context.appTheme.surface,
+          color: context.appColors.surface,
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Column(
             children: [
@@ -452,7 +452,7 @@ class _SetScoreTable extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: isActive ? AppColors.accent : context.appTheme.greyText,
+                            color: isActive ? context.appColors.accent : context.appColors.text2,
                           ),
                         ),
                       );
@@ -464,21 +464,21 @@ class _SetScoreTable extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: context.appTheme.greyText,
+                          color: context.appColors.text2,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerBase),
+              Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerBase),
               _PlayerScoreRow(
                 name: homeName,
                 setScores: homeSets,
                 total: homeTotal,
                 activeIdx: activeIdx,
               ),
-              Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerHighlight),
+              Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerHighlight),
               _PlayerScoreRow(
                 name: awayName,
                 setScores: awaySets,
@@ -499,14 +499,14 @@ class _SetScoreTable extends StatelessWidget {
     final headerStyle = TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w600,
-      color: context.appTheme.greyText,
+      color: context.appColors.text2,
     );
 
     return ListView(
       padding: const EdgeInsets.only(bottom: 20),
       children: [
         Container(
-          color: context.appTheme.surface,
+          color: context.appColors.surface,
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Column(
             children: [
@@ -530,9 +530,9 @@ class _SetScoreTable extends StatelessWidget {
                   ],
                 ),
               ),
-              Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerBase),
+              Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerBase),
               _BasicPlayerRow(name: homeName, logo: homeLogo, total: homeTotal),
-              Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerHighlight),
+              Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerHighlight),
               _BasicPlayerRow(name: awayName, logo: awayLogo, total: awayTotal),
             ],
           ),
@@ -566,7 +566,7 @@ class _PlayerScoreRow extends StatelessWidget {
               name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
             ),
           ),
           ...List.generate(setScores.length, (i) {
@@ -578,7 +578,7 @@ class _PlayerScoreRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? AppColors.accent : context.appTheme.baseText,
+                  color: isActive ? context.appColors.accent : context.appColors.text,
                 ),
               ),
             );
@@ -587,7 +587,7 @@ class _PlayerScoreRow extends StatelessWidget {
             child: Text(
               '$total',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.accent),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: context.appColors.accent),
             ),
           ),
         ],
@@ -619,7 +619,7 @@ class _BasicPlayerRow extends StatelessWidget {
                     name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
@@ -646,7 +646,7 @@ class _BasicPlayerRow extends StatelessWidget {
             child: Text(
               '$total',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.accent),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: context.appColors.accent),
             ),
           ),
         ],
@@ -674,7 +674,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
     final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.badminton, matchId: widget.matchId));
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
+      loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
@@ -705,7 +705,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
         return Column(
           children: [
             Container(
-              color: context.appTheme.surface,
+              color: context.appColors.surface,
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(horizontal: 16),
@@ -719,7 +719,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                         margin: const EdgeInsets.only(right: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.accent : context.appTheme.grey_3,
+                          color: isSelected ? context.appColors.accent : context.appColors.lineStrong,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -727,7 +727,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: isSelected ? Colors.white : context.appTheme.grey_4,
+                            color: isSelected ? Colors.white : context.appColors.text2,
                           ),
                         ),
                       ),
@@ -782,7 +782,7 @@ class _BadmintonStatRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: context.appTheme.shimmerBase, width: 0.5)),
+        border: Border(bottom: BorderSide(color: context.appColors.shimmerBase, width: 0.5)),
       ),
       child: Column(
         children: [
@@ -800,7 +800,7 @@ class _BadmintonStatRow extends StatelessWidget {
                 child: Text(
                   stat.labelKey.isNotEmpty ? stat.labelKey.tr() : '${stat.typeCode}',
                   textAlign: TextAlign.center,
-                  style: context.textTheme.bodySmall?.copyWith(color: context.appTheme.greyText),
+                  style: context.textTheme.bodySmall?.copyWith(color: context.appColors.text2),
                 ),
               ),
               SizedBox(
@@ -821,7 +821,7 @@ class _BadmintonStatRow extends StatelessWidget {
               if (total <= 0) {
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(3),
-                  child: Container(height: barHeight, color: context.appTheme.shimmerBase),
+                  child: Container(height: barHeight, color: context.appColors.shimmerBase),
                 );
               }
               final halfWidth = constraints.maxWidth / 2;
@@ -831,7 +831,7 @@ class _BadmintonStatRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(3),
                 child: Container(
                   height: barHeight,
-                  color: context.appTheme.shimmerBase,
+                  color: context.appColors.shimmerBase,
                   child: Row(
                     children: [
                       SizedBox(
@@ -841,7 +841,7 @@ class _BadmintonStatRow extends StatelessWidget {
                           child: Container(
                             width: homeWidth,
                             height: barHeight,
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               color: Colors.blue,
                               borderRadius: BorderRadius.only(topLeft: radius, bottomLeft: radius),
                             ),
@@ -855,8 +855,8 @@ class _BadmintonStatRow extends StatelessWidget {
                           child: Container(
                             width: awayWidth,
                             height: barHeight,
-                            decoration: const BoxDecoration(
-                              color: AppColors.accent,
+                            decoration: BoxDecoration(
+                              color: context.appColors.accent,
                               borderRadius: BorderRadius.only(
                                 topRight: radius,
                                 bottomRight: radius,
@@ -919,13 +919,13 @@ class _BlinkingLiveIndicatorState extends State<_BlinkingLiveIndicator>
               Container(
                 width: 7,
                 height: 7,
-                decoration: BoxDecoration(color: AppColors.surface2, shape: BoxShape.circle),
+                decoration: BoxDecoration(color: context.appColors.surface2, shape: BoxShape.circle),
               ),
               const SizedBox(width: 4),
               Text(
                 widget.label,
                 style: context.textTheme.labelSmall?.copyWith(
-                  color: AppColors.surface2,
+                  color: context.appColors.surface2,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.5,
                 ),

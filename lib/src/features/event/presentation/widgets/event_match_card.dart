@@ -78,7 +78,7 @@ class _DefaultMatchCard extends StatelessWidget {
                   child: Text(
                     match.leagueName,
                     style: context.textTheme.labelSmall?.copyWith(
-                      color: context.appTheme.greyText,
+                      color: context.appColors.text2,
                       fontWeight: FontWeight.w500,
                     ),
                     maxLines: 1,

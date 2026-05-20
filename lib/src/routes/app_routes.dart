@@ -56,6 +56,9 @@ abstract final class AppRoutes {
   static const newsDetail = '/news/detail/:newsId';
   static String newsDetailPath(int id) => '/news/detail/$id';
 
+  // News category list (intermediary "more" screen)
+  static const newsCategoryList = '/news/category';
+
   // Anchor
   static const anchorList = '/anchor/anchor-list';
   static const anchorDetail = '/anchor/anchor-list/:anchorId';

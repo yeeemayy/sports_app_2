@@ -1,22 +1,33 @@
+import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
+import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:sports_app/src/features/event/domain/models/sport_match.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/domain/sport_config.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/event_match_card.dart';
+import 'package:sports_app/src/core/models/paginated_response.dart';
+import 'package:sports_app/src/features/home/domain/models/anchor_model.dart';
 import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
-import 'package:sports_app/src/features/home/presentation/widgets/home_anchor_live_grid.dart';
-import 'package:sports_app/src/features/home/presentation/widgets/home_banner_carousel.dart';
-import 'package:sports_app/src/features/home/presentation/widgets/home_section_title.dart';
+import 'package:sports_app/src/features/news/domain/models/news_article.dart';
 import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
 import 'package:sports_app/src/providers/nav_providers.dart';
-import 'package:sports_app/src/shared_widgets/shimmer_loading_list.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
+import 'package:sports_app/src/shared_widgets/shimmer_loading_list.dart';
+
+const _kHPad = 22.0;
+const _kRecommended = 'recommended';
+
+// ---------------------------------------------------------------------------
+// Root screen
+// ---------------------------------------------------------------------------
 
 class EventScreen extends ConsumerStatefulWidget {
   const EventScreen({super.key});
@@ -28,6 +39,7 @@ class EventScreen extends ConsumerStatefulWidget {
 class _EventScreenState extends ConsumerState<EventScreen> with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   final ValueNotifier<int> _resetTrigger = ValueNotifier(0);
+  String _selectedFilter = _kRecommended;
 
   static const _sports = SportType.values;
 
@@ -44,10 +56,19 @@ class _EventScreenState extends ConsumerState<EventScreen> with SingleTickerProv
     super.dispose();
   }
 
+  void _selectFilter(String filter) {
+    setState(() => _selectedFilter = filter);
+    if (filter != _kRecommended) {
+      final i = _sports.indexWhere((s) => s.apiPath == filter);
+      if (i >= 0) _tabController.animateTo(i);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen(currentNavIndexProvider, (prev, curr) {
       if (curr == 0 && prev != 0) {
+        setState(() => _selectedFilter = _kRecommended);
         _tabController.animateTo(0);
         _resetTrigger.value++;
       }
@@ -55,41 +76,30 @@ class _EventScreenState extends ConsumerState<EventScreen> with SingleTickerProv
 
     return Column(
       children: [
-        Container(
-          color: AppColors.accent,
-          child: SafeArea(
-            child: Row(
-              children: [
-                Expanded(
-                  child: TabBar(
-                    dividerColor: Colors.transparent,
-                    tabAlignment: TabAlignment.start,
-                    isScrollable: true,
-                    controller: _tabController,
-                    indicator: const BoxDecoration(),
-                    labelStyle: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-                    unselectedLabelStyle: context.textTheme.bodyMedium?.copyWith(
-                      color: Colors.white,
-                    ),
-                    tabs: _sports.map((s) => Tab(text: s.i18nKey.tr())).toList(),
-                  ),
-                ),
-                // IconButton(icon: const Icon(Icons.search), onPressed: () {}),
-              ],
-            ),
-          ),
-        ),
+        const _HomeHeader(),
+        _FilterPills(selected: _selectedFilter, sports: _sports, onSelect: _selectFilter),
         Expanded(
-          child: TabBarView(
-            controller: _tabController,
+          child: Stack(
             children: [
-              for (var i = 0; i < _sports.length; i++)
-                _SportTabContent(
-                  sport: _sports[i],
-                  tabIndex: i,
-                  tabController: _tabController,
-                  resetTrigger: _resetTrigger,
+              // Sport tabs — kept alive with Offstage so subscriptions persist
+              Offstage(
+                offstage: _selectedFilter == _kRecommended,
+                child: TabBarView(
+                  controller: _tabController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    for (var i = 0; i < _sports.length; i++)
+                      _SportTabContent(
+                        sport: _sports[i],
+                        tabIndex: i,
+                        tabController: _tabController,
+                        resetTrigger: _resetTrigger,
+                      ),
+                  ],
                 ),
+              ),
+              if (_selectedFilter == _kRecommended)
+                _RecommendedContent(onSeeAllLive: () => _selectFilter(SportType.football.apiPath)),
             ],
           ),
         ),
@@ -97,6 +107,1044 @@ class _EventScreenState extends ConsumerState<EventScreen> with SingleTickerProv
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Header
+// ---------------------------------------------------------------------------
+
+class _HomeHeader extends ConsumerWidget {
+  const _HomeHeader();
+
+  String _greetingKey() {
+    final h = DateTime.now().hour;
+    if (h >= 5 && h < 12) return 'home.greeting.morning';
+    if (h >= 12 && h < 17) return 'home.greeting.afternoon';
+    return 'home.greeting.evening';
+  }
+
+  String _dateEyebrow(BuildContext context) {
+    final now = DateTime.now();
+    final locale = context.locale.toString();
+    final isZh = context.locale.languageCode == 'zh';
+    final pattern = isZh ? 'EEEE · MMMdd日 · HH:mm' : 'EEE · dd MMM · HH:mm';
+    final formatted = DateFormat(pattern, locale).format(now);
+    return isZh ? formatted : formatted.toUpperCase();
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authAsync = ref.watch(authNotifierProvider);
+    final nickname = authAsync.valueOrNull?.user?.nickname ?? '';
+    final displayName = nickname.isNotEmpty ? nickname.toUpperCase() : '';
+
+    return ColoredBox(
+      color: context.appColors.surface,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(_kHPad, 12, _kHPad, 16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _dateEyebrow(context),
+                      style: AppTextStyles.mono(
+                        10,
+                      ).copyWith(color: context.appColors.text2, letterSpacing: 10 * 0.18),
+                    ),
+                    const SizedBox(height: 6),
+                    RichText(
+                      text: TextSpan(
+                        style: AppTextStyles.display(
+                          32,
+                          context,
+                        ).copyWith(color: context.appColors.text),
+                        children: [
+                          TextSpan(text: _greetingKey().tr()),
+                          if (displayName.isNotEmpty) ...[
+                            TextSpan(text: ',\n'),
+                            TextSpan(
+                              text: '$displayName.',
+                              style: AppTextStyles.display(
+                                32,
+                                context,
+                              ).copyWith(color: context.appColors.accent),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Row(
+                children: [
+                  _HeaderIconButton(icon: Icons.search, onTap: () {}),
+                  const SizedBox(width: 8),
+                  _HeaderIconButton(
+                    icon: Icons.notifications_none_rounded,
+                    onTap: () {},
+                    showDot: true,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HeaderIconButton extends StatelessWidget {
+  const _HeaderIconButton({required this.icon, required this.onTap, this.showDot = false});
+
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool showDot;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 42,
+        height: 42,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: context.appColors.lineStrong, width: 0.5),
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Icon(icon, color: context.appColors.text, size: 20),
+            if (showDot)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: context.appColors.accent,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: context.appColors.ink, width: 2),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Filter pills
+// ---------------------------------------------------------------------------
+
+class _FilterPills extends StatelessWidget {
+  const _FilterPills({required this.selected, required this.sports, required this.onSelect});
+
+  final String selected;
+  final List<SportType> sports;
+  final ValueChanged<String> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: context.appColors.surface,
+      height: 42,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.fromLTRB(_kHPad, 0, _kHPad, 6),
+        children: [
+          _Pill(
+            label: 'home.tab.recommended'.tr().toUpperCase(),
+            active: selected == _kRecommended,
+            onTap: () => onSelect(_kRecommended),
+          ),
+          for (final s in sports) ...[
+            const SizedBox(width: 8),
+            _Pill(
+              label: s.i18nKey.tr().toUpperCase(),
+              active: selected == s.apiPath,
+              onTap: () => onSelect(s.apiPath),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _Pill extends StatelessWidget {
+  const _Pill({required this.label, required this.active, required this.onTap});
+
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        decoration: BoxDecoration(
+          color: active ? context.appColors.accent : Colors.transparent,
+          borderRadius: BorderRadius.circular(999),
+          border: active ? null : Border.all(color: context.appColors.lineStrong, width: 0.5),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: AppTextStyles.display(13, context).copyWith(
+              color: active ? context.appColors.ink : context.appColors.text2,
+              letterSpacing: 13 * 0.06,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Recommended tab content
+// ---------------------------------------------------------------------------
+
+class _RecommendedContent extends ConsumerWidget {
+  const _RecommendedContent({required this.onSeeAllLive});
+
+  final VoidCallback onSeeAllLive;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final newsAsync = ref.watch(newsFirstPageProvider(context.localeCode));
+    final anchorsAsync = ref.watch(anchorListProvider());
+    final liveAsync = ref.watch(
+      sportMatchesPaginatedProvider(sport: SportType.football, matchStatus: 'live'),
+    );
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(newsFirstPageProvider(context.localeCode));
+        ref.invalidate(anchorListProvider);
+        ref.invalidate(
+          sportMatchesPaginatedProvider(sport: SportType.football, matchStatus: 'live'),
+        );
+        await Future.wait([
+          ref.read(newsFirstPageProvider(context.localeCode).future),
+          ref.read(anchorListProvider().future),
+        ]);
+      },
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          // Live Now
+          SliverToBoxAdapter(
+            child: _LiveNowSection(liveAsync: liveAsync, onSeeAll: onSeeAllLive),
+          ),
+          // Editorial hero
+          SliverToBoxAdapter(
+            child: newsAsync.when(
+              skipLoadingOnReload: true,
+              loading: () => _heroShimmer(context),
+              error: (_, _) => const SizedBox.shrink(),
+              data: (articles) {
+                final hero = articles.where((a) => a.imageUrl != null).firstOrNull;
+                return hero == null ? const SizedBox.shrink() : _EditorialHeroCard(article: hero);
+              },
+            ),
+          ),
+          // Anchor rankings
+          SliverToBoxAdapter(child: _AnchorRankingsSection(anchorsAsync: anchorsAsync)),
+          // Trending news
+          SliverToBoxAdapter(
+            child: newsAsync.when(
+              skipLoadingOnReload: true,
+              loading: () => _trendingShimmer(context),
+              error: (_, _) => const SizedBox.shrink(),
+              data: (articles) {
+                final items = articles.skip(1).where((a) => a.imageUrl != null).take(4).toList();
+                return items.isEmpty ? const SizedBox.shrink() : _TrendingNewsGrid(articles: items);
+              },
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 24)),
+        ],
+      ),
+    );
+  }
+
+  Widget _heroShimmer(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(_kHPad, 0, _kHPad, 22),
+      child: Skeletonizer(
+        enabled: true,
+        child: Container(
+          height: 330,
+          decoration: BoxDecoration(
+            color: context.appColors.surface,
+            borderRadius: BorderRadius.circular(24),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _trendingShimmer(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(_kHPad, 0, _kHPad, 0),
+      child: Skeletonizer(
+        enabled: true,
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  color: context.appColors.surface,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  color: context.appColors.surface,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Live Now section
+// ---------------------------------------------------------------------------
+
+class _LiveNowSection extends StatelessWidget {
+  const _LiveNowSection({required this.liveAsync, required this.onSeeAll});
+
+  final AsyncValue<PaginatedMatchResult> liveAsync;
+  final VoidCallback onSeeAll;
+
+  @override
+  Widget build(BuildContext context) {
+    final matches = liveAsync.valueOrNull?.matches ?? [];
+
+    if (liveAsync.isLoading && matches.isEmpty) {
+      return _shimmer(context);
+    }
+
+    if (matches.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(_kHPad, 16, _kHPad, 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                'home.live_now'.tr().toUpperCase(),
+                style: AppTextStyles.display(22, context).copyWith(color: context.appColors.text),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                '${matches.length}',
+                style: AppTextStyles.mono(10).copyWith(color: context.appColors.text3),
+              ),
+              const Spacer(),
+              GestureDetector(
+                onTap: onSeeAll,
+                child: Text(
+                  'home.see_all'.tr(),
+                  style: AppTextStyles.mono(
+                    10,
+                  ).copyWith(color: context.appColors.text3, letterSpacing: 10 * 0.14),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 140,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(_kHPad, 0, _kHPad, 0),
+            itemCount: matches.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
+            itemBuilder: (context, i) =>
+                _LiveMatchCard(match: matches[i], sport: SportType.football),
+          ),
+        ),
+        const SizedBox(height: 22),
+      ],
+    );
+  }
+
+  Widget _shimmer(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(_kHPad, 4, _kHPad, 22),
+      child: Skeletonizer(
+        enabled: true,
+        child: Row(
+          children: List.generate(
+            3,
+            (_) => Container(
+              width: 240,
+              height: 140,
+              margin: const EdgeInsets.only(right: 12),
+              decoration: BoxDecoration(
+                color: context.appColors.surface,
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Live match card (240 × 140)
+// ---------------------------------------------------------------------------
+
+class _LiveMatchCard extends StatelessWidget {
+  const _LiveMatchCard({required this.match, required this.sport});
+
+  final SportMatch match;
+  final SportType sport;
+
+  @override
+  Widget build(BuildContext context) {
+    final homeScore = int.tryParse(match.homeScore) ?? 0;
+    final awayScore = int.tryParse(match.awayScore) ?? 0;
+
+    return Container(
+      width: 240,
+      height: 140,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: context.appColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: context.appColors.line, width: 0.5),
+      ),
+      child: Stack(
+        children: [
+          // Accent corner glow
+          Positioned(
+            top: -30,
+            right: -30,
+            child: Container(
+              width: 140,
+              height: 140,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [context.appColors.accent.withValues(alpha: 0.08), Colors.transparent],
+                ),
+              ),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top row: sport + league + live pulse
+              Row(
+                children: [
+                  Icon(_sportIcon(sport), size: 13, color: context.appColors.text2),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      match.leagueName.toUpperCase(),
+                      style: AppTextStyles.mono(
+                        9,
+                      ).copyWith(color: context.appColors.text2, letterSpacing: 9 * 0.16),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const _LivePulseBadge(),
+                ],
+              ),
+              const Spacer(),
+              // Home team row
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      match.homeName.toUpperCase(),
+                      style: AppTextStyles.mono(13).copyWith(color: context.appColors.text),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    match.homeScore,
+                    style: AppTextStyles.display(
+                      22,
+                      context,
+                    ).copyWith(color: context.appColors.text),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              // Away team row
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      match.awayName.toUpperCase(),
+                      style: AppTextStyles.mono(13).copyWith(color: context.appColors.text),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    match.awayScore,
+                    style: AppTextStyles.display(22, context).copyWith(
+                      color: awayScore > homeScore
+                          ? context.appColors.accent
+                          : context.appColors.text,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              // Time
+              if (match.liveMinute != null)
+                Text(
+                  match.liveMinute!.toUpperCase(),
+                  style: AppTextStyles.mono(
+                    10,
+                  ).copyWith(color: context.appColors.text3, letterSpacing: 10 * 0.14),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LivePulseBadge extends StatefulWidget {
+  const _LivePulseBadge();
+
+  @override
+  State<_LivePulseBadge> createState() => _LivePulseBadgeState();
+}
+
+class _LivePulseBadgeState extends State<_LivePulseBadge> with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))
+      ..repeat(reverse: true);
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _anim,
+      builder: (_, _) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: context.appColors.live.withValues(alpha: 0.85 + 0.15 * _anim.value),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 7,
+              height: 7,
+              decoration: BoxDecoration(
+                color: context.appColors.ink.withValues(alpha: 0.4 + 0.6 * _anim.value),
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 5),
+            Text(
+              'LIVE',
+              style: AppTextStyles.mono(9).copyWith(
+                color: context.appColors.ink,
+                letterSpacing: 9 * 0.12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Editorial hero card (330 px)
+// ---------------------------------------------------------------------------
+
+class _EditorialHeroCard extends StatelessWidget {
+  const _EditorialHeroCard({required this.article});
+
+  final NewsArticle article;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(_kHPad, 0, _kHPad, 22),
+      child: GestureDetector(
+        onTap: () => context.push(AppRoutes.newsDetailPath(article.id)),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: SizedBox(
+            height: 330,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Background image
+                CachedNetworkImage(
+                  imageUrl: article.imageUrl!,
+                  fit: BoxFit.cover,
+                  placeholder: (_, _) => Container(color: context.appColors.surface2),
+                  errorBuilder: (_, _, _) => Container(color: context.appColors.surface2),
+                ),
+                // Gradient overlay
+                Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0x0D0E0E0E), Color(0xD90E0E0E), Color(0xFF0E0E0E)],
+                      stops: [0, 0.70, 1],
+                    ),
+                  ),
+                ),
+                // Content
+                Positioned.fill(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _Chip(label: '● ${_featuredLabel(context)}', accent: true),
+                            Container(
+                              width: 34,
+                              height: 34,
+                              decoration: BoxDecoration(
+                                color: const Color(0x800E0E0E),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: context.appColors.lineStrong, width: 0.5),
+                              ),
+                              child: Icon(
+                                Icons.play_arrow,
+                                color: context.appColors.text,
+                                size: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        Text(
+                          article.description.isNotEmpty ? article.description.toUpperCase() : '',
+                          style: AppTextStyles.mono(
+                            9,
+                          ).copyWith(color: context.appColors.accentEcho, letterSpacing: 9 * 0.1),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          article.title.toUpperCase(),
+                          style: AppTextStyles.display(
+                            38,
+                            context,
+                          ).copyWith(color: Colors.white, height: 0.9),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          '${article.createdAt} · ${article.browse} READS',
+                          style: AppTextStyles.mono(
+                            10,
+                          ).copyWith(color: context.appColors.text2, letterSpacing: 10 * 0.1),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _featuredLabel(BuildContext context) => 'home.featured'.tr();
+}
+
+// ---------------------------------------------------------------------------
+// Anchor rankings
+// ---------------------------------------------------------------------------
+
+class _AnchorRankingsSection extends StatelessWidget {
+  const _AnchorRankingsSection({required this.anchorsAsync});
+
+  final AsyncValue<PaginatedResponse<AnchorModel>> anchorsAsync;
+
+  @override
+  Widget build(BuildContext context) {
+    return anchorsAsync.when(
+      skipLoadingOnReload: true,
+      loading: () => _shimmer(context),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (page) {
+        final anchors = page.data.take(6).toList();
+        if (anchors.isEmpty) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(_kHPad, 4, _kHPad, 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    'home.anchor_rankings'.tr(),
+                    style: AppTextStyles.display(
+                      22,
+                      context,
+                    ).copyWith(color: context.appColors.text),
+                  ),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () => context.push(AppRoutes.anchorList),
+                    child: Text(
+                      'home.see_all'.tr(),
+                      style: AppTextStyles.mono(
+                        10,
+                      ).copyWith(color: context.appColors.text3, letterSpacing: 10 * 0.14),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              height: 118,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.fromLTRB(_kHPad, 0, _kHPad, 0),
+                itemCount: anchors.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 14),
+                itemBuilder: (context, i) => _AnchorRankingItem(anchor: anchors[i], rank: i + 1),
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _shimmer(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(_kHPad, 4, _kHPad, 24),
+      child: Skeletonizer(
+        enabled: true,
+        child: Row(
+          children: List.generate(
+            4,
+            (_) => Container(
+              width: 88,
+              height: 118,
+              margin: const EdgeInsets.only(right: 14),
+              decoration: BoxDecoration(
+                color: context.appColors.surface,
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AnchorRankingItem extends StatelessWidget {
+  const _AnchorRankingItem({required this.anchor, required this.rank});
+
+  final AnchorModel anchor;
+  final int rank;
+
+  @override
+  Widget build(BuildContext context) {
+    final isFirst = rank == 1;
+
+    return GestureDetector(
+      onTap: () => context.push(AppRoutes.anchorPath(anchor.id)),
+      child: SizedBox(
+        width: 88,
+        child: Column(
+          children: [
+            SizedBox(
+              width: 78,
+              height: 78,
+              child: Stack(
+                children: [
+                  // Outer ring
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isFirst ? context.appColors.accent : context.appColors.lineStrong,
+                          width: isFirst ? 2 : 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Avatar
+                  Padding(
+                    padding: const EdgeInsets.all(3),
+                    child: ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl: anchor.avatarUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (_, _) => Container(color: context.appColors.surface2),
+                        errorBuilder: (_, _, _) => Container(
+                          color: context.appColors.surface2,
+                          child: Icon(Icons.person, color: context.appColors.text3),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Rank badge
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: isFirst ? context.appColors.accent : context.appColors.surface,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          '#$rank',
+                          style: AppTextStyles.display(12, context).copyWith(
+                            color: isFirst ? context.appColors.ink : context.appColors.text,
+                            letterSpacing: 12 * 0.04,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              anchor.nickname.toUpperCase(),
+              style: AppTextStyles.display(
+                11,
+                context,
+              ).copyWith(color: context.appColors.text, letterSpacing: 11 * 0.04),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Trending news 2-column grid
+// ---------------------------------------------------------------------------
+
+class _TrendingNewsGrid extends StatelessWidget {
+  const _TrendingNewsGrid({required this.articles});
+
+  final List<NewsArticle> articles;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(_kHPad, 4, _kHPad, 12),
+          child: Text(
+            'home.trending'.tr(),
+            style: AppTextStyles.display(22, context).copyWith(color: context.appColors.text),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: _kHPad),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (int i = 0; i < articles.length && i < 2; i++) ...[
+                if (i > 0) const SizedBox(width: 12),
+                Expanded(child: _TrendingNewsCard(article: articles[i])),
+              ],
+            ],
+          ),
+        ),
+        if (articles.length > 2) ...[
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: _kHPad),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (int i = 2; i < articles.length && i < 4; i++) ...[
+                  if (i > 2) const SizedBox(width: 12),
+                  Expanded(child: _TrendingNewsCard(article: articles[i])),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _TrendingNewsCard extends StatelessWidget {
+  const _TrendingNewsCard({required this.article});
+
+  final NewsArticle article;
+
+  @override
+  Widget build(BuildContext context) {
+    final category = article.keywords.split(',').first.trim().toUpperCase();
+
+    return GestureDetector(
+      onTap: () => context.push(AppRoutes.newsDetailPath(article.id)),
+      child: Container(
+        decoration: BoxDecoration(
+          color: context.appColors.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: context.appColors.line, width: 0.5),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Thumbnail
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+              child: SizedBox(
+                height: 120,
+                width: double.infinity,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (article.imageUrl != null)
+                      CachedNetworkImage(
+                        imageUrl: article.imageUrl!,
+                        fit: BoxFit.cover,
+                        placeholder: (_, _) => Container(color: context.appColors.surface2),
+                        errorBuilder: (_, _, _) => Container(color: context.appColors.surface2),
+                      )
+                    else
+                      Container(color: context.appColors.surface2),
+                    // Category badge
+                    Positioned(
+                      top: 10,
+                      left: 10,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: context.appColors.accent,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          category,
+                          style: AppTextStyles.display(
+                            10,
+                            context,
+                          ).copyWith(color: context.appColors.ink, letterSpacing: 10 * 0.08),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    article.title.toUpperCase(),
+                    style: AppTextStyles.display(
+                      15,
+                      context,
+                    ).copyWith(color: context.appColors.text, height: 1.05),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '● ${article.createdAt}',
+                    style: AppTextStyles.mono(
+                      9,
+                    ).copyWith(color: context.appColors.text3, letterSpacing: 9 * 0.12),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Sport tab content (existing logic, restyled)
+// ---------------------------------------------------------------------------
 
 class _SportTabContent extends ConsumerStatefulWidget {
   const _SportTabContent({
@@ -196,9 +1244,6 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
     final matches = matchesAsync.valueOrNull?.matches;
     if (matches == null || currStatusIds.isEmpty) return;
     final matchIds = matches.map((m) => m.id).toSet();
-    // Only treat an ID as new if it just appeared in this poll (not in the
-    // previous realtime state), to avoid spurious refreshes from unrelated
-    // live matches that the realtime endpoint always returns.
     final hasNewId = currStatusIds.keys.any(
       (id) => !matchIds.contains(id) && !prevStatusIds.containsKey(id),
     );
@@ -231,7 +1276,6 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
   static const _footballStatuses = ['hot', 'all', 'live', 'finished', 'upcoming', 'scheduled'];
   static const _statusesWithHot = ['hot', 'all', 'live', 'finished', 'upcoming'];
   static const _statuses = ['all', 'live', 'finished', 'upcoming'];
-
   static const _hotLeagueSports = {SportType.football, SportType.basketball};
 
   List<String> get _availableStatuses {
@@ -248,15 +1292,12 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
   Widget build(BuildContext context) {
     super.build(context);
 
-    // Scheduled uses the diary endpoint (no pagination).
-    // All other tabs use the paginated notifier.
     final matchesAsync = _isScheduled
         ? ref
               .watch(footballScheduledMatchesProvider(date: _formattedScheduledDate))
               .whenData((list) => PaginatedMatchResult(matches: list, currentPage: 1, totalPage: 1))
         : ref.watch(_paginatedProvider);
 
-    // Pause/resume realtime polling when the event bottom-nav tab goes off/on screen.
     ref.listen(currentNavIndexProvider, (prev, curr) {
       const eventTabIndex = 0;
       if (curr == eventTabIndex && _isActiveTab) {
@@ -275,8 +1316,6 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
         );
       });
     }
-
-    final anchorsAsync = ref.watch(anchorListProvider());
 
     return Column(
       children: [
@@ -301,12 +1340,9 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
             onSelected: (date) => setState(() => _scheduledDate = date),
             isPast: _isFinished,
           ),
-
         Expanded(
           child: RefreshIndicator(
             onRefresh: () async {
-              ref.invalidate(anchorListProvider);
-              ref.invalidate(newsFirstPageProvider(context.localeCode));
               if (_isScheduled) {
                 ref.invalidate(footballScheduledMatchesProvider(date: _formattedScheduledDate));
                 await ref.read(
@@ -318,12 +1354,7 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
               }
             },
             child: matchesAsync.when(
-              loading: () => Column(
-                children: [
-                  Padding(padding: const EdgeInsets.only(top: 16), child: HomeBannerCarousel()),
-                  const Expanded(child: ShimmerLoadingList()),
-                ],
-              ),
+              loading: () => const ShimmerLoadingList(),
               error: (e, st) {
                 debugPrint('$e, $st');
                 return LayoutBuilder(
@@ -334,7 +1365,7 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
                       child: Center(
                         child: Text(
                           'event.error.load_failed'.tr(),
-                          style: context.textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                          style: AppTextStyles.body(14).copyWith(color: context.appColors.text3),
                         ),
                       ),
                     ),
@@ -352,84 +1383,12 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
                   controller: _scrollController,
                   physics: const AlwaysScrollableScrollPhysics(),
                   slivers: [
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.only(top: 16, bottom: _isHot ? 0 : 16),
-                        child: HomeBannerCarousel(),
-                      ),
-                    ),
-                    if (_isHot)
-                      SliverToBoxAdapter(
-                        child: anchorsAsync.when(
-                          skipLoadingOnRefresh: false,
-                          data: (page) => page.data.isEmpty
-                              ? const SizedBox.shrink()
-                              : Column(
-                                  children: [
-                                    HomeSectionTitle(
-                                      icon: 'assets/images/live-tv.png',
-                                      title: 'home.section.anchor_live'.tr(),
-                                      onPressed: () => context.push(AppRoutes.anchorList),
-                                    ),
-                                    HomeAnchorLiveGrid(
-                                      padding: const EdgeInsets.only(left: 10, right: 10),
-                                      itemCount: 4,
-                                      anchors: page.data,
-                                    ),
-                                  ],
-                                ),
-                          error: (err, stack) {
-                            print('$err\n$stack');
-                            return Column(
-                              children: [
-                                HomeSectionTitle(
-                                  icon: 'assets/images/live-tv.png',
-                                  title: 'home.section.anchor_live'.tr(),
-                                  onPressed: () => context.push(AppRoutes.anchorList),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 48),
-                                  child: Column(
-                                    children: [
-                                      Icon(
-                                        Icons.wifi_off_rounded,
-                                        size: 48,
-                                        color: Colors.grey.shade400,
-                                      ),
-                                      const SizedBox(height: 12),
-                                      Text(
-                                        'home.error.load_failed'.tr(),
-                                        style: TextStyle(color: Colors.grey.shade500),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      TextButton(
-                                        onPressed: () => ref.refresh(anchorListProvider().future),
-                                        child: Text('common.retry'.tr()),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                          loading: () => Column(
-                            children: [
-                              HomeSectionTitle(
-                                icon: 'assets/images/live-tv.png',
-                                title: 'home.section.anchor_live'.tr(),
-                                onPressed: () => context.push(AppRoutes.anchorList),
-                              ),
-                              const HomeAnchorLiveGrid(),
-                            ],
-                          ),
-                        ),
-                      ),
                     if (result.matches.isEmpty)
                       SliverFillRemaining(
                         child: Center(
                           child: Text(
                             'event.empty'.tr(),
-                            style: context.textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                            style: AppTextStyles.body(14).copyWith(color: context.appColors.text3),
                           ),
                         ),
                       )
@@ -456,7 +1415,11 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
   }
 }
 
-class _StatusFilterBar extends StatefulWidget {
+// ---------------------------------------------------------------------------
+// Status filter bar (Arena-styled pills)
+// ---------------------------------------------------------------------------
+
+class _StatusFilterBar extends StatelessWidget {
   const _StatusFilterBar({
     required this.selected,
     required this.onSelected,
@@ -468,67 +1431,54 @@ class _StatusFilterBar extends StatefulWidget {
   final List<String> statuses;
 
   @override
-  State<_StatusFilterBar> createState() => _StatusFilterBarState();
-}
-
-class _StatusFilterBarState extends State<_StatusFilterBar> with SingleTickerProviderStateMixin {
-  late TabController _controller;
-
-  int get _selectedIndex =>
-      widget.statuses.indexOf(widget.selected).clamp(0, widget.statuses.length - 1);
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TabController(
-      length: widget.statuses.length,
-      initialIndex: _selectedIndex,
-      vsync: this,
-    );
-  }
-
-  @override
-  void didUpdateWidget(_StatusFilterBar old) {
-    super.didUpdateWidget(old);
-    if (old.statuses.length != widget.statuses.length) {
-      _controller.dispose();
-      _controller = TabController(
-        length: widget.statuses.length,
-        initialIndex: _selectedIndex,
-        vsync: this,
-      );
-    } else if (_controller.index != _selectedIndex) {
-      _controller.index = _selectedIndex;
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: AppColors.accent,
-      child: TabBar(
-        controller: _controller,
-        isScrollable: true,
-        tabAlignment: TabAlignment.start,
-        onTap: (i) => widget.onSelected(widget.statuses[i]),
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.white,
-        labelStyle: context.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
-        unselectedLabelStyle: context.textTheme.labelMedium,
-        indicatorColor: Colors.white,
-        indicatorPadding: EdgeInsets.only(bottom: 6),
-        dividerColor: Colors.transparent,
-        tabs: widget.statuses.map((s) => Tab(text: 'event.status.$s'.tr())).toList(),
+    return Container(
+      color: context.appColors.surface,
+      child: SizedBox(
+        height: 48,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.fromLTRB(_kHPad, 6, _kHPad, 6),
+          children: statuses.asMap().entries.map((e) {
+            final i = e.key;
+            final s = e.value;
+            final active = s == selected;
+            return Padding(
+              padding: EdgeInsets.only(right: i < statuses.length - 1 ? 8 : 0),
+              child: GestureDetector(
+                onTap: () => onSelected(s),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: active ? context.appColors.text : Colors.transparent,
+                    borderRadius: BorderRadius.circular(999),
+                    border: active
+                        ? null
+                        : Border.all(color: context.appColors.lineStrong, width: 0.5),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'event.status.$s'.tr().toUpperCase(),
+                      style: AppTextStyles.display(12, context).copyWith(
+                        color: active ? context.appColors.ink : context.appColors.text2,
+                        letterSpacing: 12 * 0.06,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Date selector bar
+// ---------------------------------------------------------------------------
 
 class _DateSelectorBar extends StatelessWidget {
   const _DateSelectorBar({required this.selected, required this.onSelected, this.isPast = false});
@@ -549,7 +1499,8 @@ class _DateSelectorBar extends StatelessWidget {
     final isZh = context.locale.languageCode == 'zh';
     final weekdays = isZh ? _weekdayKeysZh : _weekdayKeysEn;
 
-    return SizedBox(
+    return Container(
+      color: context.appColors.ink2,
       height: 56,
       child: Padding(
         padding: const EdgeInsets.only(bottom: 10),
@@ -568,22 +1519,22 @@ class _DateSelectorBar extends StatelessWidget {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.accent : context.appTheme.shimmerHighlight,
+                    color: isSelected ? context.appColors.accent : context.appColors.surface2,
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         weekdayLabel,
-                        style: context.textTheme.labelSmall?.copyWith(
-                          color: isSelected ? Colors.white : Colors.grey.shade600,
+                        style: AppTextStyles.mono(10).copyWith(
+                          color: isSelected ? context.appColors.ink : context.appColors.text3,
                           fontWeight: isSelected ? FontWeight.w600 : null,
                         ),
                       ),
                       Text(
                         dayLabel,
-                        style: context.textTheme.labelMedium?.copyWith(
-                          color: isSelected ? Colors.white : null,
+                        style: AppTextStyles.display(12, context).copyWith(
+                          color: isSelected ? context.appColors.ink : context.appColors.text,
                           fontWeight: isSelected ? FontWeight.w600 : null,
                         ),
                       ),
@@ -598,3 +1549,49 @@ class _DateSelectorBar extends StatelessWidget {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Shared helpers
+// ---------------------------------------------------------------------------
+
+class _Chip extends StatelessWidget {
+  const _Chip({required this.label, this.accent = false});
+
+  final String label;
+  final bool accent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0x800E0E0E),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: accent ? context.appColors.accent : context.appColors.lineStrong,
+          width: 0.5,
+        ),
+      ),
+      child: Text(
+        label,
+        style: AppTextStyles.mono(10).copyWith(
+          color: accent ? context.appColors.accent : context.appColors.text2,
+          letterSpacing: 10 * 0.14,
+        ),
+      ),
+    );
+  }
+}
+
+IconData _sportIcon(SportType sport) => switch (sport) {
+  SportType.football => Icons.sports_soccer,
+  SportType.basketball => Icons.sports_basketball,
+  SportType.tennis => Icons.sports_tennis,
+  SportType.cricket => Icons.sports_cricket,
+  SportType.baseball => Icons.sports_baseball,
+  SportType.volleyball => Icons.sports_volleyball,
+  SportType.badminton => Icons.sports_tennis,
+  SportType.tableTennis => Icons.sports_tennis,
+  SportType.iceHockey => Icons.sports_hockey,
+  SportType.amFootball => Icons.sports_football,
+};

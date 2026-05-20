@@ -268,7 +268,7 @@ class _BasketballMatchBody extends ConsumerWidget {
 
     return eventsAsync.when(
       loading: () =>
-          const Center(child: CircularProgressIndicator(color: AppColors.accent)),
+          Center(child: CircularProgressIndicator(color: context.appColors.accent)),
       error: (_, __) {
         // Show detail data only if events fail
         final detail = detailAsync.valueOrNull as BasketballMatchDetail?;
@@ -372,7 +372,7 @@ class _BodyContent extends StatelessWidget {
           homeTotal: homeTotal,
           awayTotal: awayTotal,
         ),
-        Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerBase),
+        Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerBase),
         ...statsToShow.map((s) => _BasketballStatRow(stat: s, isPlaceholder: stats.isEmpty)),
       ],
     );
@@ -445,7 +445,7 @@ class _QuarterScoreTable extends StatelessWidget {
     final activeIdx = _activeQuarterIndex;
 
     return Container(
-      color: context.appTheme.surface,
+      color: context.appColors.surface,
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
         children: [
@@ -464,7 +464,7 @@ class _QuarterScoreTable extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: isActive ? AppColors.accent : context.appTheme.greyText,
+                        color: isActive ? context.appColors.accent : context.appColors.text2,
                       ),
                     ),
                   );
@@ -477,14 +477,14 @@ class _QuarterScoreTable extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: context.appTheme.greyText,
+                      color: context.appColors.text2,
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerBase),
+          Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerBase),
           // Home row
           _ScoreRow(
             logo: homeLogo,
@@ -494,7 +494,7 @@ class _QuarterScoreTable extends StatelessWidget {
             activeIdx: activeIdx,
             quarterReached: _quarterReached,
           ),
-          Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerHighlight),
+          Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerHighlight),
           // Away row
           _ScoreRow(
             logo: awayLogo,
@@ -550,7 +550,7 @@ class _ScoreRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? AppColors.accent : context.appTheme.baseText,
+                  color: isActive ? context.appColors.accent : context.appColors.text,
                 ),
               ),
             );
@@ -560,10 +560,10 @@ class _ScoreRow extends StatelessWidget {
             child: Text(
               '$total',
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
-                color: AppColors.accent,
+                color: context.appColors.accent,
               ),
             ),
           ),
@@ -598,7 +598,7 @@ class _BasketballStatRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: context.appTheme.shimmerBase, width: 0.5)),
+        border: Border(bottom: BorderSide(color: context.appColors.shimmerBase, width: 0.5)),
       ),
       child: Row(
         children: [
@@ -614,7 +614,7 @@ class _BasketballStatRow extends StatelessWidget {
             child: Text(
               stat.labelKey.isNotEmpty ? stat.labelKey.tr() : '${stat.typeCode}',
               textAlign: TextAlign.center,
-              style: context.textTheme.bodySmall?.copyWith(color: context.appTheme.greyText),
+              style: context.textTheme.bodySmall?.copyWith(color: context.appColors.text2),
             ),
           ),
           SizedBox(
@@ -671,7 +671,7 @@ class _SquadTabState extends ConsumerState<_SquadTab>
     final awayName = detail?.awayName ?? '';
 
     if (homeTeamId.isEmpty && awayTeamId.isEmpty) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.accent));
+      return Center(child: CircularProgressIndicator(color: context.appColors.accent));
     }
 
     return Column(
@@ -680,7 +680,7 @@ class _SquadTabState extends ConsumerState<_SquadTab>
           margin: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(20)),
-            border: Border.all(width: 1, color: context.appTheme.shimmerBase),
+            border: Border.all(width: 1, color: context.appColors.shimmerBase),
           ),
           child: TabBar(
             dividerColor: Colors.transparent,
@@ -688,10 +688,10 @@ class _SquadTabState extends ConsumerState<_SquadTab>
             controller: _tabController,
             indicator: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: AppColors.accent,
+              color: context.appColors.accent,
             ),
             indicatorSize: TabBarIndicatorSize.tab,
-            labelStyle: const TextStyle(
+            labelStyle: TextStyle(
               color: Colors.white,
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -758,7 +758,7 @@ class _TeamSquadList extends ConsumerWidget {
 
     return squadAsync.when(
       loading: () =>
-          const Center(child: CircularProgressIndicator(color: AppColors.accent)),
+          Center(child: CircularProgressIndicator(color: context.appColors.accent)),
       error: (e, st) {
         debugPrint('$e\n$st');
         return Center(
@@ -796,8 +796,8 @@ class _PlayerRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
       decoration: BoxDecoration(
-        color: context.appTheme.surface,
-        border: Border(bottom: BorderSide(color: context.appTheme.shimmerHighlight, width: 0.5)),
+        color: context.appColors.surface,
+        border: Border(bottom: BorderSide(color: context.appColors.shimmerHighlight, width: 0.5)),
       ),
       child: Row(
         children: [
@@ -805,16 +805,16 @@ class _PlayerRow extends StatelessWidget {
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: AppColors.accent.withValues(alpha: 0.1),
+              color: context.appColors.accent.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             alignment: Alignment.center,
             child: Text(
               '${player.shirtNumber}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: AppColors.accent,
+                color: context.appColors.accent,
               ),
             ),
           ),
@@ -827,7 +827,7 @@ class _PlayerRow extends StatelessWidget {
               children: [
                 Text(
                   player.displayName,
-                  style: const TextStyle(fontSize: 13),
+                  style: TextStyle(fontSize: 13),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -837,7 +837,7 @@ class _PlayerRow extends StatelessWidget {
                       if (player.height > 0) '${player.height}cm',
                       if (player.weight > 0) '${player.weight}kg',
                     ].join(' / '),
-                    style: TextStyle(fontSize: 11, color: context.appTheme.greyText),
+                    style: TextStyle(fontSize: 11, color: context.appColors.text2),
                   ),
               ],
             ),
@@ -845,7 +845,7 @@ class _PlayerRow extends StatelessWidget {
           if (player.position.isNotEmpty)
             Text(
               player.position,
-              style: TextStyle(fontSize: 11, color: context.appTheme.greyText),
+              style: TextStyle(fontSize: 11, color: context.appColors.text2),
             ),
         ],
       ),

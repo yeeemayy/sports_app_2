@@ -314,7 +314,7 @@ class _AmFootballScoreTable extends StatelessWidget {
     final headerStyle = TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w600,
-      color: context.appTheme.greyText,
+      color: context.appColors.text2,
     );
 
     final columns = <String>[
@@ -333,7 +333,7 @@ class _AmFootballScoreTable extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 20),
       children: [
         Container(
-          color: context.appTheme.surface,
+          color: context.appColors.surface,
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Column(
             children: [
@@ -349,13 +349,13 @@ class _AmFootballScoreTable extends StatelessWidget {
                   ],
                 ),
               ),
-              Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerBase),
+              Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerBase),
               _ScoreRow(
                   name: homeName,
                   logo: homeLogo,
                   scores: homeScores,
                   accentColor: Colors.deepOrange),
-              Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerHighlight),
+              Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerHighlight),
               _ScoreRow(
                   name: awayName,
                   logo: awayLogo,
@@ -413,7 +413,7 @@ class _ScoreRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: isLast ? 14 : 13,
                   fontWeight: isLast ? FontWeight.w800 : FontWeight.w500,
-                  color: isLast ? accentColor : context.appTheme.baseText,
+                  color: isLast ? accentColor : context.appColors.text,
                 ),
               ),
             );
@@ -474,7 +474,7 @@ class _AmFootballStatRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: context.appTheme.shimmerBase, width: 0.5)),
+        border: Border(bottom: BorderSide(color: context.appColors.shimmerBase, width: 0.5)),
       ),
       child: Row(
         children: [
@@ -490,7 +490,7 @@ class _AmFootballStatRow extends StatelessWidget {
             child: Text(
               stat.labelKey.isNotEmpty ? stat.labelKey.tr() : '${stat.typeCode}',
               textAlign: TextAlign.center,
-              style: context.textTheme.bodySmall?.copyWith(color: context.appTheme.greyText),
+              style: context.textTheme.bodySmall?.copyWith(color: context.appColors.text2),
             ),
           ),
           SizedBox(
@@ -575,8 +575,8 @@ class _AmFootballIncidentTimeline extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
             indicator: _TimeIndicator(timeLabel: incident.timeLabel),
           ),
-          beforeLineStyle: LineStyle(color: context.appTheme.shimmerBase, thickness: 1),
-          afterLineStyle: LineStyle(color: context.appTheme.shimmerBase, thickness: 1),
+          beforeLineStyle: LineStyle(color: context.appColors.shimmerBase, thickness: 1),
+          afterLineStyle: LineStyle(color: context.appColors.shimmerBase, thickness: 1),
           startChild: isHome ? _IncidentCell(incident: incident, isHome: true) : null,
           endChild: !isHome ? _IncidentCell(incident: incident, isHome: false) : null,
         );
@@ -594,14 +594,14 @@ class _TimeIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: context.appTheme.grey_3,
+        color: context.appColors.lineStrong,
         borderRadius: BorderRadius.circular(12),
       ),
       alignment: Alignment.center,
       child: Text(
         timeLabel,
         style: TextStyle(
-            fontSize: 10, fontWeight: FontWeight.w600, color: context.appTheme.grey_4),
+            fontSize: 10, fontWeight: FontWeight.w600, color: context.appColors.text2),
       ),
     );
   }
@@ -633,7 +633,7 @@ class _PhaseMarker extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 2),
       padding: const EdgeInsets.symmetric(vertical: 5),
-      color: context.appTheme.shimmerHighlight,
+      color: context.appColors.shimmerHighlight,
       child: Center(
         child: Text(
           _label(),
@@ -766,13 +766,13 @@ class _BlinkingLiveIndicatorState extends State<_BlinkingLiveIndicator>
                 width: 7,
                 height: 7,
                 decoration: BoxDecoration(
-                    color: AppColors.surface2, shape: BoxShape.circle),
+                    color: context.appColors.surface2, shape: BoxShape.circle),
               ),
               const SizedBox(width: 4),
               Text(
                 widget.label,
                 style: context.textTheme.labelSmall?.copyWith(
-                  color: AppColors.surface2,
+                  color: context.appColors.surface2,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.5,
                 ),

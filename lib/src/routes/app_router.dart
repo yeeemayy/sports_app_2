@@ -22,6 +22,7 @@ import 'package:sports_app/src/features/auth/presentation/register_screen.dart';
 import 'package:sports_app/src/features/data/presentation/data_screen.dart';
 import 'package:sports_app/src/features/event/presentation/event_screen.dart';
 import 'package:sports_app/src/features/home/presentation/anchor_screen.dart';
+import 'package:sports_app/src/features/news/presentation/news_category_screen.dart';
 import 'package:sports_app/src/features/news/presentation/news_detail_screen.dart';
 import 'package:sports_app/src/features/video/presentation/video_detail_screen.dart';
 import 'package:sports_app/src/features/news/presentation/news_screen.dart';
@@ -201,6 +202,13 @@ GoRouter appRouter(AppRouterRef ref) {
         path: AppRoutes.newsDetail,
         builder: (context, state) =>
             NewsDetailScreen(newsId: int.parse(state.pathParameters['newsId']!)),
+      ),
+      GoRoute(
+        path: AppRoutes.newsCategoryList,
+        builder: (context, state) {
+          final extra = state.extra as ({String title, String keyword});
+          return NewsCategoryScreen(title: extra.title, keyword: extra.keyword);
+        },
       ),
       GoRoute(
         path: AppRoutes.videoDetail,

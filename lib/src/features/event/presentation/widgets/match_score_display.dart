@@ -4,7 +4,7 @@ import 'package:sports_app/src/extensions/context_extensions.dart';
 
 /// Shared score display for match cards that show a plain `home – away` score.
 ///
-/// Shows a dash when [isNotStarted] is true. Colours the score with [AppColors.accent]
+/// Shows a dash when [isNotStarted] is true. Colours the score with [context.appColors.accent]
 /// when [isLive], otherwise uses the theme base text colour. Pass [color] to
 /// override the score colour (e.g. for sport-specific brand colours).
 class MatchScoreDisplay extends StatelessWidget {
@@ -35,7 +35,7 @@ class MatchScoreDisplay extends StatelessWidget {
       );
     }
 
-    final scoreColor = color ?? (isLive ? AppColors.accent : context.appTheme.baseText);
+    final scoreColor = color ?? (isLive ? context.appColors.accent : context.appColors.text);
     return RichText(
       text: TextSpan(
         style: context.textTheme.titleMedium?.copyWith(

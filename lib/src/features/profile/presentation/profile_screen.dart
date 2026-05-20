@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sports_app/src/core/utils/app_info.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/auth/data/auth_storage_service.dart';
@@ -212,9 +212,8 @@ class ProfileScreen extends ConsumerWidget {
                                       height: 100,
                                       fit: BoxFit.cover,
                                       placeholder: (context, url) {
-                                        return Shimmer.fromColors(
-                                          baseColor: context.appTheme.shimmerBase,
-                                          highlightColor: context.appTheme.shimmerHighlight,
+                                        return Skeletonizer(
+                                          enabled: true,
                                           child: const ColoredBox(color: Colors.grey),
                                         );
                                       },
@@ -243,7 +242,7 @@ class ProfileScreen extends ConsumerWidget {
                                 Text(
                                   'profile.guest_mode_subtitle'.tr(),
                                   style: context.textTheme.bodyMedium?.copyWith(
-                                    color: context.appTheme.greyText,
+                                    color: context.appColors.text2,
                                   ),
                                 ),
                                 SizedBox(height: 20),
@@ -253,7 +252,7 @@ class ProfileScreen extends ConsumerWidget {
                                       child: TextButton(
                                         onPressed: () => context.push(AppRoutes.register),
                                         style: TextButton.styleFrom(
-                                          backgroundColor: AppColors.accent,
+                                          backgroundColor: context.appColors.accent,
                                           foregroundColor: Colors.white,
                                           minimumSize: const Size(0, 48),
                                         ),
@@ -355,7 +354,7 @@ class ProfileScreen extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(vertical: 30.0),
                         child: Text(
                           '${'profile.app_version'.tr()} ${AppInfo.version}',
-                          style: context.textTheme.bodySmall?.copyWith(color: context.appTheme.greyText),
+                          style: context.textTheme.bodySmall?.copyWith(color: context.appColors.text2),
                         ),
                       ),
                     ),

@@ -3,7 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/home/presentation/providers/banner_providers.dart';
@@ -93,9 +93,8 @@ class _HomeBannerCarouselState extends ConsumerState<HomeBannerCarousel> {
                       imageUrl: url,
                       width: double.maxFinite,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) => Shimmer.fromColors(
-                        baseColor: context.appTheme.shimmerBase,
-                        highlightColor: context.appTheme.shimmerHighlight,
+                      placeholder: (context, url) => Skeletonizer(
+                        enabled: true,
                         child: const ColoredBox(color: Colors.grey),
                       ),
                       errorBuilder: (context, url, error) =>
@@ -162,9 +161,8 @@ class _HomeBannerCarouselState extends ConsumerState<HomeBannerCarousel> {
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: Shimmer.fromColors(
-          baseColor: context.appTheme.shimmerBase,
-          highlightColor: context.appTheme.shimmerHighlight,
+        child: Skeletonizer(
+          enabled: true,
           child: const SizedBox(height: 180, child: ColoredBox(color: Colors.grey)),
         ),
       ),
@@ -190,7 +188,7 @@ class _PageDots extends StatelessWidget {
           width: active ? 16 : 6,
           height: 6,
           decoration: BoxDecoration(
-            color: active ? AppColors.accent : Colors.grey.shade300,
+            color: active ? context.appColors.accent : Colors.grey.shade300,
             borderRadius: BorderRadius.circular(3),
           ),
         );

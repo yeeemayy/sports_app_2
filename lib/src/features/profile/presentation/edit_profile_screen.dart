@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sports_app/src/features/auth/data/auth_repository.dart';
 import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:sports_app/src/shared_widgets/avatar.dart';
@@ -133,9 +133,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                     width: 100,
                                     height: 100,
                                     fit: BoxFit.cover,
-                                    placeholder: (context, url) => Shimmer.fromColors(
-                                      baseColor: context.appTheme.shimmerBase,
-                                      highlightColor: context.appTheme.shimmerHighlight,
+                                    placeholder: (context, url) => Skeletonizer(
+                                      enabled: true,
                                       child: const ColoredBox(color: Colors.white),
                                     ),
                                     errorBuilder: (context, url, error) => AvatarFallback(),
@@ -145,8 +144,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     Container(
                       width: 28,
                       height: 28,
-                      decoration: const BoxDecoration(
-                        color: AppColors.accent,
+                      decoration: BoxDecoration(
+                        color: context.appColors.accent,
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
@@ -176,7 +175,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(0, 48),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                    backgroundColor: AppColors.accent,
+                    backgroundColor: context.appColors.accent,
                     foregroundColor: Colors.white,
                   ),
                   child: _isSaving

@@ -1,8 +1,8 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:shimmer/shimmer.dart';
 
 class AnchorAvatar extends StatelessWidget {
   final double size;
@@ -26,9 +26,8 @@ class AnchorAvatar extends StatelessWidget {
             child: CachedNetworkImage(
               imageUrl: 'https://placehold.co/400x400/FFFFFF/898989.png?text=Image',
               fit: BoxFit.cover,
-              placeholder: (context, url) => Shimmer.fromColors(
-                baseColor: context.appTheme.shimmerBase,
-                highlightColor: context.appTheme.shimmerHighlight,
+              placeholder: (context, url) => Skeletonizer(
+                enabled: true,
                 child: const ColoredBox(color: Colors.grey),
               ),
               errorWidget: (context, url, error) => ColoredBox(color: Colors.grey.shade200),
@@ -40,7 +39,7 @@ class AnchorAvatar extends StatelessWidget {
           child: Badge(
             padding: EdgeInsets.symmetric(horizontal: 6),
             label: Text('anchor.detail.live'.tr(), style: TextStyle(fontSize: 12 * (size / 60))),
-            backgroundColor: AppColors.accent,
+            backgroundColor: context.appColors.accent,
           ),
         ),
       ],

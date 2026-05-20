@@ -5,7 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:go_router/go_router.dart';
 import 'package:marquee/marquee.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
@@ -222,9 +222,8 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
               fit: BoxFit.cover,
               width: double.infinity,
               height: double.infinity,
-              placeholder: (context, url) => Shimmer.fromColors(
-                baseColor: Colors.grey.shade900,
-                highlightColor: Colors.grey.shade700,
+              placeholder: (context, url) => Skeletonizer(
+                enabled: true,
                 child: const ColoredBox(color: Colors.grey),
               ),
               errorBuilder: (context, url, error) => ColoredBox(color: Colors.grey.shade900),
@@ -306,13 +305,13 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
       loading: () => Center(
         child: Text(
           'anchor.detail.loading'.tr(),
-          style: TextStyle(color: context.appTheme.greyText),
+          style: TextStyle(color: context.appColors.text2),
         ),
       ),
       error: (_, _) => Center(
         child: Text(
           'anchor.detail.error.load_failed'.tr(),
-          style: TextStyle(color: context.appTheme.greyText),
+          style: TextStyle(color: context.appColors.text2),
         ),
       ),
       data: (detail) => Column(
@@ -387,7 +386,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
   Widget _buildTabBar() {
     return TabBar(
       controller: _tabController,
-      indicatorColor: AppColors.accent,
+      indicatorColor: context.appColors.accent,
       indicatorSize: TabBarIndicatorSize.label,
       tabs: [
         Tab(text: 'anchor.detail.tab.chats'.tr()),
@@ -402,7 +401,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
       children: [
         _AnchorInfoHeader(detail: detail),
         const SizedBox(height: 20),
-        Divider(height: 0, color: context.appTheme.grey_3),
+        Divider(height: 0, color: context.appColors.lineStrong),
         const SizedBox(height: 16),
         _InfoRow(label: 'anchor.detail.info.title'.tr(), value: detail.title),
         const SizedBox(height: 16),
@@ -445,7 +444,7 @@ class _LiveBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(color: AppColors.accent, borderRadius: BorderRadius.circular(4)),
+      decoration: BoxDecoration(color: context.appColors.accent, borderRadius: BorderRadius.circular(4)),
       child: Text(
         'anchor.detail.live'.tr(),
         style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5),
@@ -471,12 +470,11 @@ class _AnchorInfoHeader extends StatelessWidget {
             child: CachedNetworkImage(
               imageUrl: detail.avatarUrl,
               fit: BoxFit.cover,
-              placeholder: (context, url) => Shimmer.fromColors(
-                baseColor: context.appTheme.shimmerBase,
-                highlightColor: context.appTheme.shimmerHighlight,
+              placeholder: (context, url) => Skeletonizer(
+                enabled: true,
                 child: const ColoredBox(color: Colors.grey),
               ),
-              errorWidget: (context, url, error) => ColoredBox(color: context.appTheme.grey_3),
+              errorWidget: (context, url, error) => ColoredBox(color: context.appColors.lineStrong),
             ),
           ),
         ),
@@ -519,7 +517,7 @@ class _InfoRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: context.textTheme.labelMedium?.copyWith(color: context.appTheme.greyText),
+          style: context.textTheme.labelMedium?.copyWith(color: context.appColors.text2),
         ),
         const SizedBox(height: 4),
         Text(value, style: context.textTheme.bodyMedium),

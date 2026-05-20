@@ -1,7 +1,7 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/home/domain/models/anchor_model.dart';
 import 'package:sports_app/src/shared_widgets/avatar.dart';
@@ -42,9 +42,8 @@ class HomeAnchorLiveCard extends StatelessWidget {
                             fit: BoxFit.cover,
                             loadingBuilder: (context, child, loadingProgress) {
                               if (loadingProgress == null) return child;
-                              return Shimmer.fromColors(
-                                baseColor: Colors.grey.shade800,
-                                highlightColor: Colors.grey.shade600,
+                              return Skeletonizer(
+                                enabled: true,
                                 child: const ColoredBox(color: Colors.grey),
                               );
                             },
@@ -80,9 +79,8 @@ class HomeAnchorLiveCard extends StatelessWidget {
                                         imageUrl:
                                             anchor?.avatarUrl ?? '',
                                         fit: BoxFit.cover,
-                                        placeholder: (context, url) => Shimmer.fromColors(
-                                          baseColor: Colors.grey.shade600,
-                                          highlightColor: Colors.grey.shade400,
+                                        placeholder: (context, url) => Skeletonizer(
+                                          enabled: true,
                                           child: const ColoredBox(color: Colors.grey),
                                         ),
                                         errorBuilder: (context, url, error) =>
@@ -129,7 +127,7 @@ class HomeAnchorLiveCard extends StatelessWidget {
                 right: 0,
                 child: CircleAvatar(
                   radius: 16,
-                  backgroundColor: isLive ? AppColors.accent : Colors.grey.shade300,
+                  backgroundColor: isLive ? context.appColors.accent : Colors.grey.shade300,
                   child: Image.asset(
                     'assets/images/equalizer.gif',
                     color: Colors.white,
@@ -156,9 +154,8 @@ class HomeAnchorLiveCard extends StatelessWidget {
 class _LoadingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: context.appTheme.shimmerBase,
-      highlightColor: context.appTheme.shimmerHighlight,
+    return Skeletonizer(
+      enabled: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

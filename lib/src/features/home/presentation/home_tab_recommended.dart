@@ -1,9 +1,8 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
 import 'package:sports_app/src/features/home/presentation/providers/banner_providers.dart';
 import 'package:sports_app/src/features/home/presentation/widgets/home_live_events.dart';
@@ -45,9 +44,8 @@ class HomeTabRecommended extends ConsumerWidget {
                   imageUrl: banner.cover,
                   width: double.maxFinite,
                   fit: BoxFit.cover,
-                  placeholder: (context, url) => Shimmer.fromColors(
-                    baseColor: context.appTheme.shimmerBase,
-                    highlightColor: context.appTheme.shimmerHighlight,
+                  placeholder: (context, url) => Skeletonizer(
+                    enabled: true,
                     child: const SizedBox(
                       height: 180,
                       child: ColoredBox(color: Colors.grey),

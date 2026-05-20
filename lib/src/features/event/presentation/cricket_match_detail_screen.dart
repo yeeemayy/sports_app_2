@@ -261,7 +261,7 @@ class _TeamLogo extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+      decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white),
       child: ClipOval(
         child: SportLogo(url: url, size: size),
       ),
@@ -282,7 +282,7 @@ class _ScoreTab extends ConsumerWidget {
     final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.cricket, matchId: matchId));
 
     return detailAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
+      loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
@@ -343,18 +343,18 @@ class _CricketScoreContent extends StatelessWidget {
             margin: const EdgeInsets.all(12),
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
             decoration: BoxDecoration(
-              color: AppColors.surface2,
+              color: context.appColors.surface2,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.accentEcho),
+              border: Border.all(color: context.appColors.accentEcho),
             ),
             child: Text(
               resultText,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.accent),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: context.appColors.accent),
             ),
           ),
         Container(
-          color: context.appTheme.surface,
+          color: context.appColors.surface,
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Column(
             children: [
@@ -370,7 +370,7 @@ class _CricketScoreContent extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: context.appTheme.greyText,
+                          color: context.appColors.text2,
                         ),
                       ),
                     ),
@@ -381,7 +381,7 @@ class _CricketScoreContent extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: context.appTheme.greyText,
+                          color: context.appColors.text2,
                         ),
                       ),
                     ),
@@ -392,7 +392,7 @@ class _CricketScoreContent extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: context.appTheme.greyText,
+                          color: context.appColors.text2,
                         ),
                       ),
                     ),
@@ -403,14 +403,14 @@ class _CricketScoreContent extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: context.appTheme.greyText,
+                          color: context.appColors.text2,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerBase),
+              Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerBase),
               if (innings.isEmpty)
                 Padding(
                   padding: const EdgeInsets.all(16),
@@ -436,7 +436,7 @@ class _CricketScoreContent extends StatelessWidget {
                                   Flexible(
                                     child: Text(
                                       inning.team == 1 ? detail.homeName : detail.awayName,
-                                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                      style: TextStyle(fontSize: 12, color: Colors.grey),
                                     ),
                                   ),
                                 ],
@@ -446,27 +446,27 @@ class _CricketScoreContent extends StatelessWidget {
                               child: Text(
                                 '${inning.runs}',
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                               ),
                             ),
                             Expanded(
                               child: Text(
                                 '${inning.wickets}',
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 13),
+                                style: TextStyle(fontSize: 13),
                               ),
                             ),
                             Expanded(
                               child: Text(
                                 inning.overs.toStringAsFixed(1),
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 13),
+                                style: TextStyle(fontSize: 13),
                               ),
                             ),
                           ],
                         ),
                       ),
-                      Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerHighlight),
+                      Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerHighlight),
                     ],
                   );
                 }),
@@ -588,13 +588,13 @@ class _StatSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: context.appTheme.surface,
+      color: context.appColors.surface,
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
-            child: Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+            child: Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
           ),
           ...rows,
         ],
@@ -617,7 +617,7 @@ class _StatRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: context.appTheme.shimmerBase, width: 0.5)),
+        border: Border(bottom: BorderSide(color: context.appColors.shimmerBase, width: 0.5)),
       ),
       child: Column(
         children: [
@@ -635,7 +635,7 @@ class _StatRow extends StatelessWidget {
                 child: Text(
                   label,
                   textAlign: TextAlign.center,
-                  style: context.textTheme.bodySmall?.copyWith(color: context.appTheme.greyText),
+                  style: context.textTheme.bodySmall?.copyWith(color: context.appColors.text2),
                 ),
               ),
               SizedBox(
@@ -656,7 +656,7 @@ class _StatRow extends StatelessWidget {
               if (total <= 0) {
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(3),
-                  child: Container(height: barHeight, color: context.appTheme.shimmerBase),
+                  child: Container(height: barHeight, color: context.appColors.shimmerBase),
                 );
               }
               final halfWidth = constraints.maxWidth / 2;
@@ -666,7 +666,7 @@ class _StatRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(3),
                 child: Container(
                   height: barHeight,
-                  color: context.appTheme.shimmerBase,
+                  color: context.appColors.shimmerBase,
                   child: Row(
                     children: [
                       SizedBox(
@@ -676,7 +676,7 @@ class _StatRow extends StatelessWidget {
                           child: Container(
                             width: homeWidth,
                             height: barHeight,
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               color: Colors.blue,
                               borderRadius: BorderRadius.only(topLeft: radius, bottomLeft: radius),
                             ),
@@ -690,8 +690,8 @@ class _StatRow extends StatelessWidget {
                           child: Container(
                             width: awayWidth,
                             height: barHeight,
-                            decoration: const BoxDecoration(
-                              color: AppColors.accent,
+                            decoration: BoxDecoration(
+                              color: context.appColors.accent,
                               borderRadius: BorderRadius.only(
                                 topRight: radius,
                                 bottomRight: radius,
@@ -734,7 +734,7 @@ class _SituationTabState extends ConsumerState<_SituationTab> {
     final ev = eventsAsync.valueOrNull as CricketMatchEventsData?;
 
     if (eventsAsync.isLoading && ev == null) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.accent));
+      return Center(child: CircularProgressIndicator(color: context.appColors.accent));
     }
 
     final timeline = ev?.timeline ?? [];
@@ -772,7 +772,7 @@ class _SituationTabState extends ConsumerState<_SituationTab> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     decoration: BoxDecoration(
-                      color: isSelected ? AppColors.accent : context.appTheme.grey_3,
+                      color: isSelected ? context.appColors.accent : context.appColors.lineStrong,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -780,7 +780,7 @@ class _SituationTabState extends ConsumerState<_SituationTab> {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: isSelected ? Colors.white : context.appTheme.grey_4,
+                        color: isSelected ? Colors.white : context.appColors.text2,
                       ),
                     ),
                   ),
@@ -801,7 +801,7 @@ class _SituationTabState extends ConsumerState<_SituationTab> {
                   padding: const EdgeInsets.only(bottom: 20),
                   itemCount: balls.length,
                   separatorBuilder: (_, __) =>
-                      Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerBase),
+                      Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerBase),
                   itemBuilder: (context, i) {
                     final (overNum, ball) = balls[i];
                     return _BallRow(overNumber: overNum, ball: ball);
@@ -823,7 +823,7 @@ class _BallRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final IconData iconData;
     final Color iconColor;
-    Color runTextColor = context.appTheme.greyText;
+    Color runTextColor = context.appColors.text2;
     String? extraLabel; // e.g. "+ 1 (WD)"
 
     if (ball.isWicket) {
@@ -848,14 +848,14 @@ class _BallRow extends StatelessWidget {
       runTextColor = Colors.green.shade600;
     } else if (ball.runs > 0) {
       iconData = Icons.directions_run;
-      iconColor = AppColors.accent;
+      iconColor = context.appColors.accent;
     } else {
       iconData = Icons.sports_cricket;
       iconColor = Colors.grey.shade400;
     }
 
     return Container(
-      color: context.appTheme.surface,
+      color: context.appColors.surface,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         children: [
@@ -863,7 +863,7 @@ class _BallRow extends StatelessWidget {
             width: 48,
             child: Text(
               '$overNumber.${ball.ballNumber}',
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
             ),
           ),
           Icon(iconData, color: iconColor, size: 22),
@@ -933,13 +933,13 @@ class _BlinkingLiveIndicatorState extends State<_BlinkingLiveIndicator>
               Container(
                 width: 7,
                 height: 7,
-                decoration: BoxDecoration(color: AppColors.surface2, shape: BoxShape.circle),
+                decoration: BoxDecoration(color: context.appColors.surface2, shape: BoxShape.circle),
               ),
               const SizedBox(width: 4),
               Text(
                 widget.label,
                 style: context.textTheme.labelSmall?.copyWith(
-                  color: AppColors.surface2,
+                  color: context.appColors.surface2,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.5,
                 ),

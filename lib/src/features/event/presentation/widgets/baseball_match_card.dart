@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/baseball_status.dart';
 import 'package:sports_app/src/features/event/domain/models/baseball_match.dart';
 import 'package:sports_app/src/features/event/domain/models/baseball_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/match_score_display.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/sport_status_badge.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
+
+// Design: "DIAMOND" — horizontal face-off. Teams left and right, big run scores
+// flanking a central status column. Looks like an outfield scoreboard.
 
 class BaseballMatchCard extends ConsumerWidget {
   const BaseballMatchCard({super.key, required this.match});
@@ -38,109 +38,141 @@ class BaseballMatchCard extends ConsumerWidget {
     final isLive = baseballLiveStatuses.contains(effective.statusId);
     final isNotStarted = effective.statusId == 1;
     final label = baseballStatusLabel(effective.statusId);
+    final scoreColor = isLive ? context.appColors.accent : context.appColors.text;
 
-    return GestureDetector(
-      onTap: () => context.push(AppRoutes.baseballMatchDetailPath(match.id)),
-      child: Container(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // League header row
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-              child: Row(
-                children: [
-                  LeagueLogo(url: effective.leagueLogo),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      effective.leagueName,
-                      style: context.textTheme.labelSmall?.copyWith(
-                        color: context.appTheme.greyText,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 50,
-                    child: Align(
-                      alignment: Alignment.centerRight,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+      child: Ink(
+        decoration: BoxDecoration(
+          color: context.appColors.surface,
+          border: Border.all(color: context.appColors.line, width: 0.5),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: GestureDetector(
+          onTap: () => context.push(AppRoutes.baseballMatchDetailPath(match.id)),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 11, 14, 13),
+            child: Column(
+              children: [
+                // League header
+                Row(
+                  children: [
+                    LeagueLogo(url: effective.leagueLogo),
+                    const SizedBox(width: 6),
+                    Expanded(
                       child: Text(
-                        effective.matchTimeSim,
-                        style: context.textTheme.labelSmall?.copyWith(color: Colors.grey.shade500),
+                        effective.leagueName,
+                        style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                  ),
-                ],
-              ),
+                    Text(
+                      effective.matchTimeSim,
+                      style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                // Scoreboard row
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Home team
+                    Expanded(
+                      child: Column(
+                        children: [
+                          SportLogo(url: match.homeLogo, size: 36, circular: true),
+                          const SizedBox(height: 5),
+                          Text(
+                            match.homeName,
+                            style: AppTextStyles.mono(10).copyWith(color: context.appColors.text2),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Home score
+                    SizedBox(
+                      width: 44,
+                      child: Text(
+                        isNotStarted ? '-' : effective.homeScore,
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.display(34, context).copyWith(color: scoreColor),
+                      ),
+                    ),
+                    // Center status
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'R',
+                            style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+                          ),
+                          const SizedBox(height: 4),
+                          _StatusBadge(label: label, isLive: isLive),
+                        ],
+                      ),
+                    ),
+                    // Away score
+                    SizedBox(
+                      width: 44,
+                      child: Text(
+                        isNotStarted ? '-' : effective.awayScore,
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.display(34, context).copyWith(color: scoreColor),
+                      ),
+                    ),
+                    // Away team
+                    Expanded(
+                      child: Column(
+                        children: [
+                          SportLogo(url: match.awayLogo, size: 36, circular: true),
+                          const SizedBox(height: 5),
+                          Text(
+                            match.awayName,
+                            style: AppTextStyles.mono(10).copyWith(color: context.appColors.text2),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            // Match body
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SportLogo(url: match.homeLogo, size: 48, circular: true),
-                        const SizedBox(height: 4),
-                        Text(
-                          match.homeName,
-                          style: context.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        MatchScoreDisplay(
-                          homeScore: effective.homeScore,
-                          awayScore: effective.awayScore,
-                          isNotStarted: isNotStarted,
-                          isLive: isLive,
-                        ),
-                        const SizedBox(height: 6),
-                        SportStatusBadge(
-                          label: label,
-                          isLive: isLive,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SportLogo(url: match.awayLogo, size: 48, circular: true),
-                        const SizedBox(height: 4),
-                        Text(
-                          match.awayName,
-                          style: context.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Divider(height: 1, thickness: 0.5, color: Colors.grey.shade200),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({required this.label, required this.isLive});
+  final String label;
+  final bool isLive;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: isLive ? context.appColors.live : context.appColors.surface2,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: AppTextStyles.mono(9).copyWith(
+          color: isLive ? context.appColors.ink : context.appColors.text3,
+        ),
+      ),
+    );
+  }
+}

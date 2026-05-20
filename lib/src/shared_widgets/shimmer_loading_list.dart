@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
-/// A scrollable list of shimmer-animated placeholder cards.
+/// A scrollable list of skeleton-animated placeholder cards.
 class ShimmerLoadingList extends StatelessWidget {
   const ShimmerLoadingList({super.key, this.itemCount = 8, this.itemHeight = 72});
 
@@ -11,23 +10,22 @@ class ShimmerLoadingList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: EdgeInsets.zero,
-      itemCount: itemCount,
-      itemBuilder: (context, _) {
-        return Shimmer.fromColors(
-          baseColor: context.appTheme.shimmerBase,
-          highlightColor: context.appTheme.shimmerHighlight,
-          child: Container(
+    return Skeletonizer(
+      enabled: true,
+      child: ListView.builder(
+        padding: EdgeInsets.zero,
+        itemCount: itemCount,
+        itemBuilder: (context, _) {
+          return Container(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             height: itemHeight,
             decoration: BoxDecoration(
               color: Colors.grey,
               borderRadius: BorderRadius.circular(8),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

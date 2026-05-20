@@ -1,6 +1,6 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/features/video/domain/models/video_model.dart';
 
@@ -39,9 +39,8 @@ class HomeVideoCard extends StatelessWidget {
                     CachedNetworkImage(
                       imageUrl: video!.thumbnailPath,
                       fit: BoxFit.cover,
-                      placeholder: (context, _) => Shimmer.fromColors(
-                        baseColor: Colors.grey.shade800,
-                        highlightColor: Colors.grey.shade600,
+                      placeholder: (context, _) => Skeletonizer(
+                        enabled: true,
                         child: const ColoredBox(color: Colors.grey),
                       ),
                       errorBuilder: (context, e, s) =>
@@ -78,9 +77,8 @@ class _VideoCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: context.appTheme.shimmerBase,
-      highlightColor: context.appTheme.shimmerHighlight,
+    return Skeletonizer(
+      enabled: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

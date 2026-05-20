@@ -1,67 +1,115 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/features/news/domain/models/news_article.dart';
+
+const _placeholder = NewsArticle(
+  id: 0,
+  title: 'Loading news article title here',
+  description: 'Loading description text for the news article here',
+  keywords: '',
+  createdAt: '2024-01-01T00:00:00Z',
+  slugUrl: '',
+  browse: 0,
+  category: 0,
+);
 
 class NewsCard extends StatelessWidget {
   const NewsCard({
     super.key,
     required this.article,
     required this.onTap,
-  })  : _loading = false;
+    this.categoryLabel = '',
+    this.grid = false,
+  }) : _loading = false;
 
-  const NewsCard.loading({super.key})
+  const NewsCard.loading({super.key, this.grid = false})
       : article = null,
         onTap = null,
+        categoryLabel = '',
         _loading = true;
 
   final NewsArticle? article;
   final VoidCallback? onTap;
+  final String categoryLabel;
   final bool _loading;
+  final bool grid;
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) return const _NewsCardSkeleton();
+    final a = article ?? _placeholder;
+    if (grid) {
+      return Skeletonizer(enabled: _loading, child: _buildGrid(context, a));
+    }
+    return Skeletonizer(enabled: _loading, child: _buildList(context, a));
+  }
 
-    final theme = Theme.of(context);
+  Widget _buildList(BuildContext context, NewsArticle a) {
+    final colors = context.appColors;
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _CoverImage(url: article!.imageUrl),
+            _CoverImage(url: a.imageUrl),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (categoryLabel.isNotEmpty) ...[
+                    Row(
+                      children: [
+                        Container(
+                          width: 5,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: colors.accent,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          categoryLabel.toUpperCase(),
+                          style: AppTextStyles.mono(9).copyWith(
+                            color: colors.accent,
+                            letterSpacing: 1.44,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                  ],
                   Text(
-                    article!.title,
+                    a.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      height: 1.3,
+                    style: AppTextStyles.display(17, context).copyWith(
+                      color: colors.text,
+                      height: 1.05,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    article!.description,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                      height: 1.4,
+                  if (a.description.isNotEmpty) ...[
+                    const SizedBox(height: 5),
+                    Text(
+                      a.description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.body(12).copyWith(
+                        color: colors.text3,
+                        height: 1.4,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
+                  ],
+                  const SizedBox(height: 8),
                   Text(
-                    _formatDate(article!.createdAt),
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+                    '● ${_timeAgo(a.createdAt)}',
+                    style: AppTextStyles.mono(9).copyWith(
+                      color: colors.text3,
+                      letterSpacing: 1.08,
                     ),
                   ),
                 ],
@@ -73,60 +121,121 @@ class NewsCard extends StatelessWidget {
     );
   }
 
-  String _formatDate(String iso) {
+  Widget _buildGrid(BuildContext context, NewsArticle a) {
+    final colors = context.appColors;
+    return GestureDetector(
+      onTap: onTap,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: colors.surface
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: _GridCoverImage(url: a.imageUrl),
+              ),
+            ),
+            const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (categoryLabel.isNotEmpty) ...[
+                  Row(
+                    children: [
+                      Container(
+                        width: 4,
+                        height: 4,
+                        decoration: BoxDecoration(color: colors.accent, shape: BoxShape.circle),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        categoryLabel.toUpperCase(),
+                        style: AppTextStyles.mono(8).copyWith(
+                          color: colors.accent,
+                          letterSpacing: 1.44,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                ],
+                Text(
+                  a.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.display(14, context).copyWith(
+                    color: colors.text,
+                    height: 1.1,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  '● ${_timeAgo(a.createdAt)}',
+                  style: AppTextStyles.mono(8).copyWith(
+                    color: colors.text3,
+                    letterSpacing: 1.08,
+                  ),
+                ),
+              ],
+            ),
+          )
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _timeAgo(String iso) {
     try {
       final dt = DateTime.parse(iso).toLocal();
-      return '${dt.year}-${_pad(dt.month)}-${_pad(dt.day)} ${_pad(dt.hour)}:${_pad(dt.minute)}';
+      final diff = DateTime.now().difference(dt);
+      if (diff.inMinutes < 60) return '${diff.inMinutes} MIN AGO';
+      if (diff.inHours < 24) return '${diff.inHours} HR AGO';
+      if (diff.inDays < 30) return '${diff.inDays} DAYS AGO';
+      return '${(diff.inDays / 30).floor()} MO AGO';
     } catch (_) {
       return iso;
     }
   }
-
-  String _pad(int v) => v.toString().padLeft(2, '0');
 }
 
-class _NewsCardSkeleton extends StatelessWidget {
-  const _NewsCardSkeleton();
+
+class _GridCoverImage extends StatelessWidget {
+  const _GridCoverImage({required this.url});
+
+  final String? url;
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: context.appTheme.shimmerBase,
-      highlightColor: context.appTheme.shimmerHighlight,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 90,
-              height: 90,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(height: 14, color: Colors.white),
-                  const SizedBox(height: 4),
-                  Container(height: 14, width: double.infinity, color: Colors.white),
-                  const SizedBox(height: 4),
-                  Container(height: 12, width: 160, color: Colors.white),
-                  const SizedBox(height: 10),
-                  Container(height: 10, width: 80, color: Colors.white),
-                ],
-              ),
-            ),
-          ],
-        ),
+    final colors = context.appColors;
+    if (url == null || url!.isEmpty) {
+      return ColoredBox(
+        color: colors.surface2,
+        child: Icon(Icons.article_outlined, color: colors.text3, size: 24),
+      );
+    }
+    return CachedNetworkImage(
+      imageUrl: url!,
+      fit: BoxFit.cover,
+      placeholder: (context, url) => Skeletonizer(
+        enabled: true,
+        child: ColoredBox(color: colors.surface),
+      ),
+      errorBuilder: (context, url, error) => ColoredBox(
+        color: colors.surface2,
+        child: Icon(Icons.broken_image_outlined, color: colors.text3),
       ),
     );
   }
 }
+
 
 class _CoverImage extends StatelessWidget {
   const _CoverImage({required this.url});
@@ -135,38 +244,36 @@ class _CoverImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const size = 90.0;
+    const w = 120.0;
+    const h = 96.0;
+    final colors = context.appColors;
     if (url == null || url!.isEmpty) {
       return Container(
-        width: size,
-        height: size,
+        width: w,
+        height: h,
         decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(8),
+          color: colors.surface2,
+          borderRadius: BorderRadius.circular(14),
         ),
+        child: Icon(Icons.article_outlined, color: colors.text3, size: 28),
       );
     }
     return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(14),
       child: CachedNetworkImage(
         imageUrl: url!,
-        width: size,
-        height: size,
+        width: w,
+        height: h,
         fit: BoxFit.cover,
-        placeholder: (context, url) => Shimmer.fromColors(
-          baseColor: context.appTheme.shimmerBase,
-          highlightColor: context.appTheme.shimmerHighlight,
-          child: Container(
-            width: size,
-            height: size,
-            color: Colors.white,
-          ),
+        placeholder: (context, url) => Skeletonizer(
+          enabled: true,
+          child: Container(width: w, height: h, color: colors.surface),
         ),
         errorBuilder: (context, url, error) => Container(
-          width: size,
-          height: size,
-          color: Colors.grey.shade200,
-          child: const Icon(Icons.broken_image_outlined, color: Colors.grey),
+          width: w,
+          height: h,
+          color: colors.surface2,
+          child: Icon(Icons.broken_image_outlined, color: colors.text3),
         ),
       ),
     );

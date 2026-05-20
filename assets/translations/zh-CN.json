@@ -56,6 +56,7 @@
     "me": "我的"
   },
   "news": {
+    "header": "热点资讯",
     "details": "新闻详情",
     "search_hint": "搜索新闻...",
     "no_results": "暂无结果",
@@ -65,6 +66,11 @@
       "football": "足球",
       "basketball": "篮球",
       "esports": "电竞"
+    },
+    "featured": "精选",
+    "more": "更多 →",
+    "section": {
+      "latest": "最新"
     }
   },
   "home": {
@@ -73,6 +79,16 @@
       "basketball": "篮球",
       "football": "足球"
     },
+    "greeting": {
+      "morning": "早上好",
+      "afternoon": "下午好",
+      "evening": "晚上好"
+    },
+    "live_now": "赛事进行中",
+    "anchor_rankings": "主播排名",
+    "trending": "热门",
+    "featured": "精选",
+    "see_all": "查看全部 →",
     "section": {
       "live_events": "赛事直播",
       "live_events_count": "{count}场",

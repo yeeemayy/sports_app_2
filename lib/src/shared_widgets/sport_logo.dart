@@ -1,6 +1,6 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sports_app/src/shared_widgets/avatar.dart';
 
 /// Team or player logo with a shimmer placeholder and [AvatarFallback].
@@ -26,9 +26,8 @@ class SportLogo extends StatelessWidget {
         width: size,
         height: size,
         fit: circular ? BoxFit.cover : BoxFit.contain,
-        placeholder: (_, _) => Shimmer.fromColors(
-          baseColor: const Color(0xFFE0E0E0),
-          highlightColor: const Color(0xFFF5F5F5),
+        placeholder: (_, _) => Skeletonizer(
+          enabled: true,
           child: AvatarFallback(size: size, iconSize: size * 0.5),
         ),
         errorBuilder: (_, _, _) => AvatarFallback(size: size, iconSize: size * 0.5),

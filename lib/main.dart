@@ -62,44 +62,56 @@ class MyApp extends ConsumerWidget {
       locale: context.locale,
       themeMode: themeMode,
       theme: ThemeData(
-        dividerColor: const Color(0x2E0E0E0E),
+        extensions: const [AppColors.light],
+        scaffoldBackgroundColor: AppColors.light.ink,
+        dividerColor: AppColors.light.lineStrong,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.accent,
-        ).copyWith(primary: AppColors.accent, primaryContainer: AppColors.surface2),
+          seedColor: AppColors.light.accent,
+          brightness: Brightness.light,
+        ).copyWith(
+          surface: AppColors.light.surface,
+          primary: AppColors.light.accent,
+          onPrimary: AppColors.light.surface,
+          primaryContainer: AppColors.light.surface2,
+        ),
+        textTheme: GoogleFonts.spaceGroteskTextTheme(
+          ThemeData(brightness: Brightness.light).textTheme,
+        ),
         appBarTheme: AppBarTheme(
           centerTitle: true,
-          elevation: 0.5,
-          shadowColor: Colors.grey.shade100,
-          titleTextStyle: const TextStyle(
+          elevation: 0,
+          backgroundColor: AppColors.light.ink,
+          titleTextStyle: GoogleFonts.spaceGrotesk(
             fontWeight: FontWeight.w700,
-            color: Colors.black87,
+            color: AppColors.light.text,
             fontSize: 16,
           ),
         ),
         textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(foregroundColor: AppColors.accent),
+          style: TextButton.styleFrom(foregroundColor: AppColors.light.accent),
         ),
         filledButtonTheme: FilledButtonThemeData(
           style: TextButton.styleFrom(
-            backgroundColor: AppColors.accent,
+            backgroundColor: AppColors.light.accent,
             foregroundColor: Colors.white,
             minimumSize: Size(0, 48),
           ),
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            side: BorderSide(color: AppColors.accent),
-            foregroundColor: AppColors.accent,
+            side: BorderSide(color: AppColors.light.accent),
+            foregroundColor: AppColors.light.accent,
           ),
         ),
       ),
       darkTheme: ThemeData(
-        scaffoldBackgroundColor: AppColors.ink,
-        dividerColor: AppColors.lineStrong,
+        extensions: const [AppColors.dark],
+        scaffoldBackgroundColor: AppColors.dark.ink,
+        dividerColor: AppColors.dark.lineStrong,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.accent,
+          seedColor: AppColors.dark.accent,
           brightness: Brightness.dark,
-        ).copyWith(surface: AppColors.surface, primary: AppColors.accent, onPrimary: AppColors.ink),
+        ).copyWith(surface: AppColors.dark.surface, primary: AppColors.dark.accent, onPrimary: AppColors.dark.ink),
         textTheme: GoogleFonts.spaceGroteskTextTheme(
           ThemeData(brightness: Brightness.dark).textTheme,
         ),
@@ -108,24 +120,24 @@ class MyApp extends ConsumerWidget {
           elevation: 0,
           titleTextStyle: GoogleFonts.spaceGrotesk(
             fontWeight: FontWeight.w700,
-            color: AppColors.text,
+            color: AppColors.dark.text,
             fontSize: 16,
           ),
         ),
         textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(foregroundColor: AppColors.accent),
+          style: TextButton.styleFrom(foregroundColor: AppColors.dark.accent),
         ),
         filledButtonTheme: FilledButtonThemeData(
           style: TextButton.styleFrom(
-            backgroundColor: AppColors.accent,
+            backgroundColor: AppColors.dark.accent,
             foregroundColor: Colors.white,
             minimumSize: Size(0, 48),
           ),
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            side: BorderSide(color: AppColors.accent),
-            foregroundColor: AppColors.accent,
+            side: BorderSide(color: AppColors.dark.accent),
+            foregroundColor: AppColors.dark.accent,
           ),
         ),
       ),

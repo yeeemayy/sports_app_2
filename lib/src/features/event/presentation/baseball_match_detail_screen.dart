@@ -209,7 +209,7 @@ class _ScoreTab extends ConsumerWidget {
     final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.baseball, matchId: matchId));
 
     return detailAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
+      loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
@@ -298,7 +298,7 @@ class _InningGrid extends StatelessWidget {
     final headerStyle = TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w600,
-      color: context.appTheme.greyText,
+      color: context.appColors.text2,
     );
 
     return LayoutBuilder(
@@ -316,7 +316,7 @@ class _InningGrid extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: weight ?? FontWeight.w500,
-                color: color ?? context.appTheme.baseText,
+                color: color ?? context.appColors.text,
               ),
             ),
           );
@@ -327,28 +327,28 @@ class _InningGrid extends StatelessWidget {
           children: [
             // Inning grid
             Container(
-              color: context.appTheme.surface,
+              color: context.appColors.surface,
               margin: const EdgeInsets.only(top: 12, bottom: 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Header row: blank + inning numbers
                   Container(
-                    color: context.appTheme.inningHeaderBg,
+                    color: context.appColors.inningHeaderBg,
                     padding: EdgeInsets.symmetric(vertical: 8),
                     child: Row(
                       children: [
                         SizedBox(width: nameColWidth),
                         ...List.generate(
                           displayCount,
-                          (i) => buildCell('${i + 1}', color: context.appTheme.grey_5),
+                          (i) => buildCell('${i + 1}', color: context.appColors.text3),
                         ),
                       ],
                     ),
                   ),
                   // Away row
                   Container(
-                    color: context.appTheme.inningAwayRowBg,
+                    color: context.appColors.inningAwayRowBg,
                     child: Row(
                       children: [
                         SizedBox(
@@ -364,7 +364,7 @@ class _InningGrid extends StatelessWidget {
                                     detail.awayName,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -380,7 +380,7 @@ class _InningGrid extends StatelessWidget {
                   ),
                   // Home row
                   Container(
-                    color: context.appTheme.inningHomeRowBg,
+                    color: context.appColors.inningHomeRowBg,
                     child: Row(
                       children: [
                         SizedBox(
@@ -396,7 +396,7 @@ class _InningGrid extends StatelessWidget {
                                     detail.homeName,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -417,7 +417,7 @@ class _InningGrid extends StatelessWidget {
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
-                color: context.appTheme.surface,
+                color: context.appColors.surface,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -426,7 +426,7 @@ class _InningGrid extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
-                      color: context.appTheme.inningHeaderBg,
+                      color: context.appColors.inningHeaderBg,
                       borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(8),
                         topRight: Radius.circular(8),
@@ -465,7 +465,7 @@ class _InningGrid extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerBase),
+                  Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerBase),
                   // Away team row
                   _RheRow(
                     name: detail.awayName,
@@ -473,7 +473,7 @@ class _InningGrid extends StatelessWidget {
                     hits: awayHits,
                     errors: awayErrors,
                   ),
-                  Divider(height: 1, thickness: 0.5, color: context.appTheme.shimmerHighlight),
+                  Divider(height: 1, thickness: 0.5, color: context.appColors.shimmerHighlight),
                   // Home team row
                   _RheRow(
                     name: detail.homeName,
@@ -508,7 +508,7 @@ class _RheRow extends StatelessWidget {
           Expanded(
             child: Text(
               name,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -518,7 +518,7 @@ class _RheRow extends StatelessWidget {
             child: Text(
               runs,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
             ),
           ),
           SizedBox(
@@ -526,7 +526,7 @@ class _RheRow extends StatelessWidget {
             child: Text(
               hits,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
             ),
           ),
           SizedBox(
@@ -534,7 +534,7 @@ class _RheRow extends StatelessWidget {
             child: Text(
               errors,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -569,7 +569,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
     );
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
+      loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
@@ -603,7 +603,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
                       decoration: BoxDecoration(
-                        color: isSelected ? AppColors.accent : context.appTheme.grey_3,
+                        color: isSelected ? context.appColors.accent : context.appColors.lineStrong,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -611,7 +611,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: isSelected ? Colors.white : context.appTheme.grey_4,
+                          color: isSelected ? Colors.white : context.appColors.text2,
                         ),
                       ),
                     ),
@@ -657,7 +657,7 @@ class _BaseballStatRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: context.appTheme.shimmerBase, width: 0.5)),
+        border: Border(bottom: BorderSide(color: context.appColors.shimmerBase, width: 0.5)),
       ),
       child: Column(
         children: [
@@ -675,7 +675,7 @@ class _BaseballStatRow extends StatelessWidget {
                 child: Text(
                   stat.labelKey.isNotEmpty ? stat.labelKey.tr() : '${stat.typeCode}',
                   textAlign: TextAlign.center,
-                  style: context.textTheme.bodySmall?.copyWith(color: context.appTheme.greyText),
+                  style: context.textTheme.bodySmall?.copyWith(color: context.appColors.text2),
                 ),
               ),
               SizedBox(
@@ -696,7 +696,7 @@ class _BaseballStatRow extends StatelessWidget {
               if (total <= 0) {
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(3),
-                  child: Container(height: barHeight, color: context.appTheme.shimmerBase),
+                  child: Container(height: barHeight, color: context.appColors.shimmerBase),
                 );
               }
               final halfWidth = constraints.maxWidth / 2;
@@ -706,7 +706,7 @@ class _BaseballStatRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(3),
                 child: Container(
                   height: barHeight,
-                  color: context.appTheme.shimmerBase,
+                  color: context.appColors.shimmerBase,
                   child: Row(
                     children: [
                       SizedBox(
@@ -716,7 +716,7 @@ class _BaseballStatRow extends StatelessWidget {
                           child: Container(
                             width: homeWidth,
                             height: barHeight,
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               color: Colors.blue,
                               borderRadius: BorderRadius.only(topLeft: radius, bottomLeft: radius),
                             ),
@@ -730,8 +730,8 @@ class _BaseballStatRow extends StatelessWidget {
                           child: Container(
                             width: awayWidth,
                             height: barHeight,
-                            decoration: const BoxDecoration(
-                              color: AppColors.accent,
+                            decoration: BoxDecoration(
+                              color: context.appColors.accent,
                               borderRadius: BorderRadius.only(
                                 topRight: radius,
                                 bottomRight: radius,

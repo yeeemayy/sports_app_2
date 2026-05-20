@@ -60,8 +60,8 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolvedLabelColor = labelColor ?? context.appTheme.textFieldLabel;
-    final resolvedBgColor = backgroundColor ?? context.appTheme.textFieldBg;
+    final resolvedLabelColor = labelColor ?? context.appColors.text2;
+    final resolvedBgColor = backgroundColor ?? context.appColors.surface2;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
@@ -100,7 +100,7 @@ class CustomTextField extends StatelessWidget {
             textAlign: TextAlign.left,
             style: textStyle.copyWith(color: resolvedLabelColor),
             maxLines: maxLines,
-            cursorColor: AppColors.accent,
+            cursorColor: context.appColors.accent,
             keyboardType: keyboardType,
             readOnly: readOnly,
             enabled: enabled,
@@ -129,7 +129,7 @@ class CustomTextField extends StatelessWidget {
                   : null,
               suffixIcon: suffixIcon,
               filled: true,
-              fillColor: enabled ? resolvedBgColor : AppColors.accent.withValues(alpha: 0.2),
+              fillColor: enabled ? resolvedBgColor : context.appColors.accent.withValues(alpha: 0.2),
               helperText: helperText,
               helperMaxLines: 6,
               helperStyle: TextStyle(
@@ -143,7 +143,7 @@ class CustomTextField extends StatelessWidget {
                 borderRadius: borderRadius,
               ),
               focusedBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: AppColors.accent),
+                borderSide: BorderSide(color: context.appColors.accent),
                 borderRadius: borderRadius,
               ),
               disabledBorder: OutlineInputBorder(

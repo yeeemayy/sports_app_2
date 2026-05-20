@@ -50,7 +50,7 @@ class AppWrapper extends ConsumerWidget {
       body: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.only(bottom: 100),
+            padding: const EdgeInsets.only(bottom: 80),
             child: navigationShell,
           ),
           Positioned(

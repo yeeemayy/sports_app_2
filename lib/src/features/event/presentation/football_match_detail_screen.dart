@@ -429,7 +429,7 @@ class _EventsTab extends ConsumerWidget {
     final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
+      loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
       error: (e, st) {
         debugPrint('$e\n$st');
         return Center(
@@ -508,13 +508,13 @@ class _TimeIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: context.appTheme.grey_3,
+        color: context.appColors.lineStrong,
         borderRadius: BorderRadius.circular(12),
       ),
       alignment: Alignment.center,
       child: Text(
         "$time'",
-        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: context.appTheme.grey_4),
+        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: context.appColors.text2),
       ),
     );
   }
@@ -526,14 +526,14 @@ class _HalfTimeSeparator extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.symmetric(vertical: 6),
-      color: context.appTheme.shimmerHighlight,
+      color: context.appColors.shimmerHighlight,
       child: Center(
         child: Text(
           'event.football.detail.half_time'.tr(),
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: context.appTheme.shimmerBase,
+            color: context.appColors.shimmerBase,
             letterSpacing: 0.5,
           ),
         ),
@@ -552,7 +552,7 @@ class _PhaseMarker extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 2),
       padding: const EdgeInsets.symmetric(vertical: 5),
-      color: context.appTheme.shimmerHighlight,
+      color: context.appColors.shimmerHighlight,
       child: Center(
         child: Text(
           'event.football.detail.incident_type.${incident.type}'.tr(),
@@ -571,7 +571,7 @@ class _IncidentCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final icon = _incidentIcon(incident.type);
+    final icon = _incidentIcon(incident.type, context);
     final name = _incidentLabel(incident);
 
     return Container(
@@ -609,8 +609,8 @@ class _IncidentCell extends StatelessWidget {
     return i.playerName ?? '';
   }
 
-  static const _incidentColors = {
-    1: AppColors.accent, // Goal
+  static Color _incidentColor(int type, AppColors colors) => {
+    1: colors.accent, // Goal
     2: Colors.orange, // Corner
     3: Colors.amber, // Yellow card
     4: Colors.red, // Red card
@@ -637,10 +637,10 @@ class _IncidentCell extends StatelessWidget {
     28: Colors.indigo, // VAR
     29: Colors.green, // Penalty shootout scored
     30: Colors.red, // Penalty shootout missed
-  };
+  }[type] ?? Colors.grey;
 
-  Widget _incidentIcon(int type) {
-    final color = _incidentColors[type] ?? Colors.grey;
+  Widget _incidentIcon(int type, BuildContext context) {
+    final color = _incidentColor(type, context.appColors);
     return _IncidentBadge(label: 'event.football.detail.incident_type.$type'.tr(), color: color);
   }
 }
@@ -686,7 +686,7 @@ class _IncidentText extends StatelessWidget {
         if (text.isNotEmpty)
           Text(
             text,
-            style: const TextStyle(fontSize: 11),
+            style: TextStyle(fontSize: 11),
             textAlign: align,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -694,10 +694,10 @@ class _IncidentText extends StatelessWidget {
         if (incident.homeScore != null && incident.awayScore != null)
           Text(
             '${incident.homeScore} - ${incident.awayScore}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: AppColors.accent,
+              color: context.appColors.accent,
             ),
             textAlign: align,
           ),
@@ -745,7 +745,7 @@ class _LineupsTabState extends ConsumerState<_LineupsTab> with SingleTickerProvi
     final lineupsAsync = ref.watch(footballMatchLineupsProvider(matchId: widget.matchId));
 
     return lineupsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
+      loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
       error: (e, st) {
         debugPrint('$e\n$st');
         return Center(
@@ -781,7 +781,7 @@ class _LineupsTabState extends ConsumerState<_LineupsTab> with SingleTickerProvi
               margin: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.all(Radius.circular(20)),
-                border: Border.all(width: 1, color: context.appTheme.shimmerBase),
+                border: Border.all(width: 1, color: context.appColors.shimmerBase),
               ),
               child: TabBar(
                 dividerColor: Colors.transparent,
@@ -789,10 +789,10 @@ class _LineupsTabState extends ConsumerState<_LineupsTab> with SingleTickerProvi
                 controller: _tabController,
                 indicator: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  color: AppColors.accent,
+                  color: context.appColors.accent,
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
-                labelStyle: const TextStyle(
+                labelStyle: TextStyle(
                   color: Colors.white,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -887,10 +887,10 @@ class _SectionHeader extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-      color: context.appTheme.grey_3,
+      color: context.appColors.lineStrong,
       child: Text(
         label,
-        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.appTheme.grey_4),
+        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.appColors.text2),
       ),
     );
   }
@@ -914,16 +914,16 @@ class _PlayerRow extends StatelessWidget {
             width: 24,
             height: 24,
             decoration: BoxDecoration(
-              color: AppColors.accent.withValues(alpha: 0.1),
+              color: context.appColors.accent.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             alignment: Alignment.center,
             child: Text(
               '${player.shirtNumber}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: AppColors.accent,
+                color: context.appColors.accent,
               ),
             ),
           ),
@@ -933,7 +933,7 @@ class _PlayerRow extends StatelessWidget {
           Expanded(
             child: Text(
               player.name,
-              style: const TextStyle(fontSize: 13),
+              style: TextStyle(fontSize: 13),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -961,7 +961,7 @@ class _StatsTab extends ConsumerWidget {
     final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
 
     return eventsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
+      loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
       error: (_, __) => Center(
         child: Text('event.error.load_failed'.tr(), style: TextStyle(color: Colors.grey.shade500)),
       ),
@@ -1001,7 +1001,7 @@ class _StatRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: context.appTheme.shimmerBase, width: 0.5)),
+        border: Border(bottom: BorderSide(color: context.appColors.shimmerBase, width: 0.5)),
       ),
       child: Row(
         children: [
@@ -1017,7 +1017,7 @@ class _StatRow extends StatelessWidget {
             child: Text(
               stat.label!,
               textAlign: TextAlign.center,
-              style: context.textTheme.bodySmall?.copyWith(color: context.appTheme.grey_5),
+              style: context.textTheme.bodySmall?.copyWith(color: context.appColors.text3),
             ),
           ),
           SizedBox(

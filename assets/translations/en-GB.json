@@ -56,6 +56,7 @@
     "me": "ME"
   },
   "news": {
+    "header": "The Feed.",
     "details": "News Details",
     "search_hint": "Search news...",
     "no_results": "No results found",
@@ -65,6 +66,11 @@
       "football": "Football",
       "basketball": "Basketball",
       "esports": "E-Sports"
+    },
+    "featured": "Featured",
+    "more": "More →",
+    "section": {
+      "latest": "Latest"
     }
   },
   "home": {
@@ -73,6 +79,16 @@
       "basketball": "Basketball",
       "football": "Football"
     },
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    },
+    "live_now": "Live now",
+    "anchor_rankings": "Anchor rankings",
+    "trending": "Trending",
+    "featured": "Featured",
+    "see_all": "See all →",
     "section": {
       "live_events": "Live Events",
       "live_events_count": "{count} matches",

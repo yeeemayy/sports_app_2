@@ -40,7 +40,7 @@ Future<void> showCustomStatusDialog({
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     pageBuilder: (context, animation, secondaryAnimation) {
       return Dialog(
-        backgroundColor: context.appTheme.surface,
+        backgroundColor: context.appColors.surface,
         insetPadding: const EdgeInsets.all(20),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(
@@ -112,7 +112,7 @@ Future<void> showCustomStatusDialog({
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: buttonBackgroundColor ?? AppColors.accent,
+                    backgroundColor: buttonBackgroundColor ?? context.appColors.accent,
                     foregroundColor: Colors.white,
                     minimumSize: const Size(0, 48),
                     shape: RoundedRectangleBorder(
