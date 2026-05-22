@@ -7,11 +7,13 @@ import 'package:sports_app/src/features/event/domain/models/basketball_match.dar
 import 'package:sports_app/src/features/event/domain/models/basketball_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/match_card_header.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/match_card_shell.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
 // Design: "BOXSCORE" — dramatic score-first horizontal layout.
-// [logo · name] ··· [Anton 38 score] [quarter badge] [Anton 38 score] ··· [name · logo]
+// [logo · name] ··· [Anton 36 score] [quarter badge] [Anton 36 score] ··· [name · logo]
 // Score highlight animation on update preserved.
 
 class BasketballMatchCard extends ConsumerStatefulWidget {
@@ -94,136 +96,108 @@ class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
     final isUpcoming = effectiveStatusId == 1 || effectiveStatusId == 0;
     final scoreColor = isLive ? context.appColors.accent : context.appColors.text;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-      child: Ink(
-        decoration: BoxDecoration(
-          color: context.appColors.surface,
-          border: Border.all(color: context.appColors.line, width: 0.5),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: InkWell(
-          onTap: () => context.push(AppRoutes.basketballMatchDetailPath(widget.match.id)),
-          borderRadius: BorderRadius.circular(14),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(14, 11, 14, 13),
-            child: Column(
-              children: [
-                // League header
-                Row(
+    return MatchCardShell(
+      onTap: () => context.push(AppRoutes.basketballMatchDetailPath(widget.match.id)),
+      child: Column(
+        children: [
+          MatchCardHeader(
+            leagueLogo: widget.match.leagueLogo,
+            leagueName: widget.match.leagueName,
+            matchTime: widget.match.matchTimeSim,
+          ),
+          const SizedBox(height: 12),
+          // Main scoreboard row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Home team
+              Expanded(
+                child: Column(
                   children: [
-                    LeagueLogo(url: widget.match.leagueLogo),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        widget.match.leagueName,
-                        style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
+                    SportLogo(url: widget.match.homeLogo, size: 32, circular: true),
+                    const SizedBox(height: 5),
                     Text(
-                      widget.match.matchTimeSim,
-                      style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+                      widget.match.homeName,
+                      style: AppTextStyles.mono(11).copyWith(color: context.appColors.text2),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
-                const SizedBox(height: 14),
-                // Main scoreboard row
-                Row(
+              ),
+              // Scores + status
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Home team
-                    Expanded(
-                      child: Column(
-                        children: [
-                          SportLogo(url: widget.match.homeLogo, size: 32, circular: true),
-                          const SizedBox(height: 5),
-                          Text(
-                            widget.match.homeName,
-                            style: AppTextStyles.mono(10).copyWith(color: context.appColors.text2),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+                    AnimatedBuilder(
+                      animation: _homeHighlight,
+                      builder: (_, child) => Container(
+                        width: 52,
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _homeHighlight.value,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: child,
+                      ),
+                      child: Text(
+                        isUpcoming ? '-' : effectiveHomeScore,
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.display(36, context).copyWith(color: scoreColor),
                       ),
                     ),
-                    // Scores + status
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          AnimatedBuilder(
-                            animation: _homeHighlight,
-                            builder: (_, child) => Container(
-                              width: 52,
-                              padding: const EdgeInsets.symmetric(vertical: 4),
-                              decoration: BoxDecoration(
-                                color: _homeHighlight.value,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: child,
-                            ),
-                            child: Text(
-                              isUpcoming ? '-' : effectiveHomeScore,
-                              textAlign: TextAlign.center,
-                              style: AppTextStyles.display(36, context).copyWith(color: scoreColor),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          _CenterStatus(
-                            isLive: isLive,
-                            isUpcoming: isUpcoming,
-                            periodLabel: effectivePeriodLabel,
-                            clockDisplay: effectiveClockDisplay,
-                            context: context,
-                          ),
-                          const SizedBox(width: 8),
-                          AnimatedBuilder(
-                            animation: _awayHighlight,
-                            builder: (_, child) => Container(
-                              width: 52,
-                              padding: const EdgeInsets.symmetric(vertical: 4),
-                              decoration: BoxDecoration(
-                                color: _awayHighlight.value,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: child,
-                            ),
-                            child: Text(
-                              isUpcoming ? '-' : effectiveAwayScore,
-                              textAlign: TextAlign.center,
-                              style: AppTextStyles.display(36, context).copyWith(color: scoreColor),
-                            ),
-                          ),
-                        ],
-                      ),
+                    const SizedBox(width: 8),
+                    _CenterStatus(
+                      isLive: isLive,
+                      isUpcoming: isUpcoming,
+                      periodLabel: effectivePeriodLabel,
+                      clockDisplay: effectiveClockDisplay,
+                      context: context,
                     ),
-                    // Away team
-                    Expanded(
-                      child: Column(
-                        children: [
-                          SportLogo(url: widget.match.awayLogo, size: 32, circular: true),
-                          const SizedBox(height: 5),
-                          Text(
-                            widget.match.awayName,
-                            style: AppTextStyles.mono(10).copyWith(color: context.appColors.text2),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+                    const SizedBox(width: 8),
+                    AnimatedBuilder(
+                      animation: _awayHighlight,
+                      builder: (_, child) => Container(
+                        width: 52,
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _awayHighlight.value,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: child,
+                      ),
+                      child: Text(
+                        isUpcoming ? '-' : effectiveAwayScore,
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.display(36, context).copyWith(color: scoreColor),
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+              // Away team
+              Expanded(
+                child: Column(
+                  children: [
+                    SportLogo(url: widget.match.awayLogo, size: 32, circular: true),
+                    const SizedBox(height: 5),
+                    Text(
+                      widget.match.awayName,
+                      style: AppTextStyles.mono(11).copyWith(color: context.appColors.text2),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ),
+        ],
       ),
     );
   }

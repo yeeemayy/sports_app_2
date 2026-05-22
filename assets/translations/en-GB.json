@@ -204,7 +204,19 @@
           "pressure": "Pressure",
           "temperature": "Temp",
           "wind": "Wind",
-          "humidity": "Humidity"
+          "humidity": "Humidity",
+          "weather": {
+            "1": "☀️ Sunny",
+            "2": "⛅ Partly Cloudy",
+            "3": "🌤 Cloudy",
+            "4": "☁️ Overcast",
+            "5": "🌫️ Foggy",
+            "6": "🌦️ Light Rain",
+            "7": "🌧️ Rain",
+            "8": "⛈️ Heavy Rain",
+            "9": "🌨️ Snow",
+            "10": "⚡ Thunder"
+          }
         },
         "starting_xi": "Starting XI",
         "substitutes": "Substitutes",
@@ -811,6 +823,7 @@
     "team_win": "{team} WIN",
     "draw": "DRAW",
     "locked": "● MATCH ENDED · VOTING CLOSED",
-    "login_required": "LOGIN TO PREDICT"
+    "login_required": "LOGIN TO PREDICT",
+    "vote_to_see": "VOTE TO SEE OTHER PEOPLE'S PICKS"
   }
 }

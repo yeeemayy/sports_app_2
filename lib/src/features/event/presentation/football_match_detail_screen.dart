@@ -1,8 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
+import 'package:timeline_tile/timeline_tile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/football_lineup.dart';
 import 'package:sports_app/src/features/event/domain/models/football_match.dart';
 import 'package:sports_app/src/features/event/domain/models/match_realtime_data.dart';
@@ -12,28 +12,23 @@ import 'package:sports_app/src/features/event/domain/models/football_match_event
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_header_shell.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/football_pitch_lineup.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
 import 'package:sports_app/src/features/prediction/presentation/widgets/fan_prediction_card.dart';
 import 'package:sports_app/src/shared_widgets/arena_stat_bar.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
 class FootballMatchDetailScreen extends ConsumerStatefulWidget {
-  const FootballMatchDetailScreen({
-    super.key,
-    required this.matchId,
-    this.initialMatch,
-  });
+  const FootballMatchDetailScreen({super.key, required this.matchId, this.initialMatch});
 
   final String matchId;
   final FootballMatch? initialMatch;
 
   @override
-  ConsumerState<FootballMatchDetailScreen> createState() =>
-      _FootballMatchDetailScreenState();
+  ConsumerState<FootballMatchDetailScreen> createState() => _FootballMatchDetailScreenState();
 }
 
-class _FootballMatchDetailScreenState
-    extends SportDetailScaffoldState<FootballMatchDetailScreen> {
+class _FootballMatchDetailScreenState extends SportDetailScaffoldState<FootballMatchDetailScreen> {
   @override
   String get matchId => widget.matchId;
 
@@ -51,9 +46,9 @@ class _FootballMatchDetailScreenState
 
   @override
   (String?, int?) watchDetail() {
-    final v = ref
-        .watch(matchDetailProvider(sport: SportType.football, matchId: matchId))
-        .valueOrNull as FootballMatchDetail?;
+    final v =
+        ref.watch(matchDetailProvider(sport: SportType.football, matchId: matchId)).valueOrNull
+            as FootballMatchDetail?;
     return (
       v?.leagueName ?? widget.initialMatch?.leagueName,
       v?.matchTime ?? widget.initialMatch?.matchTime,
@@ -61,11 +56,7 @@ class _FootballMatchDetailScreenState
   }
 
   @override
-  Widget buildHeader(
-    BuildContext context, {
-    String? leagueName,
-    int? matchTimestamp,
-  }) =>
+  Widget buildHeader(BuildContext context, {String? leagueName, int? matchTimestamp}) =>
       _MatchHeader(
         matchId: matchId,
         initialMatch: widget.initialMatch,
@@ -105,13 +96,10 @@ class _MatchHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync =
-        ref.watch(matchDetailProvider(sport: SportType.football, matchId: matchId));
-    final eventsAsync =
-        ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
+    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.football, matchId: matchId));
+    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.football)
-          .select((map) => map[matchId] as MatchRealtimeData?),
+      sportRealtimeProvider(SportType.football).select((map) => map[matchId] as MatchRealtimeData?),
     );
 
     Widget? fallback;
@@ -159,13 +147,14 @@ class _HeaderFallback extends StatelessWidget {
     return _ScoreRow(
       homeLogo: match.homeLogo,
       homeName: match.homeName,
-      awaLogo: match.awayLogo,
+      awayLogo: match.awayLogo,
       awayName: match.awayName,
       homeScore: isNoScore ? '–' : effHome,
       awayScore: isNoScore ? '–' : effAway,
       statusLabel: match.statusLabel,
       statusColor: _statusColor(effStatusId, colors),
-      subLabel: null,
+      statusSubLabel: null,
+      environment: null,
       colors: colors,
       context: context,
     );
@@ -201,32 +190,22 @@ class _HeaderContent extends StatelessWidget {
     final effAwayHt = rtAwayHtScore ?? detail.awayInfo.halfTimeScore;
     final isNoScore = const {0, 1, 13}.contains(effStatusId);
 
-    String? subLabel;
-    if (effStatusId != 1 &&
-        effStatusId != 8 &&
-        effHomeHt != null &&
-        effAwayHt != null) {
-      subLabel = '${'event.football.ht'.tr()} $effHomeHt-$effAwayHt';
-    }
-    if (detail.environment != null) {
-      final env = detail.environment!;
-      final parts = <String>[
-        if (env.temperature != null) env.temperature!,
-        if (env.wind != null) env.wind!,
-      ];
-      if (parts.isNotEmpty && subLabel == null) subLabel = parts.join(' · ');
+    String? statusSubLabel;
+    if (effStatusId != 1 && effStatusId != 8 && effHomeHt != null && effAwayHt != null) {
+      statusSubLabel = '${'event.football.ht'.tr()} $effHomeHt-$effAwayHt';
     }
 
     return _ScoreRow(
       homeLogo: detail.homeInfo.logo,
       homeName: detail.homeName,
-      awaLogo: detail.awayInfo.logo,
+      awayLogo: detail.awayInfo.logo,
       awayName: detail.awayName,
       homeScore: isNoScore ? '–' : effHome,
       awayScore: isNoScore ? '–' : effAway,
       statusLabel: detail.statusLabel(kickoffTimestamp: kickoffTimestamp),
       statusColor: _statusColor(effStatusId, colors),
-      subLabel: subLabel,
+      statusSubLabel: statusSubLabel,
+      environment: detail.environment,
       colors: colors,
       context: context,
     );
@@ -244,26 +223,28 @@ class _ScoreRow extends StatelessWidget {
   const _ScoreRow({
     required this.homeLogo,
     required this.homeName,
-    required this.awaLogo,
+    required this.awayLogo,
     required this.awayName,
     required this.homeScore,
     required this.awayScore,
     required this.statusLabel,
     required this.statusColor,
-    required this.subLabel,
+    required this.statusSubLabel,
+    required this.environment,
     required this.colors,
     required this.context,
   });
 
   final String homeLogo;
   final String homeName;
-  final String awaLogo;
+  final String awayLogo;
   final String awayName;
   final String homeScore;
   final String awayScore;
   final String statusLabel;
   final Color statusColor;
-  final String? subLabel;
+  final String? statusSubLabel;
+  final FootballMatchEnvironment? environment;
   final AppColors colors;
   final BuildContext context;
 
@@ -286,8 +267,7 @@ class _ScoreRow extends StatelessWidget {
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.display(13, context)
-                        .copyWith(color: colors.text),
+                    style: AppTextStyles.display(13, context).copyWith(color: colors.text),
                   ),
                 ],
               ),
@@ -298,20 +278,17 @@ class _ScoreRow extends StatelessWidget {
               child: Column(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: statusColor,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       statusLabel.toUpperCase(),
-                      style: AppTextStyles.display(11, context).copyWith(
-                        color: const Color(0xFF0E0E0E),
-                        letterSpacing: 0.1 * 11,
-                      ),
+                      style: AppTextStyles.display(
+                        11,
+                        context,
+                      ).copyWith(color: const Color(0xFF0E0E0E), letterSpacing: 0.1 * 11),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -322,36 +299,21 @@ class _ScoreRow extends StatelessWidget {
                     children: [
                       Text(
                         homeScore,
-                        style: AppTextStyles.display(56, context)
-                            .copyWith(color: colors.text),
+                        style: AppTextStyles.display(56, context).copyWith(color: colors.text),
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 6),
                         child: Text(
                           ':',
-                          style: AppTextStyles.display(28, context)
-                              .copyWith(color: colors.text3),
+                          style: AppTextStyles.display(28, context).copyWith(color: colors.text3),
                         ),
                       ),
                       Text(
                         awayScore,
-                        style: AppTextStyles.display(56, context)
-                            .copyWith(color: colors.text),
+                        style: AppTextStyles.display(56, context).copyWith(color: colors.text),
                       ),
                     ],
                   ),
-                  if (subLabel != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        subLabel!.toUpperCase(),
-                        style: AppTextStyles.mono(9).copyWith(
-                          color: colors.text3,
-                          letterSpacing: 0.14 * 9,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
                 ],
               ),
             ),
@@ -360,22 +322,70 @@ class _ScoreRow extends StatelessWidget {
               flex: 2,
               child: Column(
                 children: [
-                  SportLogo(url: awaLogo, size: 52),
+                  SportLogo(url: awayLogo, size: 52),
                   const SizedBox(height: 6),
                   Text(
                     awayName.toUpperCase(),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.display(13, context)
-                        .copyWith(color: colors.text),
+                    style: AppTextStyles.display(13, context).copyWith(color: colors.text),
                   ),
                 ],
               ),
             ),
           ],
         ),
+        if (statusSubLabel != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              statusSubLabel!.toUpperCase(),
+              style: AppTextStyles.mono(9).copyWith(color: colors.text3, letterSpacing: 0.14 * 9),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        if (environment != null) _EnvRow(env: environment!, colors: colors),
       ],
+    );
+  }
+}
+
+class _EnvRow extends StatelessWidget {
+  const _EnvRow({required this.env, required this.colors});
+
+  final FootballMatchEnvironment env;
+  final AppColors colors;
+
+  @override
+  Widget build(BuildContext context) {
+    final items = <(IconData, String)>[
+      // if (env.weather != null) (Icons.wb_sunny_outlined, 'event.football.environment.weather.${env.weather}'.tr()),
+      if (env.temperature != null) (Icons.thermostat_outlined, env.temperature!),
+      if (env.humidity != null) (Icons.water_drop_outlined, env.humidity!),
+      if (env.wind != null) (Icons.air_outlined, env.wind!),
+      if (env.pressure != null) (Icons.speed_outlined, env.pressure!),
+    ];
+    if (items.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: 10,
+        runSpacing: 4,
+        children: [
+          for (final (icon, label) in items)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 10, color: colors.text3),
+                const SizedBox(width: 3),
+                Text(label, style: AppTextStyles.mono(9).copyWith(color: colors.text3)),
+              ],
+            ),
+        ],
+      ),
     );
   }
 }
@@ -388,43 +398,30 @@ class _StatsTab extends ConsumerWidget {
   final String matchId;
   final FootballMatch? initialMatch;
 
-  static const _minimalTypeCodes = [
-    '2', '3', '4', '8', '21', '22', '23', '24', '25',
-  ];
+  static const _minimalTypeCodes = ['2', '3', '4', '8', '21', '22', '23', '24', '25'];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.appColors;
-    final eventsAsync =
-        ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
-    final detailAsync =
-        ref.watch(matchDetailProvider(sport: SportType.football, matchId: matchId));
+    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
+    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.football, matchId: matchId));
 
     final detail = detailAsync.valueOrNull as FootballMatchDetail?;
-    final effStatusId = detail?.statusId ??
-        initialMatch?.statusId ?? 1;
+    final effStatusId = detail?.statusId ?? initialMatch?.statusId ?? 1;
     final isEnded = effStatusId >= 8;
 
-    final homeName = detail?.homeName ??
-        initialMatch?.homeName ?? '';
-    final awayName = detail?.awayName ??
-        initialMatch?.awayName ?? '';
+    final homeName = detail?.homeName ?? initialMatch?.homeName ?? '';
+    final awayName = detail?.awayName ?? initialMatch?.awayName ?? '';
 
     return eventsAsync.when(
-      loading: () =>
-          Center(child: CircularProgressIndicator(color: colors.accent)),
+      loading: () => Center(child: CircularProgressIndicator(color: colors.accent)),
       error: (_, __) => Center(
-        child: Text(
-          'event.error.load_failed'.tr(),
-          style: TextStyle(color: colors.text3),
-        ),
+        child: Text('event.error.load_failed'.tr(), style: TextStyle(color: colors.text3)),
       ),
       data: (obj) {
         final events = obj as FootballMatchEvents?;
-        final apiStats = events?.stats
-                .where((s) => s.label != null && s.label!.isNotEmpty)
-                .toList() ??
-            [];
+        final apiStats =
+            events?.stats.where((s) => s.label != null && s.label!.isNotEmpty).toList() ?? [];
         final apiByLabel = {for (final s in apiStats) s.label!: s};
 
         final displayStats = _minimalTypeCodes.map((code) {
@@ -453,19 +450,12 @@ class _StatsTab extends ConsumerWidget {
                   children: [
                     Text(
                       'event.football.detail.stats'.tr().toUpperCase(),
-                      style: AppTextStyles.display(18, context)
-                          .copyWith(color: colors.text),
+                      style: AppTextStyles.display(18, context).copyWith(color: colors.text),
                     ),
                   ],
                 ),
               ),
-              ...displayStats.map(
-                (s) => ArenaStatBar(
-                  label: s.label!,
-                  home: s.home,
-                  away: s.away,
-                ),
-              ),
+              ...displayStats.map((s) => ArenaStatBar(label: s.label!, home: s.home, away: s.away)),
             ],
           ],
         );
@@ -483,37 +473,37 @@ class _EventsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colors = context.appColors;
-    final eventsAsync =
-        ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
+    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
 
     return eventsAsync.when(
-      loading: () =>
-          Center(child: CircularProgressIndicator(color: colors.accent)),
-      error: (_, __) => Center(
-        child: Text(
-          'event.error.load_failed'.tr(),
-          style: TextStyle(color: colors.text3),
-        ),
-      ),
+      loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFFFF3C00))),
+      error: (e, st) {
+        debugPrint('$e\n$st');
+        return Center(
+          child: Text(
+            'event.error.load_failed'.tr(),
+            style: TextStyle(color: Colors.grey.shade500),
+          ),
+        );
+      },
       data: (obj) {
         final events = obj as FootballMatchEvents?;
         if (events == null || events.incidents.isEmpty) {
           return Center(
             child: Text(
               'event.football.detail.no_events'.tr(),
-              style: TextStyle(color: colors.text3),
+              style: TextStyle(color: Colors.grey.shade500),
             ),
           );
         }
-        return _IncidentList(incidents: events.incidents);
+        return _IncidentTimeline(incidents: events.incidents);
       },
     );
   }
 }
 
-class _IncidentList extends StatelessWidget {
-  const _IncidentList({required this.incidents});
+class _IncidentTimeline extends StatelessWidget {
+  const _IncidentTimeline({required this.incidents});
 
   final List<MatchIncident> incidents;
 
@@ -521,65 +511,75 @@ class _IncidentList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.appColors;
     final reversed = incidents.reversed.toList();
-
     return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.only(bottom: 20),
       itemCount: reversed.length,
       itemBuilder: (context, index) {
         final incident = reversed[index];
 
-        if (incident.type == 11) {
-          return _PhaseDivider(
-            label: 'event.football.detail.half_time'.tr(),
-            colors: colors,
-            context: context,
-          );
-        }
-        if (_phaseTypes.contains(incident.type)) {
-          return _PhaseDivider(
-            label: 'event.football.detail.incident_type.${incident.type}'.tr(),
-            colors: colors,
-            context: context,
-          );
-        }
+        if (incident.type == 11) return _HalfTimeSeparator();
+        if (_phaseTypes.contains(incident.type)) return _PhaseMarker(incident: incident);
 
         final isHome = incident.position == 1;
-        return _IncidentRow(
-          incident: incident,
-          isHome: isHome,
-          colors: colors,
-          context: context,
+        final isFirst = index == 0;
+        final isLast = index == reversed.length - 1;
+
+        return TimelineTile(
+          alignment: TimelineAlign.center,
+          isFirst: isFirst,
+          isLast: isLast,
+          indicatorStyle: IndicatorStyle(
+            width: 44,
+            height: 24,
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+            indicator: _TimeIndicator(time: incident.time),
+          ),
+          beforeLineStyle: LineStyle(color: Colors.grey.shade300, thickness: 1),
+          afterLineStyle: LineStyle(color: Colors.grey.shade300, thickness: 1),
+          startChild: isHome ? _IncidentCell(incident: incident, isHome: true) : null,
+          endChild: !isHome ? _IncidentCell(incident: incident, isHome: false) : null,
         );
       },
     );
   }
 }
 
-class _PhaseDivider extends StatelessWidget {
-  const _PhaseDivider({
-    required this.label,
-    required this.colors,
-    required this.context,
-  });
+class _TimeIndicator extends StatelessWidget {
+  const _TimeIndicator({required this.time});
 
-  final String label;
-  final AppColors colors;
-  final BuildContext context;
+  final int time;
 
   @override
-  Widget build(BuildContext _) {
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 2),
+      decoration: BoxDecoration(color: colors.surface2, borderRadius: BorderRadius.circular(12)),
+      alignment: Alignment.center,
+      child: Text(
+        "$time'",
+        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: colors.text3),
+      ),
+    );
+  }
+}
+
+class _HalfTimeSeparator extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.symmetric(vertical: 6),
-      color: colors.surface,
+      color: colors.shimmerHighlight,
       child: Center(
         child: Text(
-          label.toUpperCase(),
-          style: AppTextStyles.mono(10).copyWith(
-            color: colors.text3,
-            letterSpacing: 0.14 * 10,
+          'event.football.detail.half_time'.tr(),
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: colors.shimmerBase,
+            letterSpacing: 0.5,
           ),
         ),
       ),
@@ -587,21 +587,74 @@ class _PhaseDivider extends StatelessWidget {
   }
 }
 
-class _IncidentRow extends StatelessWidget {
-  const _IncidentRow({
-    required this.incident,
-    required this.isHome,
-    required this.colors,
-    required this.context,
-  });
+class _PhaseMarker extends StatelessWidget {
+  const _PhaseMarker({required this.incident});
+
+  final MatchIncident incident;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      color: context.appColors.shimmerHighlight,
+      child: Center(
+        child: Text(
+          'event.football.detail.incident_type.${incident.type}'.tr(),
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: Colors.grey.shade500),
+        ),
+      ),
+    );
+  }
+}
+
+class _IncidentCell extends StatelessWidget {
+  const _IncidentCell({required this.incident, required this.isHome});
 
   final MatchIncident incident;
   final bool isHome;
-  final AppColors colors;
-  final BuildContext context;
 
-  static Color _incidentColor(int type, AppColors c) => {
-    1: c.accent,
+  @override
+  Widget build(BuildContext context) {
+    final icon = _incidentIcon(incident.type);
+    final name = _incidentLabel(incident);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      child: isHome
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Flexible(
+                  child: _IncidentText(text: name, incident: incident, align: TextAlign.end),
+                ),
+                const SizedBox(width: 6),
+                icon,
+              ],
+            )
+          : Row(
+              children: [
+                icon,
+                const SizedBox(width: 6),
+                Flexible(
+                  child: _IncidentText(text: name, incident: incident, align: TextAlign.start),
+                ),
+              ],
+            ),
+    );
+  }
+
+  String _incidentLabel(MatchIncident i) {
+    if (i.type == 9) {
+      final inName = i.inPlayerName ?? '';
+      final outName = i.outPlayerName ?? '';
+      return '$inName ↑\n$outName ↓';
+    }
+    return i.playerName ?? '';
+  }
+
+  static const _incidentColors = {
+    1: Color(0xFFFF3C00),
     2: Colors.orange,
     3: Colors.amber,
     4: Colors.red,
@@ -610,109 +663,88 @@ class _IncidentRow extends StatelessWidget {
     7: Colors.teal,
     8: Colors.deepOrange,
     9: Colors.green,
+    10: Colors.teal,
+    11: Colors.grey,
+    12: Colors.grey,
+    13: Colors.grey,
     15: Colors.red,
     16: Colors.red,
     17: Colors.orange,
+    19: Colors.amber,
     21: Colors.blue,
     22: Colors.blueGrey,
     23: Colors.orange,
     24: Colors.deepOrange,
     25: Colors.purple,
+    26: Colors.grey,
+    27: Colors.grey,
     28: Colors.indigo,
     29: Colors.green,
     30: Colors.red,
-  }[type] ?? Colors.grey;
+  };
+
+  Widget _incidentIcon(int type) {
+    final color = _incidentColors[type] ?? Colors.grey;
+    return _IncidentBadge(label: 'event.football.detail.incident_type.$type'.tr(), color: color);
+  }
+}
+
+class _IncidentBadge extends StatelessWidget {
+  const _IncidentBadge({required this.label, required this.color});
+
+  final String label;
+  final Color color;
 
   @override
-  Widget build(BuildContext _) {
-    final color = _incidentColor(incident.type, colors);
-    final timeLabel = "${incident.time}'";
-
-    final playerLabel = incident.type == 9
-        ? '${incident.inPlayerName ?? ''} ↑\n${incident.outPlayerName ?? ''} ↓'
-        : (incident.playerName ?? '');
-
-    final badgeLabel =
-        'event.football.detail.incident_type.${incident.type}'.tr();
-
-    Widget badge = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(4),
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(3),
         border: Border.all(color: color.withValues(alpha: 0.4), width: 0.5),
       ),
       child: Text(
-        badgeLabel,
-        style:
-            AppTextStyles.mono(9).copyWith(color: color, fontWeight: FontWeight.w700),
+        label,
+        style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: color),
       ),
     );
+  }
+}
 
-    Widget textCell = Column(
-      crossAxisAlignment:
-          isHome ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+class _IncidentText extends StatelessWidget {
+  const _IncidentText({required this.text, required this.incident, required this.align});
+
+  final String text;
+  final MatchIncident incident;
+  final TextAlign align;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: align == TextAlign.end
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (playerLabel.isNotEmpty)
+        if (text.isNotEmpty)
           Text(
-            playerLabel,
-            style: TextStyle(fontSize: 11, color: colors.text),
-            textAlign: isHome ? TextAlign.end : TextAlign.start,
+            text,
+            style: const TextStyle(fontSize: 11),
+            textAlign: align,
             maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         if (incident.homeScore != null && incident.awayScore != null)
           Text(
             '${incident.homeScore} - ${incident.awayScore}',
-            style: AppTextStyles.mono(11).copyWith(
-              color: colors.accent,
+            style: const TextStyle(
+              fontSize: 12,
               fontWeight: FontWeight.w700,
+              color: Color(0xFFFF3C00),
             ),
           ),
       ],
-    );
-
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: colors.line, width: 0.5),
-        ),
-      ),
-      child: Row(
-        children: [
-          // Time
-          SizedBox(
-            width: 36,
-            child: Text(
-              timeLabel,
-              style: AppTextStyles.mono(12).copyWith(
-                color: isHome ? colors.accent : colors.text2,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          // Dot
-          Container(
-            width: 6,
-            height: 6,
-            margin: const EdgeInsets.symmetric(horizontal: 6),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isHome ? colors.accent : colors.text3,
-            ),
-          ),
-          if (isHome) ...[
-            Expanded(child: textCell),
-            const SizedBox(width: 8),
-            badge,
-          ] else ...[
-            badge,
-            const SizedBox(width: 8),
-            Expanded(child: textCell),
-          ],
-        ],
-      ),
     );
   }
 }
@@ -729,8 +761,7 @@ class _LineupsTab extends ConsumerStatefulWidget {
   ConsumerState<_LineupsTab> createState() => _LineupsTabState();
 }
 
-class _LineupsTabState extends ConsumerState<_LineupsTab>
-    with SingleTickerProviderStateMixin {
+class _LineupsTabState extends ConsumerState<_LineupsTab> with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
   @override
@@ -748,21 +779,15 @@ class _LineupsTabState extends ConsumerState<_LineupsTab>
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
-    final lineupsAsync =
-        ref.watch(footballMatchLineupsProvider(matchId: widget.matchId));
+    final lineupsAsync = ref.watch(footballMatchLineupsProvider(matchId: widget.matchId));
 
     return lineupsAsync.when(
-      loading: () =>
-          Center(child: CircularProgressIndicator(color: colors.accent)),
+      loading: () => Center(child: CircularProgressIndicator(color: colors.accent)),
       error: (_, __) => Center(
-        child: Text(
-          'event.error.load_failed'.tr(),
-          style: TextStyle(color: colors.text3),
-        ),
+        child: Text('event.error.load_failed'.tr(), style: TextStyle(color: colors.text3)),
       ),
       data: (lineups) {
-        if (lineups == null ||
-            (lineups.home.isEmpty && lineups.away.isEmpty)) {
+        if (lineups == null || (lineups.home.isEmpty && lineups.away.isEmpty)) {
           return Center(
             child: Text(
               'event.football.detail.no_lineups'.tr(),
@@ -771,19 +796,41 @@ class _LineupsTabState extends ConsumerState<_LineupsTab>
           );
         }
 
-        final detail = ref
-            .watch(matchDetailProvider(
-              sport: SportType.football,
-              matchId: widget.matchId,
-            ))
-            .valueOrNull as FootballMatchDetail?;
+        final detail =
+            ref
+                    .watch(matchDetailProvider(sport: SportType.football, matchId: widget.matchId))
+                    .valueOrNull
+                as FootballMatchDetail?;
         final homeIcon = detail?.homeInfo.logo ?? widget.initialMatch?.homeLogo;
         final awayIcon = detail?.awayInfo.logo ?? widget.initialMatch?.awayLogo;
-        final homeName =
-            detail?.homeName ?? widget.initialMatch?.homeName ?? 'Home';
-        final awayName =
-            detail?.awayName ?? widget.initialMatch?.awayName ?? 'Away';
+        final homeName = detail?.homeName ?? widget.initialMatch?.homeName ?? 'Home';
+        final awayName = detail?.awayName ?? widget.initialMatch?.awayName ?? 'Away';
 
+        final homeStarters = lineups.home.where((p) => p.first == 1).toList();
+        final awayStarters = lineups.away.where((p) => p.first == 1).toList();
+        final homeSubs = lineups.home.where((p) => p.first == 0).toList();
+        final awaySubs = lineups.away.where((p) => p.first == 0).toList();
+
+        final hasCoords =
+            FootballPitchLineup.hasCoordinates(homeStarters) ||
+            FootballPitchLineup.hasCoordinates(awayStarters);
+
+        if (hasCoords) {
+          return SingleChildScrollView(
+            child: FootballPitchLineup(
+              homeStarters: homeStarters,
+              awayStarters: awayStarters,
+              homeSubs: homeSubs,
+              awaySubs: awaySubs,
+              homeName: homeName,
+              awayName: awayName,
+              homeIcon: homeIcon,
+              awayIcon: awayIcon,
+            ),
+          );
+        }
+
+        // Fallback to list view when coordinates aren't available
         return Column(
           children: [
             Container(
@@ -839,15 +886,8 @@ class _TeamTab extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (logo != null) ...[
-            SportLogo(url: logo!, size: 18),
-            const SizedBox(width: 6),
-          ],
-          Text(
-            name,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+          if (logo != null) ...[SportLogo(url: logo!, size: 18), const SizedBox(width: 6)],
+          Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
         ],
       ),
     );
@@ -873,8 +913,7 @@ class _TeamLineupList extends StatelessWidget {
             colors: colors,
             context: context,
           ),
-          for (final p in starters)
-            _LineupPlayerRow(player: p, colors: colors, context: context),
+          for (final p in starters) _LineupPlayerRow(player: p, colors: colors, context: context),
         ],
         if (subs.isNotEmpty) ...[
           _SectionLabel(
@@ -882,8 +921,7 @@ class _TeamLineupList extends StatelessWidget {
             colors: colors,
             context: context,
           ),
-          for (final p in subs)
-            _LineupPlayerRow(player: p, colors: colors, context: context),
+          for (final p in subs) _LineupPlayerRow(player: p, colors: colors, context: context),
         ],
       ],
     );
@@ -891,11 +929,7 @@ class _TeamLineupList extends StatelessWidget {
 }
 
 class _SectionLabel extends StatelessWidget {
-  const _SectionLabel({
-    required this.label,
-    required this.colors,
-    required this.context,
-  });
+  const _SectionLabel({required this.label, required this.colors, required this.context});
 
   final String label;
   final AppColors colors;
@@ -909,21 +943,14 @@ class _SectionLabel extends StatelessWidget {
       color: colors.surface,
       child: Text(
         label.toUpperCase(),
-        style: AppTextStyles.mono(10).copyWith(
-          color: colors.text3,
-          letterSpacing: 0.14 * 10,
-        ),
+        style: AppTextStyles.mono(10).copyWith(color: colors.text3, letterSpacing: 0.14 * 10),
       ),
     );
   }
 }
 
 class _LineupPlayerRow extends StatelessWidget {
-  const _LineupPlayerRow({
-    required this.player,
-    required this.colors,
-    required this.context,
-  });
+  const _LineupPlayerRow({required this.player, required this.colors, required this.context});
 
   final LineupPlayer player;
   final AppColors colors;
@@ -948,10 +975,9 @@ class _LineupPlayerRow extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               '${player.shirtNumber}',
-              style: AppTextStyles.mono(11).copyWith(
-                color: colors.accent,
-                fontWeight: FontWeight.w700,
-              ),
+              style: AppTextStyles.mono(
+                11,
+              ).copyWith(color: colors.accent, fontWeight: FontWeight.w700),
             ),
           ),
           const SizedBox(width: 8),
@@ -966,10 +992,7 @@ class _LineupPlayerRow extends StatelessWidget {
             ),
           ),
           if (player.position.isNotEmpty)
-            Text(
-              player.position,
-              style: AppTextStyles.mono(10).copyWith(color: colors.text3),
-            ),
+            Text(player.position, style: AppTextStyles.mono(10).copyWith(color: colors.text3)),
         ],
       ),
     );

@@ -134,6 +134,18 @@ class FanPredictionCard extends ConsumerWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
+            )
+          else if (!hasVoted)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                'prediction.vote_to_see'.tr(),
+                style: AppTextStyles.mono(9).copyWith(
+                  color: colors.text3,
+                  letterSpacing: 0.1 * 9,
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
         ],
       ),

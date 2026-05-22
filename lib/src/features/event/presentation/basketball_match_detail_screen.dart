@@ -12,7 +12,6 @@ import 'package:sports_app/src/features/event/presentation/providers/event_provi
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_header_shell.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
-import 'package:sports_app/src/features/prediction/presentation/widgets/fan_prediction_card.dart';
 import 'package:sports_app/src/shared_widgets/arena_stat_bar.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
@@ -402,15 +401,6 @@ class _OverviewContent extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.only(bottom: 24),
       children: [
-        // Fan Prediction
-        FanPredictionCard(
-          matchId: matchId,
-          homeName: homeName,
-          awayName: awayName,
-          hasDraw: false,
-          isMatchEnded: isEnded,
-        ),
-
         // Quarter scores
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),

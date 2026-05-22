@@ -8,6 +8,9 @@ import 'package:sports_app/src/features/event/domain/models/badminton_realtime_d
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/domain/set_score_utils.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/match_card_header.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/match_card_shell.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/sport_status_badge.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
@@ -43,73 +46,45 @@ class BadmintonMatchCard extends ConsumerWidget {
     final homeCurrentSet = effectiveHomeSets.isNotEmpty ? effectiveHomeSets.last : 0;
     final awayCurrentSet = effectiveAwaySets.isNotEmpty ? effectiveAwaySets.last : 0;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-      child: Ink(
-        decoration: BoxDecoration(
-          color: context.appColors.surface,
-          border: Border.all(color: context.appColors.line, width: 0.5),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: InkWell(
-          onTap: () => context.push(AppRoutes.badmintonMatchDetailPath(match.id)),
-          borderRadius: BorderRadius.circular(14),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(14, 11, 14, 13),
-            child: Column(
-              children: [
-                // League header
-                Row(
-                  children: [
-                    LeagueLogo(url: match.leagueLogo),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        match.leagueName,
-                        style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Text(
-                      match.matchTimeSim,
-                      style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                // Home player row
-                _RallyRow(
-                  logo: match.homeLogo,
-                  name: match.homeName,
-                  setsWon: effectiveHomeTotal,
-                  opponentSetsWon: effectiveAwayTotal,
-                  currentSetScore: isLive ? homeCurrentSet : null,
-                  isNotStarted: isNotStarted,
-                  isLive: isLive,
-                  context: context,
-                ),
-                const SizedBox(height: 7),
-                // Away player row
-                _RallyRow(
-                  logo: match.awayLogo,
-                  name: match.awayName,
-                  setsWon: effectiveAwayTotal,
-                  opponentSetsWon: effectiveHomeTotal,
-                  currentSetScore: isLive ? awayCurrentSet : null,
-                  isNotStarted: isNotStarted,
-                  isLive: isLive,
-                  context: context,
-                ),
-                // Status badge
-                if (statusLabel.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  _StatusBadge(label: statusLabel, isLive: isLive),
-                ],
-              ],
-            ),
+    return MatchCardShell(
+      onTap: () => context.push(AppRoutes.badmintonMatchDetailPath(match.id)),
+      child: Column(
+        children: [
+          MatchCardHeader(
+            leagueLogo: match.leagueLogo,
+            leagueName: match.leagueName,
+            matchTime: match.matchTimeSim,
           ),
-        ),
+          const SizedBox(height: 12),
+          // Home player row
+          _RallyRow(
+            logo: match.homeLogo,
+            name: match.homeName,
+            setsWon: effectiveHomeTotal,
+            opponentSetsWon: effectiveAwayTotal,
+            currentSetScore: isLive ? homeCurrentSet : null,
+            isNotStarted: isNotStarted,
+            isLive: isLive,
+            context: context,
+          ),
+          const SizedBox(height: 7),
+          // Away player row
+          _RallyRow(
+            logo: match.awayLogo,
+            name: match.awayName,
+            setsWon: effectiveAwayTotal,
+            opponentSetsWon: effectiveHomeTotal,
+            currentSetScore: isLive ? awayCurrentSet : null,
+            isNotStarted: isNotStarted,
+            isLive: isLive,
+            context: context,
+          ),
+          // Status badge
+          if (statusLabel.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            SportStatusBadge(label: statusLabel, isLive: isLive),
+          ],
+        ],
       ),
     );
   }
@@ -142,12 +117,12 @@ class _RallyRow extends StatelessWidget {
 
     return Row(
       children: [
-        SportLogo(url: logo, size: 26, circular: true),
+        SportLogo(url: logo, size: 24, circular: true),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             name,
-            style: AppTextStyles.body(12).copyWith(color: context.appColors.text),
+            style: AppTextStyles.mono(11).copyWith(color: context.appColors.text),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -189,29 +164,6 @@ class _RallyRow extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.label, required this.isLive});
-  final String label;
-  final bool isLive;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-      decoration: BoxDecoration(
-        color: isLive ? context.appColors.live : context.appColors.surface2,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label.toUpperCase(),
-        style: AppTextStyles.mono(9).copyWith(
-          color: isLive ? context.appColors.ink : context.appColors.text3,
-        ),
-      ),
     );
   }
 }

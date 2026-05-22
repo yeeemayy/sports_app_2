@@ -8,6 +8,9 @@ import 'package:sports_app/src/features/event/domain/table_tennis_status.dart';
 import 'package:sports_app/src/features/event/domain/models/table_tennis_match.dart';
 import 'package:sports_app/src/features/event/domain/set_score_utils.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/match_card_header.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/match_card_shell.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/sport_status_badge.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
@@ -41,73 +44,45 @@ class TableTennisMatchCard extends ConsumerWidget {
         ? effectiveHomeSets.length - 1
         : -1;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-      child: Ink(
-        decoration: BoxDecoration(
-          color: context.appColors.surface,
-          border: Border.all(color: context.appColors.line, width: 0.5),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: InkWell(
-          onTap: () => context.push(AppRoutes.tableTennisMatchDetailPath(match.id)),
-          borderRadius: BorderRadius.circular(14),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(14, 11, 14, 13),
-            child: Column(
-              children: [
-                // League header
-                Row(
-                  children: [
-                    LeagueLogo(url: match.leagueLogo),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        match.leagueName,
-                        style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Text(
-                      match.matchTimeSim,
-                      style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                // Home player row
-                _InlineSetRow(
-                  logo: match.homeLogo,
-                  name: match.homeName,
-                  sets: effectiveHomeSets,
-                  opponentSets: effectiveAwaySets,
-                  total: isNotStarted ? null : effectiveHomeTotal,
-                  activeSetIndex: activeSetIndex,
-                  isLive: isLive,
-                  context: context,
-                ),
-                const SizedBox(height: 5),
-                // Away player row
-                _InlineSetRow(
-                  logo: match.awayLogo,
-                  name: match.awayName,
-                  sets: effectiveAwaySets,
-                  opponentSets: effectiveHomeSets,
-                  total: isNotStarted ? null : effectiveAwayTotal,
-                  activeSetIndex: activeSetIndex,
-                  isLive: isLive,
-                  context: context,
-                ),
-                // Status badge
-                if (statusLabel.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  _StatusBadge(label: statusLabel, isLive: isLive),
-                ],
-              ],
-            ),
+    return MatchCardShell(
+      onTap: () => context.push(AppRoutes.tableTennisMatchDetailPath(match.id)),
+      child: Column(
+        children: [
+          MatchCardHeader(
+            leagueLogo: match.leagueLogo,
+            leagueName: match.leagueName,
+            matchTime: match.matchTimeSim,
           ),
-        ),
+          const SizedBox(height: 12),
+          // Home player row
+          _InlineSetRow(
+            logo: match.homeLogo,
+            name: match.homeName,
+            sets: effectiveHomeSets,
+            opponentSets: effectiveAwaySets,
+            total: isNotStarted ? null : effectiveHomeTotal,
+            activeSetIndex: activeSetIndex,
+            isLive: isLive,
+            context: context,
+          ),
+          const SizedBox(height: 5),
+          // Away player row
+          _InlineSetRow(
+            logo: match.awayLogo,
+            name: match.awayName,
+            sets: effectiveAwaySets,
+            opponentSets: effectiveHomeSets,
+            total: isNotStarted ? null : effectiveAwayTotal,
+            activeSetIndex: activeSetIndex,
+            isLive: isLive,
+            context: context,
+          ),
+          // Status badge
+          if (statusLabel.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            SportStatusBadge(label: statusLabel, isLive: isLive),
+          ],
+        ],
       ),
     );
   }
@@ -138,12 +113,12 @@ class _InlineSetRow extends StatelessWidget {
   Widget build(BuildContext ctx) {
     return Row(
       children: [
-        SportLogo(url: logo, size: 22, circular: true),
+        SportLogo(url: logo, size: 24, circular: true),
         const SizedBox(width: 7),
         Expanded(
           child: Text(
             name,
-            style: AppTextStyles.body(11).copyWith(color: context.appColors.text),
+            style: AppTextStyles.mono(11).copyWith(color: context.appColors.text),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -216,29 +191,6 @@ class _SmallSetBox extends StatelessWidget {
           style: AppTextStyles.mono(9).copyWith(
             color: isActive ? context.appColors.accent : (isWon ? context.appColors.text : context.appColors.text3),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.label, required this.isLive});
-  final String label;
-  final bool isLive;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-      decoration: BoxDecoration(
-        color: isLive ? context.appColors.live : context.appColors.surface2,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label.toUpperCase(),
-        style: AppTextStyles.mono(9).copyWith(
-          color: isLive ? context.appColors.ink : context.appColors.text3,
         ),
       ),
     );

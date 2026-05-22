@@ -7,12 +7,15 @@ import 'package:sports_app/src/features/event/domain/models/football_match.dart'
 import 'package:sports_app/src/features/event/domain/models/match_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/match_card_header.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/match_card_shell.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/sport_status_badge.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
-// Design: "SCORELINE" — two stacked team rows with score pushed to right.
-// Each row: logo · name · card dots  →  score (Anton)
-// Live amber minute pill on bottom-right. HT score footer.
+// Design: "SCORELINE" — face-off layout matching basketball/baseball structure.
+// [logo · name · cards] [score 30] [center: minute / status] [score 30] [cards · name · logo]
+// HT score footer when available.
 
 class FootballMatchCard extends ConsumerWidget {
   const FootballMatchCard({super.key, required this.match});
@@ -41,151 +44,134 @@ class FootballMatchCard extends ConsumerWidget {
     final isNotStarted = const {0, 1, 13}.contains(effective.statusId);
     final isLive = const {2, 3, 4, 5, 6, 7}.contains(effective.statusId);
     final hasHtScore = effective.htHomeScore != null && effective.htAwayScore != null;
+    final scoreColor = isLive ? context.appColors.accent : context.appColors.text;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-      child: Ink(
-        decoration: BoxDecoration(
-          color: context.appColors.surface,
-          border: Border.all(color: context.appColors.line, width: 0.5),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: InkWell(
-          onTap: () => context.push(AppRoutes.footballMatchDetailPath(match.id), extra: match),
-          borderRadius: BorderRadius.circular(14),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(14, 11, 14, 11),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // League header
-                Row(
-                  children: [
-                    Expanded(
-                      child: Row(
-                        children: [
-                          LeagueLogo(url: effective.leagueLogo),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              effective.leagueName,
-                              style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (isLive && effective.statusLabel.isNotEmpty)
-                      _LiveMinuteBadge(label: effective.statusLabel)
-                    else if (!isLive && !isNotStarted)
-                      _FinishedBadge(label: effective.statusLabel),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          effective.matchTimeSim,
-                          style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 11),
-                // Home row
-                _TeamRow(
+    return MatchCardShell(
+      onTap: () => context.push(AppRoutes.footballMatchDetailPath(match.id), extra: match),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          MatchCardHeader(
+            leagueLogo: effective.leagueLogo,
+            leagueName: effective.leagueName,
+            matchTime: effective.matchTimeSim,
+            statusWidget: (isLive || (!isNotStarted)) && effective.statusLabel.isNotEmpty
+                ? SportStatusBadge(label: effective.statusLabel, isLive: isLive)
+                : null,
+          ),
+          const SizedBox(height: 12),
+          // Face-off row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Home team
+              Expanded(
+                child: _TeamColumn(
                   logo: effective.homeLogo,
                   name: effective.homeName,
-                  score: effective.homeScore,
                   redCards: effective.homeRedCards,
                   yellowCards: effective.homeYellowCards,
-                  isNotStarted: isNotStarted,
-                  isLive: isLive,
                   context: context,
                 ),
-                const SizedBox(height: 7),
-                // Away row
-                _TeamRow(
+              ),
+              // Home score
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: Text(
+                  isNotStarted ? '-' : effective.homeScore,
+                  style: AppTextStyles.display(30, context).copyWith(color: scoreColor),
+                ),
+              ),
+              // Center separator
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Text(
+                  '–',
+                  style: AppTextStyles.display(
+                    22,
+                    context,
+                  ).copyWith(color: context.appColors.text3),
+                ),
+              ),
+              // Away score
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: Text(
+                  isNotStarted ? '-' : effective.awayScore,
+                  style: AppTextStyles.display(30, context).copyWith(color: scoreColor),
+                ),
+              ),
+              // Away team
+              Expanded(
+                child: _TeamColumn(
                   logo: effective.awayLogo,
                   name: effective.awayName,
-                  score: effective.awayScore,
                   redCards: effective.awayRedCards,
                   yellowCards: effective.awayYellowCards,
-                  isNotStarted: isNotStarted,
-                  isLive: isLive,
                   context: context,
+                  rightAlign: true,
                 ),
-                // HT footer
-                if (!isNotStarted && hasHtScore) ...[
-                  const SizedBox(height: 8),
-                  Divider(height: 1, thickness: 0.5, color: context.appColors.line),
-                  const SizedBox(height: 6),
-                  Center(
-                    child: Text(
-                      '${effective.htHomeScore}-${effective.htAwayScore}  ${'event.football.ht'.tr()}',
-                      style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-                    ),
-                  ),
-                ],
-              ],
-            ),
+              ),
+            ],
           ),
-        ),
+          // HT footer
+          if (!isNotStarted && hasHtScore) ...[
+            const SizedBox(height: 8),
+            Divider(height: 1, thickness: 0.5, color: context.appColors.line),
+            const SizedBox(height: 6),
+            Center(
+              child: Text(
+                '${effective.htHomeScore}-${effective.htAwayScore}  ${'event.football.ht'.tr()}',
+                style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
 }
 
-class _TeamRow extends StatelessWidget {
-  const _TeamRow({
+class _TeamColumn extends StatelessWidget {
+  const _TeamColumn({
     required this.logo,
     required this.name,
-    required this.score,
     required this.redCards,
     required this.yellowCards,
-    required this.isNotStarted,
-    required this.isLive,
     required this.context,
+    this.rightAlign = false,
   });
 
   final String logo;
   final String name;
-  final String score;
   final int redCards;
   final int yellowCards;
-  final bool isNotStarted;
-  final bool isLive;
   final BuildContext context;
+  final bool rightAlign;
 
   @override
   Widget build(BuildContext ctx) {
-    return Row(
+    return Column(
       children: [
-        SportLogo(url: logo, size: 22),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            name,
-            style: AppTextStyles.mono(12).copyWith(color: context.appColors.text),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+        SportLogo(url: logo, size: 32, circular: true),
+        const SizedBox(height: 5),
+        Text(
+          name,
+          style: AppTextStyles.mono(11).copyWith(color: context.appColors.text2),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
         ),
-        if (redCards > 0) _CardDot(count: redCards, color: context.appColors.danger),
-        if (yellowCards > 0) _CardDot(count: yellowCards, color: context.appColors.live),
-        const SizedBox(width: 8),
-        SizedBox(
-          width: 28,
-          child: Text(
-            isNotStarted ? '-' : score,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.display(
-              22,
-              context,
-            ).copyWith(color: isLive ? context.appColors.accent : context.appColors.text),
+        if (redCards > 0 || yellowCards > 0) ...[
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (yellowCards > 0) _CardDot(count: yellowCards, color: context.appColors.live),
+              if (redCards > 0) _CardDot(count: redCards, color: context.appColors.danger),
+            ],
           ),
-        ),
+        ],
       ],
     );
   }
@@ -199,49 +185,12 @@ class _CardDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(left: 4),
+      margin: const EdgeInsets.only(left: 3),
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
       decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3)),
       child: Text(
         '$count',
         style: TextStyle(fontSize: 10, color: context.appColors.ink, height: 1.2),
-      ),
-    );
-  }
-}
-
-class _LiveMinuteBadge extends StatelessWidget {
-  const _LiveMinuteBadge({required this.label});
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: context.appColors.live,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(label, style: AppTextStyles.mono(9).copyWith(color: context.appColors.ink)),
-    );
-  }
-}
-
-class _FinishedBadge extends StatelessWidget {
-  const _FinishedBadge({required this.label});
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: context.appColors.surface2,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label.toUpperCase(),
-        style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
       ),
     );
   }

@@ -8,6 +8,9 @@ import 'package:sports_app/src/features/event/domain/models/ice_hockey_realtime_
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/domain/set_score_utils.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/match_card_header.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/match_card_shell.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/sport_status_badge.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
@@ -51,92 +54,65 @@ class IceHockeyMatchCard extends ConsumerWidget {
     final awayPeriods = List<int?>.generate(4, (i) =>
         i < effectiveAwaySets.length ? effectiveAwaySets[i] : null);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-      child: Ink(
-        decoration: BoxDecoration(
-          color: context.appColors.surface,
-          border: Border.all(color: context.appColors.line, width: 0.5),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: GestureDetector(
-          onTap: () => context.push(AppRoutes.iceHockeyMatchDetailPath(match.id)),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(14, 11, 14, 13),
-            child: Column(
+    return MatchCardShell(
+      onTap: () => context.push(AppRoutes.iceHockeyMatchDetailPath(match.id)),
+      child: Column(
+        children: [
+          MatchCardHeader(
+            leagueLogo: match.leagueLogo,
+            leagueName: match.leagueName,
+            matchTime: match.matchTimeSim,
+          ),
+          const SizedBox(height: 12),
+          // Grid
+          if (!isNotStarted) ...[
+            // Header row
+            _GridHeaderRow(activePeriod: activePeriod),
+            const SizedBox(height: 4),
+            Divider(height: 1, thickness: 0.5, color: context.appColors.line),
+            const SizedBox(height: 6),
+            // Home row
+            _GridTeamRow(
+              logo: match.homeLogo,
+              name: match.homeName,
+              periods: homePeriods,
+              total: effectiveHomeScore,
+              activePeriod: activePeriod,
+              isLive: isLive,
+              context: context,
+            ),
+            const SizedBox(height: 5),
+            // Away row
+            _GridTeamRow(
+              logo: match.awayLogo,
+              name: match.awayName,
+              periods: awayPeriods,
+              total: effectiveAwayScore,
+              activePeriod: activePeriod,
+              isLive: isLive,
+              context: context,
+            ),
+          ] else ...[
+            // Not started: face-off header
+            Row(
               children: [
-                // League header
-                Row(
-                  children: [
-                    LeagueLogo(url: match.leagueLogo),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        match.leagueName,
-                        style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Text(
-                      match.matchTimeSim,
-                      style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-                    ),
-                  ],
+                Flexible(child: _TeamLabel(logo: match.homeLogo, name: match.homeName)),
+                const Spacer(),
+                Text(
+                  match.matchTimeSim,
+                  style: AppTextStyles.display(18, context).copyWith(color: context.appColors.text3),
                 ),
-                const SizedBox(height: 10),
-                // Grid
-                if (!isNotStarted) ...[
-                  // Header row
-                  _GridHeaderRow(activePeriod: activePeriod),
-                  const SizedBox(height: 4),
-                  Divider(height: 1, thickness: 0.5, color: context.appColors.line),
-                  const SizedBox(height: 6),
-                  // Home row
-                  _GridTeamRow(
-                    logo: match.homeLogo,
-                    name: match.homeName,
-                    periods: homePeriods,
-                    total: effectiveHomeScore,
-                    activePeriod: activePeriod,
-                    isLive: isLive,
-                    context: context,
-                  ),
-                  const SizedBox(height: 5),
-                  // Away row
-                  _GridTeamRow(
-                    logo: match.awayLogo,
-                    name: match.awayName,
-                    periods: awayPeriods,
-                    total: effectiveAwayScore,
-                    activePeriod: activePeriod,
-                    isLive: isLive,
-                    context: context,
-                  ),
-                ] else ...[
-                  // Not started: face-off header
-                  Row(
-                    children: [
-                      Flexible(child: _TeamLabel(logo: match.homeLogo, name: match.homeName)),
-                      const Spacer(),
-                      Text(
-                        match.matchTimeSim,
-                        style: AppTextStyles.display(18, context).copyWith(color: context.appColors.text3),
-                      ),
-                      const Spacer(),
-                      Flexible(child: _TeamLabel(logo: match.awayLogo, name: match.awayName, rightAlign: true)),
-                    ],
-                  ),
-                ],
-                // Status badge
-                if (statusLabel.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  _StatusBadge(label: statusLabel, isLive: isLive),
-                ],
+                const Spacer(),
+                Flexible(child: _TeamLabel(logo: match.awayLogo, name: match.awayName, rightAlign: true)),
               ],
             ),
-          ),
-        ),
+          ],
+          // Status badge
+          if (statusLabel.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            SportStatusBadge(label: statusLabel, isLive: isLive),
+          ],
+        ],
       ),
     );
   }
@@ -197,12 +173,12 @@ class _GridTeamRow extends StatelessWidget {
           width: 90,
           child: Row(
             children: [
-              SportLogo(url: logo, size: 22, circular: true),
+              SportLogo(url: logo, size: 24, circular: true),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   name,
-                  style: AppTextStyles.mono(10).copyWith(color: context.appColors.text2),
+                  style: AppTextStyles.mono(11).copyWith(color: context.appColors.text2),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -274,7 +250,7 @@ class _TeamLabel extends StatelessWidget {
       Flexible(
         child: Text(
           name,
-          style: AppTextStyles.body(11).copyWith(color: context.appColors.text2),
+          style: AppTextStyles.mono(11).copyWith(color: context.appColors.text2),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           textAlign: rightAlign ? TextAlign.right : TextAlign.left,
@@ -282,28 +258,5 @@ class _TeamLabel extends StatelessWidget {
       ),
     ];
     return Row(children: rightAlign ? children.reversed.toList() : children);
-  }
-}
-
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.label, required this.isLive});
-  final String label;
-  final bool isLive;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-      decoration: BoxDecoration(
-        color: isLive ? context.appColors.live : context.appColors.surface2,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label.toUpperCase(),
-        style: AppTextStyles.mono(9).copyWith(
-          color: isLive ? context.appColors.ink : context.appColors.text3,
-        ),
-      ),
-    );
   }
 }

@@ -8,6 +8,9 @@ import 'package:sports_app/src/features/event/domain/models/volleyball_realtime_
 import 'package:sports_app/src/features/event/domain/set_score_utils.dart';
 import 'package:sports_app/src/features/event/domain/volleyball_status.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/match_card_header.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/match_card_shell.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/sport_status_badge.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
@@ -41,86 +44,59 @@ class VolleyballMatchCard extends ConsumerWidget {
     final homeCurrentSet = effectiveHomeSets.isNotEmpty ? effectiveHomeSets.last : null;
     final awayCurrentSet = effectiveAwaySets.isNotEmpty ? effectiveAwaySets.last : null;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-      child: Ink(
-        decoration: BoxDecoration(
-          color: context.appColors.surface,
-          border: Border.all(color: context.appColors.line, width: 0.5),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: GestureDetector(
-          onTap: () => context.push(AppRoutes.volleyballMatchDetailPath(match.id)),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(14, 11, 14, 13),
-            child: Column(
-              children: [
-                // League header
-                Row(
-                  children: [
-                    LeagueLogo(url: match.leagueLogo),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        match.leagueName,
-                        style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Text(
-                      match.matchTimeSim,
-                      style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                // Home team row
-                _SetCountRow(
-                  logo: match.homeLogo,
-                  name: match.homeName,
-                  setsWon: effectiveHomeScore,
-                  currentSetScore: isLive ? homeCurrentSet : null,
-                  isNotStarted: isNotStarted,
-                  isLive: isLive,
-                  context: context,
-                ),
-                // Set divider
-                if (!isNotStarted && homeCurrentSet != null && awayCurrentSet != null) ...[
-                  const SizedBox(height: 4),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          '$homeCurrentSet - $awayCurrentSet',
-                          style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-                        ),
-                      ],
-                    ),
+    return MatchCardShell(
+      onTap: () => context.push(AppRoutes.volleyballMatchDetailPath(match.id)),
+      child: Column(
+        children: [
+          MatchCardHeader(
+            leagueLogo: match.leagueLogo,
+            leagueName: match.leagueName,
+            matchTime: match.matchTimeSim,
+          ),
+          const SizedBox(height: 12),
+          // Home team row
+          _SetCountRow(
+            logo: match.homeLogo,
+            name: match.homeName,
+            setsWon: effectiveHomeScore,
+            currentSetScore: isLive ? homeCurrentSet : null,
+            isNotStarted: isNotStarted,
+            isLive: isLive,
+            context: context,
+          ),
+          // Set divider
+          if (!isNotStarted && homeCurrentSet != null && awayCurrentSet != null) ...[
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    '$homeCurrentSet - $awayCurrentSet',
+                    style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
                   ),
                 ],
-                const SizedBox(height: 5),
-                // Away team row
-                _SetCountRow(
-                  logo: match.awayLogo,
-                  name: match.awayName,
-                  setsWon: effectiveAwayScore,
-                  currentSetScore: isLive ? awayCurrentSet : null,
-                  isNotStarted: isNotStarted,
-                  isLive: isLive,
-                  context: context,
-                ),
-                // Status badge
-                if (statusLabel.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  _StatusBadge(label: statusLabel, isLive: isLive),
-                ],
-              ],
+              ),
             ),
+          ],
+          const SizedBox(height: 5),
+          // Away team row
+          _SetCountRow(
+            logo: match.awayLogo,
+            name: match.awayName,
+            setsWon: effectiveAwayScore,
+            currentSetScore: isLive ? awayCurrentSet : null,
+            isNotStarted: isNotStarted,
+            isLive: isLive,
+            context: context,
           ),
-        ),
+          // Status badge
+          if (statusLabel.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            SportStatusBadge(label: statusLabel, isLive: isLive),
+          ],
+        ],
       ),
     );
   }
@@ -149,12 +125,12 @@ class _SetCountRow extends StatelessWidget {
   Widget build(BuildContext ctx) {
     return Row(
       children: [
-        SportLogo(url: logo, size: 28, circular: true),
+        SportLogo(url: logo, size: 24, circular: true),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             name,
-            style: AppTextStyles.body(13).copyWith(color: context.appColors.text),
+            style: AppTextStyles.mono(11).copyWith(color: context.appColors.text),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -167,29 +143,6 @@ class _SetCountRow extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.label, required this.isLive});
-  final String label;
-  final bool isLive;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-      decoration: BoxDecoration(
-        color: isLive ? context.appColors.live : context.appColors.surface2,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label.toUpperCase(),
-        style: AppTextStyles.mono(9).copyWith(
-          color: isLive ? context.appColors.ink : context.appColors.text3,
-        ),
-      ),
     );
   }
 }

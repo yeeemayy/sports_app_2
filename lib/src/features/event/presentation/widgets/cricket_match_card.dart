@@ -7,11 +7,14 @@ import 'package:sports_app/src/features/event/domain/models/cricket_match.dart';
 import 'package:sports_app/src/features/event/domain/models/cricket_realtime_data.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/match_card_header.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/match_card_shell.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/sport_status_badge.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
 // Design: "INNINGS" — portrait face-off with prominent innings data.
-// [logo 44px] ← (center) → [logo 44px]
+// [logo 40px] ← (center) → [logo 40px]
 // [name]    [score runs/wkts]   [name]
 //           [overs below]
 
@@ -52,120 +55,93 @@ class CricketMatchCard extends ConsumerWidget {
       awayOvers = _formatOvers(awayInnings.overs);
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-      child: Ink(
-        decoration: BoxDecoration(
-          color: context.appColors.surface,
-          border: Border.all(color: context.appColors.line, width: 0.5),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: GestureDetector(
-          onTap: () => context.push(AppRoutes.cricketMatchDetailPath(match.id)),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(14, 11, 14, 13),
-            child: Column(
-              children: [
-                // League header
-                Row(
-                  children: [
-                    LeagueLogo(url: match.leagueLogo),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        match.leagueName,
-                        style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Text(
-                      match.matchTimeSim,
-                      style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                // Face-off row
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Home team
-                    Expanded(
-                      child: Column(
-                        children: [
-                          SportLogo(url: match.homeLogo, size: 44, circular: true),
-                          const SizedBox(height: 6),
-                          Text(
-                            match.homeName,
-                            style: AppTextStyles.body(11).copyWith(color: context.appColors.text2),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Center score column
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Home innings score
-                          Text(
-                            homeDisplay,
-                            style: AppTextStyles.display(18, context).copyWith(
-                              color: isLive ? context.appColors.accent : context.appColors.text,
-                            ),
-                          ),
-                          if (homeOvers != null)
-                            Text(
-                              '($homeOvers ov)',
-                              style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-                            ),
-                          const SizedBox(height: 6),
-                          Divider(height: 1, thickness: 0.5, color: context.appColors.line),
-                          const SizedBox(height: 6),
-                          // Away innings score
-                          Text(
-                            awayDisplay,
-                            style: AppTextStyles.display(18, context).copyWith(
-                              color: isLive ? context.appColors.accent : context.appColors.text,
-                            ),
-                          ),
-                          if (awayOvers != null)
-                            Text(
-                              '($awayOvers ov)',
-                              style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-                            ),
-                          const SizedBox(height: 8),
-                          _StatusBadge(label: statusLabel, isLive: isLive),
-                        ],
-                      ),
-                    ),
-                    // Away team
-                    Expanded(
-                      child: Column(
-                        children: [
-                          SportLogo(url: match.awayLogo, size: 44, circular: true),
-                          const SizedBox(height: 6),
-                          Text(
-                            match.awayName,
-                            style: AppTextStyles.body(11).copyWith(color: context.appColors.text2),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+    return MatchCardShell(
+      onTap: () => context.push(AppRoutes.cricketMatchDetailPath(match.id)),
+      child: Column(
+        children: [
+          MatchCardHeader(
+            leagueLogo: match.leagueLogo,
+            leagueName: match.leagueName,
+            matchTime: match.matchTimeSim,
           ),
-        ),
+          const SizedBox(height: 12),
+          // Face-off row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Home team
+              Expanded(
+                child: Column(
+                  children: [
+                    SportLogo(url: match.homeLogo, size: 40, circular: true),
+                    const SizedBox(height: 6),
+                    Text(
+                      match.homeName,
+                      style: AppTextStyles.mono(11).copyWith(color: context.appColors.text2),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              // Center score column
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Home innings score
+                    Text(
+                      homeDisplay,
+                      style: AppTextStyles.display(18, context).copyWith(
+                        color: isLive ? context.appColors.accent : context.appColors.text,
+                      ),
+                    ),
+                    if (homeOvers != null)
+                      Text(
+                        '($homeOvers ov)',
+                        style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+                      ),
+                    const SizedBox(height: 6),
+                    Divider(height: 1, thickness: 0.5, color: context.appColors.line),
+                    const SizedBox(height: 6),
+                    // Away innings score
+                    Text(
+                      awayDisplay,
+                      style: AppTextStyles.display(18, context).copyWith(
+                        color: isLive ? context.appColors.accent : context.appColors.text,
+                      ),
+                    ),
+                    if (awayOvers != null)
+                      Text(
+                        '($awayOvers ov)',
+                        style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+                      ),
+                    const SizedBox(height: 8),
+                    SportStatusBadge(label: statusLabel, isLive: isLive),
+                  ],
+                ),
+              ),
+              // Away team
+              Expanded(
+                child: Column(
+                  children: [
+                    SportLogo(url: match.awayLogo, size: 40, circular: true),
+                    const SizedBox(height: 6),
+                    Text(
+                      match.awayName,
+                      style: AppTextStyles.mono(11).copyWith(color: context.appColors.text2),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -173,28 +149,5 @@ class CricketMatchCard extends ConsumerWidget {
   static String _formatOvers(double overs) {
     final str = overs.toString();
     return str.contains('.') ? str : '$str.0';
-  }
-}
-
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.label, required this.isLive});
-  final String label;
-  final bool isLive;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-      decoration: BoxDecoration(
-        color: isLive ? context.appColors.live : context.appColors.surface2,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label.toUpperCase(),
-        style: AppTextStyles.mono(9).copyWith(
-          color: isLive ? context.appColors.ink : context.appColors.text3,
-        ),
-      ),
-    );
   }
 }

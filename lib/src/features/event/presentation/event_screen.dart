@@ -821,9 +821,10 @@ class _LivePulseBadge extends StatefulWidget {
   State<_LivePulseBadge> createState() => _LivePulseBadgeState();
 }
 
-class _LivePulseBadgeState extends State<_LivePulseBadge> with SingleTickerProviderStateMixin {
+class _LivePulseBadgeState extends State<_LivePulseBadge> with TickerProviderStateMixin {
   late final AnimationController _ctrl;
   late final Animation<double> _anim;
+  late final AnimationController _blinkCtrl;
   late final Timer _ticker;
   String? _liveMinute;
 
@@ -834,6 +835,8 @@ class _LivePulseBadgeState extends State<_LivePulseBadge> with SingleTickerProvi
     _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))
       ..repeat(reverse: true);
     _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut);
+    _blinkCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000))
+      ..repeat();
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
       final next = widget.liveMinute();
       if (next != _liveMinute) setState(() => _liveMinute = next);
@@ -844,42 +847,62 @@ class _LivePulseBadgeState extends State<_LivePulseBadge> with SingleTickerProvi
   void dispose() {
     _ticker.cancel();
     _ctrl.dispose();
+    _blinkCtrl.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _anim,
-      builder: (_, _) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: context.appColors.live.withValues(alpha: 0.85 + 0.15 * _anim.value),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 7,
-              height: 7,
-              decoration: BoxDecoration(
-                color: context.appColors.ink.withValues(alpha: 0.4 + 0.6 * _anim.value),
-                shape: BoxShape.circle,
+      animation: Listenable.merge([_anim, _blinkCtrl]),
+      builder: (_, _) {
+        final text = _liveMinute ?? '';
+        final hasApostrophe = text.endsWith("'");
+        final base = hasApostrophe ? text.substring(0, text.length - 1) : text;
+        final apostropheOpacity = _blinkCtrl.value < 0.5 ? 1.0 : 0.0;
+        final baseStyle = AppTextStyles.mono(9).copyWith(
+          color: context.appColors.ink,
+          letterSpacing: 9 * 0.12,
+          fontWeight: FontWeight.w700,
+        );
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: context.appColors.live.withValues(alpha: 0.85 + 0.15 * _anim.value),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 7,
+                height: 7,
+                decoration: BoxDecoration(
+                  color: context.appColors.ink.withValues(alpha: 0.4 + 0.6 * _anim.value),
+                  shape: BoxShape.circle,
+                ),
               ),
-            ),
-            const SizedBox(width: 5),
-            Text(
-              (_liveMinute ?? '').toUpperCase(),
-              style: AppTextStyles.mono(9).copyWith(
-                color: context.appColors.ink,
-                letterSpacing: 9 * 0.12,
-                fontWeight: FontWeight.w700,
+              const SizedBox(width: 5),
+              RichText(
+                text: TextSpan(
+                  text: base.toUpperCase(),
+                  style: baseStyle,
+                  children: hasApostrophe
+                      ? [
+                          TextSpan(
+                            text: "'",
+                            style: baseStyle.copyWith(
+                              color: context.appColors.ink.withValues(alpha: apostropheOpacity),
+                            ),
+                          ),
+                        ]
+                      : null,
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
