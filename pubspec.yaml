@@ -123,8 +123,14 @@ flutter:
   assets:
     - assets/translations/
     - assets/images/
-    - assets/icon/icon.png                                                                                                                                                                                                                                                                     
+    - assets/icon/icon.png
     - .env
+
+  fonts:
+    - family: DouyinSans
+      fonts:
+        - asset: assets/fonts/DouyinSansBold.ttf
+          weight: 700
 
   # To add other assets to your application, add to the assets section above:
   # assets:

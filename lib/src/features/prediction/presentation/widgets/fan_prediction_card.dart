@@ -43,6 +43,7 @@ class FanPredictionCard extends ConsumerWidget {
     final userPick = userVoteAsync.valueOrNull;
 
     final options = _buildOptions(homeName, awayName);
+    final hasVoted = userPick != null;
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 18, 16, 0),
@@ -64,15 +65,16 @@ class FanPredictionCard extends ConsumerWidget {
                     .copyWith(color: colors.text),
               ),
               const Spacer(),
-              Text(
-                'prediction.picks'.tr(
-                  namedArgs: {'n': _formatCount(tally.total)},
+              if (hasVoted)
+                Text(
+                  'prediction.picks'.tr(
+                    namedArgs: {'n': _formatCount(tally.total)},
+                  ),
+                  style: AppTextStyles.mono(9).copyWith(
+                    color: colors.text3,
+                    letterSpacing: 0.14 * 9,
+                  ),
                 ),
-                style: AppTextStyles.mono(9).copyWith(
-                  color: colors.text3,
-                  letterSpacing: 0.14 * 9,
-                ),
-              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -84,7 +86,7 @@ class FanPredictionCard extends ConsumerWidget {
             }
             final pct = _pctFor(opt.pick, tally);
             final isSelected = userPick == opt.pick;
-            final canVote = !isMatchEnded && firebaseUid != null && isLoggedIn;
+            final canVote = !isMatchEnded && firebaseUid != null && isLoggedIn && !hasVoted;
 
             return Padding(
               padding: const EdgeInsets.only(bottom: 6),
@@ -92,6 +94,7 @@ class FanPredictionCard extends ConsumerWidget {
                 label: opt.label,
                 pct: pct,
                 isSelected: isSelected,
+                hasVoted: hasVoted,
                 canVote: canVote,
                 onTap: canVote
                     ? () => ref
@@ -172,6 +175,7 @@ class _VoteBar extends StatelessWidget {
     required this.label,
     required this.pct,
     required this.isSelected,
+    required this.hasVoted,
     required this.canVote,
     required this.onTap,
     required this.colors,
@@ -181,6 +185,7 @@ class _VoteBar extends StatelessWidget {
   final String label;
   final double pct;
   final bool isSelected;
+  final bool hasVoted;
   final bool canVote;
   final VoidCallback? onTap;
   final AppColors colors;
@@ -188,8 +193,8 @@ class _VoteBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext _) {
-    final barColor = isSelected ? colors.accent : colors.surface2;
-    final textColor = isSelected ? const Color(0xFF0E0E0E) : colors.text;
+    final barColor = (hasVoted && isSelected) ? colors.accent : colors.surface2;
+    final textColor = (hasVoted && isSelected) ? const Color(0xFF0E0E0E) : colors.text;
     final pctDisplay = '${(pct * 100).round()}%';
 
     return GestureDetector(
@@ -199,19 +204,19 @@ class _VoteBar extends StatelessWidget {
         child: SizedBox(
           height: 32,
           child: Stack(
+            alignment: Alignment.centerLeft,
             children: [
               // Background fill
               Container(color: colors.surface2),
-              // Percentage fill
-              FractionallySizedBox(
-                widthFactor: pct.clamp(0.0, 1.0),
-                child: Container(
-                  color: isSelected
-                      ? colors.accent
-                      : colors.lineStrong,
+              // Percentage fill — only visible after the user has voted
+              if (hasVoted)
+                FractionallySizedBox(
+                  widthFactor: pct.clamp(0.0, 1.0),
+                  child: Container(
+                    color: isSelected ? barColor : colors.lineStrong,
+                  ),
                 ),
-              ),
-              // Label + percentage overlay
+              // Label + optional percentage overlay
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Row(
@@ -222,10 +227,11 @@ class _VoteBar extends StatelessWidget {
                           .copyWith(color: textColor, letterSpacing: 0.06 * 12),
                     ),
                     const Spacer(),
-                    Text(
-                      pctDisplay,
-                      style: AppTextStyles.mono(11).copyWith(color: textColor),
-                    ),
+                    if (hasVoted)
+                      Text(
+                        pctDisplay,
+                        style: AppTextStyles.mono(11).copyWith(color: textColor),
+                      ),
                   ],
                 ),
               ),

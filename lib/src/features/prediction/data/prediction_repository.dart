@@ -48,14 +48,11 @@ class PredictionRepository {
       final tallySnap = await tx.get(tallyRef);
 
       final prevRaw = userSnap.exists ? (userSnap.data()?['pick'] as String?) : null;
-      if (prevRaw == pickStr) return; // same pick, no-op
+      if (prevRaw != null) return; // already voted — one vote per user
 
-      final Map<String, dynamic> tallyUpdates = {};
-
-      if (prevRaw != null) {
-        tallyUpdates['${prevRaw}Votes'] = FieldValue.increment(-1);
-      }
-      tallyUpdates['${pickStr}Votes'] = FieldValue.increment(1);
+      final Map<String, dynamic> tallyUpdates = {
+        '${pickStr}Votes': FieldValue.increment(1),
+      };
 
       if (tallySnap.exists) {
         tx.update(tallyRef, tallyUpdates);

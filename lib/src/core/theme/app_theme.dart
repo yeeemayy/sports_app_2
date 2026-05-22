@@ -164,7 +164,7 @@ class AppTextStyles {
   static TextStyle display(double size, BuildContext context) {
     final isChinese = Localizations.localeOf(context).languageCode == 'zh';
     return isChinese
-        ? GoogleFonts.wdxlLubrifontSc(fontSize: size, height: 0.85)
+        ? TextStyle(fontFamily: 'DouyinSans', fontSize: size, height: 0.85)
         : GoogleFonts.anton(fontSize: size, height: 0.85);
   }
 

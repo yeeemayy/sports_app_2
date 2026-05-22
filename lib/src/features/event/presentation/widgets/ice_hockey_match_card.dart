@@ -117,14 +117,14 @@ class IceHockeyMatchCard extends ConsumerWidget {
                   // Not started: face-off header
                   Row(
                     children: [
-                      _TeamLabel(logo: match.homeLogo, name: match.homeName),
+                      Flexible(child: _TeamLabel(logo: match.homeLogo, name: match.homeName)),
                       const Spacer(),
                       Text(
                         match.matchTimeSim,
                         style: AppTextStyles.display(18, context).copyWith(color: context.appColors.text3),
                       ),
                       const Spacer(),
-                      _TeamLabel(logo: match.awayLogo, name: match.awayName, rightAlign: true),
+                      Flexible(child: _TeamLabel(logo: match.awayLogo, name: match.awayName, rightAlign: true)),
                     ],
                   ),
                 ],

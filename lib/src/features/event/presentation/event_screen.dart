@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -76,8 +78,7 @@ class _EventScreenState extends ConsumerState<EventScreen> with SingleTickerProv
 
     return Column(
       children: [
-        const _HomeHeader(),
-        _FilterPills(selected: _selectedFilter, sports: _sports, onSelect: _selectFilter),
+        _HomeHeader(selectedFilter: _selectedFilter),
         Expanded(
           child: Stack(
             children: [
@@ -94,12 +95,20 @@ class _EventScreenState extends ConsumerState<EventScreen> with SingleTickerProv
                         tabIndex: i,
                         tabController: _tabController,
                         resetTrigger: _resetTrigger,
+                        sports: _sports,
+                        selectedFilter: _selectedFilter,
+                        onSelectFilter: _selectFilter,
                       ),
                   ],
                 ),
               ),
               if (_selectedFilter == _kRecommended)
-                _RecommendedContent(onSeeAllLive: () => _selectFilter(SportType.football.apiPath)),
+                _RecommendedContent(
+                  onSeeAllLive: () => _selectFilter(SportType.football.apiPath),
+                  sports: _sports,
+                  selectedFilter: _selectedFilter,
+                  onSelectFilter: _selectFilter,
+                ),
             ],
           ),
         ),
@@ -113,7 +122,18 @@ class _EventScreenState extends ConsumerState<EventScreen> with SingleTickerProv
 // ---------------------------------------------------------------------------
 
 class _HomeHeader extends ConsumerWidget {
-  const _HomeHeader();
+  const _HomeHeader({required this.selectedFilter});
+
+  final String selectedFilter;
+
+  String get _heroAsset {
+    if (selectedFilter == _kRecommended) return 'assets/images/image_01.jpeg';
+    try {
+      return SportType.values.firstWhere((s) => s.apiPath == selectedFilter).heroAsset;
+    } catch (_) {
+      return 'assets/images/image_01.jpeg';
+    }
+  }
 
   String _greetingKey() {
     final h = DateTime.now().hour;
@@ -126,7 +146,7 @@ class _HomeHeader extends ConsumerWidget {
     final now = DateTime.now();
     final locale = context.locale.toString();
     final isZh = context.locale.languageCode == 'zh';
-    final pattern = isZh ? 'EEEE · MMMdd日 · HH:mm' : 'EEE · dd MMM · HH:mm';
+    final pattern = isZh ? 'EEEE · MMMdd日' : 'EEE · dd MMM';
     final formatted = DateFormat(pattern, locale).format(now);
     return isZh ? formatted : formatted.toUpperCase();
   }
@@ -136,181 +156,317 @@ class _HomeHeader extends ConsumerWidget {
     final authAsync = ref.watch(authNotifierProvider);
     final nickname = authAsync.valueOrNull?.user?.nickname ?? '';
     final displayName = nickname.isNotEmpty ? nickname.toUpperCase() : '';
+    final heroAsset = _heroAsset;
 
     return ColoredBox(
       color: context.appColors.surface,
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(_kHPad, 12, _kHPad, 16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _dateEyebrow(context),
-                      style: AppTextStyles.mono(
-                        10,
-                      ).copyWith(color: context.appColors.text2, letterSpacing: 10 * 0.18),
-                    ),
-                    const SizedBox(height: 6),
-                    RichText(
-                      text: TextSpan(
-                        style: AppTextStyles.display(
-                          32,
-                          context,
-                        ).copyWith(color: context.appColors.text),
-                        children: [
-                          TextSpan(text: _greetingKey().tr()),
-                          if (displayName.isNotEmpty) ...[
-                            TextSpan(text: ',\n'),
-                            TextSpan(
-                              text: '$displayName.',
-                              style: AppTextStyles.display(
-                                32,
-                                context,
-                              ).copyWith(color: context.appColors.accent),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ],
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Sport hero image — right-aligned with horizontal gradient fade, extends into dropdown bar
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: -48,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 450),
+              child: Align(
+                key: ValueKey(heroAsset),
+                alignment: Alignment.centerRight,
+                child: ShaderMask(
+                  shaderCallback: (bounds) => const LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [Colors.transparent, Colors.white],
+                    stops: [0.0, 0.55],
+                  ).createShader(bounds),
+                  blendMode: BlendMode.dstIn,
+                  child: Image.asset(
+                    heroAsset,
+                    height: double.infinity,
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    fit: BoxFit.cover,
+                    color: Colors.white.withValues(alpha: 0.18),
+                    colorBlendMode: BlendMode.modulate,
+                  ),
                 ),
               ),
-              const SizedBox(width: 12),
-              Row(
+            ),
+          ),
+          // Text content
+          SafeArea(
+            child: Container(
+              width: double.maxFinite,
+              padding: const EdgeInsets.fromLTRB(_kHPad, 12, _kHPad, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _HeaderIconButton(icon: Icons.search, onTap: () {}),
-                  const SizedBox(width: 8),
-                  _HeaderIconButton(
-                    icon: Icons.notifications_none_rounded,
-                    onTap: () {},
-                    showDot: true,
+                  Text(
+                    _dateEyebrow(context),
+                    style: AppTextStyles.mono(
+                      10,
+                    ).copyWith(color: context.appColors.text2, letterSpacing: 10 * 0.18),
+                  ),
+                  const SizedBox(height: 6),
+                  RichText(
+                    text: TextSpan(
+                      style: AppTextStyles.display(
+                        32,
+                        context,
+                      ).copyWith(color: context.appColors.text),
+                      children: [
+                        TextSpan(text: _greetingKey().tr()),
+                        if (displayName.isNotEmpty) ...[
+                          TextSpan(text: ',\n'),
+                          TextSpan(
+                            text: displayName,
+                            style: AppTextStyles.display(
+                              32,
+                              context,
+                            ).copyWith(color: context.appColors.accent, height: 1),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _HeaderIconButton extends StatelessWidget {
-  const _HeaderIconButton({required this.icon, required this.onTap, this.showDot = false});
-
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool showDot;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: context.appColors.lineStrong, width: 0.5),
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Icon(icon, color: context.appColors.text, size: 20),
-            if (showDot)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: context.appColors.accent,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: context.appColors.ink, width: 2),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Filter pills
-// ---------------------------------------------------------------------------
-
-class _FilterPills extends StatelessWidget {
-  const _FilterPills({required this.selected, required this.sports, required this.onSelect});
-
-  final String selected;
-  final List<SportType> sports;
-  final ValueChanged<String> onSelect;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: context.appColors.surface,
-      height: 42,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.fromLTRB(_kHPad, 0, _kHPad, 6),
-        children: [
-          _Pill(
-            label: 'home.tab.recommended'.tr().toUpperCase(),
-            active: selected == _kRecommended,
-            onTap: () => onSelect(_kRecommended),
-          ),
-          for (final s in sports) ...[
-            const SizedBox(width: 8),
-            _Pill(
-              label: s.i18nKey.tr().toUpperCase(),
-              active: selected == s.apiPath,
-              onTap: () => onSelect(s.apiPath),
             ),
-          ],
+          ),
         ],
       ),
     );
   }
 }
 
-class _Pill extends StatelessWidget {
-  const _Pill({required this.label, required this.active, required this.onTap});
+// ---------------------------------------------------------------------------
+// Sport dropdown bar (standalone, for Recommended page)
+// ---------------------------------------------------------------------------
 
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
+class _SportDropdownBar extends StatelessWidget {
+  const _SportDropdownBar({
+    required this.sports,
+    required this.selectedFilter,
+    required this.onSelectFilter,
+  });
+
+  final List<SportType> sports;
+  final String selectedFilter;
+  final ValueChanged<String> onSelectFilter;
+
+  String _label(BuildContext context) {
+    if (selectedFilter == _kRecommended) return 'home.tab.recommended'.tr();
+    final s = sports.firstWhere((s) => s.apiPath == selectedFilter, orElse: () => sports.first);
+    return s.i18nKey.tr();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-        decoration: BoxDecoration(
-          color: active ? context.appColors.accent : Colors.transparent,
-          borderRadius: BorderRadius.circular(999),
-          border: active ? null : Border.all(color: context.appColors.lineStrong, width: 0.5),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: AppTextStyles.display(13, context).copyWith(
-              color: active ? context.appColors.ink : context.appColors.text2,
-              letterSpacing: 13 * 0.06,
+    return Container(
+      // color: context.appColors.surface,
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: _kHPad, vertical: 6),
+      child: _SportDropdownButton(
+        label: _label(context),
+        sports: sports,
+        selectedFilter: selectedFilter,
+        onSelectFilter: onSelectFilter,
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Sport dropdown + status pills combined bar (for sport tabs)
+// ---------------------------------------------------------------------------
+
+class _SportAndStatusBar extends StatelessWidget {
+  const _SportAndStatusBar({
+    required this.sports,
+    required this.selectedFilter,
+    required this.onSelectFilter,
+    required this.selected,
+    required this.onSelected,
+    required this.statuses,
+  });
+
+  final List<SportType> sports;
+  final String selectedFilter;
+  final ValueChanged<String> onSelectFilter;
+  final String selected;
+  final ValueChanged<String> onSelected;
+  final List<String> statuses;
+
+  String _dropdownLabel(BuildContext context) {
+    if (selectedFilter == _kRecommended) return 'home.tab.recommended'.tr();
+    final s = sports.firstWhere((s) => s.apiPath == selectedFilter, orElse: () => sports.first);
+    return s.i18nKey.tr();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 48,
+      child: Row(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: _kHPad, top: 6, bottom: 6),
+            child: _SportDropdownButton(
+              label: _dropdownLabel(context),
+              sports: sports,
+              selectedFilter: selectedFilter,
+              onSelectFilter: onSelectFilter,
             ),
           ),
+          VerticalDivider(
+            thickness: 0.5,
+            width: 20,
+            color: context.appColors.lineStrong,
+            indent: 12,
+            endIndent: 12,
+          ),
+          Expanded(
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.fromLTRB(0, 6, _kHPad, 6),
+              children: statuses.asMap().entries.map((e) {
+                final i = e.key;
+                final s = e.value;
+                final active = s == selected;
+                return Padding(
+                  padding: EdgeInsets.only(right: i < statuses.length - 1 ? 8 : 0),
+                  child: GestureDetector(
+                    onTap: () => onSelected(s),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 0),
+                      decoration: BoxDecoration(
+                        color: active ? context.appColors.text : Colors.transparent,
+                        borderRadius: BorderRadius.circular(999),
+                        border: active
+                            ? null
+                            : Border.all(color: context.appColors.lineStrong, width: 0.5),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'event.status.$s'.tr().toUpperCase(),
+                          style: AppTextStyles.display(12, context).copyWith(
+                            color: active ? context.appColors.ink : context.appColors.text2,
+                            letterSpacing: 12 * 0.06,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SportMenuItem extends StatelessWidget {
+  const _SportMenuItem({
+    required this.icon,
+    required this.label,
+    required this.active,
+    required this.context,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool active;
+  final BuildContext context;
+
+  @override
+  Widget build(BuildContext _) {
+    final color = active ? context.appColors.accent : context.appColors.text;
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: color),
+        const SizedBox(width: 10),
+        Text(
+          label,
+          style: AppTextStyles.display(
+            13,
+            context,
+          ).copyWith(color: color, letterSpacing: 13 * 0.06),
         ),
+      ],
+    );
+  }
+}
+
+class _SportDropdownButton extends StatelessWidget {
+  const _SportDropdownButton({
+    required this.label,
+    required this.sports,
+    required this.selectedFilter,
+    required this.onSelectFilter,
+  });
+
+  final String label;
+  final List<SportType> sports;
+  final String selectedFilter;
+  final ValueChanged<String> onSelectFilter;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      onSelected: onSelectFilter,
+      color: context.appColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: context.appColors.lineStrong, width: 0.5),
+      ),
+      offset: const Offset(0, 36),
+      itemBuilder: (_) => [
+        PopupMenuItem(
+          value: _kRecommended,
+          child: _SportMenuItem(
+            icon: Icons.auto_awesome,
+            label: 'home.tab.recommended'.tr(),
+            active: selectedFilter == _kRecommended,
+            context: context,
+          ),
+        ),
+        for (final s in sports)
+          PopupMenuItem(
+            value: s.apiPath,
+            child: _SportMenuItem(
+              icon: s.icon,
+              label: s.i18nKey.tr(),
+              active: selectedFilter == s.apiPath,
+              context: context,
+            ),
+          ),
+      ],
+      child: Row(
+        spacing: 4,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            selectedFilter == _kRecommended
+                ? Icons.auto_awesome
+                : sports
+                      .firstWhere((s) => s.apiPath == selectedFilter, orElse: () => sports.first)
+                      .icon,
+            size: 16,
+            color: context.appColors.text2,
+          ),
+          Text(
+            label.toUpperCase(),
+            style: AppTextStyles.display(
+              13,
+              context,
+            ).copyWith(color: context.appColors.text, letterSpacing: 13 * 0.06),
+          ),
+          Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: context.appColors.text2),
+        ],
       ),
     );
   }
@@ -321,9 +477,17 @@ class _Pill extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _RecommendedContent extends ConsumerWidget {
-  const _RecommendedContent({required this.onSeeAllLive});
+  const _RecommendedContent({
+    required this.onSeeAllLive,
+    required this.sports,
+    required this.selectedFilter,
+    required this.onSelectFilter,
+  });
 
   final VoidCallback onSeeAllLive;
+  final List<SportType> sports;
+  final String selectedFilter;
+  final ValueChanged<String> onSelectFilter;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -348,6 +512,13 @@ class _RecommendedContent extends ConsumerWidget {
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
+          SliverToBoxAdapter(
+            child: _SportDropdownBar(
+              sports: sports,
+              selectedFilter: selectedFilter,
+              onSelectFilter: onSelectFilter,
+            ),
+          ),
           // Live Now
           SliverToBoxAdapter(
             child: _LiveNowSection(liveAsync: liveAsync, onSeeAll: onSeeAllLive),
@@ -485,7 +656,7 @@ class _LiveNowSection extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 140,
+          height: 118,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(_kHPad, 0, _kHPad, 0),
@@ -502,16 +673,18 @@ class _LiveNowSection extends StatelessWidget {
 
   Widget _shimmer(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(_kHPad, 4, _kHPad, 22),
+      padding: const EdgeInsets.fromLTRB(0, 4, 0, 22),
       child: Skeletonizer(
         enabled: true,
-        child: Row(
-          children: List.generate(
-            3,
-            (_) => Container(
+        child: SizedBox(
+          height: 140,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(_kHPad, 0, _kHPad, 0),
+            itemCount: 3,
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
+            itemBuilder: (_, _) => Container(
               width: 240,
-              height: 140,
-              margin: const EdgeInsets.only(right: 12),
               decoration: BoxDecoration(
                 color: context.appColors.surface,
                 borderRadius: BorderRadius.circular(14),
@@ -525,7 +698,7 @@ class _LiveNowSection extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Live match card (240 × 140)
+// Live match card (240 × 118)
 // ---------------------------------------------------------------------------
 
 class _LiveMatchCard extends StatelessWidget {
@@ -541,7 +714,7 @@ class _LiveMatchCard extends StatelessWidget {
 
     return Container(
       width: 240,
-      height: 140,
+      height: 118,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: context.appColors.surface,
@@ -555,8 +728,8 @@ class _LiveMatchCard extends StatelessWidget {
             top: -30,
             right: -30,
             child: Container(
-              width: 140,
-              height: 140,
+              width: 118,
+              height: 118,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
@@ -583,7 +756,7 @@ class _LiveMatchCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const _LivePulseBadge(),
+                  _LivePulseBadge(liveMinute: () => match.liveMinute),
                 ],
               ),
               const Spacer(),
@@ -631,15 +804,6 @@ class _LiveMatchCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
-              // Time
-              if (match.liveMinute != null)
-                Text(
-                  match.liveMinute!.toUpperCase(),
-                  style: AppTextStyles.mono(
-                    10,
-                  ).copyWith(color: context.appColors.text3, letterSpacing: 10 * 0.14),
-                ),
             ],
           ),
         ],
@@ -649,7 +813,9 @@ class _LiveMatchCard extends StatelessWidget {
 }
 
 class _LivePulseBadge extends StatefulWidget {
-  const _LivePulseBadge();
+  const _LivePulseBadge({required this.liveMinute});
+
+  final String? Function() liveMinute;
 
   @override
   State<_LivePulseBadge> createState() => _LivePulseBadgeState();
@@ -658,17 +824,25 @@ class _LivePulseBadge extends StatefulWidget {
 class _LivePulseBadgeState extends State<_LivePulseBadge> with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
   late final Animation<double> _anim;
+  late final Timer _ticker;
+  String? _liveMinute;
 
   @override
   void initState() {
     super.initState();
+    _liveMinute = widget.liveMinute();
     _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))
       ..repeat(reverse: true);
     _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut);
+    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+      final next = widget.liveMinute();
+      if (next != _liveMinute) setState(() => _liveMinute = next);
+    });
   }
 
   @override
   void dispose() {
+    _ticker.cancel();
     _ctrl.dispose();
     super.dispose();
   }
@@ -696,7 +870,7 @@ class _LivePulseBadgeState extends State<_LivePulseBadge> with SingleTickerProvi
             ),
             const SizedBox(width: 5),
             Text(
-              'LIVE',
+              (_liveMinute ?? '').toUpperCase(),
               style: AppTextStyles.mono(9).copyWith(
                 color: context.appColors.ink,
                 letterSpacing: 9 * 0.12,
@@ -887,16 +1061,20 @@ class _AnchorRankingsSection extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(_kHPad, 4, _kHPad, 24),
       child: Skeletonizer(
         enabled: true,
-        child: Row(
-          children: List.generate(
-            4,
-            (_) => Container(
-              width: 88,
-              height: 118,
-              margin: const EdgeInsets.only(right: 14),
-              decoration: BoxDecoration(
-                color: context.appColors.surface,
-                borderRadius: BorderRadius.circular(14),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const NeverScrollableScrollPhysics(),
+          child: Row(
+            children: List.generate(
+              4,
+              (_) => Container(
+                width: 88,
+                height: 118,
+                margin: const EdgeInsets.only(right: 14),
+                decoration: BoxDecoration(
+                  color: context.appColors.surface,
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
             ),
           ),
@@ -1152,12 +1330,18 @@ class _SportTabContent extends ConsumerStatefulWidget {
     required this.tabIndex,
     required this.tabController,
     required this.resetTrigger,
+    required this.sports,
+    required this.selectedFilter,
+    required this.onSelectFilter,
   });
 
   final SportType sport;
   final int tabIndex;
   final TabController tabController;
   final ValueNotifier<int> resetTrigger;
+  final List<SportType> sports;
+  final String selectedFilter;
+  final ValueChanged<String> onSelectFilter;
 
   @override
   ConsumerState<_SportTabContent> createState() => _SportTabContentState();
@@ -1319,7 +1503,10 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
 
     return Column(
       children: [
-        _StatusFilterBar(
+        _SportAndStatusBar(
+          sports: widget.sports,
+          selectedFilter: widget.selectedFilter,
+          onSelectFilter: widget.onSelectFilter,
           selected: _matchStatus,
           onSelected: (status) {
             setState(() {
@@ -1411,67 +1598,6 @@ class _SportTabContentState extends ConsumerState<_SportTabContent>
           ),
         ),
       ],
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Status filter bar (Arena-styled pills)
-// ---------------------------------------------------------------------------
-
-class _StatusFilterBar extends StatelessWidget {
-  const _StatusFilterBar({
-    required this.selected,
-    required this.onSelected,
-    required this.statuses,
-  });
-
-  final String selected;
-  final ValueChanged<String> onSelected;
-  final List<String> statuses;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: context.appColors.surface,
-      child: SizedBox(
-        height: 48,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.fromLTRB(_kHPad, 6, _kHPad, 6),
-          children: statuses.asMap().entries.map((e) {
-            final i = e.key;
-            final s = e.value;
-            final active = s == selected;
-            return Padding(
-              padding: EdgeInsets.only(right: i < statuses.length - 1 ? 8 : 0),
-              child: GestureDetector(
-                onTap: () => onSelected(s),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: active ? context.appColors.text : Colors.transparent,
-                    borderRadius: BorderRadius.circular(999),
-                    border: active
-                        ? null
-                        : Border.all(color: context.appColors.lineStrong, width: 0.5),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'event.status.$s'.tr().toUpperCase(),
-                      style: AppTextStyles.display(12, context).copyWith(
-                        color: active ? context.appColors.ink : context.appColors.text2,
-                        letterSpacing: 12 * 0.06,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ),
     );
   }
 }
