@@ -20,12 +20,10 @@ class BaseballMatchDetailScreen extends ConsumerStatefulWidget {
   final String matchId;
 
   @override
-  ConsumerState<BaseballMatchDetailScreen> createState() =>
-      _BaseballMatchDetailScreenState();
+  ConsumerState<BaseballMatchDetailScreen> createState() => _BaseballMatchDetailScreenState();
 }
 
-class _BaseballMatchDetailScreenState
-    extends SportDetailScaffoldState<BaseballMatchDetailScreen> {
+class _BaseballMatchDetailScreenState extends SportDetailScaffoldState<BaseballMatchDetailScreen> {
   @override
   String get matchId => widget.matchId;
 
@@ -37,9 +35,9 @@ class _BaseballMatchDetailScreenState
 
   @override
   (String?, int?) watchDetail() {
-    final v = ref
-        .watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId))
-        .valueOrNull as BaseballMatchDetail?;
+    final v =
+        ref.watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId)).valueOrNull
+            as BaseballMatchDetail?;
     return (v?.leagueName, v?.matchTime);
   }
 
@@ -53,25 +51,21 @@ class _BaseballMatchDetailScreenState
 
   @override
   List<Tab> buildTabs(BuildContext context) => [
-        Tab(text: 'event.baseball.detail.score'.tr()),
-        Tab(text: 'event.baseball.detail.stats'.tr()),
-      ];
+    Tab(text: 'event.baseball.detail.score'.tr()),
+    Tab(text: 'event.baseball.detail.stats'.tr()),
+  ];
 
   @override
   List<Widget> buildTabViews(BuildContext context) => [
-        _ScoreTab(matchId: matchId),
-        _StatsTab(matchId: matchId),
-      ];
+    _ScoreTab(matchId: matchId),
+    _StatsTab(matchId: matchId),
+  ];
 }
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 class _BaseballMatchHeader extends ConsumerWidget {
-  const _BaseballMatchHeader({
-    required this.matchId,
-    this.leagueName,
-    this.matchTimestamp,
-  });
+  const _BaseballMatchHeader({required this.matchId, this.leagueName, this.matchTimestamp});
 
   final String matchId;
   final String? leagueName;
@@ -79,11 +73,11 @@ class _BaseballMatchHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync =
-        ref.watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId));
+    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId));
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.baseball)
-          .select((map) => map[matchId] as BaseballRealtimeData?),
+      sportRealtimeProvider(
+        SportType.baseball,
+      ).select((map) => map[matchId] as BaseballRealtimeData?),
     );
 
     return SportDetailHeaderShell<BaseballMatchDetail>(
@@ -119,6 +113,7 @@ class _BaseballHeaderContent extends StatelessWidget {
     final isNotStarted = statusId == 1;
     final statusLabel = baseballStatusLabel(statusId);
     final pillColor = isLive ? colors.live : colors.text2;
+    final scoreColor = isLive ? colors.accent : colors.text2;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -135,10 +130,7 @@ class _BaseballHeaderContent extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.body(12).copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: AppTextStyles.body(12).copyWith(fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -157,18 +149,14 @@ class _BaseballHeaderContent extends StatelessWidget {
                 ),
                 child: Text(
                   statusLabel.isNotEmpty ? statusLabel : 'common.unknown'.tr(),
-                  style: AppTextStyles.mono(10).copyWith(
-                    color: pillColor,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: AppTextStyles.mono(
+                    10,
+                  ).copyWith(color: pillColor, fontWeight: FontWeight.w700),
                 ),
               ),
               const SizedBox(height: 8),
               if (isNotStarted)
-                Text(
-                  '-',
-                  style: AppTextStyles.display(32, context).copyWith(color: colors.text3),
-                )
+                Text('-', style: AppTextStyles.display(32, context).copyWith(color: scoreColor))
               else
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -177,7 +165,7 @@ class _BaseballHeaderContent extends StatelessWidget {
                   children: [
                     Text(
                       homeScore,
-                      style: AppTextStyles.display(48, context).copyWith(color: Colors.white),
+                      style: AppTextStyles.display(48, context).copyWith(color: scoreColor),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -188,7 +176,7 @@ class _BaseballHeaderContent extends StatelessWidget {
                     ),
                     Text(
                       awayScore,
-                      style: AppTextStyles.display(48, context).copyWith(color: Colors.white),
+                      style: AppTextStyles.display(48, context).copyWith(color: scoreColor),
                     ),
                   ],
                 ),
@@ -207,10 +195,7 @@ class _BaseballHeaderContent extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.body(12).copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: AppTextStyles.body(12).copyWith(fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -229,16 +214,16 @@ class _ScoreTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync =
-        ref.watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId));
-    final eventsAsync =
-        ref.watch(matchEventsProvider(sport: SportType.baseball, matchId: matchId));
+    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId));
+    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.baseball, matchId: matchId));
 
     return detailAsync.when(
       loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
       error: (_, __) => Center(
-        child: Text('event.error.load_failed'.tr(),
-            style: TextStyle(color: context.appColors.text3)),
+        child: Text(
+          'event.error.load_failed'.tr(),
+          style: TextStyle(color: context.appColors.text3),
+        ),
       ),
       data: (obj) {
         final detail = obj as BaseballMatchDetail;
@@ -322,7 +307,8 @@ class _InningGrid extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
+        // Subtract container margin (12+12) and Border.all 1px (1+1) so cells fit inside.
+        final totalWidth = constraints.maxWidth - 26;
         final nameColWidth = totalWidth * 0.30;
         final cellWidth = (totalWidth * 0.70) / displayCount;
 
@@ -389,10 +375,9 @@ class _InningGrid extends StatelessWidget {
                                     detail.awayName,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: AppTextStyles.body(11).copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: colors.text,
-                                    ),
+                                    style: AppTextStyles.body(
+                                      11,
+                                    ).copyWith(fontWeight: FontWeight.w600, color: colors.text),
                                   ),
                                 ),
                               ],
@@ -427,10 +412,9 @@ class _InningGrid extends StatelessWidget {
                                     detail.homeName,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: AppTextStyles.body(11).copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: colors.text,
-                                    ),
+                                    style: AppTextStyles.body(
+                                      11,
+                                    ).copyWith(fontWeight: FontWeight.w600, color: colors.text),
                                   ),
                                 ),
                               ],
@@ -498,9 +482,19 @@ class _InningGrid extends StatelessWidget {
                     ),
                   ),
                   Divider(height: 1, thickness: 0.5, color: colors.line),
-                  _RheRow(name: detail.awayName, runs: awayRuns, hits: awayHits, errors: awayErrors),
+                  _RheRow(
+                    name: detail.awayName,
+                    runs: awayRuns,
+                    hits: awayHits,
+                    errors: awayErrors,
+                  ),
                   Divider(height: 1, thickness: 0.5, color: colors.line),
-                  _RheRow(name: detail.homeName, runs: homeRuns, hits: homeHits, errors: homeErrors),
+                  _RheRow(
+                    name: detail.homeName,
+                    runs: homeRuns,
+                    hits: homeHits,
+                    errors: homeErrors,
+                  ),
                 ],
               ),
             ),
@@ -512,12 +506,7 @@ class _InningGrid extends StatelessWidget {
 }
 
 class _RheRow extends StatelessWidget {
-  const _RheRow({
-    required this.name,
-    required this.runs,
-    required this.hits,
-    required this.errors,
-  });
+  const _RheRow({required this.name, required this.runs, required this.hits, required this.errors});
 
   final String name;
   final String runs;
@@ -534,10 +523,9 @@ class _RheRow extends StatelessWidget {
           Expanded(
             child: Text(
               name,
-              style: AppTextStyles.body(13).copyWith(
-                fontWeight: FontWeight.w600,
-                color: colors.text,
-              ),
+              style: AppTextStyles.body(
+                13,
+              ).copyWith(fontWeight: FontWeight.w600, color: colors.text),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -547,10 +535,9 @@ class _RheRow extends StatelessWidget {
             child: Text(
               runs,
               textAlign: TextAlign.center,
-              style: AppTextStyles.mono(14).copyWith(
-                color: colors.accent,
-                fontWeight: FontWeight.w800,
-              ),
+              style: AppTextStyles.mono(
+                14,
+              ).copyWith(color: colors.accent, fontWeight: FontWeight.w800),
             ),
           ),
           SizedBox(
@@ -604,8 +591,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
     return eventsAsync.when(
       loading: () => Center(child: CircularProgressIndicator(color: colors.accent)),
       error: (_, __) => Center(
-        child: Text('event.error.load_failed'.tr(),
-            style: TextStyle(color: colors.text3)),
+        child: Text('event.error.load_failed'.tr(), style: TextStyle(color: colors.text3)),
       ),
       data: (obj) {
         final events = obj as BaseballMatchEventsData?;
@@ -637,13 +623,9 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
                       decoration: BoxDecoration(
-                        color: isSelected
-                            ? colors.accent
-                            : colors.surface2,
+                        color: isSelected ? colors.accent : colors.surface2,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: isSelected ? colors.accent : colors.line,
-                        ),
+                        border: Border.all(color: isSelected ? colors.accent : colors.line),
                       ),
                       child: Text(
                         _inningLabel(setIndices[i]),

@@ -27,15 +27,16 @@ class TableTennisMatchCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.tableTennis)
-          .select((map) => map[match.id] as TableTennisRealtimeData?),
+      sportRealtimeProvider(
+        SportType.tableTennis,
+      ).select((map) => map[match.id] as TableTennisRealtimeData?),
     );
 
     final effectiveStatusId = rt?.statusId ?? match.statusId;
     final effectiveHomeSets = rt?.homeSets ?? extractSetScores(match.scores, 0, maxSets: 7);
     final effectiveAwaySets = rt?.awaySets ?? extractSetScores(match.scores, 1, maxSets: 7);
-    final effectiveHomeTotal = rt?.homeTotal ?? 0;
-    final effectiveAwayTotal = rt?.awayTotal ?? 0;
+    final effectiveHomeTotal = rt?.homeTotal ?? int.tryParse(match.homeScore);
+    final effectiveAwayTotal = rt?.awayTotal ?? int.tryParse(match.awayScore);
 
     final statusLabel = tableTennisStatusLabel(effectiveStatusId, match.statusDescription);
     final isLive = _liveStatuses.contains(effectiveStatusId);
@@ -132,12 +133,7 @@ class _InlineSetRow extends StatelessWidget {
             children: List.generate(sets.length, (i) {
               final isActive = i == activeSetIndex;
               final won = sets[i] > (i < opponentSets.length ? opponentSets[i] : 0);
-              return _SmallSetBox(
-                score: sets[i],
-                isActive: isActive,
-                isWon: won,
-                isLive: isLive,
-              );
+              return _SmallSetBox(score: sets[i], isActive: isActive, isWon: won, isLive: isLive);
             }),
           ),
         ),
@@ -148,9 +144,10 @@ class _InlineSetRow extends StatelessWidget {
           child: Text(
             total != null ? '$total' : '-',
             textAlign: TextAlign.center,
-            style: AppTextStyles.display(18, context).copyWith(
-              color: isLive ? context.appColors.accent : context.appColors.text,
-            ),
+            style: AppTextStyles.display(
+              18,
+              context,
+            ).copyWith(color: isLive ? context.appColors.accent : context.appColors.text),
           ),
         ),
       ],
@@ -178,7 +175,9 @@ class _SmallSetBox extends StatelessWidget {
       height: 20,
       margin: const EdgeInsets.only(left: 2),
       decoration: BoxDecoration(
-        color: isActive ? context.appColors.accent.withValues(alpha: 0.14) : context.appColors.surface2,
+        color: isActive
+            ? context.appColors.accent.withValues(alpha: 0.14)
+            : context.appColors.surface2,
         borderRadius: BorderRadius.circular(4),
         border: Border.all(
           color: isActive ? context.appColors.accent : context.appColors.line,
@@ -189,7 +188,9 @@ class _SmallSetBox extends StatelessWidget {
         child: Text(
           '$score',
           style: AppTextStyles.mono(9).copyWith(
-            color: isActive ? context.appColors.accent : (isWon ? context.appColors.text : context.appColors.text3),
+            color: isActive
+                ? context.appColors.accent
+                : (isWon ? context.appColors.text : context.appColors.text3),
           ),
         ),
       ),

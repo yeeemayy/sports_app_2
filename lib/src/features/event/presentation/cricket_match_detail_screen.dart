@@ -126,6 +126,7 @@ class _CricketHeaderContent extends StatelessWidget {
     final isLive = liveStatuses.contains(effStatusId);
     final statusLabel = cricketStatusLabel(effStatusId, detail.statusDescription);
     final statusColor = isLive ? colors.live : colors.text3;
+    final scoreColor = isLive ? colors.accent : colors.text3;
 
     return Column(
       children: [
@@ -164,7 +165,7 @@ class _CricketHeaderContent extends StatelessWidget {
                     child: Text(
                       statusLabel.toUpperCase(),
                       style: AppTextStyles.display(11, context).copyWith(
-                        color: const Color(0xFF0E0E0E),
+                        color: statusColor.computeLuminance() > 0.5 ? const Color(0xFF0E0E0E) : Colors.white,
                         letterSpacing: 0.1 * 11,
                       ),
                     ),
@@ -173,7 +174,7 @@ class _CricketHeaderContent extends StatelessWidget {
                   if (isNotStarted)
                     Text(
                       '–  –',
-                      style: AppTextStyles.display(40, context).copyWith(color: colors.text3),
+                      style: AppTextStyles.display(40, context).copyWith(color: scoreColor),
                     )
                   else if (homeInnings != null && awayInnings != null) ...[
                     Row(
@@ -181,18 +182,15 @@ class _CricketHeaderContent extends StatelessWidget {
                       children: [
                         Text(
                           '${homeInnings.runs}/${homeInnings.wickets}',
-                          style: AppTextStyles.display(26, context).copyWith(color: colors.text),
+                          style: AppTextStyles.display(26, context).copyWith(color: scoreColor),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Text(
-                            ':',
-                            style: AppTextStyles.display(26, context).copyWith(color: colors.text3),
-                          ),
+                          child:  Text('–', style: AppTextStyles.display(22, context).copyWith(color: context.appColors.text3)),
                         ),
                         Text(
                           '${awayInnings.runs}/${awayInnings.wickets}',
-                          style: AppTextStyles.display(26, context).copyWith(color: colors.text),
+                          style: AppTextStyles.display(26, context).copyWith(color: scoreColor),
                         ),
                       ],
                     ),
@@ -204,7 +202,7 @@ class _CricketHeaderContent extends StatelessWidget {
                   ] else
                     Text(
                       '–  –',
-                      style: AppTextStyles.display(40, context).copyWith(color: colors.text3),
+                      style: AppTextStyles.display(40, context).copyWith(color: scoreColor),
                     ),
                 ],
               ),
@@ -621,7 +619,9 @@ class _SituationTabState extends ConsumerState<_SituationTab> {
     return Column(
       children: [
         Container(
+          width: double.maxFinite,
           color: colors.surface,
+          alignment: Alignment.center,
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,

@@ -55,11 +55,11 @@ class FootballMatchCard extends ConsumerWidget {
             leagueLogo: effective.leagueLogo,
             leagueName: effective.leagueName,
             matchTime: effective.matchTimeSim,
-            statusWidget: (isLive || (!isNotStarted)) && effective.statusLabel.isNotEmpty
-                ? SportStatusBadge(label: effective.statusLabel, isLive: isLive)
-                : null,
           ),
           const SizedBox(height: 12),
+          if (!isNotStarted && effective.statusLabel.isNotEmpty) ...[
+            Center(child: SportStatusBadge(label: effective.statusLabel, isLive: isLive)),
+          ],
           // Face-off row
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,

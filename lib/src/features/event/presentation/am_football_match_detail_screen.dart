@@ -117,6 +117,7 @@ class _AmFootballHeaderContent extends StatelessWidget {
     final isLive = liveStatuses.contains(effStatusId);
     final statusLabel = amFootballStatusLabel(effStatusId, detail.statusDescription);
     final pillColor = isLive ? colors.live : colors.text2;
+    final scoreColor = isLive ? colors.accent : colors.text;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -133,10 +134,7 @@ class _AmFootballHeaderContent extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.body(12).copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: AppTextStyles.body(12).copyWith(fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -150,13 +148,12 @@ class _AmFootballHeaderContent extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                 decoration: BoxDecoration(
                   color: pillColor.withValues(alpha: 0.15),
-                  border: Border.all(color: pillColor.withValues(alpha: 0.5)),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   statusLabel.isNotEmpty ? statusLabel : 'common.unknown'.tr(),
                   style: AppTextStyles.mono(10).copyWith(
-                    color: pillColor,
+                    color: scoreColor,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -164,8 +161,8 @@ class _AmFootballHeaderContent extends StatelessWidget {
               const SizedBox(height: 8),
               if (isNotStarted)
                 Text(
-                  '-',
-                  style: AppTextStyles.display(32, context).copyWith(color: colors.text3),
+                  '–',
+                  style: AppTextStyles.display(22, context).copyWith(color: colors.text3),
                 )
               else
                 Row(
@@ -175,7 +172,7 @@ class _AmFootballHeaderContent extends StatelessWidget {
                   children: [
                     Text(
                       homeScore,
-                      style: AppTextStyles.display(48, context).copyWith(color: Colors.white),
+                      style: AppTextStyles.display(48, context).copyWith(color: scoreColor),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -186,7 +183,7 @@ class _AmFootballHeaderContent extends StatelessWidget {
                     ),
                     Text(
                       awayScore,
-                      style: AppTextStyles.display(48, context).copyWith(color: Colors.white),
+                      style: AppTextStyles.display(48, context).copyWith(color: scoreColor),
                     ),
                   ],
                 ),
@@ -205,10 +202,7 @@ class _AmFootballHeaderContent extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.body(12).copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: AppTextStyles.body(12).copyWith(fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -339,84 +333,114 @@ class _AmFootballScoreTable extends StatelessWidget {
           ),
           child: Column(
             children: [
+              // Header: [empty] | Home | Away
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 child: Row(
                   children: [
-                    const Expanded(flex: 3, child: SizedBox()),
-                    ...columns.map((label) => Expanded(
-                          child: Text(
-                            label,
-                            textAlign: TextAlign.center,
-                            style: AppTextStyles.mono(10).copyWith(color: colors.text3),
+                    const Expanded(flex: 2, child: SizedBox()),
+                    Expanded(
+                      flex: 3,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SportLogo(url: homeLogo, size: 16),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              homeName,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.body(12).copyWith(
+                                color: colors.text,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
-                        )),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SportLogo(url: awayLogo, size: 16),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              awayName,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.body(12).copyWith(
+                                color: colors.text,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
               Divider(height: 1, thickness: 0.5, color: colors.line),
-              _PeriodScoreRow(name: homeName, logo: homeLogo, scores: homeScores),
-              Divider(height: 1, thickness: 0.5, color: colors.line),
-              _PeriodScoreRow(name: awayName, logo: awayLogo, scores: awayScores),
+              // One row per quarter/period
+              ...List.generate(columns.length, (i) {
+                final isTotal = i == columns.length - 1;
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              columns[i],
+                              style: AppTextStyles.mono(11).copyWith(color: colors.text3),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 3,
+                            child: Text(
+                              '${homeScores[i]}',
+                              textAlign: TextAlign.center,
+                              style: isTotal
+                                  ? AppTextStyles.mono(14).copyWith(
+                                      color: colors.accent,
+                                      fontWeight: FontWeight.w800,
+                                    )
+                                  : AppTextStyles.mono(13).copyWith(color: colors.text2),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 3,
+                            child: Text(
+                              '${awayScores[i]}',
+                              textAlign: TextAlign.center,
+                              style: isTotal
+                                  ? AppTextStyles.mono(14).copyWith(
+                                      color: colors.accent,
+                                      fontWeight: FontWeight.w800,
+                                    )
+                                  : AppTextStyles.mono(13).copyWith(color: colors.text2),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (i < columns.length - 1)
+                      Divider(height: 1, thickness: 0.5, color: colors.line),
+                  ],
+                );
+              }),
             ],
           ),
         ),
       ],
-    );
-  }
-}
-
-class _PeriodScoreRow extends StatelessWidget {
-  const _PeriodScoreRow({required this.name, required this.logo, required this.scores});
-
-  final String name;
-  final String logo;
-  final List<int> scores;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.appColors;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Row(
-              children: [
-                SportLogo(url: logo, size: 20),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.body(13).copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: colors.text,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          ...scores.asMap().entries.map((e) {
-            final isLast = e.key == scores.length - 1;
-            return Expanded(
-              child: Text(
-                '${e.value}',
-                textAlign: TextAlign.center,
-                style: isLast
-                    ? AppTextStyles.mono(14).copyWith(
-                        color: colors.accent,
-                        fontWeight: FontWeight.w800,
-                      )
-                    : AppTextStyles.mono(13).copyWith(color: colors.text2),
-              ),
-            );
-          }),
-        ],
-      ),
     );
   }
 }

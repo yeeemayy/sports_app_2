@@ -27,8 +27,9 @@ class AmFootballMatchCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.amFootball)
-          .select((map) => map[match.id] as AmFootballRealtimeData?),
+      sportRealtimeProvider(
+        SportType.amFootball,
+      ).select((map) => map[match.id] as AmFootballRealtimeData?),
     );
 
     final effectiveStatusId = rt?.statusId ?? match.statusId;
@@ -86,14 +87,11 @@ class AmFootballMatchCard extends ConsumerWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            '·',
-                            style: AppTextStyles.display(24, context).copyWith(
-                              color: context.appColors.text3,
-                            ),
-                          ),
-                          Text(
-                            isNotStarted ? 'VS' : statusLabel.toUpperCase(),
-                            style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+                            '–',
+                            style: AppTextStyles.display(
+                              22,
+                              context,
+                            ).copyWith(color: context.appColors.text3),
                           ),
                         ],
                       ),

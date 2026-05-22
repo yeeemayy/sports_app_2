@@ -21,8 +21,7 @@ class IceHockeyMatchDetailScreen extends ConsumerStatefulWidget {
   final String matchId;
 
   @override
-  ConsumerState<IceHockeyMatchDetailScreen> createState() =>
-      _IceHockeyMatchDetailScreenState();
+  ConsumerState<IceHockeyMatchDetailScreen> createState() => _IceHockeyMatchDetailScreenState();
 }
 
 class _IceHockeyMatchDetailScreenState
@@ -38,9 +37,9 @@ class _IceHockeyMatchDetailScreenState
 
   @override
   (String?, int?) watchDetail() {
-    final v = ref
-        .watch(matchDetailProvider(sport: SportType.iceHockey, matchId: matchId))
-        .valueOrNull as IceHockeyMatchDetail?;
+    final v =
+        ref.watch(matchDetailProvider(sport: SportType.iceHockey, matchId: matchId)).valueOrNull
+            as IceHockeyMatchDetail?;
     return (v?.leagueName, v?.matchTime);
   }
 
@@ -54,27 +53,23 @@ class _IceHockeyMatchDetailScreenState
 
   @override
   List<Tab> buildTabs(BuildContext context) => [
-        Tab(text: 'event.ice_hockey.detail.score'.tr()),
-        Tab(text: 'event.ice_hockey.detail.stats'.tr()),
-        Tab(text: 'event.ice_hockey.detail.events'.tr()),
-      ];
+    Tab(text: 'event.ice_hockey.detail.score'.tr()),
+    Tab(text: 'event.ice_hockey.detail.stats'.tr()),
+    Tab(text: 'event.ice_hockey.detail.events'.tr()),
+  ];
 
   @override
   List<Widget> buildTabViews(BuildContext context) => [
-        _ScoreTab(matchId: matchId),
-        _StatsTab(matchId: matchId),
-        _EventsTab(matchId: matchId),
-      ];
+    _ScoreTab(matchId: matchId),
+    _StatsTab(matchId: matchId),
+    _EventsTab(matchId: matchId),
+  ];
 }
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 class _IceHockeyMatchHeader extends ConsumerWidget {
-  const _IceHockeyMatchHeader({
-    required this.matchId,
-    this.leagueName,
-    this.matchTimestamp,
-  });
+  const _IceHockeyMatchHeader({required this.matchId, this.leagueName, this.matchTimestamp});
 
   final String matchId;
   final String? leagueName;
@@ -82,11 +77,13 @@ class _IceHockeyMatchHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync =
-        ref.watch(matchDetailProvider(sport: SportType.iceHockey, matchId: matchId));
+    final detailAsync = ref.watch(
+      matchDetailProvider(sport: SportType.iceHockey, matchId: matchId),
+    );
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.iceHockey)
-          .select((map) => map[matchId] as IceHockeyRealtimeData?),
+      sportRealtimeProvider(
+        SportType.iceHockey,
+      ).select((map) => map[matchId] as IceHockeyRealtimeData?),
     );
 
     return SportDetailHeaderShell<IceHockeyMatchDetail>(
@@ -117,6 +114,7 @@ class _IceHockeyHeaderContent extends StatelessWidget {
     final isLive = liveStatuses.contains(effStatusId);
     final statusLabel = iceHockeyStatusLabel(effStatusId, detail.statusDescription);
     final pillColor = isLive ? colors.live : colors.text2;
+    final scoreColor = isLive ? colors.accent : colors.text;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -133,10 +131,7 @@ class _IceHockeyHeaderContent extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.body(12).copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: AppTextStyles.body(12).copyWith(fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -150,22 +145,23 @@ class _IceHockeyHeaderContent extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                 decoration: BoxDecoration(
                   color: pillColor.withValues(alpha: 0.15),
-                  border: Border.all(color: pillColor.withValues(alpha: 0.5)),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   statusLabel.isNotEmpty ? statusLabel : 'common.unknown'.tr(),
-                  style: AppTextStyles.mono(10).copyWith(
-                    color: pillColor,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: AppTextStyles.mono(
+                    10,
+                  ).copyWith(color: scoreColor, fontWeight: FontWeight.w700),
                 ),
               ),
               const SizedBox(height: 8),
               if (isNotStarted)
                 Text(
-                  '-',
-                  style: AppTextStyles.display(32, context).copyWith(color: colors.text3),
+                  '–',
+                  style: AppTextStyles.display(
+                    22,
+                    context,
+                  ).copyWith(color: context.appColors.text3),
                 )
               else
                 Row(
@@ -175,7 +171,7 @@ class _IceHockeyHeaderContent extends StatelessWidget {
                   children: [
                     Text(
                       homeScore,
-                      style: AppTextStyles.display(48, context).copyWith(color: Colors.white),
+                      style: AppTextStyles.display(48, context).copyWith(color: scoreColor),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -186,7 +182,7 @@ class _IceHockeyHeaderContent extends StatelessWidget {
                     ),
                     Text(
                       awayScore,
-                      style: AppTextStyles.display(48, context).copyWith(color: Colors.white),
+                      style: AppTextStyles.display(48, context).copyWith(color: scoreColor),
                     ),
                   ],
                 ),
@@ -205,10 +201,7 @@ class _IceHockeyHeaderContent extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.body(12).copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: AppTextStyles.body(12).copyWith(fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -227,20 +220,25 @@ class _ScoreTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync =
-        ref.watch(matchDetailProvider(sport: SportType.iceHockey, matchId: matchId));
-    final eventsAsync =
-        ref.watch(matchEventsProvider(sport: SportType.iceHockey, matchId: matchId));
+    final detailAsync = ref.watch(
+      matchDetailProvider(sport: SportType.iceHockey, matchId: matchId),
+    );
+    final eventsAsync = ref.watch(
+      matchEventsProvider(sport: SportType.iceHockey, matchId: matchId),
+    );
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.iceHockey)
-          .select((map) => map[matchId] as IceHockeyRealtimeData?),
+      sportRealtimeProvider(
+        SportType.iceHockey,
+      ).select((map) => map[matchId] as IceHockeyRealtimeData?),
     );
 
     return detailAsync.when(
       loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
       error: (_, __) => Center(
-        child: Text('event.error.load_failed'.tr(),
-            style: TextStyle(color: context.appColors.text3)),
+        child: Text(
+          'event.error.load_failed'.tr(),
+          style: TextStyle(color: context.appColors.text3),
+        ),
       ),
       data: (obj) {
         final detail = obj as IceHockeyMatchDetail;
@@ -256,10 +254,8 @@ class _ScoreTab extends ConsumerWidget {
         final awayOt = ev?.awayOt ?? rt?.awayOt ?? _p(detail.scores, 'ot', 1);
         final homeAp = ev?.homeAp ?? rt?.homeAp ?? _p(detail.scores, 'ap', 0);
         final awayAp = ev?.awayAp ?? rt?.awayAp ?? _p(detail.scores, 'ap', 1);
-        final homeTotal =
-            ev?.homeScore ?? rt?.homeScore ?? int.tryParse(detail.homeScore) ?? 0;
-        final awayTotal =
-            ev?.awayScore ?? rt?.awayScore ?? int.tryParse(detail.awayScore) ?? 0;
+        final homeTotal = ev?.homeScore ?? rt?.homeScore ?? int.tryParse(detail.homeScore) ?? 0;
+        final awayTotal = ev?.awayScore ?? rt?.awayScore ?? int.tryParse(detail.awayScore) ?? 0;
         final effStatusId = ev?.statusId ?? rt?.statusId ?? detail.statusId;
 
         return _IceHockeyScoreTable(
@@ -268,12 +264,18 @@ class _ScoreTab extends ConsumerWidget {
           awayName: detail.awayName,
           homeLogo: detail.homeInfo.logo,
           awayLogo: detail.awayInfo.logo,
-          homeP1: homeP1, awayP1: awayP1,
-          homeP2: homeP2, awayP2: awayP2,
-          homeP3: homeP3, awayP3: awayP3,
-          homeOt: homeOt, awayOt: awayOt,
-          homeAp: homeAp, awayAp: awayAp,
-          homeTotal: homeTotal, awayTotal: awayTotal,
+          homeP1: homeP1,
+          awayP1: awayP1,
+          homeP2: homeP2,
+          awayP2: awayP2,
+          homeP3: homeP3,
+          awayP3: awayP3,
+          homeOt: homeOt,
+          awayOt: awayOt,
+          homeAp: homeAp,
+          awayAp: awayAp,
+          homeTotal: homeTotal,
+          awayTotal: awayTotal,
         );
       },
     );
@@ -292,12 +294,18 @@ class _IceHockeyScoreTable extends StatelessWidget {
     required this.awayName,
     required this.homeLogo,
     required this.awayLogo,
-    required this.homeP1, required this.awayP1,
-    required this.homeP2, required this.awayP2,
-    required this.homeP3, required this.awayP3,
-    required this.homeOt, required this.awayOt,
-    required this.homeAp, required this.awayAp,
-    required this.homeTotal, required this.awayTotal,
+    required this.homeP1,
+    required this.awayP1,
+    required this.homeP2,
+    required this.awayP2,
+    required this.homeP3,
+    required this.awayP3,
+    required this.homeOt,
+    required this.awayOt,
+    required this.homeAp,
+    required this.awayAp,
+    required this.homeTotal,
+    required this.awayTotal,
   });
 
   final int statusId;
@@ -326,18 +334,8 @@ class _IceHockeyScoreTable extends StatelessWidget {
       'event.ice_hockey.detail.total'.tr(),
     ];
 
-    final homeScores = [
-      homeP1, homeP2, homeP3,
-      if (_hasOt) homeOt,
-      if (_hasAp) homeAp,
-      homeTotal,
-    ];
-    final awayScores = [
-      awayP1, awayP2, awayP3,
-      if (_hasOt) awayOt,
-      if (_hasAp) awayAp,
-      awayTotal,
-    ];
+    final homeScores = [homeP1, homeP2, homeP3, if (_hasOt) homeOt, if (_hasAp) homeAp, homeTotal];
+    final awayScores = [awayP1, awayP2, awayP3, if (_hasOt) awayOt, if (_hasAp) awayAp, awayTotal];
 
     return ListView(
       padding: const EdgeInsets.all(12),
@@ -350,84 +348,111 @@ class _IceHockeyScoreTable extends StatelessWidget {
           ),
           child: Column(
             children: [
+              // Header: [empty] | Home | Away
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 child: Row(
+                  spacing: 2,
                   children: [
-                    const Expanded(flex: 3, child: SizedBox()),
-                    ...columns.map((label) => Expanded(
-                          child: Text(
-                            label,
-                            textAlign: TextAlign.center,
-                            style: AppTextStyles.mono(10).copyWith(color: colors.text3),
+                    const Expanded(flex: 2, child: SizedBox()),
+                    Expanded(
+                      flex: 3,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SportLogo(url: homeLogo, size: 16),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              homeName,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.body(
+                                12,
+                              ).copyWith(color: colors.text, fontWeight: FontWeight.w600),
+                            ),
                           ),
-                        )),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SportLogo(url: awayLogo, size: 16),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              awayName,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.body(
+                                12,
+                              ).copyWith(color: colors.text, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
               Divider(height: 1, thickness: 0.5, color: colors.line),
-              _PeriodScoreRow(name: homeName, logo: homeLogo, scores: homeScores),
-              Divider(height: 1, thickness: 0.5, color: colors.line),
-              _PeriodScoreRow(name: awayName, logo: awayLogo, scores: awayScores),
+              // One row per period
+              ...List.generate(columns.length, (i) {
+                final isTotal = i == columns.length - 1;
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              columns[i],
+                              style: AppTextStyles.mono(11).copyWith(color: colors.text3),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 3,
+                            child: Text(
+                              '${homeScores[i]}',
+                              textAlign: TextAlign.center,
+                              style: isTotal
+                                  ? AppTextStyles.mono(
+                                      14,
+                                    ).copyWith(color: colors.accent, fontWeight: FontWeight.w800)
+                                  : AppTextStyles.mono(13).copyWith(color: colors.text2),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 3,
+                            child: Text(
+                              '${awayScores[i]}',
+                              textAlign: TextAlign.center,
+                              style: isTotal
+                                  ? AppTextStyles.mono(
+                                      14,
+                                    ).copyWith(color: colors.accent, fontWeight: FontWeight.w800)
+                                  : AppTextStyles.mono(13).copyWith(color: colors.text2),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (i < columns.length - 1)
+                      Divider(height: 1, thickness: 0.5, color: colors.line),
+                  ],
+                );
+              }),
             ],
           ),
         ),
       ],
-    );
-  }
-}
-
-class _PeriodScoreRow extends StatelessWidget {
-  const _PeriodScoreRow({required this.name, required this.logo, required this.scores});
-
-  final String name;
-  final String logo;
-  final List<int> scores;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.appColors;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Row(
-              children: [
-                SportLogo(url: logo, size: 20),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.body(13).copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: colors.text,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          ...scores.asMap().entries.map((e) {
-            final isLast = e.key == scores.length - 1;
-            return Expanded(
-              child: Text(
-                '${e.value}',
-                textAlign: TextAlign.center,
-                style: isLast
-                    ? AppTextStyles.mono(14).copyWith(
-                        color: colors.accent,
-                        fontWeight: FontWeight.w800,
-                      )
-                    : AppTextStyles.mono(13).copyWith(color: colors.text2),
-              ),
-            );
-          }),
-        ],
-      ),
     );
   }
 }
@@ -441,14 +466,17 @@ class _StatsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final eventsAsync =
-        ref.watch(matchEventsProvider(sport: SportType.iceHockey, matchId: matchId));
+    final eventsAsync = ref.watch(
+      matchEventsProvider(sport: SportType.iceHockey, matchId: matchId),
+    );
 
     return eventsAsync.when(
       loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
       error: (_, __) => Center(
-        child: Text('event.error.load_failed'.tr(),
-            style: TextStyle(color: context.appColors.text3)),
+        child: Text(
+          'event.error.load_failed'.tr(),
+          style: TextStyle(color: context.appColors.text3),
+        ),
       ),
       data: (obj) {
         final events = obj as IceHockeyMatchEventsData?;
@@ -487,14 +515,17 @@ class _EventsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final eventsAsync =
-        ref.watch(matchEventsProvider(sport: SportType.iceHockey, matchId: matchId));
+    final eventsAsync = ref.watch(
+      matchEventsProvider(sport: SportType.iceHockey, matchId: matchId),
+    );
 
     return eventsAsync.when(
       loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
       error: (_, __) => Center(
-        child: Text('event.error.load_failed'.tr(),
-            style: TextStyle(color: context.appColors.text3)),
+        child: Text(
+          'event.error.load_failed'.tr(),
+          style: TextStyle(color: context.appColors.text3),
+        ),
       ),
       data: (obj) {
         final events = obj as IceHockeyMatchEventsData?;
@@ -569,10 +600,7 @@ class _TimeIndicator extends StatelessWidget {
         border: Border.all(color: colors.line),
       ),
       alignment: Alignment.center,
-      child: Text(
-        timeLabel,
-        style: AppTextStyles.mono(10).copyWith(color: colors.text3),
-      ),
+      child: Text(timeLabel, style: AppTextStyles.mono(10).copyWith(color: colors.text3)),
     );
   }
 }
@@ -606,13 +634,13 @@ class _IncidentCell extends StatelessWidget {
   final bool isHome;
 
   Color _incidentColor(AppColors colors) => switch (incident.type) {
-        2 => colors.accent,   // Goal
-        3 => colors.live,     // Penalty
-        8 => colors.danger,   // Penalty missed
-        9 => colors.text2,    // Penalty shootout
-        13 => colors.text3,   // Goal disallowed
-        _ => colors.text3,
-      };
+    2 => colors.accent, // Goal
+    3 => colors.live, // Penalty
+    8 => colors.danger, // Penalty missed
+    9 => colors.text2, // Penalty shootout
+    13 => colors.text3, // Goal disallowed
+    _ => colors.text3,
+  };
 
   String _scoreLabel() => '${incident.homeScore} - ${incident.awayScore}';
 
@@ -631,10 +659,9 @@ class _IncidentCell extends StatelessWidget {
               children: [
                 Text(
                   _scoreLabel(),
-                  style: AppTextStyles.mono(12).copyWith(
-                    color: colors.accent,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: AppTextStyles.mono(
+                    12,
+                  ).copyWith(color: colors.accent, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(width: 6),
                 badge,
@@ -646,10 +673,9 @@ class _IncidentCell extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   _scoreLabel(),
-                  style: AppTextStyles.mono(12).copyWith(
-                    color: colors.accent,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: AppTextStyles.mono(
+                    12,
+                  ).copyWith(color: colors.accent, fontWeight: FontWeight.w700),
                 ),
               ],
             ),

@@ -53,6 +53,7 @@ class BaseballMatchCard extends ConsumerWidget {
             matchTime: effective.matchTimeSim,
           ),
           const SizedBox(height: 12),
+          SportStatusBadge(label: label, isLive: isLive),
           // Scoreboard row
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -85,17 +86,7 @@ class BaseballMatchCard extends ConsumerWidget {
               // Center status
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'R',
-                      style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-                    ),
-                    const SizedBox(height: 4),
-                    SportStatusBadge(label: label, isLive: isLive),
-                  ],
-                ),
+                child: Text('–', style: AppTextStyles.display(22, context).copyWith(color: context.appColors.text3)),
               ),
               // Away score
               SizedBox(

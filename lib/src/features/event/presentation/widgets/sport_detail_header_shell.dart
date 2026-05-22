@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 
@@ -114,19 +115,15 @@ class _ArenaNavBar extends StatelessWidget {
         children: [
           // Back button
           GestureDetector(
-            onTap: () => Navigator.of(context).maybePop(),
+            onTap: () => context.pop(),
             child: Container(
-              width: 36,
-              height: 36,
+              margin: const EdgeInsets.all(8),
               decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
-                color: Colors.black.withValues(alpha: 0.35),
-                border: Border.all(
-                  color: colors.lineStrong,
-                  width: 0.5,
-                ),
+                border: Border.all(color: colors.lineStrong, width: 0.5),
               ),
-              child: Icon(Icons.chevron_left, size: 20, color: colors.text),
+              child: Icon(Icons.arrow_circle_left_outlined, color: Colors.white, size: 24),
             ),
           ),
 

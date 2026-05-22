@@ -123,6 +123,7 @@ class _TableTennisHeaderContent extends StatelessWidget {
     final isLive = effStatusId >= 3 && effStatusId < 100;
     final statusLabel = tableTennisStatusLabel(effStatusId, detail.statusDescription);
     final statusColor = isLive ? colors.live : colors.text3;
+    final scoreColor = isLive ? colors.accent : colors.text;
 
     return Column(
       children: [
@@ -159,30 +160,32 @@ class _TableTennisHeaderContent extends StatelessWidget {
                     child: Text(
                       statusLabel.toUpperCase(),
                       style: AppTextStyles.display(11, context).copyWith(
-                        color: const Color(0xFF0E0E0E),
+                        color: statusColor.computeLuminance() > 0.5 ? const Color(0xFF0E0E0E) : Colors.white,
                         letterSpacing: 0.1 * 11,
                       ),
                     ),
                   ),
                   const SizedBox(height: 10),
                   if (isNotStarted)
-                    Text('– –', style: AppTextStyles.display(40, context).copyWith(color: colors.text3))
+                    Text('– –', style: AppTextStyles.display(40, context).copyWith(color: scoreColor))
                   else
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('$homeTotal', style: AppTextStyles.display(48, context).copyWith(color: colors.text)),
+                        Text('$homeTotal', style: AppTextStyles.display(48, context).copyWith(color: scoreColor)),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Text(':', style: AppTextStyles.display(40, context).copyWith(color: colors.text3)),
+                          child:  Text(
+                            '–',
+                            style: AppTextStyles.display(
+                              22,
+                              context,
+                            ).copyWith(color: context.appColors.text3),
+                          ),
                         ),
-                        Text('$awayTotal', style: AppTextStyles.display(48, context).copyWith(color: colors.text)),
+                        Text('$awayTotal', style: AppTextStyles.display(48, context).copyWith(color: scoreColor)),
                       ],
                     ),
-                  if (homeSets.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    _ArenaSetGrid(homeSets: homeSets, awaySets: awaySets, statusId: effStatusId, colors: colors, context: context),
-                  ],
                 ],
               ),
             ),
@@ -205,57 +208,6 @@ class _TableTennisHeaderContent extends StatelessWidget {
           ],
         ),
       ],
-    );
-  }
-}
-
-class _ArenaSetGrid extends StatelessWidget {
-  const _ArenaSetGrid({
-    required this.homeSets,
-    required this.awaySets,
-    required this.statusId,
-    required this.colors,
-    required this.context,
-  });
-
-  final List<int> homeSets;
-  final List<int> awaySets;
-  final int statusId;
-  final AppColors colors;
-  final BuildContext context;
-
-  int? get _activeIdx {
-    switch (statusId) {
-      case 51: return 0;
-      case 52: return 1;
-      case 53: return 2;
-      case 54: return 3;
-      case 55: return 4;
-      case 472: return 5;
-      case 473: return 6;
-      default: return null;
-    }
-  }
-
-  @override
-  Widget build(BuildContext _) {
-    final activeIdx = _activeIdx;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(homeSets.length, (i) {
-        final isActive = i == activeIdx;
-        final color = isActive ? colors.accent : colors.text3;
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('${homeSets[i]}', style: AppTextStyles.mono(13).copyWith(color: color, fontWeight: isActive ? FontWeight.w700 : FontWeight.w400)),
-              Text('${awaySets[i]}', style: AppTextStyles.mono(13).copyWith(color: color, fontWeight: isActive ? FontWeight.w700 : FontWeight.w400)),
-            ],
-          ),
-        );
-      }),
     );
   }
 }
@@ -339,9 +291,27 @@ class _SetScoreTable extends StatelessWidget {
     final setCount = homeSets.length;
     final activeIdx = _activeSetIndex;
 
-    final setLabels = setCount > 0
-        ? List.generate(setCount, (i) => 'event.table_tennis.detail.set_n'.tr(namedArgs: {'n': '${i + 1}'}))
-        : ['event.table_tennis.detail.set_n'.tr(namedArgs: {'n': '1'})];
+    Widget teamHeader(String name, String logo) => Expanded(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SportLogo(url: logo, size: 18),
+          const SizedBox(width: 6),
+          Flexible(child: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTextStyles.body(12).copyWith(color: colors.text))),
+        ],
+      ),
+    );
+
+    Widget scoreCell(String value, {bool isActive = false, bool isBold = false}) => Expanded(
+      child: Text(
+        value,
+        textAlign: TextAlign.center,
+        style: AppTextStyles.mono(13).copyWith(
+          color: (isActive || isBold) ? colors.accent : colors.text2,
+          fontWeight: (isActive || isBold) ? FontWeight.w700 : FontWeight.w400,
+        ),
+      ),
+    );
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
@@ -354,86 +324,66 @@ class _SetScoreTable extends StatelessWidget {
           ),
           child: Column(
             children: [
+              // Header: [empty] [Home] [Away]
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 child: Row(
                   children: [
                     const Expanded(child: SizedBox()),
-                    ...List.generate(setLabels.length, (i) {
-                      final isActive = setCount > 0 && i == activeIdx;
-                      return Expanded(
-                        child: Text(
-                          setLabels[i].toUpperCase(),
-                          textAlign: TextAlign.center,
-                          style: AppTextStyles.mono(9).copyWith(
-                            color: isActive ? colors.accent : colors.text3,
-                            letterSpacing: 0.14 * 9,
-                          ),
-                        ),
-                      );
-                    }),
-                    Expanded(
-                      child: Text(
-                        'event.table_tennis.detail.total'.tr().toUpperCase(),
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.mono(9).copyWith(color: colors.text3, letterSpacing: 0.14 * 9),
-                      ),
-                    ),
+                    teamHeader(homeName, homeLogo),
+                    teamHeader(awayName, awayLogo),
                   ],
                 ),
               ),
               Divider(height: 1, thickness: 0.5, color: colors.line),
-              _PlayerRow(name: homeName, logo: homeLogo, setScores: setCount > 0 ? homeSets : [], total: homeTotal, activeIdx: activeIdx),
-              Divider(height: 1, thickness: 0.5, color: colors.line),
-              _PlayerRow(name: awayName, logo: awayLogo, setScores: setCount > 0 ? awaySets : [], total: awayTotal, activeIdx: activeIdx),
+              // One row per set
+              ...List.generate(setCount > 0 ? setCount : 1, (i) {
+                final isActive = setCount > 0 && i == activeIdx;
+                final hasScore = setCount > 0;
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'event.table_tennis.detail.set_n'.tr(namedArgs: {'n': '${i + 1}'}).toUpperCase(),
+                              style: AppTextStyles.mono(9).copyWith(
+                                color: isActive ? colors.accent : colors.text3,
+                                letterSpacing: 0.14 * 9,
+                              ),
+                            ),
+                          ),
+                          scoreCell(hasScore ? '${homeSets[i]}' : '—', isActive: isActive),
+                          scoreCell(hasScore ? '${awaySets[i]}' : '—', isActive: isActive),
+                        ],
+                      ),
+                    ),
+                    Divider(height: 1, thickness: 0.5, color: colors.line),
+                  ],
+                );
+              }),
+              // Total row
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'event.table_tennis.detail.total'.tr().toUpperCase(),
+                        style: AppTextStyles.mono(9).copyWith(color: colors.text3, letterSpacing: 0.14 * 9),
+                      ),
+                    ),
+                    scoreCell('$homeTotal', isBold: true),
+                    scoreCell('$awayTotal', isBold: true),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
       ],
-    );
-  }
-}
-
-class _PlayerRow extends StatelessWidget {
-  const _PlayerRow({required this.name, required this.logo, required this.setScores, required this.total, required this.activeIdx});
-
-  final String name, logo;
-  final List<int> setScores;
-  final int total;
-  final int? activeIdx;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.appColors;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      child: Row(
-        children: [
-          Expanded(
-            child: Row(
-              children: [
-                SportLogo(url: logo, size: 20),
-                const SizedBox(width: 6),
-                Flexible(child: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTextStyles.body(13).copyWith(color: colors.text))),
-              ],
-            ),
-          ),
-          ...List.generate(setScores.length, (i) {
-            final isActive = i == activeIdx;
-            return Expanded(
-              child: Text('${setScores[i]}', textAlign: TextAlign.center,
-                style: AppTextStyles.mono(13).copyWith(
-                  color: isActive ? colors.accent : colors.text2,
-                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
-                )),
-            );
-          }),
-          Expanded(
-            child: Text('$total', textAlign: TextAlign.center,
-              style: AppTextStyles.mono(14).copyWith(color: colors.accent, fontWeight: FontWeight.w700)),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -475,6 +425,8 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
         return Column(
           children: [
             Container(
+              alignment: Alignment.center,
+              width: double.maxFinite,
               color: colors.surface,
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
               child: SingleChildScrollView(

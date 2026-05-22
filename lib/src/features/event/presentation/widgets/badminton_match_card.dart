@@ -152,7 +152,7 @@ class _RallyRow extends StatelessWidget {
         const SizedBox(width: 12),
         // Game score or total sets
         SizedBox(
-          width: 30,
+          width: 50,
           child: Text(
             isNotStarted
                 ? '-'

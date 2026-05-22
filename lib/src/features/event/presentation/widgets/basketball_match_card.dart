@@ -106,6 +106,15 @@ class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
             matchTime: widget.match.matchTimeSim,
           ),
           const SizedBox(height: 12),
+          Center(
+            child: _StatusFooter(
+              isLive: isLive,
+              isUpcoming: isUpcoming,
+              periodLabel: effectivePeriodLabel,
+              clockDisplay: effectiveClockDisplay,
+              context: context,
+            ),
+          ),
           // Main scoreboard row
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -126,7 +135,7 @@ class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
                   ],
                 ),
               ),
-              // Scores + status
+              // Scores + hyphen
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
@@ -151,12 +160,12 @@ class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
                       ),
                     ),
                     const SizedBox(width: 8),
-                    _CenterStatus(
-                      isLive: isLive,
-                      isUpcoming: isUpcoming,
-                      periodLabel: effectivePeriodLabel,
-                      clockDisplay: effectiveClockDisplay,
-                      context: context,
+                    Text(
+                      '–',
+                      style: AppTextStyles.display(
+                        22,
+                        context,
+                      ).copyWith(color: context.appColors.text3),
                     ),
                     const SizedBox(width: 8),
                     AnimatedBuilder(
@@ -197,14 +206,16 @@ class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
               ),
             ],
           ),
+          // Status footer
+          const SizedBox(height: 8),
         ],
       ),
     );
   }
 }
 
-class _CenterStatus extends StatelessWidget {
-  const _CenterStatus({
+class _StatusFooter extends StatelessWidget {
+  const _StatusFooter({
     required this.isLive,
     required this.isUpcoming,
     required this.periodLabel,
@@ -221,7 +232,7 @@ class _CenterStatus extends StatelessWidget {
   @override
   Widget build(BuildContext ctx) {
     if (isLive) {
-      return Column(
+      return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (periodLabel != null && periodLabel!.isNotEmpty)
@@ -236,23 +247,23 @@ class _CenterStatus extends StatelessWidget {
                 style: AppTextStyles.mono(9).copyWith(color: context.appColors.ink),
               ),
             ),
-          if (clockDisplay != null && clockDisplay!.isNotEmpty) ...[
-            const SizedBox(height: 3),
-            Text(clockDisplay!, style: AppTextStyles.mono(10).copyWith(color: context.appColors.accent)),
+          if (clockDisplay != null && clockDisplay != '0' && clockDisplay!.isNotEmpty) ...[
+            const SizedBox(width: 6),
+            Text(
+              clockDisplay!,
+              style: AppTextStyles.mono(10).copyWith(color: context.appColors.accent),
+            ),
           ],
         ],
       );
     }
 
-    return Column(
+    return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text('–', style: AppTextStyles.display(22, context).copyWith(color: context.appColors.text3)),
-        const SizedBox(height: 2),
         Text(
           isUpcoming ? 'event.status.upcoming'.tr() : 'event.status.finished'.tr(),
           style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-          textAlign: TextAlign.center,
         ),
       ],
     );

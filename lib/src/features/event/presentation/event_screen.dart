@@ -712,101 +712,118 @@ class _LiveMatchCard extends StatelessWidget {
     final homeScore = int.tryParse(match.homeScore) ?? 0;
     final awayScore = int.tryParse(match.awayScore) ?? 0;
 
-    return Container(
-      width: 240,
-      height: 118,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: context.appColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: context.appColors.line, width: 0.5),
-      ),
-      child: Stack(
-        children: [
-          // Accent corner glow
-          Positioned(
-            top: -30,
-            right: -30,
-            child: Container(
-              width: 118,
-              height: 118,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [context.appColors.accent.withValues(alpha: 0.08), Colors.transparent],
+    return GestureDetector(
+      onTap: () {
+        final path = switch (sport) {
+          SportType.football => AppRoutes.footballMatchDetailPath(match.id),
+          SportType.basketball => AppRoutes.basketballMatchDetailPath(match.id),
+          SportType.tennis => AppRoutes.tennisMatchDetailPath(match.id),
+          SportType.cricket => AppRoutes.cricketMatchDetailPath(match.id),
+          SportType.baseball => AppRoutes.baseballMatchDetailPath(match.id),
+          SportType.volleyball => AppRoutes.volleyballMatchDetailPath(match.id),
+          SportType.badminton => AppRoutes.badmintonMatchDetailPath(match.id),
+          SportType.tableTennis => AppRoutes.tableTennisMatchDetailPath(match.id),
+          SportType.iceHockey => AppRoutes.iceHockeyMatchDetailPath(match.id),
+          SportType.amFootball => AppRoutes.amFootballMatchDetailPath(match.id),
+        };
+        context.push(path, extra: match);
+      },
+      child: Container(
+        width: 240,
+        height: 118,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: context.appColors.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: context.appColors.line, width: 0.5),
+        ),
+        child: Stack(
+          children: [
+            // Accent corner glow
+            Positioned(
+              top: -30,
+              right: -30,
+              child: Container(
+                width: 118,
+                height: 118,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [context.appColors.accent.withValues(alpha: 0.08), Colors.transparent],
+                  ),
                 ),
               ),
             ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top row: sport + league + live pulse
-              Row(
-                children: [
-                  Icon(_sportIcon(sport), size: 13, color: context.appColors.text2),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      match.leagueName.toUpperCase(),
-                      style: AppTextStyles.mono(
-                        9,
-                      ).copyWith(color: context.appColors.text2, letterSpacing: 9 * 0.16),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Top row: sport + league + live pulse
+                Row(
+                  children: [
+                    Icon(_sportIcon(sport), size: 13, color: context.appColors.text2),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        match.leagueName.toUpperCase(),
+                        style: AppTextStyles.mono(
+                          9,
+                        ).copyWith(color: context.appColors.text2, letterSpacing: 9 * 0.16),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                  _LivePulseBadge(liveMinute: () => match.liveMinute),
-                ],
-              ),
-              const Spacer(),
-              // Home team row
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      match.homeName.toUpperCase(),
-                      style: AppTextStyles.mono(13).copyWith(color: context.appColors.text),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    _LivePulseBadge(liveMinute: () => match.liveMinute),
+                  ],
+                ),
+                const Spacer(),
+                // Home team row
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        match.homeName.toUpperCase(),
+                        style: AppTextStyles.mono(13).copyWith(color: context.appColors.text),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    match.homeScore,
-                    style: AppTextStyles.display(
-                      22,
-                      context,
-                    ).copyWith(color: context.appColors.text),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              // Away team row
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      match.awayName.toUpperCase(),
-                      style: AppTextStyles.mono(13).copyWith(color: context.appColors.text),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    const SizedBox(width: 8),
+                    Text(
+                      match.homeScore,
+                      style: AppTextStyles.display(
+                        22,
+                        context,
+                      ).copyWith(color: context.appColors.text),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    match.awayScore,
-                    style: AppTextStyles.display(22, context).copyWith(
-                      color: awayScore > homeScore
-                          ? context.appColors.accent
-                          : context.appColors.text,
+                  ],
+                ),
+                const SizedBox(height: 6),
+                // Away team row
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        match.awayName.toUpperCase(),
+                        style: AppTextStyles.mono(13).copyWith(color: context.appColors.text),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
+                    const SizedBox(width: 8),
+                    Text(
+                      match.awayScore,
+                      style: AppTextStyles.display(22, context).copyWith(
+                        color: awayScore > homeScore
+                            ? context.appColors.accent
+                            : context.appColors.text,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -954,26 +971,7 @@ class _EditorialHeroCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _Chip(label: '● ${_featuredLabel(context)}', accent: true),
-                            Container(
-                              width: 34,
-                              height: 34,
-                              decoration: BoxDecoration(
-                                color: const Color(0x800E0E0E),
-                                shape: BoxShape.circle,
-                                border: Border.all(color: context.appColors.lineStrong, width: 0.5),
-                              ),
-                              child: Icon(
-                                Icons.play_arrow,
-                                color: context.appColors.text,
-                                size: 14,
-                              ),
-                            ),
-                          ],
-                        ),
+                        _Chip(label: '● ${_featuredLabel(context)}', accent: true),
                         const Spacer(),
                         Text(
                           article.description.isNotEmpty ? article.description.toUpperCase() : '',

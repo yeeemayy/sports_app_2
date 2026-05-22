@@ -224,7 +224,7 @@ class _ScoreBlock extends StatelessWidget {
                   child: Text(
                     statusLabel.toUpperCase(),
                     style: AppTextStyles.display(11, context).copyWith(
-                      color: const Color(0xFF0E0E0E),
+                      color: statusColor.computeLuminance() > 0.5 ? const Color(0xFF0E0E0E) : Colors.white,
                       letterSpacing: 0.1 * 11,
                     ),
                   ),
@@ -240,26 +240,27 @@ class _ScoreBlock extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
                 children: [
                   Text(
                     homeScore,
                     style: AppTextStyles.display(56, context)
-                        .copyWith(color: colors.text),
+                        .copyWith(color: statusColor == colors.live ? colors.accent : statusColor),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     child: Text(
-                      ':',
-                      style: AppTextStyles.display(28, context)
-                          .copyWith(color: colors.text3),
+                      '–',
+                      style: AppTextStyles.display(
+                        22,
+                        context,
+                      ).copyWith(color: context.appColors.text3),
                     ),
                   ),
                   Text(
                     awayScore,
                     style: AppTextStyles.display(56, context)
-                        .copyWith(color: colors.text),
+                        .copyWith(color: statusColor == colors.live ? colors.accent : statusColor),
                   ),
                 ],
               ),
@@ -753,6 +754,7 @@ class _TeamSquadList extends ConsumerWidget {
           );
         }
         return ListView.builder(
+          padding: EdgeInsets.symmetric(vertical: 10),
           itemCount: players.length,
           itemBuilder: (context, i) =>
               _PlayerRow(player: players[i], colors: colors, context: context),

@@ -116,6 +116,7 @@ class _VolleyballHeaderContent extends StatelessWidget {
     final isLive = liveStatuses.contains(effStatusId);
     final statusLabel = volleyballStatusLabel(effStatusId, detail.statusDescription);
     final statusColor = isLive ? colors.live : colors.text3;
+    final scoreColor = isLive ? colors.accent : colors.text3;
 
     return Column(
       children: [
@@ -152,24 +153,24 @@ class _VolleyballHeaderContent extends StatelessWidget {
                     child: Text(
                       statusLabel.toUpperCase(),
                       style: AppTextStyles.display(11, context).copyWith(
-                        color: const Color(0xFF0E0E0E),
+                        color: statusColor.computeLuminance() > 0.5 ? const Color(0xFF0E0E0E) : Colors.white,
                         letterSpacing: 0.1 * 11,
                       ),
                     ),
                   ),
                   const SizedBox(height: 10),
                   if (isNotStarted)
-                    Text('– –', style: AppTextStyles.display(40, context).copyWith(color: colors.text3))
+                    Text('– –', style: AppTextStyles.display(40, context).copyWith(color: scoreColor))
                   else
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('$homeTotal', style: AppTextStyles.display(56, context).copyWith(color: colors.text)),
+                        Text('$homeTotal', style: AppTextStyles.display(56, context).copyWith(color: scoreColor)),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: Text(':', style: AppTextStyles.display(48, context).copyWith(color: colors.text3)),
                         ),
-                        Text('$awayTotal', style: AppTextStyles.display(56, context).copyWith(color: colors.text)),
+                        Text('$awayTotal', style: AppTextStyles.display(56, context).copyWith(color: scoreColor)),
                       ],
                     ),
                 ],

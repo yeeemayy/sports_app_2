@@ -288,7 +288,10 @@ class _ScoreRow extends StatelessWidget {
                       style: AppTextStyles.display(
                         11,
                         context,
-                      ).copyWith(color: const Color(0xFF0E0E0E), letterSpacing: 0.1 * 11),
+                      ).copyWith(
+                        color: statusColor.computeLuminance() > 0.5 ? const Color(0xFF0E0E0E) : Colors.white,
+                        letterSpacing: 0.1 * 11,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -299,7 +302,7 @@ class _ScoreRow extends StatelessWidget {
                     children: [
                       Text(
                         homeScore,
-                        style: AppTextStyles.display(56, context).copyWith(color: colors.text),
+                        style: AppTextStyles.display(56, context).copyWith(color: statusColor == colors.live ? colors.accent : statusColor),
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -310,7 +313,7 @@ class _ScoreRow extends StatelessWidget {
                       ),
                       Text(
                         awayScore,
-                        style: AppTextStyles.display(56, context).copyWith(color: colors.text),
+                        style: AppTextStyles.display(56, context).copyWith(color: statusColor == colors.live ? colors.accent : statusColor),
                       ),
                     ],
                   ),

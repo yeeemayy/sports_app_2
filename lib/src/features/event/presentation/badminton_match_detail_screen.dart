@@ -37,17 +37,14 @@ class _BadmintonMatchDetailScreenState
 
   @override
   (String?, int?) watchDetail() {
-    final v = ref.watch(matchDetailProvider(sport: SportType.badminton, matchId: matchId))
-        .valueOrNull as BadmintonMatchDetail?;
+    final v =
+        ref.watch(matchDetailProvider(sport: SportType.badminton, matchId: matchId)).valueOrNull
+            as BadmintonMatchDetail?;
     return (v?.leagueName, v?.matchTime);
   }
 
   @override
-  Widget buildHeader(
-    BuildContext context, {
-    String? leagueName,
-    int? matchTimestamp,
-  }) =>
+  Widget buildHeader(BuildContext context, {String? leagueName, int? matchTimestamp}) =>
       _BadmintonMatchHeader(
         matchId: matchId,
         leagueName: leagueName,
@@ -70,11 +67,7 @@ class _BadmintonMatchDetailScreenState
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 class _BadmintonMatchHeader extends ConsumerWidget {
-  const _BadmintonMatchHeader({
-    required this.matchId,
-    this.leagueName,
-    this.matchTimestamp,
-  });
+  const _BadmintonMatchHeader({required this.matchId, this.leagueName, this.matchTimestamp});
 
   final String matchId;
   final String? leagueName;
@@ -82,10 +75,16 @@ class _BadmintonMatchHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.badminton, matchId: matchId));
-    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.badminton, matchId: matchId));
+    final detailAsync = ref.watch(
+      matchDetailProvider(sport: SportType.badminton, matchId: matchId),
+    );
+    final eventsAsync = ref.watch(
+      matchEventsProvider(sport: SportType.badminton, matchId: matchId),
+    );
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.badminton).select((map) => map[matchId] as BadmintonRealtimeData?),
+      sportRealtimeProvider(
+        SportType.badminton,
+      ).select((map) => map[matchId] as BadmintonRealtimeData?),
     );
 
     return SportDetailHeaderShell<BadmintonMatchDetail>(
@@ -123,6 +122,7 @@ class _BadmintonHeaderContent extends StatelessWidget {
     final isLive = effStatusId >= 3 && effStatusId < 100;
     final statusLabel = badmintonStatusLabel(effStatusId, detail.statusDescription);
     final statusColor = isLive ? colors.live : colors.text3;
+    final scoreColor = isLive ? colors.accent : colors.text3;
 
     return Column(
       children: [
@@ -159,36 +159,40 @@ class _BadmintonHeaderContent extends StatelessWidget {
                     child: Text(
                       statusLabel.toUpperCase(),
                       style: AppTextStyles.display(11, context).copyWith(
-                        color: const Color(0xFF0E0E0E),
+                        color: statusColor.computeLuminance() > 0.5
+                            ? const Color(0xFF0E0E0E)
+                            : Colors.white,
                         letterSpacing: 0.1 * 11,
                       ),
                     ),
                   ),
                   const SizedBox(height: 10),
                   if (isNotStarted)
-                    Text('– –', style: AppTextStyles.display(40, context).copyWith(color: colors.text3))
+                    Text(
+                      '– –',
+                      style: AppTextStyles.display(40, context).copyWith(color: scoreColor),
+                    )
                   else
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('$homeTotal', style: AppTextStyles.display(48, context).copyWith(color: colors.text)),
+                        Text(
+                          '$homeTotal',
+                          style: AppTextStyles.display(48, context).copyWith(color: scoreColor),
+                        ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Text(':', style: AppTextStyles.display(40, context).copyWith(color: colors.text3)),
+                          child: Text(
+                            ':',
+                            style: AppTextStyles.display(40, context).copyWith(color: colors.text3),
+                          ),
                         ),
-                        Text('$awayTotal', style: AppTextStyles.display(48, context).copyWith(color: colors.text)),
+                        Text(
+                          '$awayTotal',
+                          style: AppTextStyles.display(48, context).copyWith(color: scoreColor),
+                        ),
                       ],
                     ),
-                  if (homeSets.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    _ArenaSetGrid(
-                      homeSets: homeSets,
-                      awaySets: awaySets,
-                      statusId: effStatusId,
-                      colors: colors,
-                      context: context,
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -215,55 +219,6 @@ class _BadmintonHeaderContent extends StatelessWidget {
   }
 }
 
-class _ArenaSetGrid extends StatelessWidget {
-  const _ArenaSetGrid({
-    required this.homeSets,
-    required this.awaySets,
-    required this.statusId,
-    required this.colors,
-    required this.context,
-  });
-
-  final List<int> homeSets;
-  final List<int> awaySets;
-  final int statusId;
-  final AppColors colors;
-  final BuildContext context;
-
-  int? get _activeIdx {
-    switch (statusId) {
-      case 51: return 0;
-      case 52: return 1;
-      case 53: return 2;
-      case 54: return 3;
-      case 55: return 4;
-      default: return null;
-    }
-  }
-
-  @override
-  Widget build(BuildContext _) {
-    final activeIdx = _activeIdx;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(homeSets.length, (i) {
-        final isActive = i == activeIdx;
-        final color = isActive ? colors.accent : colors.text3;
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('${homeSets[i]}', style: AppTextStyles.mono(13).copyWith(color: color, fontWeight: isActive ? FontWeight.w700 : FontWeight.w400)),
-              Text('${awaySets[i]}', style: AppTextStyles.mono(13).copyWith(color: color, fontWeight: isActive ? FontWeight.w700 : FontWeight.w400)),
-            ],
-          ),
-        );
-      }),
-    );
-  }
-}
-
 // ─── Score Tab ────────────────────────────────────────────────────────────────
 
 class _ScoreTab extends ConsumerWidget {
@@ -273,15 +228,26 @@ class _ScoreTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.badminton, matchId: matchId));
-    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.badminton, matchId: matchId));
+    final detailAsync = ref.watch(
+      matchDetailProvider(sport: SportType.badminton, matchId: matchId),
+    );
+    final eventsAsync = ref.watch(
+      matchEventsProvider(sport: SportType.badminton, matchId: matchId),
+    );
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.badminton).select((map) => map[matchId] as BadmintonRealtimeData?),
+      sportRealtimeProvider(
+        SportType.badminton,
+      ).select((map) => map[matchId] as BadmintonRealtimeData?),
     );
 
     return detailAsync.when(
       loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
-      error: (_, __) => Center(child: Text('event.error.load_failed'.tr(), style: AppTextStyles.body(13).copyWith(color: context.appColors.text3))),
+      error: (_, __) => Center(
+        child: Text(
+          'event.error.load_failed'.tr(),
+          style: AppTextStyles.body(13).copyWith(color: context.appColors.text3),
+        ),
+      ),
       data: (obj) {
         final detail = obj as BadmintonMatchDetail;
         final ev = eventsAsync.valueOrNull as BadmintonMatchEventsData?;
@@ -338,12 +304,18 @@ class _SetScoreTable extends StatelessWidget {
 
   int? get _activeSetIndex {
     switch (statusId) {
-      case 51: return 0;
-      case 52: return 1;
-      case 53: return 2;
-      case 54: return 3;
-      case 55: return 4;
-      default: return null;
+      case 51:
+        return 0;
+      case 52:
+        return 1;
+      case 53:
+        return 2;
+      case 54:
+        return 3;
+      case 55:
+        return 4;
+      default:
+        return null;
     }
   }
 
@@ -395,16 +367,30 @@ class _SetScoreTable extends StatelessWidget {
                       child: Text(
                         totalKey.tr().toUpperCase(),
                         textAlign: TextAlign.center,
-                        style: AppTextStyles.mono(9).copyWith(color: colors.text3, letterSpacing: 0.14 * 9),
+                        style: AppTextStyles.mono(
+                          9,
+                        ).copyWith(color: colors.text3, letterSpacing: 0.14 * 9),
                       ),
                     ),
                   ],
                 ),
               ),
               Divider(height: 1, thickness: 0.5, color: colors.line),
-              _PlayerRow(name: homeName, logo: homeLogo, setScores: effectiveHomeSets, total: homeTotal, activeIdx: activeIdx),
+              _PlayerRow(
+                name: homeName,
+                logo: homeLogo,
+                setScores: effectiveHomeSets,
+                total: homeTotal,
+                activeIdx: activeIdx,
+              ),
               Divider(height: 1, thickness: 0.5, color: colors.line),
-              _PlayerRow(name: awayName, logo: awayLogo, setScores: effectiveAwaySets, total: awayTotal, activeIdx: activeIdx),
+              _PlayerRow(
+                name: awayName,
+                logo: awayLogo,
+                setScores: effectiveAwaySets,
+                total: awayTotal,
+                activeIdx: activeIdx,
+              ),
             ],
           ),
         ),
@@ -441,25 +427,37 @@ class _PlayerRow extends StatelessWidget {
                 SportLogo(url: logo, size: 20),
                 const SizedBox(width: 6),
                 Flexible(
-                  child: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.body(13).copyWith(color: colors.text)),
+                  child: Text(
+                    name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.body(13).copyWith(color: colors.text),
+                  ),
                 ),
               ],
             ),
           ),
-          ...List.generate(setScores.length, (i) {
+          ...List.generate(setScores.isNotEmpty ? setScores.length : 2, (i) {
             final isActive = i == activeIdx;
             return Expanded(
-              child: Text('${setScores[i]}', textAlign: TextAlign.center,
+              child: Text(
+                setScores.isNotEmpty ? '${setScores[i]}' : '-',
+                textAlign: TextAlign.center,
                 style: AppTextStyles.mono(13).copyWith(
                   color: isActive ? colors.accent : colors.text2,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
-                )),
+                ),
+              ),
             );
           }),
           Expanded(
-            child: Text('$total', textAlign: TextAlign.center,
-              style: AppTextStyles.mono(14).copyWith(color: colors.accent, fontWeight: FontWeight.w700)),
+            child: Text(
+              '$total',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.mono(
+                14,
+              ).copyWith(color: colors.accent, fontWeight: FontWeight.w700),
+            ),
           ),
         ],
       ),
@@ -482,15 +480,27 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
-    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.badminton, matchId: widget.matchId));
+    final eventsAsync = ref.watch(
+      matchEventsProvider(sport: SportType.badminton, matchId: widget.matchId),
+    );
 
     return eventsAsync.when(
       loading: () => Center(child: CircularProgressIndicator(color: colors.accent)),
-      error: (_, __) => Center(child: Text('event.error.load_failed'.tr(), style: AppTextStyles.body(13).copyWith(color: colors.text3))),
+      error: (_, __) => Center(
+        child: Text(
+          'event.error.load_failed'.tr(),
+          style: AppTextStyles.body(13).copyWith(color: colors.text3),
+        ),
+      ),
       data: (obj) {
         final events = obj as BadmintonMatchEventsData?;
         if (events == null || events.statSets.isEmpty) {
-          return Center(child: Text('event.badminton.detail.no_stats'.tr(), style: AppTextStyles.body(13).copyWith(color: colors.text3)));
+          return Center(
+            child: Text(
+              'event.badminton.detail.no_stats'.tr(),
+              style: AppTextStyles.body(13).copyWith(color: colors.text3),
+            ),
+          );
         }
 
         final setIndices = events.statSets.map((s) => s.setIndex).toSet().toList()..sort();
@@ -499,12 +509,17 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
           if (idx == 0) return 'event.badminton.detail.overall'.tr();
           return 'event.badminton.detail.set_n'.tr(namedArgs: {'n': '$idx'});
         }).toList();
-        final stats = events.statSets.where((s) => s.setIndex == setIndices[safeIdx]).expand((s) => s.stats).toList();
+        final stats = events.statSets
+            .where((s) => s.setIndex == setIndices[safeIdx])
+            .expand((s) => s.stats)
+            .toList();
 
         return Column(
           children: [
             Container(
+              width: double.maxFinite,
               color: colors.surface,
+              alignment: Alignment.center,
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -537,7 +552,12 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
             Divider(height: 1, thickness: 0.5, color: colors.line),
             Expanded(
               child: stats.isEmpty
-                  ? Center(child: Text('event.badminton.detail.no_stats'.tr(), style: AppTextStyles.body(13).copyWith(color: colors.text3)))
+                  ? Center(
+                      child: Text(
+                        'event.badminton.detail.no_stats'.tr(),
+                        style: AppTextStyles.body(13).copyWith(color: colors.text3),
+                      ),
+                    )
                   : ListView.builder(
                       padding: const EdgeInsets.only(bottom: 20),
                       itemCount: stats.length,
@@ -545,7 +565,9 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                         final stat = stats[i];
                         final home = stat.homeValue.isNaN ? 0.0 : stat.homeValue.abs();
                         final away = stat.awayValue.isNaN ? 0.0 : stat.awayValue.abs();
-                        final label = stat.labelKey.isNotEmpty ? stat.labelKey.tr() : '${stat.typeCode}';
+                        final label = stat.labelKey.isNotEmpty
+                            ? stat.labelKey.tr()
+                            : '${stat.typeCode}';
                         return ArenaStatBar(label: label, home: home, away: away);
                       },
                     ),

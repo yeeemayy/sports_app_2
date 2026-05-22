@@ -93,19 +93,9 @@ class IceHockeyMatchCard extends ConsumerWidget {
               context: context,
             ),
           ] else ...[
-            // Not started: face-off header
-            Row(
-              children: [
-                Flexible(child: _TeamLabel(logo: match.homeLogo, name: match.homeName)),
-                const Spacer(),
-                Text(
-                  match.matchTimeSim,
-                  style: AppTextStyles.display(18, context).copyWith(color: context.appColors.text3),
-                ),
-                const Spacer(),
-                Flexible(child: _TeamLabel(logo: match.awayLogo, name: match.awayName, rightAlign: true)),
-              ],
-            ),
+            _NotStartedTeamRow(logo: match.homeLogo, name: match.homeName, context: context),
+            const SizedBox(height: 6),
+            _NotStartedTeamRow(logo: match.awayLogo, name: match.awayName, context: context),
           ],
           // Status badge
           if (statusLabel.isNotEmpty) ...[
@@ -128,7 +118,7 @@ class _GridHeaderRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const SizedBox(width: 90), // team column width
+        Spacer(),
         ...List.generate(_labels.length, (i) {
           final isActive = i == activePeriod;
           return _GridCell(
@@ -169,8 +159,7 @@ class _GridTeamRow extends StatelessWidget {
   Widget build(BuildContext ctx) {
     return Row(
       children: [
-        SizedBox(
-          width: 90,
+        Expanded(
           child: Row(
             children: [
               SportLogo(url: logo, size: 24, circular: true),
@@ -236,27 +225,36 @@ class _GridCell extends StatelessWidget {
   }
 }
 
-class _TeamLabel extends StatelessWidget {
-  const _TeamLabel({required this.logo, required this.name, this.rightAlign = false});
+class _NotStartedTeamRow extends StatelessWidget {
+  const _NotStartedTeamRow({required this.logo, required this.name, required this.context});
   final String logo;
   final String name;
-  final bool rightAlign;
+  final BuildContext context;
 
   @override
-  Widget build(BuildContext context) {
-    final children = [
-      SportLogo(url: logo, size: 28, circular: true),
-      const SizedBox(width: 6),
-      Flexible(
-        child: Text(
-          name,
-          style: AppTextStyles.mono(11).copyWith(color: context.appColors.text2),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          textAlign: rightAlign ? TextAlign.right : TextAlign.left,
+  Widget build(BuildContext ctx) {
+    return Row(
+      children: [
+        SportLogo(url: logo, size: 24, circular: true),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            name,
+            style: AppTextStyles.mono(11).copyWith(color: context.appColors.text),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
-      ),
-    ];
-    return Row(children: rightAlign ? children.reversed.toList() : children);
+        const SizedBox(width: 10),
+        SizedBox(
+          width: 22,
+          child: Text(
+            '-',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.display(20, context).copyWith(color: context.appColors.text3),
+          ),
+        ),
+      ],
+    );
   }
 }

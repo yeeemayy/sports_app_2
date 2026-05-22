@@ -24,8 +24,7 @@ class TennisMatchDetailScreen extends ConsumerStatefulWidget {
   ConsumerState<TennisMatchDetailScreen> createState() => _TennisMatchDetailScreenState();
 }
 
-class _TennisMatchDetailScreenState
-    extends SportDetailScaffoldState<TennisMatchDetailScreen> {
+class _TennisMatchDetailScreenState extends SportDetailScaffoldState<TennisMatchDetailScreen> {
   @override
   String get matchId => widget.matchId;
 
@@ -37,22 +36,15 @@ class _TennisMatchDetailScreenState
 
   @override
   (String?, int?) watchDetail() {
-    final v = ref.watch(matchDetailProvider(sport: SportType.tennis, matchId: matchId))
-        .valueOrNull as TennisMatchDetail?;
+    final v =
+        ref.watch(matchDetailProvider(sport: SportType.tennis, matchId: matchId)).valueOrNull
+            as TennisMatchDetail?;
     return (v?.leagueName, v?.matchTime);
   }
 
   @override
-  Widget buildHeader(
-    BuildContext context, {
-    String? leagueName,
-    int? matchTimestamp,
-  }) =>
-      _TennisMatchHeader(
-        matchId: matchId,
-        leagueName: leagueName,
-        matchTimestamp: matchTimestamp,
-      );
+  Widget buildHeader(BuildContext context, {String? leagueName, int? matchTimestamp}) =>
+      _TennisMatchHeader(matchId: matchId, leagueName: leagueName, matchTimestamp: matchTimestamp);
 
   @override
   List<Tab> buildTabs(BuildContext context) => [
@@ -72,11 +64,7 @@ class _TennisMatchDetailScreenState
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 class _TennisMatchHeader extends ConsumerWidget {
-  const _TennisMatchHeader({
-    required this.matchId,
-    this.leagueName,
-    this.matchTimestamp,
-  });
+  const _TennisMatchHeader({required this.matchId, this.leagueName, this.matchTimestamp});
 
   final String matchId;
   final String? leagueName;
@@ -129,6 +117,7 @@ class _TennisHeaderContent extends StatelessWidget {
 
     final statusLabel = tennisStatusLabel(effStatusId, detail.statusDescription);
     final statusColor = _tennisStatusColor(effStatusId, colors);
+    final scoreColor = isLive ? colors.accent : colors.text3;
 
     return Column(
       children: [
@@ -155,8 +144,7 @@ class _TennisHeaderContent extends StatelessWidget {
                           textAlign: TextAlign.center,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.display(12, context)
-                              .copyWith(color: colors.text),
+                          style: AppTextStyles.display(12, context).copyWith(color: colors.text),
                         ),
                       ),
                     ],
@@ -179,7 +167,9 @@ class _TennisHeaderContent extends StatelessWidget {
                     child: Text(
                       statusLabel.toUpperCase(),
                       style: AppTextStyles.display(11, context).copyWith(
-                        color: const Color(0xFF0E0E0E),
+                        color: statusColor.computeLuminance() > 0.5
+                            ? const Color(0xFF0E0E0E)
+                            : Colors.white,
                         letterSpacing: 0.1 * 11,
                       ),
                     ),
@@ -188,8 +178,7 @@ class _TennisHeaderContent extends StatelessWidget {
                   if (isNotStarted)
                     Text(
                       '–  –',
-                      style: AppTextStyles.display(40, context)
-                          .copyWith(color: colors.text3),
+                      style: AppTextStyles.display(40, context).copyWith(color: scoreColor),
                     )
                   else
                     Row(
@@ -198,34 +187,24 @@ class _TennisHeaderContent extends StatelessWidget {
                       children: [
                         Text(
                           '$homeTotal',
-                          style: AppTextStyles.display(48, context)
-                              .copyWith(color: colors.text),
+                          style: AppTextStyles.display(48, context).copyWith(color: scoreColor),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: Text(
-                            ':',
-                            style: AppTextStyles.display(40, context)
-                                .copyWith(color: colors.text3),
+                            '–',
+                            style: AppTextStyles.display(
+                              22,
+                              context,
+                            ).copyWith(color: context.appColors.text3),
                           ),
                         ),
                         Text(
                           '$awayTotal',
-                          style: AppTextStyles.display(48, context)
-                              .copyWith(color: colors.text),
+                          style: AppTextStyles.display(48, context).copyWith(color: scoreColor),
                         ),
                       ],
                     ),
-                  if (homeSets.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    _ArenaSetScoreGrid(
-                      homeSets: homeSets,
-                      awaySets: awaySets,
-                      statusId: effStatusId,
-                      colors: colors,
-                      context: context,
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -245,8 +224,7 @@ class _TennisHeaderContent extends StatelessWidget {
                           textAlign: TextAlign.center,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.display(12, context)
-                              .copyWith(color: colors.text),
+                          style: AppTextStyles.display(12, context).copyWith(color: colors.text),
                         ),
                       ),
                       if (isLive && servingSide == 2) ...[
@@ -271,69 +249,6 @@ Color _tennisStatusColor(int statusId, AppColors colors) {
   return colors.text3;
 }
 
-class _ArenaSetScoreGrid extends StatelessWidget {
-  const _ArenaSetScoreGrid({
-    required this.homeSets,
-    required this.awaySets,
-    required this.statusId,
-    required this.colors,
-    required this.context,
-  });
-
-  final List<int> homeSets;
-  final List<int> awaySets;
-  final int statusId;
-  final AppColors colors;
-  final BuildContext context;
-
-  int? get _activeSetIndex {
-    switch (statusId) {
-      case 51: return 0;
-      case 52: return 1;
-      case 53: return 2;
-      case 54: return 3;
-      case 55: return 4;
-      default: return null;
-    }
-  }
-
-  @override
-  Widget build(BuildContext _) {
-    final activeIdx = _activeSetIndex;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(homeSets.length, (i) {
-        final isActive = i == activeIdx;
-        final color = isActive ? colors.accent : colors.text3;
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '${homeSets[i]}',
-                style: AppTextStyles.mono(13).copyWith(
-                  color: color,
-                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
-                ),
-              ),
-              Text(
-                '${awaySets[i]}',
-                style: AppTextStyles.mono(13).copyWith(
-                  color: color,
-                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
-                ),
-              ),
-            ],
-          ),
-        );
-      }),
-    );
-  }
-}
-
-// ─── Score Tab ────────────────────────────────────────────────────────────────
-
 class _ScoreTab extends ConsumerWidget {
   const _ScoreTab({required this.matchId});
 
@@ -350,24 +265,22 @@ class _ScoreTab extends ConsumerWidget {
     return detailAsync.when(
       loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
       error: (_, __) => Center(
-        child: Text('event.error.load_failed'.tr(), style: AppTextStyles.body(13).copyWith(color: context.appColors.text3)),
+        child: Text(
+          'event.error.load_failed'.tr(),
+          style: AppTextStyles.body(13).copyWith(color: context.appColors.text3),
+        ),
       ),
       data: (obj) {
         final detail = obj as TennisMatchDetail;
         final ev = eventsAsync.valueOrNull as TennisMatchEventsData?;
         final effStatusId = ev?.statusId ?? rt?.statusId ?? detail.statusId;
-        final homeSets =
-            ev?.homeSets ?? rt?.homeSets ?? detail.homeInfo.setSores;
-        final awaySets =
-            ev?.awaySets ?? rt?.awaySets ?? detail.awayInfo.setSores;
-        final homeTotal =
-            ev?.homeTotal ?? rt?.homeTotal ?? detail.homeInfo.totalScore;
-        final awayTotal =
-            ev?.awayTotal ?? rt?.awayTotal ?? detail.awayInfo.totalScore;
+        final homeSets = ev?.homeSets ?? rt?.homeSets ?? detail.homeInfo.setSores;
+        final awaySets = ev?.awaySets ?? rt?.awaySets ?? detail.awayInfo.setSores;
+        final homeTotal = ev?.homeTotal ?? rt?.homeTotal ?? detail.homeInfo.totalScore;
+        final awayTotal = ev?.awayTotal ?? rt?.awayTotal ?? detail.awayInfo.totalScore;
         final homePt = ev?.homePt ?? rt?.homePt ?? detail.homePt ?? '';
         final awayPt = ev?.awayPt ?? rt?.awayPt ?? detail.awayPt ?? '';
-        final servingSide =
-            ev?.servingSide ?? rt?.servingSide ?? detail.servingSide ?? 0;
+        final servingSide = ev?.servingSide ?? rt?.servingSide ?? detail.servingSide ?? 0;
 
         return _SetScoreTable(
           statusId: effStatusId,
@@ -465,10 +378,9 @@ class _SetScoreTable extends StatelessWidget {
                       child: Text(
                         s1Label.toUpperCase(),
                         textAlign: TextAlign.center,
-                        style: AppTextStyles.mono(9).copyWith(
-                          color: colors.text3,
-                          letterSpacing: 0.14 * 9,
-                        ),
+                        style: AppTextStyles.mono(
+                          9,
+                        ).copyWith(color: colors.text3, letterSpacing: 0.14 * 9),
                       ),
                     ),
                     SizedBox(
@@ -476,10 +388,9 @@ class _SetScoreTable extends StatelessWidget {
                       child: Text(
                         s2Label.toUpperCase(),
                         textAlign: TextAlign.center,
-                        style: AppTextStyles.mono(9).copyWith(
-                          color: colors.text3,
-                          letterSpacing: 0.14 * 9,
-                        ),
+                        style: AppTextStyles.mono(
+                          9,
+                        ).copyWith(color: colors.text3, letterSpacing: 0.14 * 9),
                       ),
                     ),
                     SizedBox(
@@ -487,10 +398,9 @@ class _SetScoreTable extends StatelessWidget {
                       child: Text(
                         ftLabel.toUpperCase(),
                         textAlign: TextAlign.center,
-                        style: AppTextStyles.mono(9).copyWith(
-                          color: colors.text3,
-                          letterSpacing: 0.14 * 9,
-                        ),
+                        style: AppTextStyles.mono(
+                          9,
+                        ).copyWith(color: colors.text3, letterSpacing: 0.14 * 9),
                       ),
                     ),
                   ],
@@ -566,20 +476,18 @@ class _SetScoreTable extends StatelessWidget {
                         child: Text(
                           'event.tennis.detail.pt'.tr().toUpperCase(),
                           textAlign: TextAlign.center,
-                          style: AppTextStyles.mono(9).copyWith(
-                            color: colors.accent,
-                            letterSpacing: 0.14 * 9,
-                          ),
+                          style: AppTextStyles.mono(
+                            9,
+                          ).copyWith(color: colors.accent, letterSpacing: 0.14 * 9),
                         ),
                       ),
                     Expanded(
                       child: Text(
                         'event.tennis.detail.total'.tr().toUpperCase(),
                         textAlign: TextAlign.center,
-                        style: AppTextStyles.mono(9).copyWith(
-                          color: colors.text3,
-                          letterSpacing: 0.14 * 9,
-                        ),
+                        style: AppTextStyles.mono(
+                          9,
+                        ).copyWith(color: colors.text3, letterSpacing: 0.14 * 9),
                       ),
                     ),
                   ],
@@ -634,7 +542,8 @@ class _PlayerScoreRow extends StatelessWidget {
           Expanded(
             child: Text(
               name,
-              maxLines: 1,
+              maxLines: 2,
+              textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.body(13).copyWith(color: colors.text),
             ),
@@ -657,20 +566,18 @@ class _PlayerScoreRow extends StatelessWidget {
               child: Text(
                 ptScore!,
                 textAlign: TextAlign.center,
-                style: AppTextStyles.mono(13).copyWith(
-                  color: colors.accent,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: AppTextStyles.mono(
+                  13,
+                ).copyWith(color: colors.accent, fontWeight: FontWeight.w700),
               ),
             ),
           Expanded(
             child: Text(
               '$total',
               textAlign: TextAlign.center,
-              style: AppTextStyles.mono(14).copyWith(
-                color: colors.accent,
-                fontWeight: FontWeight.w700,
-              ),
+              style: AppTextStyles.mono(
+                14,
+              ).copyWith(color: colors.accent, fontWeight: FontWeight.w700),
             ),
           ),
         ],
@@ -713,10 +620,7 @@ class _BasicPlayerRow extends StatelessWidget {
                         child: Container(
                           width: 8,
                           height: 8,
-                          decoration: BoxDecoration(
-                            color: colors.accent,
-                            shape: BoxShape.circle,
-                          ),
+                          decoration: BoxDecoration(color: colors.accent, shape: BoxShape.circle),
                         ),
                       ),
                   ],
@@ -746,10 +650,9 @@ class _BasicPlayerRow extends StatelessWidget {
             child: Text(
               '$total',
               textAlign: TextAlign.center,
-              style: AppTextStyles.mono(14).copyWith(
-                color: colors.accent,
-                fontWeight: FontWeight.w700,
-              ),
+              style: AppTextStyles.mono(
+                14,
+              ).copyWith(color: colors.accent, fontWeight: FontWeight.w700),
             ),
           ),
         ],
@@ -774,12 +677,17 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
 
   @override
   Widget build(BuildContext context) {
-    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.tennis, matchId: widget.matchId));
+    final eventsAsync = ref.watch(
+      matchEventsProvider(sport: SportType.tennis, matchId: widget.matchId),
+    );
 
     return eventsAsync.when(
       loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
       error: (_, __) => Center(
-        child: Text('event.error.load_failed'.tr(), style: AppTextStyles.body(13).copyWith(color: context.appColors.text3)),
+        child: Text(
+          'event.error.load_failed'.tr(),
+          style: AppTextStyles.body(13).copyWith(color: context.appColors.text3),
+        ),
       ),
       data: (obj) {
         final events = obj as TennisMatchEventsData?;
@@ -824,9 +732,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                         decoration: BoxDecoration(
                           color: isSelected ? colors.accent : colors.surface2,
                           borderRadius: BorderRadius.circular(20),
-                          border: isSelected
-                              ? null
-                              : Border.all(color: colors.line, width: 0.5),
+                          border: isSelected ? null : Border.all(color: colors.line, width: 0.5),
                         ),
                         child: Text(
                           tabLabels[i].toUpperCase(),
@@ -873,9 +779,7 @@ class _StatsList extends StatelessWidget {
         final stat = stats[i];
         final home = stat.homeValue.isNaN ? 0.0 : stat.homeValue.abs();
         final away = stat.awayValue.isNaN ? 0.0 : stat.awayValue.abs();
-        final label = stat.labelKey.isNotEmpty
-            ? stat.labelKey.tr()
-            : '${stat.typeCode}';
+        final label = stat.labelKey.isNotEmpty ? stat.labelKey.tr() : '${stat.typeCode}';
         return ArenaStatBar(label: label, home: home, away: away);
       },
     );
@@ -892,12 +796,17 @@ class _SituationTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.tennis, matchId: matchId));
-    final detail = ref.watch(matchDetailProvider(sport: SportType.tennis, matchId: matchId)).valueOrNull as TennisMatchDetail?;
+    final detail =
+        ref.watch(matchDetailProvider(sport: SportType.tennis, matchId: matchId)).valueOrNull
+            as TennisMatchDetail?;
 
     return eventsAsync.when(
       loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
       error: (_, __) => Center(
-        child: Text('event.error.load_failed'.tr(), style: AppTextStyles.body(13).copyWith(color: context.appColors.text3)),
+        child: Text(
+          'event.error.load_failed'.tr(),
+          style: AppTextStyles.body(13).copyWith(color: context.appColors.text3),
+        ),
       ),
       data: (obj) {
         final events = obj as TennisMatchEventsData?;
@@ -963,7 +872,9 @@ class _SetTimelineSection extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'event.tennis.detail.set_n'.tr(namedArgs: {'n': '${setTimeline.set}'}).toUpperCase(),
+                'event.tennis.detail.set_n'
+                    .tr(namedArgs: {'n': '${setTimeline.set}'})
+                    .toUpperCase(),
                 style: AppTextStyles.display(13, context).copyWith(color: colors.text),
               ),
             ],
@@ -1004,15 +915,14 @@ class _RoundCard extends StatelessWidget {
     final servingName = round.serve == 1
         ? homeName
         : round.serve == 2
-            ? awayName
-            : '';
+        ? awayName
+        : '';
     final servingLogo = round.serve == 1
         ? homeLogo
         : round.serve == 2
-            ? awayLogo
-            : '';
-    final scoreText =
-        round.isComplete ? '${round.homeScore} - ${round.awayScore}' : '';
+        ? awayLogo
+        : '';
+    final scoreText = round.isComplete ? '${round.homeScore} - ${round.awayScore}' : '';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1023,10 +933,9 @@ class _RoundCard extends StatelessWidget {
             children: [
               Text(
                 'event.tennis.detail.round_n'.tr(namedArgs: {'n': '${round.round}'}).toUpperCase(),
-                style: AppTextStyles.mono(10).copyWith(
-                  color: context.appColors.accent,
-                  letterSpacing: 0.1 * 10,
-                ),
+                style: AppTextStyles.mono(
+                  10,
+                ).copyWith(color: context.appColors.accent, letterSpacing: 0.1 * 10),
               ),
               const SizedBox(width: 8),
               if (servingLogo.isNotEmpty) ...[
@@ -1067,9 +976,7 @@ class _RoundCard extends StatelessWidget {
             child: Wrap(
               spacing: 6,
               runSpacing: 6,
-              children: round.points
-                  .map((pt) => _PointChip(home: pt.home, away: pt.away))
-                  .toList(),
+              children: round.points.map((pt) => _PointChip(home: pt.home, away: pt.away)).toList(),
             ),
           ),
         Divider(height: 1, thickness: 0.5, color: context.appColors.line),
@@ -1077,7 +984,6 @@ class _RoundCard extends StatelessWidget {
     );
   }
 }
-
 
 class _PointChip extends StatelessWidget {
   const _PointChip({required this.home, required this.away});
