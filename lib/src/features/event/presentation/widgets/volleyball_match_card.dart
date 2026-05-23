@@ -65,21 +65,21 @@ class VolleyballMatchCard extends ConsumerWidget {
             context: context,
           ),
           // Set divider
-          if (!isNotStarted && homeCurrentSet != null && awayCurrentSet != null) ...[
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    '$homeCurrentSet - $awayCurrentSet',
-                    style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-                  ),
-                ],
-              ),
-            ),
-          ],
+          // if (!isNotStarted && homeCurrentSet != null && awayCurrentSet != null) ...[
+          //   const SizedBox(height: 4),
+          //   Padding(
+          //     padding: const EdgeInsets.symmetric(horizontal: 8),
+          //     child: Row(
+          //       mainAxisAlignment: MainAxisAlignment.end,
+          //       children: [
+          //         Text(
+          //           '$homeCurrentSet - $awayCurrentSet',
+          //           style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ],
           const SizedBox(height: 5),
           // Away team row
           _SetCountRow(

@@ -50,6 +50,7 @@ class AmFootballMatchCard extends ConsumerWidget {
             matchTime: match.matchTimeSim,
           ),
           const SizedBox(height: 12),
+          SportStatusBadge(label: statusLabel, isLive: true),
           // Jumbotron row
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -81,20 +82,13 @@ class AmFootballMatchCard extends ConsumerWidget {
               // Center status column
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: isLive
-                    ? SportStatusBadge(label: statusLabel, isLive: true)
-                    : Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '–',
-                            style: AppTextStyles.display(
-                              22,
-                              context,
-                            ).copyWith(color: context.appColors.text3),
-                          ),
-                        ],
-                      ),
+                child:  Text(
+                  '–',
+                  style: AppTextStyles.display(
+                    22,
+                    context,
+                  ).copyWith(color: context.appColors.text3),
+                ),
               ),
               // Away score
               Padding(

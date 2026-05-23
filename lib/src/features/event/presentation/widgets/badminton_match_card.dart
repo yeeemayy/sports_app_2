@@ -35,8 +35,8 @@ class BadmintonMatchCard extends ConsumerWidget {
     final effectiveStatusId = rt?.statusId ?? match.statusId;
     final effectiveHomeSets = rt?.homeSets ?? extractSetScores(match.scores, 0);
     final effectiveAwaySets = rt?.awaySets ?? extractSetScores(match.scores, 1);
-    final effectiveHomeTotal = rt?.homeTotal ?? 0;
-    final effectiveAwayTotal = rt?.awayTotal ?? 0;
+    final effectiveHomeTotal = rt?.homeTotal ?? int.tryParse(match.homeScore) ?? 0;
+    final effectiveAwayTotal = rt?.awayTotal ?? int.tryParse(match.awayScore) ?? 0;
 
     final statusLabel = badmintonStatusLabel(effectiveStatusId, match.statusDescription);
     final isLive = _liveStatuses.contains(effectiveStatusId);
