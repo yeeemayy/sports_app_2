@@ -782,7 +782,7 @@ class _FollowerChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.remove_red_eye_outlined, color: colors.text, size: 11),
+          Icon(Icons.person_outline_outlined, color: colors.text, size: 11),
           const SizedBox(width: 4),
           Text(
             _format(count),
