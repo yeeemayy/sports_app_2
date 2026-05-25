@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/features/home/domain/models/anchor_model.dart';
 import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
@@ -21,6 +22,8 @@ class _AnchorListScreenState extends ConsumerState<AnchorListScreen> {
   int _lastPage = 1;
   bool _initialized = false;
   bool _isLoadingMore = false;
+
+  static double _aspectRatio(int index) => index.isEven ? 0.62 : 0.80;
 
   @override
   void initState() {
@@ -81,21 +84,21 @@ class _AnchorListScreenState extends ConsumerState<AnchorListScreen> {
   @override
   Widget build(BuildContext context) {
     final firstPageAsync = ref.watch(anchorListProvider());
-    final isTablet = MediaQuery.sizeOf(context).width >= 600;
+    final crossAxisCount = MediaQuery.sizeOf(context).width >= 600 ? 3 : 2;
 
     return Scaffold(
       appBar: AppBar(title: Text('anchor.list.title'.tr())),
       body: firstPageAsync.when(
-        loading: () => GridView.builder(
+        loading: () => MasonryGridView.count(
           padding: const EdgeInsets.all(16),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: isTablet ? 3 : 2,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            childAspectRatio: 1.2,
-          ),
+          crossAxisCount: crossAxisCount,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
           itemCount: 6,
-          itemBuilder: (context, i) => const HomeAnchorLiveCard.loading(),
+          itemBuilder: (context, i) => AspectRatio(
+            aspectRatio: _aspectRatio(i),
+            child: const HomeAnchorLiveCard.loading(),
+          ),
         ),
         error: (err, _) => RefreshIndicator(
           onRefresh: _refresh,
@@ -136,24 +139,27 @@ class _AnchorListScreenState extends ConsumerState<AnchorListScreen> {
 
           return RefreshIndicator(
             onRefresh: _refresh,
-            child: GridView.builder(
+            child: MasonryGridView.count(
               controller: _scrollController,
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: isTablet ? 3 : 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 1.2,
-              ),
+              crossAxisCount: crossAxisCount,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
               itemCount: _anchors.length + (_isLoadingMore ? 2 : 0),
               itemBuilder: (context, index) {
                 if (index >= _anchors.length) {
-                  return const HomeAnchorLiveCard.loading();
+                  return AspectRatio(
+                    aspectRatio: _aspectRatio(index),
+                    child: const HomeAnchorLiveCard.loading(),
+                  );
                 }
                 final anchor = _anchors[index];
-                return HomeAnchorLiveCard(
-                  anchor: anchor,
-                  onTap: () => context.push(AppRoutes.anchorPath(anchor.id)),
+                return AspectRatio(
+                  aspectRatio: _aspectRatio(index),
+                  child: HomeAnchorLiveCard(
+                    anchor: anchor,
+                    onTap: () => context.push(AppRoutes.anchorPath(anchor.id)),
+                  ),
                 );
               },
             ),

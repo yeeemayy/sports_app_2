@@ -85,7 +85,7 @@
       "evening": "晚上好"
     },
     "live_now": "赛事进行中",
-    "anchor_rankings": "主播排名",
+    "anchor_rankings": "主播直播间",
     "trending": "热门",
     "featured": "精选",
     "see_all": "查看全部 →",
@@ -102,7 +102,9 @@
     },
     "anchor": {
       "no_live": "目前暂无直播",
-      "no_live_subtitle": "先看看别的吧"
+      "no_live_subtitle": "先看看别的吧",
+      "live_badge": "直播中",
+      "followers": "{} 粉丝"
     }
   },
   "video": {
@@ -134,7 +136,10 @@
     "edit_save": "保存",
     "edit_success": "资料已更新",
     "edit_error_title": "更新失败",
-    "toggle_dark_mode": "深色模式",
+    "toggle_dark_mode": "外观",
+    "theme_light": "浅色",
+    "theme_dark": "深色",
+    "theme_system": "跟随系统",
     "toggle_language": "切换语言",
     "language_zh_cn": "简体中文",
     "language_en_gb": "English (UK)",

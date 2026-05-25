@@ -873,7 +873,7 @@ class _LivePulseBadgeState extends State<_LivePulseBadge> with TickerProviderSta
     return AnimatedBuilder(
       animation: Listenable.merge([_anim, _blinkCtrl]),
       builder: (_, _) {
-        final text = _liveMinute ?? '';
+        final text = _liveMinute ?? 'event.football.ht'.tr();
         final hasApostrophe = text.endsWith("'");
         final base = hasApostrophe ? text.substring(0, text.length - 1) : text;
         final apostropheOpacity = _blinkCtrl.value < 0.5 ? 1.0 : 0.0;
@@ -993,7 +993,12 @@ class _EditorialHeroCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 14),
                         Text(
-                          '${article.createdAt} · ${article.browse} READS',
+                          DateFormat(
+                            context.locale.languageCode == 'zh'
+                                ? 'MMMdd日, yyyy HH:mm'
+                                : 'dd MMM, yyyy HH:mm',
+                            context.locale.languageCode,
+                          ).format(DateTime.parse(article.createdAt)),
                           style: AppTextStyles.mono(
                             10,
                           ).copyWith(color: context.appColors.text2, letterSpacing: 10 * 0.1),
@@ -1067,7 +1072,7 @@ class _AnchorRankingsSection extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(_kHPad, 0, _kHPad, 0),
                 itemCount: anchors.length,
                 separatorBuilder: (_, _) => const SizedBox(width: 14),
-                itemBuilder: (context, i) => _AnchorRankingItem(anchor: anchors[i], rank: i + 1),
+                itemBuilder: (context, i) => _AnchorRankingItem(anchor: anchors[i]),
               ),
             ),
             const SizedBox(height: 24),
@@ -1106,14 +1111,13 @@ class _AnchorRankingsSection extends StatelessWidget {
 }
 
 class _AnchorRankingItem extends StatelessWidget {
-  const _AnchorRankingItem({required this.anchor, required this.rank});
+  const _AnchorRankingItem({required this.anchor});
 
   final AnchorModel anchor;
-  final int rank;
 
   @override
   Widget build(BuildContext context) {
-    final isFirst = rank == 1;
+    final isLive = anchor.isLive == 1;
 
     return GestureDetector(
       onTap: () => context.push(AppRoutes.anchorPath(anchor.id)),
@@ -1132,8 +1136,8 @@ class _AnchorRankingItem extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: isFirst ? context.appColors.accent : context.appColors.lineStrong,
-                          width: isFirst ? 2 : 1,
+                          color: isLive ? context.appColors.accent : context.appColors.lineStrong,
+                          width: isLive ? 2 : 1,
                         ),
                       ),
                     ),
@@ -1144,6 +1148,8 @@ class _AnchorRankingItem extends StatelessWidget {
                     child: ClipOval(
                       child: CachedNetworkImage(
                         imageUrl: anchor.avatarUrl,
+                        width: 78,
+                        height: 78,
                         fit: BoxFit.cover,
                         placeholder: (_, _) => Container(color: context.appColors.surface2),
                         errorBuilder: (_, _, _) => Container(
@@ -1153,28 +1159,29 @@ class _AnchorRankingItem extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Rank badge
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Center(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: isFirst ? context.appColors.accent : context.appColors.surface,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          '#$rank',
-                          style: AppTextStyles.display(12, context).copyWith(
-                            color: isFirst ? context.appColors.ink : context.appColors.text,
-                            letterSpacing: 12 * 0.04,
+                  // Live badge
+                  if (isLive)
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: context.appColors.accent,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            'home.anchor.live_badge'.tr(),
+                            style: AppTextStyles.display(
+                              12,
+                              context,
+                            ).copyWith(color: context.appColors.ink, letterSpacing: 12 * 0.04),
                           ),
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -1212,9 +1219,25 @@ class _TrendingNewsGrid extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(_kHPad, 4, _kHPad, 12),
-          child: Text(
-            'home.trending'.tr(),
-            style: AppTextStyles.display(22, context).copyWith(color: context.appColors.text),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                'home.trending'.tr(),
+                style: AppTextStyles.display(22, context).copyWith(color: context.appColors.text),
+              ),
+              const Spacer(),
+              GestureDetector(
+                onTap: () => context.push(AppRoutes.news),
+                child: Text(
+                  'home.see_all'.tr(),
+                  style: AppTextStyles.mono(
+                    10,
+                  ).copyWith(color: context.appColors.text3, letterSpacing: 10 * 0.14),
+                ),
+              ),
+            ],
           ),
         ),
         Padding(
@@ -1326,7 +1349,12 @@ class _TrendingNewsCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '● ${article.createdAt}',
+                    DateFormat(
+                      context.locale.languageCode == 'zh'
+                          ? 'MMMdd日, yyyy HH:mm'
+                          : 'dd MMM, yyyy HH:mm',
+                      context.locale.languageCode,
+                    ).format(DateTime.parse(article.createdAt)),
                     style: AppTextStyles.mono(
                       9,
                     ).copyWith(color: context.appColors.text3, letterSpacing: 9 * 0.12),

@@ -19,6 +19,8 @@ import 'package:sports_app/src/shared_widgets/custom_text_field.dart';
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
+  // ── Dialogs & pickers (logic unchanged) ─────────────────────────────────────
+
   void _confirmDeleteAccount(BuildContext context, WidgetRef ref) {
     showCustomStatusDialog(
       context: context,
@@ -132,6 +134,48 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
+  void _showThemePicker(BuildContext context, WidgetRef ref, ThemeMode current) {
+    final options = [
+      (mode: ThemeMode.light, label: 'profile.theme_light', icon: Icons.light_mode_rounded),
+      (mode: ThemeMode.dark, label: 'profile.theme_dark', icon: Icons.dark_mode_rounded),
+      (mode: ThemeMode.system, label: 'profile.theme_system', icon: Icons.brightness_auto_rounded),
+    ];
+
+    showModalBottomSheet<void>(
+      context: rootNavigatorKey.currentContext ?? context,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+                child: Text(
+                  'profile.toggle_dark_mode'.tr(),
+                  style: sheetContext.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                ),
+              ),
+              const Divider(height: 0),
+              ...options.map(
+                (opt) => ListTile(
+                  leading: Icon(opt.icon),
+                  title: Text(opt.label.tr()),
+                  trailing: current == opt.mode ? const Icon(Icons.check_rounded) : null,
+                  onTap: () {
+                    ref.read(themeModeProvider.notifier).setThemeMode(opt.mode);
+                    Navigator.of(sheetContext).pop();
+                  },
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _showLanguagePicker(BuildContext context) {
     final current = context.locale;
     final languages = [
@@ -173,6 +217,8 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
+  // ── Build ────────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authNotifierProvider);
@@ -181,193 +227,485 @@ class ProfileScreen extends ConsumerWidget {
     final avatarUrl = user?.avatarUrl;
     debugPrint(avatarUrl);
     final nickname = user?.nickname ?? '';
-    final isDark = ref.watch(themeModeProvider) == ThemeMode.dark;
+    final themeMode = ref.watch(themeModeProvider);
+    final colors = context.appColors;
+    final topPadding = MediaQuery.paddingOf(context).top;
+    final locale = context.locale;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final safePadding = MediaQuery.paddingOf(context);
-        return SingleChildScrollView(
-          child: SafeArea(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: constraints.maxHeight - safePadding.top - safePadding.bottom,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+    // Language display value shown in the settings row
+    final langValue = locale.languageCode == 'zh' ? '简体中文' : 'English';
+
+    // Hero section total height:
+    // gradient (topPadding + 170) + avatar overflow below gradient (104 - 58 = 46)
+    final heroHeight = topPadding + (isAuthenticated ? 216.0 : 170.0);
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // ── Hero: gradient header + overlapping avatar ─────────────────────
+          SizedBox(
+            height: heroHeight,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // Photo header with gradient overlay
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: SizedBox(
+                    height: topPadding + 170,
+                    child: Stack(
+                      fit: StackFit.expand,
                       children: [
-                        const SizedBox(height: 48),
-                        if (isAuthenticated) ...[
-                          Center(
-                            child: ClipOval(
-                              child: avatarUrl != null && avatarUrl.isNotEmpty
-                                  ? CachedNetworkImage(
-                                      imageUrl: avatarUrl,
-                                      width: 100,
-                                      height: 100,
-                                      fit: BoxFit.cover,
-                                      placeholder: (context, url) {
-                                        return Skeletonizer(
-                                          enabled: true,
-                                          child: const ColoredBox(color: Colors.grey),
-                                        );
-                                      },
-                                      errorBuilder: (context, url, error) => AvatarFallback(),
-                                    )
-                                  : AvatarFallback(),
+                        // Stadium tunnel photo
+                        Image.asset(
+                          'assets/images/image_03.jpeg',
+                          fit: BoxFit.cover,
+                        ),
+                        // Gradient overlay: subtle dark at top → solid ink at bottom
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                colors.ink.withValues(alpha: 0.35),
+                                colors.ink,
+                              ],
+                              stops: const [0.0, 1.0],
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          Center(
-                            child: Text(
-                              nickname,
-                              style: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                        ] else
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                            child: Column(
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Avatar + username row — overlaps the gradient by 58 px
+                if (isAuthenticated)
+                  Positioned(
+                    top: topPadding + 112.0, // 170 - 58 overlap
+                    left: 22,
+                    right: 22,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        // Avatar circle with camera edit button
+                        GestureDetector(
+                          onTap: () => context.push(AppRoutes.profileEditFull),
+                          child: SizedBox(
+                            width: 104,
+                            height: 104,
+                            child: Stack(
+                              clipBehavior: Clip.none,
                               children: [
-                                Text(
-                                  'profile.guest_mode_title'.tr(),
-                                  style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  'profile.guest_mode_subtitle'.tr(),
-                                  style: context.textTheme.bodyMedium?.copyWith(
-                                    color: context.appColors.text2,
+                                // Ink-ring border via padding
+                                Container(
+                                  padding: const EdgeInsets.all(3),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: colors.ink,
+                                  ),
+                                  child: ClipOval(
+                                    child: avatarUrl != null && avatarUrl.isNotEmpty
+                                        ? CachedNetworkImage(
+                                            imageUrl: avatarUrl,
+                                            width: 98,
+                                            height: 98,
+                                            fit: BoxFit.cover,
+                                            placeholder: (context, url) => Skeletonizer(
+                                              enabled: true,
+                                              child: const ColoredBox(color: Colors.grey),
+                                            ),
+                                            errorBuilder: (context, url, error) =>
+                                                AvatarFallback(size: 98),
+                                          )
+                                        : AvatarFallback(size: 98),
                                   ),
                                 ),
-                                SizedBox(height: 20),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: TextButton(
-                                        onPressed: () => context.push(AppRoutes.register),
-                                        style: TextButton.styleFrom(
-                                          backgroundColor: context.appColors.accent,
-                                          foregroundColor: Colors.white,
-                                          minimumSize: const Size(0, 48),
-                                        ),
-                                        child: Text('auth.register.register'.tr()),
-                                      ),
+                                // Camera button
+                                Positioned(
+                                  bottom: 2,
+                                  right: 2,
+                                  child: Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      color: colors.accent,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: colors.ink, width: 2.5),
                                     ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: OutlinedButton(
-                                        onPressed: () => context.push(AppRoutes.login),
-                                        style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
-                                        child: Text('auth.login.login'.tr()),
-                                      ),
+                                    child: const Icon(
+                                      Icons.camera_alt_outlined,
+                                      size: 14,
+                                      color: Colors.black,
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                        const SizedBox(height: 32),
-                        _ProfileSection(
-                          label: 'profile.section_settings'.tr(),
-                          tiles: [
-                            if (isAuthenticated)
-                              _ProfileTile(
-                                icon: Icons.person_outline,
-                                label: 'profile.edit_button'.tr(),
-                                onTap: () => context.push(AppRoutes.profileEditFull),
-                              ),
-                            _ProfileTile(
-                              icon: isDark ? Icons.dark_mode : Icons.light_mode,
-                              label: 'profile.toggle_dark_mode'.tr(),
-                              onTap: () => ref
-                                  .read(themeModeProvider.notifier)
-                                  .setThemeMode(isDark ? ThemeMode.light : ThemeMode.dark),
-                              trailing: Switch(
-                                value: isDark,
-                                onChanged: (v) => ref
-                                    .read(themeModeProvider.notifier)
-                                    .setThemeMode(v ? ThemeMode.dark : ThemeMode.light),
-                              ),
-                            ),
-                            _ProfileTile(
-                              icon: Icons.language,
-                              label: 'profile.toggle_language'.tr(),
-                              onTap: () => _showLanguagePicker(context),
-                            ),
-                          ],
                         ),
-                        const SizedBox(height: 16),
-                        _ProfileSection(
-                          label: 'profile.section_legal'.tr(),
-                          tiles: [
-                            _ProfileTile(
-                              icon: Icons.privacy_tip_outlined,
-                              label: 'profile.privacy_policy'.tr(),
-                              onTap: () => context.push(
-                                AppRoutes.privacyPolicy,
-                                extra: 'profile.privacy_policy'.tr(),
+                        const SizedBox(width: 14),
+                        // Nickname
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Text(
+                              nickname.toUpperCase(),
+                              style: AppTextStyles.display(32, context).copyWith(
+                                color: colors.text,
                               ),
-                            ),
-                            _ProfileTile(
-                              icon: Icons.description_outlined,
-                              label: 'profile.terms_of_use'.tr(),
-                              onTap: () => context.push(
-                                AppRoutes.userAgreement,
-                                extra: 'profile.terms_of_use'.tr(),
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (isAuthenticated) ...[
-                          SizedBox(height: 16),
-                          _ProfileSection(
-                            label: 'profile.section_danger_zone'.tr(),
-                            tiles: [
-                              _ProfileTile(
-                                icon: Icons.person_remove_outlined,
-                                label: 'profile.delete_account'.tr(),
-                                onTap: () => _confirmDeleteAccount(context, ref),
-                              ),
-                            ],
-                          ),
-                        ],
-                        if (isAuthenticated) ...[
-                          const SizedBox(height: 16),
-                          Center(
-                            child: TextButton.icon(
-                              onPressed: () => _confirmLogout(context, ref),
-                              icon: Icon(Icons.logout),
-                              label: Text('profile.logout'.tr()),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                        ],
+                        ),
                       ],
                     ),
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 30.0),
-                        child: Text(
-                          '${'profile.app_version'.tr()} ${AppInfo.version}',
-                          style: context.textTheme.bodySmall?.copyWith(color: context.appColors.text2),
+                  ),
+              ],
+            ),
+          ),
+
+          // ── Guest mode call-to-action ──────────────────────────────────────
+          if (!isAuthenticated) ...[
+            const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 22),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'profile.guest_mode_title'.tr().toUpperCase(),
+                    style: AppTextStyles.display(28, context).copyWith(color: colors.text),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'profile.guest_mode_subtitle'.tr(),
+                    style: context.textTheme.bodyMedium?.copyWith(color: colors.text2),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => context.push(AppRoutes.register),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colors.accent,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size(0, 48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: Text('auth.register.register'.tr()),
                         ),
                       ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => context.push(AppRoutes.login),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size(0, 48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            side: BorderSide(color: colors.lineStrong),
+                          ),
+                          child: Text('auth.login.login'.tr()),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+
+          const SizedBox(height: 28),
+
+          // ── Settings section ───────────────────────────────────────────────
+          _ArenaSectionLabel(label: 'profile.section_settings'.tr()),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 22),
+            child: _ArenaSettingsGroup(
+              tiles: [
+                if (isAuthenticated)
+                  _ProfileTile(
+                    icon: Icons.person_outline,
+                    label: 'profile.edit_button'.tr(),
+                    onTap: () => context.push(AppRoutes.profileEditFull),
+                  ),
+                _ProfileTile(
+                  icon: themeMode == ThemeMode.light
+                      ? Icons.light_mode_rounded
+                      : themeMode == ThemeMode.dark
+                          ? Icons.dark_mode_rounded
+                          : Icons.brightness_auto_rounded,
+                  label: 'profile.toggle_dark_mode'.tr(),
+                  value: themeMode == ThemeMode.light
+                      ? 'profile.theme_light'.tr()
+                      : themeMode == ThemeMode.dark
+                          ? 'profile.theme_dark'.tr()
+                          : 'profile.theme_system'.tr(),
+                  onTap: () => _showThemePicker(context, ref, themeMode),
+                ),
+                _ProfileTile(
+                  icon: Icons.language_rounded,
+                  label: 'profile.toggle_language'.tr(),
+                  value: langValue,
+                  onTap: () => _showLanguagePicker(context),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // ── Legal section ──────────────────────────────────────────────────
+          _ArenaSectionLabel(label: 'profile.section_legal'.tr()),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 22),
+            child: _ArenaSettingsGroup(
+              tiles: [
+                _ProfileTile(
+                  icon: Icons.privacy_tip_outlined,
+                  label: 'profile.privacy_policy'.tr(),
+                  onTap: () => context.push(
+                    AppRoutes.privacyPolicy,
+                    extra: 'profile.privacy_policy'.tr(),
+                  ),
+                ),
+                _ProfileTile(
+                  icon: Icons.description_outlined,
+                  label: 'profile.terms_of_use'.tr(),
+                  onTap: () => context.push(
+                    AppRoutes.userAgreement,
+                    extra: 'profile.terms_of_use'.tr(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── Danger zone (authenticated only) ──────────────────────────────
+          if (isAuthenticated) ...[
+            const SizedBox(height: 20),
+            _ArenaSectionLabel(
+              label: 'profile.section_danger_zone'.tr(),
+              color: colors.danger,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 22),
+              child: _ArenaSettingsGroup(
+                tiles: [
+                  _ProfileTile(
+                    icon: Icons.person_remove_outlined,
+                    label: 'profile.delete_account'.tr(),
+                    isDestructive: true,
+                    onTap: () => _confirmDeleteAccount(context, ref),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
+          // ── Logout button (authenticated only) ─────────────────────────────
+          if (isAuthenticated) ...[
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 22),
+              child: SizedBox(
+                width: double.infinity,
+                height: 54,
+                child: OutlinedButton.icon(
+                  onPressed: () => _confirmLogout(context, ref),
+                  icon: const Icon(Icons.logout_rounded, size: 16),
+                  label: Text('profile.logout'.tr().toUpperCase()),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: colors.danger, width: 0.5),
+                    foregroundColor: colors.danger,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
                     ),
-                  ],
+                    textStyle: AppTextStyles.display(14, context),
+                  ),
+                ),
+              ),
+            ),
+          ],
+
+          // ── App version ────────────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 28),
+            child: Center(
+              child: Text(
+                'ARENA · v${AppInfo.version}'.toUpperCase(),
+                style: AppTextStyles.mono(9).copyWith(
+                  color: colors.text3,
+                  letterSpacing: 0.18 * 9,
                 ),
               ),
             ),
           ),
-        );
-      },
+
+          // Safe area bottom spacing
+          SafeArea(top: false, child: const SizedBox()),
+        ],
+      ),
     );
   }
 }
+
+// ── Section label ──────────────────────────────────────────────────────────────
+
+class _ArenaSectionLabel extends StatelessWidget {
+  const _ArenaSectionLabel({required this.label, this.color});
+
+  final String label;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(22, 0, 22, 10),
+      child: Text(
+        label.toUpperCase(),
+        style: AppTextStyles.display(18, context).copyWith(
+          color: color ?? colors.text,
+        ),
+      ),
+    );
+  }
+}
+
+// ── Settings group (bordered card with hairline dividers) ──────────────────────
+
+class _ProfileTile {
+  const _ProfileTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.value,
+    this.trailing,
+    this.isDestructive = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final String? value;
+  final Widget? trailing;
+  final bool isDestructive;
+}
+
+class _ArenaSettingsGroup extends StatelessWidget {
+  const _ArenaSettingsGroup({required this.tiles});
+
+  final List<_ProfileTile> tiles;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: colors.line, width: 0.5),
+      ),
+      clipBehavior: Clip.hardEdge,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (int i = 0; i < tiles.length; i++) ...[
+            if (i > 0)
+              Divider(
+                height: 0,
+                thickness: 0.5,
+                color: colors.line,
+                indent: 16,
+                endIndent: 16,
+              ),
+            _ArenaTile(data: tiles[i]),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ArenaTile extends StatelessWidget {
+  const _ArenaTile({required this.data});
+
+  final _ProfileTile data;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final tileColor = data.isDestructive ? colors.danger : null;
+
+    return InkWell(
+      onTap: data.onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            // Icon in rounded square
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: data.isDestructive
+                    ? colors.danger.withValues(alpha: 0.12)
+                    : colors.surface2,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                data.icon,
+                size: 16,
+                color: tileColor ?? colors.text2,
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Label
+            Expanded(
+              child: Text(
+                data.label,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: tileColor ?? colors.text,
+                ),
+              ),
+            ),
+            // Trailing: custom widget OR value + chevron
+            if (data.trailing != null)
+              data.trailing!
+            else ...[
+              if (data.value != null && data.value!.isNotEmpty) ...[
+                Text(
+                  data.value!,
+                  style: AppTextStyles.mono(10).copyWith(
+                    color: colors.text3,
+                    letterSpacing: 0.1 * 10,
+                  ),
+                ),
+                const SizedBox(width: 4),
+              ],
+              if (!data.isDestructive)
+                Icon(Icons.chevron_right_rounded, size: 16, color: colors.text3),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Password confirm dialog content (logic unchanged) ─────────────────────────
 
 class _PasswordConfirmContent extends StatefulWidget {
   const _PasswordConfirmContent({required this.controller, required this.errorNotifier});
@@ -412,66 +750,6 @@ class _PasswordConfirmContentState extends State<_PasswordConfirmContent> {
           ],
         );
       },
-    );
-  }
-}
-
-class _ProfileTile extends StatelessWidget {
-  const _ProfileTile({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.isDestructive = false,
-    this.trailing,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool isDestructive;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isDestructive ? Colors.red : null;
-    return ListTile(
-      leading: Icon(icon, color: color, size: 20),
-      title: Text(label, style: context.textTheme.bodyMedium?.copyWith(color: color)),
-      trailing: trailing ?? (isDestructive ? null : const Icon(Icons.chevron_right)),
-      onTap: onTap,
-    );
-  }
-}
-
-class _ProfileSection extends StatelessWidget {
-  const _ProfileSection({required this.label, required this.tiles});
-
-  final String label;
-  final List<Widget> tiles;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: Text(
-            label,
-            style: context.textTheme.labelMedium?.copyWith(
-              color: context.colorScheme.onSurfaceVariant,
-              letterSpacing: 0.8,
-            ),
-          ),
-        ),
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: tiles.length,
-          itemBuilder: (context, index) => tiles[index],
-          separatorBuilder: (context, index) => const Divider(indent: 16, endIndent: 16, height: 0),
-        ),
-      ],
     );
   }
 }

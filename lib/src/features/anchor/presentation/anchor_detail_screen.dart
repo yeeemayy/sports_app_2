@@ -9,7 +9,6 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:go_router/go_router.dart';
 import 'package:marquee/marquee.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/shared_widgets/diagonal_split_banner.dart';
 import 'package:sports_app/src/features/home/domain/models/banner_model.dart';
 import 'package:sports_app/src/features/home/presentation/providers/banner_providers.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -101,7 +100,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
         controller.play();
       }
     });
-    _onVideoTap(); // reset the hide timer after interaction
+    _onVideoTap();
   }
 
   Future<void> _openFullscreen() async {
@@ -145,17 +144,19 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
   Widget build(BuildContext context) {
     ref.listen(anchorDetailProvider(widget.anchorId), (_, next) {
       next.whenData((detail) {
-        if (_videoController == null && detail.m3u8Url != null && detail.m3u8Url!.isNotEmpty) {
+        if (_videoController == null &&
+            detail.m3u8Url != null &&
+            detail.m3u8Url!.isNotEmpty) {
           _initVideoPlayer(detail.m3u8Url!);
         }
       });
     });
 
     final detailAsync = ref.watch(anchorDetailProvider(widget.anchorId));
-
     final bannerAsync = ref.watch(bannerProvider);
 
     return Scaffold(
+      backgroundColor: context.appColors.ink,
       body: SafeArea(
         child: Column(
           children: [
@@ -167,175 +168,261 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
     );
   }
 
+  // ─── Video section ──────────────────────────────────────────────────────────
+
   Widget _buildVideoSection(AsyncValue<AnchorDetailModel> detailAsync) {
+    final colors = context.appColors;
+    final videoHeight = MediaQuery.sizeOf(context).width * 9 / 16;
+
     return GestureDetector(
       onTap: _onVideoTap,
-      child: Stack(
-        children: [
-          AspectRatio(
-            aspectRatio: 16 / 9,
-            child: detailAsync.when(
-              loading: () => Container(
-                color: Colors.grey.shade900,
-                child: const Center(child: CircularProgressIndicator(color: Colors.white)),
-              ),
-              error: (_, _) => Container(color: Colors.grey.shade900),
-              data: (detail) => _buildVideoPlayer(detail),
-            ),
-          ),
-          Positioned(
-            top: 4,
-            left: 4,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-              onPressed: () => context.pop(),
-            ),
-          ),
-          if (detailAsync.valueOrNull?.isLive == 1)
-            Positioned(top: 12, right: 12, child: _LiveBadge()),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVideoPlayer(AnchorDetailModel detail) {
-    return GestureDetector(
-      onTap: () {
-        setState(() => _showControls = !_showControls);
-      },
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Background
-          if (_videoInitialized && _videoController != null)
-            FittedBox(
-              fit: BoxFit.cover,
-              child: SizedBox(
-                width: _videoController!.value.size.width,
-                height: _videoController!.value.size.height,
-                child: VideoPlayer(_videoController!),
-              ),
-            )
-          else
-            CachedNetworkImage(
-              imageUrl: detail.cover,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-              placeholder: (context, url) => Skeletonizer(
-                enabled: true,
-                child: const ColoredBox(color: Colors.grey),
-              ),
-              errorBuilder: (context, url, error) => ColoredBox(color: Colors.grey.shade900),
+      child: SizedBox(
+        height: videoHeight,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // ── Layer 1: Raw video / cover image ──
+            detailAsync.when(
+              loading: () => ColoredBox(color: colors.ink2),
+              error: (_, _) => ColoredBox(color: colors.ink2),
+              data: (detail) => _buildVideoBackground(detail),
             ),
 
-          // Loading
-          if (_videoController != null && !_videoInitialized && !_videoError)
-            const Center(child: CircularProgressIndicator(color: Colors.white)),
-
-          // Buffering
-          if (_videoInitialized && _isBuffering)
-            Container(
-              color: Colors.black38,
-              child: const Center(child: CircularProgressIndicator(color: Colors.white)),
-            ),
-
-          // Error
-          if (_videoError)
-            Container(
-              color: Colors.black54,
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'anchor.detail.video.error'.tr(),
-                      style: const TextStyle(color: Colors.white70, fontSize: 13),
-                    ),
-                    const SizedBox(height: 12),
-                    TextButton(
-                      onPressed: _retryVideo,
-                      child: Text('anchor.detail.video.retry'.tr()),
-                    ),
+            // ── Layer 2: Gradient overlay ──
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0x66000000), // 40% black
+                    Colors.transparent,
+                    Colors.transparent,
+                    Color(0xEB000000), // 92% black
                   ],
+                  stops: [0.0, 0.3, 0.6, 1.0],
                 ),
               ),
             ),
 
-          // Fullscreen button
-          // if (_videoInitialized && !_videoError)
+            // ── Layer 3: API loading ──
+            if (detailAsync.isLoading)
+              Center(
+                child: CircularProgressIndicator(
+                  color: colors.text,
+                  strokeWidth: 2,
+                ),
+              ),
+
+            // ── Layer 4: Video controller init spinner ──
+            if (_videoController != null && !_videoInitialized && !_videoError)
+              const Center(
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              ),
+
+            // ── Layer 5: Buffering ──
+            if (_videoInitialized && _isBuffering)
+              Container(
+                color: Colors.black38,
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                ),
+              ),
+
+            // ── Layer 6: Video error ──
+            if (_videoError)
+              Container(
+                color: Colors.black54,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'anchor.detail.video.error'.tr(),
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 13,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+                      TextButton(
+                        onPressed: _retryVideo,
+                        child: Text('anchor.detail.video.retry'.tr()),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+            // ── Layer 7: Offline ──
+            if (detailAsync.valueOrNull != null &&
+                !_videoError &&
+                (detailAsync.valueOrNull!.isLive == 0 ||
+                    detailAsync.valueOrNull!.m3u8Url == null))
+              Container(
+                color: Colors.black54,
+                child: Center(
+                  child: Text(
+                    'anchor.detail.offline'.tr(),
+                    style: const TextStyle(
+                      color: Colors.white60,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+
+            // ── Layer 8: Controls (play/pause) — animated ──
             AnimatedOpacity(
               opacity: _showControls ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 300),
               child: IgnorePointer(
                 ignoring: !_showControls,
-                child: Container(
-                  color: Colors.black26,
-                  alignment: Alignment.bottomRight,
-                  padding: const EdgeInsets.all(8),
-                  child: IconButton(
-                    onPressed: _openFullscreen,
-                    icon: const Icon(Icons.fullscreen, color: Colors.white70, size: 28),
+                child: Center(
+                  child: GestureDetector(
+                    onTap: _togglePlayPause,
+                    child: Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.5),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: colors.lineStrong),
+                      ),
+                      child: Icon(
+                        _videoController?.value.isPlaying == true
+                            ? Icons.pause_rounded
+                            : Icons.play_arrow_rounded,
+                        color: colors.text,
+                        size: 26,
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
 
-          // Offline
-          if (!_videoError && (detail.isLive == 0 || detail.m3u8Url == null))
-            Container(
-              color: Colors.black54,
-              child: Center(
-                child: Text(
-                  'anchor.detail.offline'.tr(),
-                  style: const TextStyle(color: Colors.white60, fontSize: 14),
+            // ── Layer 9: Top bar — back button + live badge + follower chip ──
+            Positioned(
+              top: 8,
+              left: 8,
+              right: 16,
+              child: Row(
+                children: [
+                  _FrostedIconButton(
+                    onTap: () => context.pop(),
+                    child: Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: colors.text,
+                      size: 18,
+                    ),
+                  ),
+                  Spacer(),
+                  if (detailAsync.valueOrNull?.isLive == 1) ...[
+                    const SizedBox(width: 10),
+                    const _LivePulseBadge(),
+                    const SizedBox(width: 8),
+                    _FollowerChip(count: detailAsync.valueOrNull!.collect),
+                  ],
+                ],
+              ),
+            ),
+
+            // ── Layer 11: Fullscreen button (top-right) — animated ──
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: AnimatedOpacity(
+                opacity: _showControls ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 300),
+                child: IgnorePointer(
+                  ignoring: !_showControls,
+                  child: _FrostedIconButton(
+                    onTap: _openFullscreen,
+                    size: 34,
+                    borderRadius: 8,
+                    child: Icon(
+                      Icons.fullscreen_rounded,
+                      color: colors.text,
+                      size: 18,
+                    ),
+                  ),
                 ),
               ),
             ),
-        ],
+
+            // ── Layer 12: Anchor strip (bottom overlay) ──
+            if (detailAsync.valueOrNull != null)
+              Positioned(
+                bottom: 16,
+                left: 16,
+                right: 16,
+                child: _AnchorVideoStrip(detail: detailAsync.valueOrNull!),
+              ),
+          ],
+        ),
       ),
     );
   }
+
+  Widget _buildVideoBackground(AnchorDetailModel detail) {
+    if (_videoInitialized && _videoController != null) {
+      return FittedBox(
+        fit: BoxFit.cover,
+        child: SizedBox(
+          width: _videoController!.value.size.width,
+          height: _videoController!.value.size.height,
+          child: VideoPlayer(_videoController!),
+        ),
+      );
+    }
+    return CachedNetworkImage(
+      imageUrl: detail.cover,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      placeholder: (context, url) => Skeletonizer(
+        enabled: true,
+        child: ColoredBox(color: context.appColors.ink2),
+      ),
+      errorBuilder: (context, url, error) =>
+          ColoredBox(color: context.appColors.ink2),
+    );
+  }
+
+  // ─── Below-video section ────────────────────────────────────────────────────
 
   Widget _buildBelowSection(
     AsyncValue<AnchorDetailModel> detailAsync,
     AsyncValue<BannerModel> bannerAsync,
   ) {
+    final colors = context.appColors;
     return detailAsync.when(
       loading: () => Center(
         child: Text(
           'anchor.detail.loading'.tr(),
-          style: TextStyle(color: context.appColors.text2),
+          style: AppTextStyles.mono(11).copyWith(
+            color: colors.text3,
+            letterSpacing: 1.4,
+          ),
         ),
       ),
       error: (_, _) => Center(
         child: Text(
           'anchor.detail.error.load_failed'.tr(),
-          style: TextStyle(color: context.appColors.text2),
+          style: AppTextStyles.mono(11).copyWith(color: colors.text3),
         ),
       ),
       data: (detail) => Column(
         children: [
-          if (detail.notice.isNotEmpty)
-            DiagonalSplitBanner(
-              leftColor: Colors.amber,
-              rightColor: Colors.yellow,
-              cutWidth: 10,
-              height: 20,
-              leftFlex: 1,
-              rightFlex: 4,
-              leftChild: Text(
-                'anchor.detail.info.notice_banner_label'.tr(),
-                style: context.textTheme.bodySmall?.copyWith(color: Colors.white),
-              ),
-              rightChild: Marquee(
-                text: detail.notice,
-                style: context.textTheme.bodySmall?.copyWith(color: Colors.black87),
-                scrollAxis: Axis.horizontal,
-                blankSpace: 30,
-                velocity: 50,
-              ),
-            ),
+          if (detail.notice.isNotEmpty) _buildNoticeBanner(detail.notice),
           _buildRefAppBanner(bannerAsync),
           _buildTabBar(),
           Expanded(
@@ -352,70 +439,442 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
     );
   }
 
+  /// Arena-themed notice bar: accent label pill on the left, scrolling text on the right.
+  Widget _buildNoticeBanner(String notice) {
+    final colors = context.appColors;
+    return Container(
+      height: 34,
+      decoration: BoxDecoration(
+        color: colors.surface,
+        border: Border(bottom: BorderSide(color: colors.line, width: 0.5)),
+      ),
+      child: Row(
+        children: [
+          // Label
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+            margin: const EdgeInsets.symmetric(vertical: 7),
+            decoration: BoxDecoration(
+              color: colors.accent,
+              borderRadius: const BorderRadius.only(
+                topRight: Radius.circular(4),
+                bottomRight: Radius.circular(4),
+              ),
+            ),
+            child: Text(
+              'anchor.detail.info.notice_banner_label'.tr().toUpperCase(),
+              style: AppTextStyles.mono(9).copyWith(
+                color: const Color(0xFF0E0E0E),
+                letterSpacing: 1.4,
+                height: 1,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          // Scrolling text
+          Expanded(
+            child: Marquee(
+              text: notice,
+              style: AppTextStyles.body(12).copyWith(color: colors.text2),
+              scrollAxis: Axis.horizontal,
+              blankSpace: 30,
+              velocity: 50,
+            ),
+          ),
+          const SizedBox(width: 12),
+        ],
+      ),
+    );
+  }
+
   Widget _buildRefAppBanner(AsyncValue<BannerModel> bannerAsync) {
     return bannerAsync.when(
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (e, st) => const SizedBox.shrink(),
       data: (banner) {
         final apps = banner.refApp
             .where((app) => app.name != null && app.name!.isNotEmpty)
             .toList();
-        if (apps.length == 2) {
-          return DiagonalSplitBanner(
-            leftColor: Color(0xff389628),
-            rightColor: Color(0xffE9225C),
-            cutWidth: 20,
-            height: 60,
-            leftChild: _RefAppButton(icon: apps[0].icon, name: apps[0].name!, url: apps[0].url),
-            rightChild: _RefAppButton(icon: apps[1].icon, name: apps[1].name!, url: apps[1].url),
-          );
-        } else if (apps.length == 1) {
-          return Container(
-            height: 60,
-            color: Colors.amberAccent,
-            child: Center(
-              child: _RefAppButton(icon: apps[0].icon, name: apps[0].name!, url: apps[0].url),
+        if (apps.isEmpty) return const SizedBox.shrink();
+
+        final colors = context.appColors;
+        return Container(
+          height: 56,
+          decoration: BoxDecoration(
+            color: colors.surface,
+            border: Border.symmetric(
+              horizontal: BorderSide(color: colors.line, width: 0.5),
             ),
-          );
-        }
-        return const SizedBox.shrink();
+          ),
+          child: Row(
+            children: [
+              for (int i = 0; i < apps.length; i++) ...[
+                if (i > 0)
+                  VerticalDivider(
+                    width: 1,
+                    thickness: 0.5,
+                    color: colors.lineStrong,
+                    indent: 12,
+                    endIndent: 12,
+                  ),
+                Expanded(
+                  child: Center(
+                    child: _RefAppButton(
+                      icon: apps[i].icon,
+                      name: apps[i].name!,
+                      url: apps[i].url,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
       },
     );
   }
 
   Widget _buildTabBar() {
-    return TabBar(
-      controller: _tabController,
-      indicatorColor: context.appColors.accent,
-      indicatorSize: TabBarIndicatorSize.label,
-      tabs: [
-        Tab(text: 'anchor.detail.tab.chats'.tr()),
-        Tab(text: 'anchor.detail.tab.info'.tr()),
-      ],
+    final colors = context.appColors;
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: colors.line, width: 0.5)),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        isScrollable: true,
+        tabAlignment: TabAlignment.center,
+        // Gap-24 between tabs (right-only label padding simulates flex gap)
+        labelPadding: const EdgeInsets.symmetric(horizontal: 12),
+        indicator: UnderlineTabIndicator(
+          borderSide: BorderSide(color: colors.accent, width: 2),
+          insets: EdgeInsets.zero,
+        ),
+        indicatorSize: TabBarIndicatorSize.label,
+        labelStyle: AppTextStyles.display(16, context).copyWith(
+          letterSpacing: 0.08 * 16,
+        ),
+        unselectedLabelStyle: AppTextStyles.display(16, context).copyWith(
+          letterSpacing: 0.08 * 16,
+        ),
+        labelColor: colors.text,
+        unselectedLabelColor: colors.text3,
+        dividerColor: Colors.transparent,
+        tabs: [
+          Tab(
+            height: 44,
+            child: Text('anchor.detail.tab.chats'.tr().toUpperCase()),
+          ),
+          Tab(
+            height: 44,
+            child: Text('anchor.detail.tab.info'.tr().toUpperCase()),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildInfoTab(AnchorDetailModel detail) {
+    final colors = context.appColors;
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(22, 20, 22, 16),
       children: [
-        _AnchorInfoHeader(detail: detail),
+        // Avatar + name row
+        Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: colors.accent, width: 2),
+              ),
+              child: ClipOval(
+                child: CachedNetworkImage(
+                  imageUrl: detail.avatarUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Skeletonizer(
+                    enabled: true,
+                    child: ColoredBox(color: colors.surface2),
+                  ),
+                  errorBuilder: (context, url, error) =>
+                      ColoredBox(color: colors.surface2),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    detail.nickname,
+                    style: AppTextStyles.display(18, context)
+                        .copyWith(color: colors.text),
+                  ),
+                  const SizedBox(height: 3),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.local_fire_department_rounded,
+                        color: colors.accentEcho,
+                        size: 13,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${detail.collect}',
+                        style: AppTextStyles.mono(11)
+                            .copyWith(color: colors.text2),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            if (detail.isLive == 1) const _LivePulseBadge(),
+          ],
+        ),
         const SizedBox(height: 20),
-        Divider(height: 0, color: context.appColors.lineStrong),
+        Divider(height: 0, color: colors.lineStrong),
+        const SizedBox(height: 18),
+        _InfoRow(
+          label: 'anchor.detail.info.title'.tr(),
+          value: detail.title,
+        ),
         const SizedBox(height: 16),
-        _InfoRow(label: 'anchor.detail.info.title'.tr(), value: detail.title),
-        const SizedBox(height: 16),
-        _InfoRow(label: 'anchor.detail.info.followers'.tr(), value: '${detail.collect}'),
-        // if (detail.matchId.isNotEmpty) ...[
-        //   const SizedBox(height: 16),
-        //   _InfoRow(label: 'anchor.detail.info.match_id'.tr(), value: detail.matchId),
-        // ],
-        // const SizedBox(height: 16),
-        // _InfoRow(label: 'anchor.detail.info.updated'.tr(), value: detail.updated),
+        _InfoRow(
+          label: 'anchor.detail.info.followers'.tr(),
+          value: '${detail.collect}',
+        ),
       ],
     );
   }
 }
+
+// ─── Frosted glass icon button ───────────────────────────────────────────────
+
+class _FrostedIconButton extends StatelessWidget {
+  const _FrostedIconButton({
+    required this.onTap,
+    required this.child,
+    this.size = 38,
+    this.borderRadius,
+  });
+
+  final VoidCallback onTap;
+  final Widget child;
+  final double size;
+  final double? borderRadius;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final radius = borderRadius ?? size / 2;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(radius),
+          border: Border.all(color: colors.lineStrong, width: 0.5),
+        ),
+        child: Center(child: child),
+      ),
+    );
+  }
+}
+
+// ─── Live pulse badge ─────────────────────────────────────────────────────────
+
+class _LivePulseBadge extends StatefulWidget {
+  const _LivePulseBadge();
+
+  @override
+  State<_LivePulseBadge> createState() => _LivePulseBadgeState();
+}
+
+class _LivePulseBadgeState extends State<_LivePulseBadge>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _anim;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _anim = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..repeat(reverse: true);
+    _scale = Tween<double>(begin: 1.0, end: 0.7).animate(
+      CurvedAnimation(parent: _anim, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _anim.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: colors.live,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ScaleTransition(
+            scale: _scale,
+            child: Container(
+              width: 6,
+              height: 6,
+              decoration: const BoxDecoration(
+                color: Color(0xFF0E0E0E),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          const SizedBox(width: 5),
+          Text(
+            'anchor.detail.live'.tr(),
+            style: AppTextStyles.display(10, context).copyWith(
+              color: const Color(0xFF0E0E0E),
+              letterSpacing: 0.12 * 10,
+              height: 1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Follower count chip ─────────────────────────────────────────────────────
+
+class _FollowerChip extends StatelessWidget {
+  const _FollowerChip({required this.count});
+
+  final int count;
+
+  String _format(int n) {
+    if (n >= 10000) return '${(n / 1000).toStringAsFixed(0)}K';
+    if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}K';
+    return '$n';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: colors.lineStrong, width: 0.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.remove_red_eye_outlined, color: colors.text, size: 11),
+          const SizedBox(width: 4),
+          Text(
+            _format(count),
+            style: AppTextStyles.mono(11).copyWith(color: colors.text),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Anchor strip overlaid on video bottom ───────────────────────────────────
+
+class _AnchorVideoStrip extends StatelessWidget {
+  const _AnchorVideoStrip({required this.detail});
+
+  final AnchorDetailModel detail;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    return Row(
+      children: [
+        // Avatar
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: colors.accent, width: 2),
+          ),
+          child: ClipOval(
+            child: CachedNetworkImage(
+              imageUrl: detail.avatarUrl,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Skeletonizer(
+                enabled: true,
+                child: ColoredBox(color: colors.surface2),
+              ),
+              errorBuilder: (context, url, error) =>
+                  ColoredBox(color: colors.surface2),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        // Name + subtitle
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      detail.nickname.toUpperCase(),
+                      style: AppTextStyles.display(17, context)
+                          .copyWith(color: colors.text),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Container(
+                    width: 5,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: colors.accent,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 3),
+              Text(
+                detail.title.toUpperCase(),
+                style: AppTextStyles.mono(10).copyWith(
+                  color: colors.text2,
+                  letterSpacing: 1.4,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Ref-app button ───────────────────────────────────────────────────────────
 
 class _RefAppButton extends StatelessWidget {
   final String icon;
@@ -429,80 +888,20 @@ class _RefAppButton extends StatelessWidget {
       onTap: () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        spacing: 10,
         children: [
           CachedNetworkImage(imageUrl: icon, height: 35),
-          Text(name, style: context.textTheme.bodyMedium?.copyWith(color: Colors.white)),
+          const SizedBox(width: 10),
+          Text(
+            name,
+            style: context.textTheme.bodyMedium?.copyWith(color: Colors.white),
+          ),
         ],
       ),
     );
   }
 }
 
-class _LiveBadge extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(color: context.appColors.accent, borderRadius: BorderRadius.circular(4)),
-      child: Text(
-        'anchor.detail.live'.tr(),
-        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5),
-      ),
-    );
-  }
-}
-
-class _AnchorInfoHeader extends StatelessWidget {
-  const _AnchorInfoHeader({required this.detail});
-
-  final AnchorDetailModel detail;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 52,
-          height: 52,
-          decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(width: 1)),
-          child: ClipOval(
-            child: CachedNetworkImage(
-              imageUrl: detail.avatarUrl,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Skeletonizer(
-                enabled: true,
-                child: const ColoredBox(color: Colors.grey),
-              ),
-              errorWidget: (context, url, error) => ColoredBox(color: context.appColors.lineStrong),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                detail.nickname,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  const Icon(Icons.local_fire_department, color: Colors.orange, size: 14),
-                  const SizedBox(width: 4),
-                  Text('${detail.collect}', style: const TextStyle(fontSize: 12)),
-                ],
-              ),
-            ],
-          ),
-        ),
-        if (detail.isLive == 1) _LiveBadge(),
-      ],
-    );
-  }
-}
+// ─── Info row ────────────────────────────────────────────────────────────────
 
 class _InfoRow extends StatelessWidget {
   const _InfoRow({required this.label, required this.value});
@@ -512,15 +911,22 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: context.textTheme.labelMedium?.copyWith(color: context.appColors.text2),
+          style: AppTextStyles.mono(10).copyWith(
+            color: colors.text3,
+            letterSpacing: 1.6,
+          ),
         ),
-        const SizedBox(height: 4),
-        Text(value, style: context.textTheme.bodyMedium),
+        const SizedBox(height: 5),
+        Text(
+          value,
+          style: context.textTheme.bodyMedium?.copyWith(color: colors.text),
+        ),
       ],
     );
   }
