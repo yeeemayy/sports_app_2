@@ -51,6 +51,7 @@
     "anchor": "主播",
     "news": "新闻",
     "data": "数据",
+    "league": "联赛",
     "profile": "个人",
     "live": "直播",
     "me": "我的"
@@ -830,5 +831,97 @@
     "locked": "● 赛事已结束 · 预测已关闭",
     "login_required": "登录后参与预测",
     "vote_to_see": "投票后查看其他人的预测"
+  },
+  "league": {
+    "title": "联赛",
+    "hot": "热门联赛",
+    "all": "全部 →",
+    "by_country": "按国家",
+    "regions": "{n} 个地区",
+    "competitions": "{n} 个赛事",
+    "search_hint": "搜索联赛、球队、球员...",
+    "empty": "暂无数据",
+    "coming_soon": "即将上线",
+    "search_title": "搜索",
+    "results": "{n} 个结果",
+    "recent": "最近",
+    "clear": "清除",
+    "all_filter": "全部",
+    "type_team": "球队",
+    "type_league": "联赛",
+    "type_player": "球员",
+    "tabs": {
+      "standings": "积分榜",
+      "top_scorers": "射手榜",
+      "top_players": "球员榜",
+      "team_stats": "球队数据",
+      "squads": "阵容"
+    },
+    "zone": {
+      "ucl": "UCL",
+      "europa": "欧联",
+      "relegation": "降级区"
+    },
+    "col": {
+      "club": "球队",
+      "team": "球队",
+      "pts": "积分",
+      "won": "胜",
+      "draw": "平",
+      "loss": "负",
+      "gd": "净胜",
+      "played": "场",
+      "win_rate": "胜率",
+      "game_back": "差距",
+      "ppg": "场均分",
+      "papg": "场均失分",
+      "poss": "控球%",
+      "shots": "射门",
+      "pass": "传球%",
+      "fg": "投篮%",
+      "three_p": "三分%",
+      "reb": "篮板",
+      "ast": "助攻"
+    },
+    "player": {
+      "goals": "球",
+      "assists": "助攻",
+      "ppg": "场均分",
+      "rpg": "场均篮板",
+      "apg": "场均助攻",
+      "matches": "场次",
+      "season_stats": "赛季数据",
+      "club": "所在球队",
+      "career": "职业生涯"
+    },
+    "team": {
+      "total_players": "球员总数",
+      "foreign": "外援",
+      "est": "创立"
+    },
+    "squad": {
+      "player": "球员",
+      "num": "号码",
+      "nat": "国籍",
+      "age": "年龄",
+      "height": "身高",
+      "weight": "体重",
+      "pos": "位置"
+    },
+    "stat": {
+      "rounds": "轮次",
+      "goals": "进球",
+      "clubs": "球队",
+      "matches": "场次",
+      "games": "场次",
+      "teams": "球队",
+      "avg_ppg": "场均得分",
+      "season": "赛季"
+    },
+    "season_picker": {
+      "title": "赛季",
+      "apply": "确认",
+      "live": "进行中"
+    }
   }
 }

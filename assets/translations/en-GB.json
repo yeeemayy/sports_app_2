@@ -51,6 +51,7 @@
     "anchor": "Anchor",
     "news": "News",
     "data": "Data",
+    "league": "League",
     "profile": "Profile",
     "live": "LIVE",
     "me": "ME"
@@ -830,5 +831,97 @@
     "locked": "● MATCH ENDED · VOTING CLOSED",
     "login_required": "LOGIN TO PREDICT",
     "vote_to_see": "VOTE TO SEE OTHER PEOPLE'S PICKS"
+  },
+  "league": {
+    "title": "LEAGUES",
+    "hot": "HOT LEAGUES",
+    "all": "ALL →",
+    "by_country": "BY COUNTRY",
+    "regions": "{n} REGIONS",
+    "competitions": "{n} COMPETITIONS",
+    "search_hint": "Search leagues, teams, players...",
+    "empty": "No data available",
+    "coming_soon": "Coming Soon",
+    "search_title": "SEARCH",
+    "results": "{n} RESULTS",
+    "recent": "RECENT",
+    "clear": "CLEAR",
+    "all_filter": "ALL",
+    "type_team": "TEAM",
+    "type_league": "LEAGUE",
+    "type_player": "PLAYER",
+    "tabs": {
+      "standings": "STANDINGS",
+      "top_scorers": "TOP SCORERS",
+      "top_players": "TOP PLAYERS",
+      "team_stats": "TEAM STATS",
+      "squads": "SQUADS"
+    },
+    "zone": {
+      "ucl": "UCL",
+      "europa": "EUROPA",
+      "relegation": "RELEGATION"
+    },
+    "col": {
+      "club": "CLUB",
+      "team": "TEAM",
+      "pts": "PTS",
+      "won": "W",
+      "draw": "D",
+      "loss": "L",
+      "gd": "GD",
+      "played": "P",
+      "win_rate": "WIN%",
+      "game_back": "GB",
+      "ppg": "PPG",
+      "papg": "PAPG",
+      "poss": "POSS%",
+      "shots": "SHOTS",
+      "pass": "PASS%",
+      "fg": "FG%",
+      "three_p": "3P%",
+      "reb": "REB",
+      "ast": "AST"
+    },
+    "player": {
+      "goals": "G",
+      "assists": "AST",
+      "ppg": "PPG",
+      "rpg": "RPG",
+      "apg": "APG",
+      "matches": "MATCHES",
+      "season_stats": "SEASON STATS",
+      "club": "CLUB",
+      "career": "CAREER"
+    },
+    "team": {
+      "total_players": "TOTAL PLAYERS",
+      "foreign": "FOREIGN",
+      "est": "EST."
+    },
+    "squad": {
+      "player": "PLAYER",
+      "num": "#",
+      "nat": "NAT",
+      "age": "AGE",
+      "height": "HEIGHT",
+      "weight": "WEIGHT",
+      "pos": "POS"
+    },
+    "stat": {
+      "rounds": "ROUNDS",
+      "goals": "GOALS",
+      "clubs": "CLUBS",
+      "matches": "MATCHES",
+      "games": "GAMES",
+      "teams": "TEAMS",
+      "avg_ppg": "AVG PPG",
+      "season": "SEASON"
+    },
+    "season_picker": {
+      "title": "SEASON",
+      "apply": "APPLY",
+      "live": "LIVE"
+    }
   }
 }

@@ -14,6 +14,15 @@ extension ContextTheme on BuildContext {
 extension ContextLocale on BuildContext {
   /// Maps the current app locale to the API locale param ('cn' or 'en').
   String get localeCode => locale.languageCode == 'zh' ? 'cn' : 'en';
+
+  /// Returns [cn] when the current locale is Chinese and [cn] is non-empty,
+  /// otherwise falls back to [en].
+  String localizedName({required String en, String? cn}) {
+    if (locale.languageCode == 'zh' && cn != null && cn.isNotEmpty) {
+      return cn;
+    }
+    return en;
+  }
 }
 
 extension ContextDialogs on BuildContext {

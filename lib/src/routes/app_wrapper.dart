@@ -20,6 +20,7 @@ class AppWrapper extends ConsumerWidget {
     (labelKey: 'nav.home', icon: Icons.home_outlined, activeIcon: Icons.home, path: AppRoutes.home),
     (labelKey: 'nav.live', icon: Icons.play_circle_outline, activeIcon: Icons.play_circle, path: AppRoutes.anchor),
     (labelKey: 'nav.news', icon: Icons.article_outlined, activeIcon: Icons.article, path: AppRoutes.news),
+    (labelKey: 'nav.league', icon: Icons.emoji_events_outlined, activeIcon: Icons.emoji_events, path: AppRoutes.league),
     (labelKey: 'nav.me', icon: Icons.person_outline, activeIcon: Icons.person, path: AppRoutes.profile),
   ];
 
@@ -31,6 +32,7 @@ class AppWrapper extends ConsumerWidget {
         ref.invalidate(newsFirstPageProvider(context.localeCode));
       }
     }
+    // index 2 = news
     if (index == 2 && index != navigationShell.currentIndex) {
       ref.read(newsSearchProvider.notifier).refresh();
     }

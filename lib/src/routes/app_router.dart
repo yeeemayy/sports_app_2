@@ -19,8 +19,17 @@ import 'package:sports_app/src/features/auth/presentation/forgot_password_screen
 import 'package:sports_app/src/features/auth/presentation/login_screen.dart';
 import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:sports_app/src/features/auth/presentation/register_screen.dart';
-import 'package:sports_app/src/features/data/presentation/data_screen.dart';
 import 'package:sports_app/src/features/event/presentation/event_screen.dart';
+import 'package:sports_app/src/features/league/domain/league_sport.dart';
+import 'package:sports_app/src/features/league/domain/models/country_model.dart';
+import 'package:sports_app/src/features/league/domain/models/squad_player.dart';
+import 'package:sports_app/src/features/league/presentation/country_leagues_screen.dart';
+import 'package:sports_app/src/features/league/presentation/hot_leagues_browse_screen.dart';
+import 'package:sports_app/src/features/league/presentation/league_detail_screen.dart';
+import 'package:sports_app/src/features/league/presentation/league_screen.dart';
+import 'package:sports_app/src/features/league/presentation/player_detail_screen.dart';
+import 'package:sports_app/src/features/league/presentation/search_leagues_screen.dart';
+import 'package:sports_app/src/features/league/presentation/team_detail_screen.dart';
 import 'package:sports_app/src/features/home/presentation/anchor_screen.dart';
 import 'package:sports_app/src/features/news/presentation/news_category_screen.dart';
 import 'package:sports_app/src/features/news/presentation/news_detail_screen.dart';
@@ -104,14 +113,15 @@ GoRouter appRouter(AppRouterRef ref) {
               ),
             ],
           ),
-          // StatefulShellBranch(
-          //   routes: <RouteBase>[
-          //     GoRoute(
-          //       path: AppRoutes.data,
-          //       builder: (BuildContext context, GoRouterState state) => const DataScreen(),
-          //     ),
-          //   ],
-          // ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: AppRoutes.league,
+                builder: (BuildContext context, GoRouterState state) =>
+                    const LeagueScreen(),
+              ),
+            ],
+          ),
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(
@@ -146,6 +156,71 @@ GoRouter appRouter(AppRouterRef ref) {
           ),
         ],
       ),
+      // ── League pushed routes ──────────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.leagueCountry,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) {
+          final sport = LeagueSport.fromString(state.pathParameters['sport']!);
+          final countryId = state.pathParameters['countryId']!;
+          final country = state.extra as CountryModel?;
+          return CountryLeaguesScreen(
+            sport: sport,
+            countryId: countryId,
+            countryName: country?.name ?? countryId,
+            countryNameCn: country?.cnName,
+            countryLogoUrl: country?.logo,
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.leagueDetail,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) {
+          final sport = LeagueSport.fromString(state.pathParameters['sport']!);
+          final leagueId = state.pathParameters['leagueId']!;
+          return LeagueDetailScreen(sport: sport, leagueId: leagueId);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.leagueTeam,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) {
+          final sport = LeagueSport.fromString(state.pathParameters['sport']!);
+          final teamId = state.pathParameters['teamId']!;
+          return TeamDetailScreen(sport: sport, teamId: teamId);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.leaguePlayer,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) {
+          final sport = LeagueSport.fromString(state.pathParameters['sport']!);
+          final playerId = state.pathParameters['playerId']!;
+          final extra = state.extra;
+          return PlayerDetailScreen(
+            sport: sport,
+            playerId: playerId,
+            squadPlayer: extra is SquadPlayer ? extra : null,
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.leagueHotBrowse,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) {
+          final extra = state.extra;
+          return HotLeaguesBrowseScreen(
+            initialSport: extra is LeagueSport ? extra : null,
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.leagueSearch,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const SearchLeaguesScreen(),
+      ),
+      // ── Match detail routes ───────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.footballMatchDetail,
         builder: (context, state) => FootballMatchDetailScreen(

@@ -4,7 +4,25 @@ abstract final class AppRoutes {
   static const anchor = '/anchor';
   static const news = '/news';
   static const data = '/data';
+  static const league = '/league';
   static const profile = '/profile';
+
+  // League sub-routes (pushed outside shell)
+  static const leagueCountry = '/league/country/:sport/:countryId';
+  static const leagueDetail = '/league/detail/:sport/:leagueId';
+  static const leagueTeam = '/league/team/:sport/:teamId';
+  static const leaguePlayer = '/league/player/:sport/:playerId';
+  static const leagueHotBrowse = '/league/hot';
+  static const leagueSearch = '/league/search';
+
+  static String leagueCountryPath(String sport, String countryId) =>
+      '/league/country/$sport/$countryId';
+  static String leagueDetailPath(String sport, String leagueId) =>
+      '/league/detail/$sport/$leagueId';
+  static String leagueTeamPath(String sport, String teamId) =>
+      '/league/team/$sport/$teamId';
+  static String leaguePlayerPath(String sport, String playerId) =>
+      '/league/player/$sport/$playerId';
 
   // Profile sub-routes (relative)
   static const profileEdit = 'edit';
