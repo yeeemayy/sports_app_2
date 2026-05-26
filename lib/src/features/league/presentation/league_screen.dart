@@ -15,6 +15,20 @@ import 'package:sports_app/src/routes/app_routes.dart';
 
 const _kPad = 22.0;
 
+/// Maps [SportType] → [LeagueSport].
+LeagueSport _toLs(SportType s) => switch (s) {
+  SportType.football => LeagueSport.football,
+  SportType.basketball => LeagueSport.basketball,
+  SportType.tennis => LeagueSport.tennis,
+  SportType.cricket => LeagueSport.cricket,
+  SportType.baseball => LeagueSport.baseball,
+  SportType.volleyball => LeagueSport.volleyball,
+  SportType.badminton => LeagueSport.badminton,
+  SportType.tableTennis => LeagueSport.tableTennis,
+  SportType.iceHockey => LeagueSport.iceHockey,
+  SportType.amFootball => LeagueSport.amFootball,
+};
+
 class LeagueScreen extends ConsumerStatefulWidget {
   const LeagueScreen({super.key});
 
@@ -29,13 +43,21 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final hotAsync = _sport == LeagueSport.football
-        ? ref.watch(footballHotLeaguesProvider)
-        : ref.watch(basketballHotLeaguesProvider);
+    // ── Hot leagues provider ──
+    final AsyncValue<List<LeagueItem>> hotAsync = switch (_sport) {
+      LeagueSport.football => ref.watch(footballHotLeaguesProvider),
+      LeagueSport.basketball => ref.watch(basketballHotLeaguesProvider),
+      final s => ref.watch(sportHotLeaguesProvider(sport: s)),
+    };
 
-    final countriesAsync = _sport == LeagueSport.football
-        ? ref.watch(footballCountriesProvider)
-        : ref.watch(basketballCountriesProvider);
+    // ── Browse (countries / categories) provider ──
+    final AsyncValue<List<CountryModel>> countriesAsync = switch (_sport) {
+      LeagueSport.football => ref.watch(footballCountriesProvider),
+      LeagueSport.basketball => ref.watch(basketballCountriesProvider),
+      _ when _sport.usesCategoryBrowse == null =>
+        const AsyncData([]),
+      final s => ref.watch(sportBrowseItemsProvider(sport: s)),
+    };
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -93,32 +115,12 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
                 separatorBuilder: (_, _) => const SizedBox(width: 10),
                 itemBuilder: (context, i) {
                   final s = _sportList[i];
-                  final isSupportedSport = s == SportType.football ||
-                      s == SportType.basketball;
-                  final isActive = (_sport == LeagueSport.football &&
-                          s == SportType.football) ||
-                      (_sport == LeagueSport.basketball &&
-                          s == SportType.basketball);
+                  final ls = _toLs(s);
+                  final isActive = _sport == ls;
                   return _SportFilterChip(
                     sport: s,
                     active: isActive,
-                    supported: isSupportedSport,
-                    onTap: () {
-                      if (!isSupportedSport) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('league.coming_soon'.tr()),
-                            duration: const Duration(seconds: 1),
-                          ),
-                        );
-                        return;
-                      }
-                      setState(() {
-                        _sport = s == SportType.football
-                            ? LeagueSport.football
-                            : LeagueSport.basketball;
-                      });
-                    },
+                    onTap: () => setState(() => _sport = ls),
                   );
                 },
               ),
@@ -194,60 +196,67 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
 
           const SliverToBoxAdapter(child: SizedBox(height: 20)),
 
-          // ── By Country heading ───────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(_kPad, 0, _kPad, 14),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Expanded(
-                    child: Text(
-                      'league.by_country'.tr(),
-                      style: AppTextStyles.display(20, context)
-                          .copyWith(color: context.appColors.text),
-                    ),
-                  ),
-                  countriesAsync.maybeWhen(
-                    data: (c) => Text(
-                      'league.regions'.tr(namedArgs: {'n': '${c.length}'}),
-                      style: AppTextStyles.mono(10).copyWith(
-                        color: context.appColors.text3,
-                        letterSpacing: 10 * 0.14,
+          // ── By Country / Category heading ────────────────────────────────
+          if (_sport.usesCategoryBrowse != null)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(_kPad, 0, _kPad, 14),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _sport.usesCategoryBrowse!
+                            ? 'league.by_category'.tr()
+                            : 'league.by_country'.tr(),
+                        style: AppTextStyles.display(20, context)
+                            .copyWith(color: context.appColors.text),
                       ),
                     ),
-                    orElse: () => const SizedBox.shrink(),
-                  ),
-                ],
+                    countriesAsync.maybeWhen(
+                      data: (c) => c.isEmpty
+                          ? const SizedBox.shrink()
+                          : Text(
+                              'league.regions'.tr(namedArgs: {'n': '${c.length}'}),
+                              style: AppTextStyles.mono(10).copyWith(
+                                color: context.appColors.text3,
+                                letterSpacing: 10 * 0.14,
+                              ),
+                            ),
+                      orElse: () => const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
 
-          // ── By Country grid ──────────────────────────────────────────────
-          countriesAsync.when(
-            loading: () => SliverToBoxAdapter(child: _CountriesShimmer()),
-            error: (_, _) => const SliverToBoxAdapter(child: SizedBox.shrink()),
-            data: (countries) => SliverPadding(
-              padding: const EdgeInsets.fromLTRB(_kPad, 0, _kPad, 0),
-              sliver: SliverGrid(
-                gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  childAspectRatio: 3.2,
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, i) => _CountryTile(
-                    country: countries[i],
-                    sport: _sport,
+          // ── By Country / Category grid ───────────────────────────────────
+          if (_sport.usesCategoryBrowse != null)
+            countriesAsync.when(
+              loading: () => SliverToBoxAdapter(child: _CountriesShimmer()),
+              error: (_, _) =>
+                  const SliverToBoxAdapter(child: SizedBox.shrink()),
+              data: (countries) => SliverPadding(
+                padding: const EdgeInsets.fromLTRB(_kPad, 0, _kPad, 0),
+                sliver: SliverGrid(
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    childAspectRatio: 3.2,
                   ),
-                  childCount: countries.length,
+                  delegate: SliverChildBuilderDelegate(
+                    (context, i) => _CountryTile(
+                      country: countries[i],
+                      sport: _sport,
+                    ),
+                    childCount: countries.length,
+                  ),
                 ),
               ),
             ),
-          ),
 
           const SliverToBoxAdapter(child: SizedBox(height: 32)),
         ],
@@ -262,13 +271,11 @@ class _SportFilterChip extends StatelessWidget {
   const _SportFilterChip({
     required this.sport,
     required this.active,
-    required this.supported,
     required this.onTap,
   });
 
   final SportType sport;
   final bool active;
-  final bool supported;
   final VoidCallback onTap;
 
   @override
@@ -296,9 +303,7 @@ class _SportFilterChip extends StatelessWidget {
               size: 20,
               color: active
                   ? context.appColors.accent
-                  : supported
-                      ? context.appColors.text2
-                      : context.appColors.text3,
+                  : context.appColors.text2,
             ),
             const SizedBox(height: 8),
             Text(
@@ -306,9 +311,7 @@ class _SportFilterChip extends StatelessWidget {
               style: AppTextStyles.mono(8).copyWith(
                 color: active
                     ? context.appColors.accent
-                    : supported
-                        ? context.appColors.text2
-                        : context.appColors.text3,
+                    : context.appColors.text2,
                 letterSpacing: 8 * 0.1,
               ),
             ),
@@ -335,7 +338,7 @@ class _HotLeagueCard extends StatelessWidget {
         extra: league,
       ),
       child: Container(
-        constraints: BoxConstraints(minWidth: 200),
+        constraints: const BoxConstraints(minWidth: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: context.appColors.surface,
@@ -357,7 +360,7 @@ class _HotLeagueCard extends StatelessWidget {
                       .copyWith(color: context.appColors.text, height: 1),
                 ),
                 const SizedBox(height: 5),
-                if (league.nameEnShort != null)
+                if (league.nameEnShort != null && league.nameEnShort!.isNotEmpty)
                   Text(
                     league.nameEnShort!.toUpperCase(),
                     style: AppTextStyles.mono(9).copyWith(
@@ -374,7 +377,7 @@ class _HotLeagueCard extends StatelessWidget {
   }
 }
 
-// ─── Country tile ─────────────────────────────────────────────────────────────
+// ─── Country / Category tile ──────────────────────────────────────────────────
 
 class _CountryTile extends StatelessWidget {
   const _CountryTile({required this.country, required this.sport});
@@ -422,7 +425,9 @@ class _CountryTile extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    context.localizedName(en: country.name, cn: country.cnName).toUpperCase(),
+                    context
+                        .localizedName(en: country.name, cn: country.cnName)
+                        .toUpperCase(),
                     style: AppTextStyles.display(13, context)
                         .copyWith(color: context.appColors.text, height: 1),
                     maxLines: 1,

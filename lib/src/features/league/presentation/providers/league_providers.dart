@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sports_app/src/features/league/data/league_repository.dart';
+import 'package:sports_app/src/features/league/domain/league_sport.dart';
 import 'package:sports_app/src/features/league/domain/models/basketball_player_stat.dart';
 import 'package:sports_app/src/features/league/domain/models/basketball_standings_model.dart';
 import 'package:sports_app/src/features/league/domain/models/basketball_team_stat.dart';
@@ -9,8 +10,10 @@ import 'package:sports_app/src/features/league/domain/models/football_player_det
 import 'package:sports_app/src/features/league/domain/models/football_player_stat.dart';
 import 'package:sports_app/src/features/league/domain/models/football_standings_model.dart';
 import 'package:sports_app/src/features/league/domain/models/football_team_stat.dart';
+import 'package:sports_app/src/features/league/domain/models/generic_standings_model.dart';
 import 'package:sports_app/src/features/league/domain/models/league_detail_model.dart';
 import 'package:sports_app/src/features/league/domain/models/league_item.dart';
+import 'package:sports_app/src/features/league/domain/models/simple_team_detail.dart';
 import 'package:sports_app/src/features/league/domain/models/squad_player.dart';
 import 'package:sports_app/src/features/league/domain/models/team_detail_model.dart';
 
@@ -140,3 +143,52 @@ Future<List<SquadPlayer>> basketballSquad(
   required String teamId,
 }) =>
     ref.read(leagueRepositoryProvider).getBasketballSquad(teamId);
+
+// ─── Generic (Tennis, Cricket, Baseball, Volleyball, Badminton,
+//     Table Tennis, Ice Hockey, American Football) ────────────────────────
+
+@riverpod
+Future<List<LeagueItem>> sportHotLeagues(
+  SportHotLeaguesRef ref, {
+  required LeagueSport sport,
+}) =>
+    ref.read(leagueRepositoryProvider).getHotLeagues(sport);
+
+@riverpod
+Future<List<CountryModel>> sportBrowseItems(
+  SportBrowseItemsRef ref, {
+  required LeagueSport sport,
+}) =>
+    ref.read(leagueRepositoryProvider).getBrowseItems(sport);
+
+@riverpod
+Future<List<CountryLeagueItem>> sportLeaguesByBrowseId(
+  SportLeaguesByBrowseIdRef ref, {
+  required LeagueSport sport,
+  required String id,
+}) =>
+    ref.read(leagueRepositoryProvider).getLeaguesByBrowseId(sport, id);
+
+@riverpod
+Future<LeagueDetailModel> sportLeagueDetail(
+  SportLeagueDetailRef ref, {
+  required LeagueSport sport,
+  required String leagueId,
+}) =>
+    ref.read(leagueRepositoryProvider).getGenericLeagueDetail(sport, leagueId);
+
+@riverpod
+Future<Map<String, GenericStandingsGroup>> genericStandings(
+  GenericStandingsRef ref, {
+  required LeagueSport sport,
+  required String leagueId,
+}) =>
+    ref.read(leagueRepositoryProvider).getGenericStandings(sport, leagueId);
+
+@riverpod
+Future<SimpleTeamDetail> genericTeamDetail(
+  GenericTeamDetailRef ref, {
+  required LeagueSport sport,
+  required String teamId,
+}) =>
+    ref.read(leagueRepositoryProvider).getGenericTeamDetail(sport, teamId);

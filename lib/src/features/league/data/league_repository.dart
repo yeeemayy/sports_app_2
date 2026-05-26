@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sports_app/src/core/services/api_service.dart';
+import 'package:sports_app/src/features/league/domain/league_sport.dart';
 import 'package:sports_app/src/features/league/domain/models/basketball_player_stat.dart';
 import 'package:sports_app/src/features/league/domain/models/basketball_standings_model.dart';
 import 'package:sports_app/src/features/league/domain/models/basketball_team_stat.dart';
@@ -9,8 +10,10 @@ import 'package:sports_app/src/features/league/domain/models/football_player_det
 import 'package:sports_app/src/features/league/domain/models/football_player_stat.dart';
 import 'package:sports_app/src/features/league/domain/models/football_standings_model.dart';
 import 'package:sports_app/src/features/league/domain/models/football_team_stat.dart';
+import 'package:sports_app/src/features/league/domain/models/generic_standings_model.dart';
 import 'package:sports_app/src/features/league/domain/models/league_detail_model.dart';
 import 'package:sports_app/src/features/league/domain/models/league_item.dart';
+import 'package:sports_app/src/features/league/domain/models/simple_team_detail.dart';
 import 'package:sports_app/src/features/league/domain/models/squad_player.dart';
 import 'package:sports_app/src/features/league/domain/models/team_detail_model.dart';
 
@@ -208,5 +211,117 @@ class LeagueRepository {
     return list
         .map((j) => SquadPlayer.fromJson(j as Map<String, dynamic>))
         .toList();
+  }
+
+  // ─── Generic methods for Tennis, Cricket, Baseball, Volleyball,
+  //     Badminton, Table Tennis, Ice Hockey, American Football ──────────────
+
+  /// Fetches hot leagues for any sport using its [hotLeaguesListKey].
+  Future<List<LeagueItem>> getHotLeagues(LeagueSport sport) async {
+    final dio = _ref.read(sportsApiServiceProvider);
+    final res = await dio.get('/${sport.apiPath}/league/list');
+    final list = res.data[sport.hotLeaguesListKey] as List;
+    return list
+        .map((j) => LeagueItem.fromJson(j as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Returns categories or countries for the browse grid.
+  /// Returns empty list if [sport.usesCategoryBrowse] is null (Tennis).
+  Future<List<CountryModel>> getBrowseItems(LeagueSport sport) async {
+    if (sport.usesCategoryBrowse == null) return [];
+    final dio = _ref.read(sportsApiServiceProvider);
+
+    if (sport.usesCategoryBrowse!) {
+      // /category/list
+      final res =
+          await dio.get('/${sport.apiPath}/category/list');
+      final List raw;
+      if (sport == LeagueSport.badminton) {
+        raw = res.data['categoryList'] as List;
+      } else {
+        // cricket, table_tennis, hockey, amfootball → wrapped in 'data'
+        raw = res.data['data'] as List;
+      }
+      return raw
+          .map((j) =>
+              CountryModel.fromCategoryJson(j as Map<String, dynamic>))
+          .toList();
+    } else {
+      // /country/list  (baseball, volleyball)
+      final res =
+          await dio.get('/${sport.apiPath}/country/list');
+      final List raw = res.data['countryList'] as List;
+      return raw
+          .map((j) => CountryModel.fromJson(j as Map<String, dynamic>))
+          .toList();
+    }
+  }
+
+  /// Returns leagues under a given country or category id.
+  Future<List<CountryLeagueItem>> getLeaguesByBrowseId(
+      LeagueSport sport, String id) async {
+    final dio = _ref.read(sportsApiServiceProvider);
+    final useCategory = sport.usesCategoryBrowse ?? false;
+    final endpoint = useCategory
+        ? '/${sport.apiPath}/category/leagues/$id'
+        : '/${sport.apiPath}/country/leagues/$id';
+
+    final res = await dio.get(endpoint);
+
+    final List raw;
+    if (sport == LeagueSport.badminton ||
+        sport == LeagueSport.baseball ||
+        sport == LeagueSport.volleyball) {
+      // Returns array directly (no wrapper)
+      raw = res.data as List;
+    } else {
+      // cricket, table_tennis, hockey, amfootball → wrapped in 'data'
+      raw = res.data['data'] as List;
+    }
+
+    return raw
+        .map((j) =>
+            CountryLeagueItem.fromJson(j as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Fetches league detail for any new sport (all wrap in 'leagueDetails').
+  Future<LeagueDetailModel> getGenericLeagueDetail(
+      LeagueSport sport, String leagueId) async {
+    final dio = _ref.read(sportsApiServiceProvider);
+    final res =
+        await dio.get('/${sport.apiPath}/league/details/$leagueId');
+    return LeagueDetailModel.fromJson(
+        res.data['leagueDetails'] as Map<String, dynamic>);
+  }
+
+  /// Fetches standings for any new sport.  All use the same map format.
+  Future<Map<String, GenericStandingsGroup>> getGenericStandings(
+      LeagueSport sport, String leagueId) async {
+    final dio = _ref.read(sportsApiServiceProvider);
+    final res = await dio
+        .get('/${sport.apiPath}/league/season/standings/$leagueId');
+    final map = res.data['standings'] as Map<String, dynamic>? ?? {};
+    return map.map((key, value) => MapEntry(
+          key,
+          GenericStandingsGroup.fromJson(value as Map<String, dynamic>),
+        ));
+  }
+
+  /// Fetches team / participant detail for any new sport.
+  /// AmFootball wraps the object in a 'data' key.
+  Future<SimpleTeamDetail> getGenericTeamDetail(
+      LeagueSport sport, String teamId) async {
+    final dio = _ref.read(sportsApiServiceProvider);
+    final res =
+        await dio.get('/${sport.apiPath}/team/details/$teamId');
+    final Map<String, dynamic> data;
+    if (sport == LeagueSport.amFootball) {
+      data = res.data['data'] as Map<String, dynamic>;
+    } else {
+      data = res.data as Map<String, dynamic>;
+    }
+    return SimpleTeamDetail.fromJson(data);
   }
 }

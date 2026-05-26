@@ -15,4 +15,13 @@ class CountryModel with _$CountryModel {
 
   factory CountryModel.fromJson(Map<String, dynamic> json) =>
       _$CountryModelFromJson(json);
+
+  /// Creates a [CountryModel] from a /category/list item, which has no logo.
+  static CountryModel fromCategoryJson(Map<String, dynamic> json) =>
+      CountryModel(
+        id: (json['id'] as String?) ?? '',
+        name: (json['name'] as String?) ?? '',
+        logo: '',
+        cnName: json['cn_name'] as String?,
+      );
 }

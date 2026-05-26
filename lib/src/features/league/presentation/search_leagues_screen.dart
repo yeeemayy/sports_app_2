@@ -83,19 +83,12 @@ class _SearchLeaguesScreenState extends ConsumerState<SearchLeaguesScreen> {
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
               child: Row(
                 children: [
-                  GestureDetector(
-                    onTap: () => context.pop(),
-                    child: Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                            color: context.appColors.lineStrong, width: 0.5),
-                      ),
-                      child: Icon(Icons.chevron_left_rounded,
-                          size: 20, color: context.appColors.text),
-                    ),
+                  IconButton(
+                    onPressed: () => context.pop(),
+                    icon: Icon(Icons.arrow_circle_left_outlined,
+                        color: context.appColors.text),
+                    iconSize: 24,
+                    padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 10),
                   Expanded(

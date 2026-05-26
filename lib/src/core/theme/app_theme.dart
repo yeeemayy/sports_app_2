@@ -75,7 +75,7 @@ class AppColors extends ThemeExtension<AppColors> {
     lineStrong: Color(0x2E0E0E0E),
     text: Color(0xFF0E0E0E),
     text2: Color(0x9E0E0E0E),
-    text3: Color(0x5C0E0E0E),
+    text3: Color(0x800E0E0E),
     accent: Color(0xFFFF3C00),
     accentEcho: Color(0xFFFF7A45),
     live: Color(0xFFE11D48),

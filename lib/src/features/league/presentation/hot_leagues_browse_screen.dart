@@ -59,19 +59,12 @@ class _HotLeaguesBrowseScreenState
               padding: const EdgeInsets.fromLTRB(22, 10, 22, 16),
               child: Row(
                 children: [
-                  GestureDetector(
-                    onTap: () => context.pop(),
-                    child: Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                            color: context.appColors.lineStrong, width: 0.5),
-                      ),
-                      child: Icon(Icons.chevron_left_rounded,
-                          size: 20, color: context.appColors.text),
-                    ),
+                  IconButton(
+                    onPressed: () => context.pop(),
+                    icon: Icon(Icons.arrow_circle_left_outlined,
+                        color: context.appColors.text),
+                    iconSize: 24,
+                    padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 14),
                   Expanded(

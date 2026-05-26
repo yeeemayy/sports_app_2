@@ -28,11 +28,11 @@ class CountryLeaguesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final leaguesAsync = sport == LeagueSport.football
-        ? ref.watch(
-            footballLeaguesByCountryProvider(countryId: countryId))
-        : ref.watch(
-            basketballLeaguesByCountryProvider(countryId: countryId));
+    final leaguesAsync = switch (sport) {
+      LeagueSport.football => ref.watch(footballLeaguesByCountryProvider(countryId: countryId)),
+      LeagueSport.basketball => ref.watch(basketballLeaguesByCountryProvider(countryId: countryId)),
+      final s => ref.watch(sportLeaguesByBrowseIdProvider(sport: s, id: countryId)),
+    };
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -41,24 +41,14 @@ class CountryLeaguesScreen extends ConsumerWidget {
           children: [
             // Header
             Padding(
-              padding:
-                  const EdgeInsets.fromLTRB(22, 10, 22, 16),
+              padding: const EdgeInsets.fromLTRB(22, 10, 22, 16),
               child: Row(
                 children: [
-                  GestureDetector(
-                    onTap: () => context.pop(),
-                    child: Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                            color: context.appColors.lineStrong,
-                            width: 0.5),
-                      ),
-                      child: Icon(Icons.chevron_left_rounded,
-                          size: 20, color: context.appColors.text),
-                    ),
+                  IconButton(
+                    onPressed: () => context.pop(),
+                    icon: Icon(Icons.arrow_circle_left_outlined, color: context.appColors.text),
+                    iconSize: 24,
+                    padding: EdgeInsets.zero,
                   ),
                   const SizedBox(width: 14),
                   if (countryLogoUrl != null)
@@ -68,8 +58,7 @@ class CountryLeaguesScreen extends ConsumerWidget {
                         width: 28,
                         height: 28,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) =>
-                            const SizedBox.shrink(),
+                        errorBuilder: (_, _, _) => const SizedBox.shrink(),
                       ),
                     ),
                   if (countryLogoUrl != null) const SizedBox(width: 10),
@@ -79,19 +68,17 @@ class CountryLeaguesScreen extends ConsumerWidget {
                       children: [
                         Text(
                           context.localizedName(en: countryName, cn: countryNameCn).toUpperCase(),
-                          style: AppTextStyles.display(26, context)
-                              .copyWith(
-                                  color: context.appColors.text,
-                                  height: 1),
+                          style: AppTextStyles.display(
+                            26,
+                            context,
+                          ).copyWith(color: context.appColors.text, height: 1),
                         ),
                         leaguesAsync.maybeWhen(
                           data: (l) => Text(
-                            'league.competitions'.tr(
-                                namedArgs: {'n': '${l.length}'}),
-                            style: AppTextStyles.mono(10).copyWith(
-                              color: context.appColors.text3,
-                              letterSpacing: 10 * 0.14,
-                            ),
+                            'league.competitions'.tr(namedArgs: {'n': '${l.length}'}),
+                            style: AppTextStyles.mono(
+                              10,
+                            ).copyWith(color: context.appColors.text3, letterSpacing: 10 * 0.14),
                           ),
                           orElse: () => const SizedBox.shrink(),
                         ),
@@ -105,30 +92,24 @@ class CountryLeaguesScreen extends ConsumerWidget {
             // League list
             Expanded(
               child: leaguesAsync.when(
-                loading: () => const Center(
-                    child: CircularProgressIndicator()),
+                loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, _) => Center(
                   child: Text(
                     'league.empty'.tr(),
-                    style: AppTextStyles.body(14)
-                        .copyWith(color: context.appColors.text3),
+                    style: AppTextStyles.body(14).copyWith(color: context.appColors.text3),
                   ),
                 ),
                 data: (leagues) => leagues.isEmpty
                     ? Center(
                         child: Text(
                           'league.empty'.tr(),
-                          style: AppTextStyles.body(14)
-                              .copyWith(color: context.appColors.text3),
+                          style: AppTextStyles.body(14).copyWith(color: context.appColors.text3),
                         ),
                       )
                     : ListView.builder(
                         itemCount: leagues.length,
                         itemBuilder: (context, i) =>
-                            _CountryLeagueRow(
-                          item: leagues[i],
-                          sport: sport,
-                        ),
+                            _CountryLeagueRow(item: leagues[i], sport: sport),
                       ),
               ),
             ),
@@ -145,23 +126,31 @@ class _CountryLeagueRow extends StatelessWidget {
   final CountryLeagueItem item;
   final LeagueSport sport;
 
+  String? _compTypeKey(int? type) => switch (type) {
+    1 => 'league.comp_type_league',
+    2 => 'league.comp_type_cup',
+    3 => 'league.comp_type_friendly',
+    _ => null,
+  };
+
+  Color _compTypeColor(BuildContext context, int? type) => switch (type) {
+    1 => context.appColors.accent, // league — orange
+    2 => context.appColors.live, // cup — red
+    3 => context.appColors.success, // friendly — green
+    _ => context.appColors.live,
+  };
+
   @override
   Widget build(BuildContext context) {
-    final isCup = item.type == 2;
+    final compTypeKey = _compTypeKey(item.type);
+    final compTypeColor = _compTypeColor(context, item.type);
 
     return GestureDetector(
-      onTap: () => context.push(
-        AppRoutes.leagueDetailPath(sport.apiPath, item.id),
-        extra: item,
-      ),
+      onTap: () => context.push(AppRoutes.leagueDetailPath(sport.apiPath, item.id), extra: item),
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
         decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-                color: context.appColors.line, width: 0.5),
-          ),
+          border: Border(bottom: BorderSide(color: context.appColors.line, width: 0.5)),
         ),
         child: Row(
           children: [
@@ -171,8 +160,7 @@ class _CountryLeagueRow extends StatelessWidget {
                 width: 46,
                 height: 46,
                 fit: BoxFit.cover,
-                placeholder: (_, _) =>
-                    Container(color: context.appColors.surface2),
+                placeholder: (_, _) => Container(color: context.appColors.surface2),
                 errorBuilder: (_, _, _) => Container(
                   width: 46,
                   height: 46,
@@ -180,8 +168,11 @@ class _CountryLeagueRow extends StatelessWidget {
                     shape: BoxShape.circle,
                     color: context.appColors.surface2,
                   ),
-                  child: Icon(Icons.emoji_events_outlined,
-                      size: 20, color: context.appColors.text3),
+                  child: Icon(
+                    Icons.emoji_events_outlined,
+                    size: 20,
+                    color: context.appColors.text3,
+                  ),
                 ),
               ),
             ),
@@ -192,9 +183,10 @@ class _CountryLeagueRow extends StatelessWidget {
                 children: [
                   Text(
                     context.localizedName(en: item.name, cn: item.cnName),
-                    style: AppTextStyles.display(17, context)
-                        .copyWith(
-                            color: context.appColors.text, height: 1),
+                    style: AppTextStyles.display(
+                      17,
+                      context,
+                    ).copyWith(color: context.appColors.text, height: 1),
                   ),
                   const SizedBox(height: 7),
                   Row(
@@ -202,38 +194,24 @@ class _CountryLeagueRow extends StatelessWidget {
                       if (item.shortName != null) ...[
                         Text(
                           item.shortName!,
-                          style: AppTextStyles.mono(9).copyWith(
-                            color: context.appColors.text3,
-                            letterSpacing: 9 * 0.1,
-                          ),
+                          style: AppTextStyles.mono(
+                            9,
+                          ).copyWith(color: context.appColors.text3, letterSpacing: 9 * 0.1),
                         ),
                         _dot(context),
                       ],
-                      if (item.curRound != null &&
-                          item.roundCount != null &&
-                          !isCup) ...[
-                        Text(
-                          'GW ${item.curRound}/${item.roundCount}',
-                          style: AppTextStyles.mono(9).copyWith(
-                            color: context.appColors.text3,
-                          ),
-                        ),
-                      ],
-                      if (isCup)
+                      if (compTypeKey != null)
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 1),
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                           decoration: BoxDecoration(
-                            color: context.appColors.live
-                                .withValues(alpha: 0.12),
+                            color: compTypeColor.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            'CUP',
-                            style: AppTextStyles.mono(8).copyWith(
-                              color: context.appColors.live,
-                              letterSpacing: 8 * 0.1,
-                            ),
+                            compTypeKey.tr(),
+                            style: AppTextStyles.mono(
+                              8,
+                            ).copyWith(color: compTypeColor, letterSpacing: 8 * 0.1),
                           ),
                         ),
                     ],
@@ -241,8 +219,7 @@ class _CountryLeagueRow extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded,
-                size: 16, color: context.appColors.text3),
+            Icon(Icons.chevron_right_rounded, size: 16, color: context.appColors.text3),
           ],
         ),
       ),
@@ -250,14 +227,11 @@ class _CountryLeagueRow extends StatelessWidget {
   }
 
   Widget _dot(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6),
-        child: Container(
-          width: 3,
-          height: 3,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: context.appColors.lineStrong,
-          ),
-        ),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 6),
+    child: Container(
+      width: 3,
+      height: 3,
+      decoration: BoxDecoration(shape: BoxShape.circle, color: context.appColors.lineStrong),
+    ),
+  );
 }

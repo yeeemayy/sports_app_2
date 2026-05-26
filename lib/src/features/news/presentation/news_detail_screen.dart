@@ -97,16 +97,14 @@ class NewsDetailScreen extends ConsumerWidget {
               pinned: true,
               elevation: 0,
               surfaceTintColor: Colors.transparent,
-              leading: GestureDetector(
-                onTap: () => context.pop(),
-                child: Container(
-                  margin: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: colors.lineStrong, width: 0.5),
-                  ),
-                  child: Icon(Icons.arrow_circle_left_outlined, color: Colors.white, size: 24),
+              leading: IconButton(
+                onPressed: () => context.pop(),
+                icon: const Icon(Icons.arrow_circle_left_outlined, color: Colors.white),
+                iconSize: 24,
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.black.withValues(alpha: 0.5),
+                  side: BorderSide(color: colors.lineStrong, width: 0.5),
+                  shape: const CircleBorder(),
                 ),
               ),
               flexibleSpace: hasImage || isLoading
@@ -206,16 +204,14 @@ class NewsDetailScreen extends ConsumerWidget {
       backgroundColor: colors.ink,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
-      leading: GestureDetector(
-        onTap: () => Navigator.pop(context),
-        child: Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: colors.surface2,
-            shape: BoxShape.circle,
-            border: Border.all(color: colors.lineStrong, width: 0.5),
-          ),
-          child: Icon(Icons.arrow_circle_left_outlined, color: Colors.white, size: 24),
+      leading: IconButton(
+        onPressed: () => context.pop(),
+        icon: const Icon(Icons.arrow_circle_left_outlined, color: Colors.white),
+        iconSize: 24,
+        style: IconButton.styleFrom(
+          backgroundColor: colors.surface2,
+          side: BorderSide(color: colors.lineStrong, width: 0.5),
+          shape: const CircleBorder(),
         ),
       ),
     );

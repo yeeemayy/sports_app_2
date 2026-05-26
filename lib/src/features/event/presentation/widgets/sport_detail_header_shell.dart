@@ -114,16 +114,15 @@ class _ArenaNavBar extends StatelessWidget {
       child: Row(
         children: [
           // Back button
-          GestureDetector(
-            onTap: () => context.pop(),
-            child: Container(
-              margin: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.5),
-                shape: BoxShape.circle,
-                border: Border.all(color: colors.lineStrong, width: 0.5),
-              ),
-              child: Icon(Icons.arrow_circle_left_outlined, color: Colors.white, size: 24),
+          IconButton(
+            onPressed: () => context.pop(),
+            icon: const Icon(Icons.arrow_circle_left_outlined, color: Colors.white),
+            iconSize: 24,
+            padding: EdgeInsets.zero,
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.black.withValues(alpha: 0.5),
+              side: BorderSide(color: colors.lineStrong, width: 0.5),
+              shape: const CircleBorder(),
             ),
           ),
 
