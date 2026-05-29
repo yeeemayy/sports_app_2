@@ -188,34 +188,36 @@ class _CountryLeagueRow extends StatelessWidget {
                       context,
                     ).copyWith(color: context.appColors.text, height: 1),
                   ),
-                  const SizedBox(height: 7),
-                  Row(
-                    children: [
-                      if (item.shortName != null) ...[
-                        Text(
-                          item.shortName!,
-                          style: AppTextStyles.mono(
-                            9,
-                          ).copyWith(color: context.appColors.text3, letterSpacing: 9 * 0.1),
-                        ),
-                        _dot(context),
-                      ],
-                      if (compTypeKey != null)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                          decoration: BoxDecoration(
-                            color: compTypeColor.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            compTypeKey.tr(),
+                  if (sport == LeagueSport.football || sport == LeagueSport.basketball) ...[
+                    const SizedBox(height: 7),
+                    Row(
+                      children: [
+                        if (item.shortName != null) ...[
+                          Text(
+                            item.shortName!,
                             style: AppTextStyles.mono(
-                              8,
-                            ).copyWith(color: compTypeColor, letterSpacing: 8 * 0.1),
+                              9,
+                            ).copyWith(color: context.appColors.text3, letterSpacing: 9 * 0.1),
                           ),
-                        ),
-                    ],
-                  ),
+                          _dot(context),
+                        ],
+                        if (compTypeKey != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: compTypeColor.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              compTypeKey.tr(),
+                              style: AppTextStyles.mono(
+                                8,
+                              ).copyWith(color: compTypeColor, letterSpacing: 8 * 0.1),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),

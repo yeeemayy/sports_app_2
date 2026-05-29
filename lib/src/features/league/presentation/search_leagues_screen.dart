@@ -34,23 +34,22 @@ class _SearchLeaguesScreenState extends ConsumerState<SearchLeaguesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Load all hot leagues and country lists for both sports
-    final footballLeagues = ref.watch(footballHotLeaguesProvider).valueOrNull ?? [];
-    final basketballLeagues =
-        ref.watch(basketballHotLeaguesProvider).valueOrNull ?? [];
-    final footballCountries =
-        ref.watch(footballCountriesProvider).valueOrNull ?? [];
-    final basketballCountries =
-        ref.watch(basketballCountriesProvider).valueOrNull ?? [];
+    final allLeagues = <(LeagueItem, LeagueSport)>[];
+    final allCountries = <(CountryModel, LeagueSport)>[];
 
-    final allLeagues = [
-      ...footballLeagues.map((l) => (l, LeagueSport.football)),
-      ...basketballLeagues.map((l) => (l, LeagueSport.basketball)),
-    ];
-    final allCountries = [
-      ...footballCountries.map((c) => (c, LeagueSport.football)),
-      ...basketballCountries.map((c) => (c, LeagueSport.basketball)),
-    ];
+    for (final sport in LeagueSport.values) {
+      final leagues =
+          ref.watch(sportHotLeaguesProvider(sport: sport)).valueOrNull ?? [];
+      for (final l in leagues) {
+        allLeagues.add((l, sport));
+      }
+
+      final countries =
+          ref.watch(sportBrowseItemsProvider(sport: sport)).valueOrNull ?? [];
+      for (final c in countries) {
+        allCountries.add((c, sport));
+      }
+    }
 
     // Filter
     final q = _query.toLowerCase();
@@ -188,19 +187,19 @@ class _TypeFilterBar extends StatelessWidget {
       child: Row(
         children: [
           _TypeChip(
-            label: 'ALL',
+            label: 'league.all_filter'.tr(),
             active: selected == _SearchType.all,
             onTap: () => onSelect(_SearchType.all),
           ),
           const SizedBox(width: 8),
           _TypeChip(
-            label: 'LEAGUES',
+            label: 'league.filter.leagues'.tr(),
             active: selected == _SearchType.leagues,
             onTap: () => onSelect(_SearchType.leagues),
           ),
           const SizedBox(width: 8),
           _TypeChip(
-            label: 'COUNTRIES',
+            label: 'league.filter.countries'.tr(),
             active: selected == _SearchType.countries,
             onTap: () => onSelect(_SearchType.countries),
           ),
@@ -335,7 +334,7 @@ class _LeagueResultRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
-                sport == LeagueSport.football ? 'FOOTBALL' : 'BASKETBALL',
+                sport.labelKey.tr(),
                 style: AppTextStyles.mono(7).copyWith(
                   color: context.appColors.text3,
                   letterSpacing: 7 * 0.1,

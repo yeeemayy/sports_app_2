@@ -849,6 +849,22 @@
     "recent": "RECENT",
     "clear": "CLEAR",
     "all_filter": "ALL",
+  "sport": {
+    "football": "FOOTBALL",
+    "basketball": "BASKETBALL",
+    "tennis": "TENNIS",
+    "cricket": "CRICKET",
+    "baseball": "BASEBALL",
+    "volleyball": "VOLLEYBALL",
+    "badminton": "BADMINTON",
+    "table_tennis": "TABLE TENNIS",
+    "ice_hockey": "ICE HOCKEY",
+    "am_football": "AM. FOOTBALL"
+  },
+  "filter": {
+    "leagues": "LEAGUES",
+    "countries": "COUNTRIES"
+  },
     "type_team": "TEAM",
     "type_league": "LEAGUE",
     "type_player": "PLAYER",

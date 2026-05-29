@@ -10,6 +10,19 @@ enum LeagueSport {
   iceHockey,
   amFootball;
 
+  String get labelKey => switch (this) {
+    LeagueSport.football => 'league.sport.football',
+    LeagueSport.basketball => 'league.sport.basketball',
+    LeagueSport.tennis => 'league.sport.tennis',
+    LeagueSport.cricket => 'league.sport.cricket',
+    LeagueSport.baseball => 'league.sport.baseball',
+    LeagueSport.volleyball => 'league.sport.volleyball',
+    LeagueSport.badminton => 'league.sport.badminton',
+    LeagueSport.tableTennis => 'league.sport.table_tennis',
+    LeagueSport.iceHockey => 'league.sport.ice_hockey',
+    LeagueSport.amFootball => 'league.sport.am_football',
+  };
+
   String get apiPath => switch (this) {
     LeagueSport.football => 'football',
     LeagueSport.basketball => 'basketball',

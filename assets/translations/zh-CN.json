@@ -849,6 +849,22 @@
     "recent": "最近",
     "clear": "清除",
     "all_filter": "全部",
+    "sport": {
+      "football": "足球",
+      "basketball": "篮球",
+      "tennis": "网球",
+      "cricket": "板球",
+      "baseball": "棒球",
+      "volleyball": "排球",
+      "badminton": "羽毛球",
+      "table_tennis": "乒乓球",
+      "ice_hockey": "冰球",
+      "am_football": "美式橄榄球"
+    },
+    "filter": {
+      "leagues": "联赛",
+      "countries": "国家/地区"
+    },
     "type_team": "球队",
     "type_league": "联赛",
     "type_player": "球员",

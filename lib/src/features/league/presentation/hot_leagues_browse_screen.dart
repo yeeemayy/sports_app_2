@@ -23,7 +23,6 @@ class HotLeaguesBrowseScreen extends ConsumerStatefulWidget {
 
 class _HotLeaguesBrowseScreenState
     extends ConsumerState<HotLeaguesBrowseScreen> {
-  // null = all
   LeagueSport? _filter;
 
   @override
@@ -34,17 +33,17 @@ class _HotLeaguesBrowseScreenState
 
   @override
   Widget build(BuildContext context) {
-    final footballAsync = ref.watch(footballHotLeaguesProvider);
-    final basketballAsync = ref.watch(basketballHotLeaguesProvider);
+    bool isLoading = false;
+    final all = <(LeagueItem, LeagueSport)>[];
 
-    final footballLeagues =
-        footballAsync.valueOrNull?.map((l) => (l, LeagueSport.football)).toList() ?? [];
-    final basketballLeagues = basketballAsync.valueOrNull
-            ?.map((l) => (l, LeagueSport.basketball))
-            .toList() ??
-        [];
+    for (final sport in LeagueSport.values) {
+      final async = ref.watch(sportHotLeaguesProvider(sport: sport));
+      if (async.isLoading) isLoading = true;
+      for (final l in async.valueOrNull ?? []) {
+        all.add((l, sport));
+      }
+    }
 
-    final all = [...footballLeagues, ...basketballLeagues];
     final filtered = _filter == null
         ? all
         : all.where((t) => t.$2 == _filter).toList();
@@ -88,8 +87,7 @@ class _HotLeaguesBrowseScreenState
 
             // Grid
             Expanded(
-              child: (footballAsync.isLoading || basketballAsync.isLoading) &&
-                      all.isEmpty
+              child: isLoading && all.isEmpty
                   ? const Center(child: CircularProgressIndicator())
                   : filtered.isEmpty
                       ? Center(
@@ -138,22 +136,18 @@ class _SportFilterBar extends StatelessWidget {
       child: Row(
         children: [
           _FilterChip(
-            label: 'ALL',
+            label: 'league.all_filter'.tr(),
             active: selected == null,
             onTap: () => onSelect(null),
           ),
-          const SizedBox(width: 8),
-          _FilterChip(
-            label: 'FOOTBALL',
-            active: selected == LeagueSport.football,
-            onTap: () => onSelect(LeagueSport.football),
-          ),
-          const SizedBox(width: 8),
-          _FilterChip(
-            label: 'BASKETBALL',
-            active: selected == LeagueSport.basketball,
-            onTap: () => onSelect(LeagueSport.basketball),
-          ),
+          for (final sport in LeagueSport.values) ...[
+            const SizedBox(width: 8),
+            _FilterChip(
+              label: sport.labelKey.tr(),
+              active: selected == sport,
+              onTap: () => onSelect(sport),
+            ),
+          ],
         ],
       ),
     );
@@ -207,7 +201,6 @@ class _LeagueCard extends StatefulWidget {
 }
 
 class _LeagueCardState extends State<_LeagueCard> {
-  // Fallback: a neutral dark surface used before palette resolves
   static const _fallbackBase = Color(0xFF1E2330);
 
   Color? _base;
@@ -231,9 +224,7 @@ class _LeagueCardState extends State<_LeagueCard> {
       if (picked != null && mounted) {
         setState(() => _base = picked.color);
       }
-    } catch (_) {
-      // Keep fallback silently
-    }
+    } catch (_) {}
   }
 
   Color get _effectiveBase => _base ?? _fallbackBase;
@@ -289,9 +280,9 @@ class _LeagueCardState extends State<_LeagueCard> {
                   Container(
                     height: 50, width: 50,
                     alignment: Alignment.center,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Colors.white,
-                      shape: BoxShape.circle
+                      shape: BoxShape.circle,
                     ),
                     clipBehavior: Clip.hardEdge,
                     child: CachedNetworkImage(
