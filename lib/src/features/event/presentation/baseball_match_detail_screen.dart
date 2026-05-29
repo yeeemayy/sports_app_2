@@ -20,10 +20,12 @@ class BaseballMatchDetailScreen extends ConsumerStatefulWidget {
   final String matchId;
 
   @override
-  ConsumerState<BaseballMatchDetailScreen> createState() => _BaseballMatchDetailScreenState();
+  ConsumerState<BaseballMatchDetailScreen> createState() =>
+      _BaseballMatchDetailScreenState();
 }
 
-class _BaseballMatchDetailScreenState extends SportDetailScaffoldState<BaseballMatchDetailScreen> {
+class _BaseballMatchDetailScreenState
+    extends SportDetailScaffoldState<BaseballMatchDetailScreen> {
   @override
   String get matchId => widget.matchId;
 
@@ -36,18 +38,28 @@ class _BaseballMatchDetailScreenState extends SportDetailScaffoldState<BaseballM
   @override
   (String?, int?) watchDetail() {
     final v =
-        ref.watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId)).valueOrNull
+        ref
+                .watch(
+                  matchDetailProvider(
+                    sport: SportType.baseball,
+                    matchId: matchId,
+                  ),
+                )
+                .valueOrNull
             as BaseballMatchDetail?;
     return (v?.leagueName, v?.matchTime);
   }
 
   @override
-  Widget buildHeader(BuildContext context, {String? leagueName, int? matchTimestamp}) =>
-      _BaseballMatchHeader(
-        matchId: matchId,
-        leagueName: leagueName,
-        matchTimestamp: matchTimestamp,
-      );
+  Widget buildHeader(
+    BuildContext context, {
+    String? leagueName,
+    int? matchTimestamp,
+  }) => _BaseballMatchHeader(
+    matchId: matchId,
+    leagueName: leagueName,
+    matchTimestamp: matchTimestamp,
+  );
 
   @override
   List<Tab> buildTabs(BuildContext context) => [
@@ -65,7 +77,11 @@ class _BaseballMatchDetailScreenState extends SportDetailScaffoldState<BaseballM
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 class _BaseballMatchHeader extends ConsumerWidget {
-  const _BaseballMatchHeader({required this.matchId, this.leagueName, this.matchTimestamp});
+  const _BaseballMatchHeader({
+    required this.matchId,
+    this.leagueName,
+    this.matchTimestamp,
+  });
 
   final String matchId;
   final String? leagueName;
@@ -73,7 +89,9 @@ class _BaseballMatchHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId));
+    final detailAsync = ref.watch(
+      matchDetailProvider(sport: SportType.baseball, matchId: matchId),
+    );
     final rt = ref.watch(
       sportRealtimeProvider(
         SportType.baseball,
@@ -102,11 +120,15 @@ class _BaseballHeaderContent extends StatelessWidget {
     final statusId = rt?.statusId ?? detail.statusId;
     final homeScore =
         rt?.homeScore ??
-        (detail.scores['ft'] as List<dynamic>?)?.elementAtOrNull(0)?.toString() ??
+        (detail.scores['ft'] as List<dynamic>?)
+            ?.elementAtOrNull(0)
+            ?.toString() ??
         '-';
     final awayScore =
         rt?.awayScore ??
-        (detail.scores['ft'] as List<dynamic>?)?.elementAtOrNull(1)?.toString() ??
+        (detail.scores['ft'] as List<dynamic>?)
+            ?.elementAtOrNull(1)
+            ?.toString() ??
         '-';
 
     final isLive = baseballLiveStatuses.contains(statusId);
@@ -130,7 +152,9 @@ class _BaseballHeaderContent extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.body(12).copyWith(fontWeight: FontWeight.w600),
+                style: AppTextStyles.body(
+                  12,
+                ).copyWith(fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -141,7 +165,10 @@ class _BaseballHeaderContent extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 3,
+                ),
                 decoration: BoxDecoration(
                   color: pillColor.withValues(alpha: 0.15),
                   border: Border.all(color: pillColor.withValues(alpha: 0.5)),
@@ -156,7 +183,13 @@ class _BaseballHeaderContent extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               if (isNotStarted)
-                Text('-', style: AppTextStyles.display(32, context).copyWith(color: scoreColor))
+                Text(
+                  '-',
+                  style: AppTextStyles.display(
+                    32,
+                    context,
+                  ).copyWith(color: scoreColor),
+                )
               else
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -165,18 +198,27 @@ class _BaseballHeaderContent extends StatelessWidget {
                   children: [
                     Text(
                       homeScore,
-                      style: AppTextStyles.display(48, context).copyWith(color: scoreColor),
+                      style: AppTextStyles.display(
+                        48,
+                        context,
+                      ).copyWith(color: scoreColor),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Text(
                         '–',
-                        style: AppTextStyles.display(32, context).copyWith(color: colors.text3),
+                        style: AppTextStyles.display(
+                          32,
+                          context,
+                        ).copyWith(color: colors.text3),
                       ),
                     ),
                     Text(
                       awayScore,
-                      style: AppTextStyles.display(48, context).copyWith(color: scoreColor),
+                      style: AppTextStyles.display(
+                        48,
+                        context,
+                      ).copyWith(color: scoreColor),
                     ),
                   ],
                 ),
@@ -195,7 +237,9 @@ class _BaseballHeaderContent extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.body(12).copyWith(fontWeight: FontWeight.w600),
+                style: AppTextStyles.body(
+                  12,
+                ).copyWith(fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -214,11 +258,17 @@ class _ScoreTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.baseball, matchId: matchId));
-    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.baseball, matchId: matchId));
+    final detailAsync = ref.watch(
+      matchDetailProvider(sport: SportType.baseball, matchId: matchId),
+    );
+    final eventsAsync = ref.watch(
+      matchEventsProvider(sport: SportType.baseball, matchId: matchId),
+    );
 
     return detailAsync.when(
-      loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
+      loading: () => Center(
+        child: CircularProgressIndicator(color: context.appColors.accent),
+      ),
       error: (_, __) => Center(
         child: Text(
           'event.error.load_failed'.tr(),
@@ -240,7 +290,11 @@ class _InningGrid extends StatelessWidget {
   final BaseballMatchDetail detail;
   final BaseballMatchEventsData? events;
 
-  List<String> _inningScores(Map<String, dynamic> scores, int sideIndex, int count) {
+  List<String> _inningScores(
+    Map<String, dynamic> scores,
+    int sideIndex,
+    int count,
+  ) {
     return List.generate(count, (i) {
       final val = scores['p${i + 1}'] as List<dynamic>?;
       if (val == null || val.length <= sideIndex) return '-';
@@ -318,7 +372,9 @@ class _InningGrid extends StatelessWidget {
             child: Text(
               text,
               textAlign: TextAlign.center,
-              style: AppTextStyles.mono(12).copyWith(color: color ?? colors.text2),
+              style: AppTextStyles.mono(
+                12,
+              ).copyWith(color: color ?? colors.text2),
             ),
           );
         }
@@ -365,7 +421,10 @@ class _InningGrid extends StatelessWidget {
                         SizedBox(
                           width: nameColWidth,
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 8,
+                            ),
                             child: Row(
                               children: [
                                 SportLogo(url: detail.awayInfo.logo, size: 22),
@@ -375,9 +434,10 @@ class _InningGrid extends StatelessWidget {
                                     detail.awayName,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: AppTextStyles.body(
-                                      11,
-                                    ).copyWith(fontWeight: FontWeight.w600, color: colors.text),
+                                    style: AppTextStyles.body(11).copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: colors.text,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -402,7 +462,10 @@ class _InningGrid extends StatelessWidget {
                         SizedBox(
                           width: nameColWidth,
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 8,
+                            ),
                             child: Row(
                               children: [
                                 SportLogo(url: detail.homeInfo.logo, size: 22),
@@ -412,9 +475,10 @@ class _InningGrid extends StatelessWidget {
                                     detail.homeName,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: AppTextStyles.body(
-                                      11,
-                                    ).copyWith(fontWeight: FontWeight.w600, color: colors.text),
+                                    style: AppTextStyles.body(11).copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: colors.text,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -458,7 +522,9 @@ class _InningGrid extends StatelessWidget {
                             child: Text(
                               'event.baseball.detail.runs'.tr(),
                               textAlign: TextAlign.center,
-                              style: AppTextStyles.mono(10).copyWith(color: colors.text3),
+                              style: AppTextStyles.mono(
+                                10,
+                              ).copyWith(color: colors.text3),
                             ),
                           ),
                         ),
@@ -467,7 +533,9 @@ class _InningGrid extends StatelessWidget {
                           child: Text(
                             'event.baseball.detail.hits'.tr(),
                             textAlign: TextAlign.center,
-                            style: AppTextStyles.mono(10).copyWith(color: colors.text3),
+                            style: AppTextStyles.mono(
+                              10,
+                            ).copyWith(color: colors.text3),
                           ),
                         ),
                         SizedBox(
@@ -475,7 +543,9 @@ class _InningGrid extends StatelessWidget {
                           child: Text(
                             'event.baseball.detail.errors'.tr(),
                             textAlign: TextAlign.center,
-                            style: AppTextStyles.mono(10).copyWith(color: colors.text3),
+                            style: AppTextStyles.mono(
+                              10,
+                            ).copyWith(color: colors.text3),
                           ),
                         ),
                       ],
@@ -506,7 +576,12 @@ class _InningGrid extends StatelessWidget {
 }
 
 class _RheRow extends StatelessWidget {
-  const _RheRow({required this.name, required this.runs, required this.hits, required this.errors});
+  const _RheRow({
+    required this.name,
+    required this.runs,
+    required this.hits,
+    required this.errors,
+  });
 
   final String name;
   final String runs;
@@ -589,9 +664,13 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
     );
 
     return eventsAsync.when(
-      loading: () => Center(child: CircularProgressIndicator(color: colors.accent)),
+      loading: () =>
+          Center(child: CircularProgressIndicator(color: colors.accent)),
       error: (_, __) => Center(
-        child: Text('event.error.load_failed'.tr(), style: TextStyle(color: colors.text3)),
+        child: Text(
+          'event.error.load_failed'.tr(),
+          style: TextStyle(color: colors.text3),
+        ),
       ),
       data: (obj) {
         final events = obj as BaseballMatchEventsData?;
@@ -604,7 +683,8 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
           );
         }
 
-        final setIndices = events.statSets.map((s) => s.setIndex).toSet().toList()..sort();
+        final setIndices =
+            events.statSets.map((s) => s.setIndex).toSet().toList()..sort();
         final safeIdx = _selectedIdx.clamp(0, setIndices.length - 1);
         final stats = events.statsFor(setIndices[safeIdx]);
 
@@ -621,11 +701,16 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                   return GestureDetector(
                     onTap: () => setState(() => _selectedIdx = i),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 7,
+                      ),
                       decoration: BoxDecoration(
                         color: isSelected ? colors.accent : colors.surface2,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: isSelected ? colors.accent : colors.line),
+                        border: Border.all(
+                          color: isSelected ? colors.accent : colors.line,
+                        ),
                       ),
                       child: Text(
                         _inningLabel(setIndices[i]),
@@ -656,7 +741,9 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                   itemBuilder: (context, i) {
                     final s = stats[i];
                     return ArenaStatBar(
-                      label: s.labelKey.isNotEmpty ? s.labelKey.tr() : '${s.typeCode}',
+                      label: s.labelKey.isNotEmpty
+                          ? s.labelKey.tr()
+                          : '${s.typeCode}',
                       home: s.homeValue,
                       away: s.awayValue,
                     );

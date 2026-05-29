@@ -103,8 +103,7 @@ class GenericStandingsRow {
       overtimeLoss: _int('overtime_loss'),
       shootoutWin: _int('shootout_win'),
       shootoutLoss: _int('shootout_loss'),
-      teamInfo:
-          GenericStandingsTeamInfo.fromJsonOrNull(json['teamInfo']),
+      teamInfo: GenericStandingsTeamInfo.fromJsonOrNull(json['teamInfo']),
     );
   }
 }
@@ -129,8 +128,7 @@ class GenericStandingsGroup {
       name: (json['name'] as String?) ?? '',
       stageId: json['stage_id'] as String?,
       rows: rawRows
-          .map((r) =>
-              GenericStandingsRow.fromJson(r as Map<String, dynamic>))
+          .map((r) => GenericStandingsRow.fromJson(r as Map<String, dynamic>))
           .toList(),
     );
   }

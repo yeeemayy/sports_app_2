@@ -1,5 +1,7 @@
 import 'dart:async';
 
+// ignore_for_file: invalid_use_of_internal_member
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sports_app/src/features/event/data/event_repository.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_realtime_data.dart';
@@ -13,7 +15,6 @@ part 'realtime_providers.g.dart';
 /// Consumers call [setWatchedIds] with a named source and a list of IDs to
 /// watch. Call [clearSource] to stop polling for those IDs. The timer is
 /// restarted whenever the union of all watched IDs changes.
-// ignore: invalid_use_of_internal_member
 mixin RealtimePollMixin<T extends SportRealtimeData>
     on BuildlessAutoDisposeNotifier<Map<String, T>> {
   Timer? _pollTimer;
@@ -36,7 +37,10 @@ mixin RealtimePollMixin<T extends SportRealtimeData>
   void setWatchedIds(String source, List<String> ids) {
     final newSet = ids.toSet();
     final existing = _sources[source];
-    if (existing != null && existing.length == newSet.length && existing.containsAll(newSet)) return;
+    if (existing != null &&
+        existing.length == newSet.length &&
+        existing.containsAll(newSet))
+      return;
     _sources[source] = newSet;
     _restartTimer();
   }
@@ -75,7 +79,8 @@ mixin RealtimePollMixin<T extends SportRealtimeData>
 /// );
 /// ```
 @riverpod
-class SportRealtime extends _$SportRealtime with RealtimePollMixin<SportRealtimeData> {
+class SportRealtime extends _$SportRealtime
+    with RealtimePollMixin<SportRealtimeData> {
   @override
   Duration get pollInterval => arg.config.pollInterval;
 

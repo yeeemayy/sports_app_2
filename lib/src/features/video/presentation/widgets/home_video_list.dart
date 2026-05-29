@@ -22,7 +22,9 @@ class HomeVideoList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final videosAsync = ref.watch(videoListProvider(locale: locale, page: page));
+    final videosAsync = ref.watch(
+      videoListProvider(locale: locale, page: page),
+    );
 
     return videosAsync.when(
       loading: () => _VideoGrid(
@@ -49,12 +51,12 @@ class HomeVideoList extends ConsumerWidget {
               onTap: onVideoTap != null
                   ? () => onVideoTap!(video)
                   : () => context.push(
-                        AppRoutes.videoDetailPath(
-                          video.id,
-                          currentPage: page,
-                          lastPage: response.meta.lastPage,
-                        ),
+                      AppRoutes.videoDetailPath(
+                        video.id,
+                        currentPage: page,
+                        lastPage: response.meta.lastPage,
                       ),
+                    ),
             );
           },
         );

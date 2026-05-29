@@ -29,7 +29,8 @@ class BasketballMatch with _$BasketballMatch implements SportMatch {
     String? statusDescription,
   }) = _BasketballMatch;
 
-  factory BasketballMatch.fromJson(Map<String, dynamic> json) => _$BasketballMatchFromJson(json);
+  factory BasketballMatch.fromJson(Map<String, dynamic> json) =>
+      _$BasketballMatchFromJson(json);
 
   factory BasketballMatch.fromSportJson(Map<String, dynamic> json) {
     final homeInfo = json['homeInfo'] is Map

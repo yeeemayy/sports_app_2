@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
 
 /// Handoff-style stat comparison row: home value | label | away value
 /// with a split progress bar beneath.
@@ -23,17 +22,24 @@ class ArenaStatBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
-    final effectiveMax = max?.toDouble() ??
+    final effectiveMax =
+        max?.toDouble() ??
         (home.toDouble() == 0 && away.toDouble() == 0
             ? 1
             : (home.toDouble() + away.toDouble()));
-    final homePct =
-        effectiveMax == 0 ? 0.0 : (home.toDouble() / effectiveMax).clamp(0.0, 1.0);
-    final awayPct =
-        effectiveMax == 0 ? 0.0 : (away.toDouble() / effectiveMax).clamp(0.0, 1.0);
+    final homePct = effectiveMax == 0
+        ? 0.0
+        : (home.toDouble() / effectiveMax).clamp(0.0, 1.0);
+    final awayPct = effectiveMax == 0
+        ? 0.0
+        : (away.toDouble() / effectiveMax).clamp(0.0, 1.0);
 
-    final homeDisplay = home == home.toInt() ? '${home.toInt()}' : home.toStringAsFixed(1);
-    final awayDisplay = away == away.toInt() ? '${away.toInt()}' : away.toStringAsFixed(1);
+    final homeDisplay = home == home.toInt()
+        ? '${home.toInt()}'
+        : home.toStringAsFixed(1);
+    final awayDisplay = away == away.toInt()
+        ? '${away.toInt()}'
+        : away.toStringAsFixed(1);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
@@ -52,10 +58,9 @@ class ArenaStatBar extends StatelessWidget {
                 child: Text(
                   label.toUpperCase(),
                   textAlign: TextAlign.center,
-                  style: AppTextStyles.mono(9).copyWith(
-                    color: colors.text3,
-                    letterSpacing: 0.14 * 9,
-                  ),
+                  style: AppTextStyles.mono(
+                    9,
+                  ).copyWith(color: colors.text3, letterSpacing: 0.14 * 9),
                 ),
               ),
               SizedBox(
@@ -76,10 +81,7 @@ class ArenaStatBar extends StatelessWidget {
                 child: LayoutBuilder(
                   builder: (context, constraints) => Stack(
                     children: [
-                      Container(
-                        height: 4,
-                        color: colors.surface2,
-                      ),
+                      Container(height: 4, color: colors.surface2),
                       Positioned(
                         right: 0,
                         top: 0,
@@ -97,10 +99,7 @@ class ArenaStatBar extends StatelessWidget {
                 child: LayoutBuilder(
                   builder: (context, constraints) => Stack(
                     children: [
-                      Container(
-                        height: 4,
-                        color: colors.surface2,
-                      ),
+                      Container(height: 4, color: colors.surface2),
                       Positioned(
                         left: 0,
                         top: 0,

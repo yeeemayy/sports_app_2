@@ -6,5 +6,7 @@ part 'anchor_detail_providers.g.dart';
 
 @riverpod
 Future<AnchorDetailModel> anchorDetail(AnchorDetailRef ref, int anchorId) {
-  return ref.watch(anchorDetailRepositoryProvider.notifier).getAnchorDetail(anchorId);
+  return ref
+      .watch(anchorDetailRepositoryProvider.notifier)
+      .getAnchorDetail(anchorId);
 }

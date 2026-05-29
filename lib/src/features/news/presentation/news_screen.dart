@@ -53,7 +53,9 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
       if (_searchKeyword.isNotEmpty) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          ref.read(newsSearchProvider.notifier).search(_searchKeyword, newLocale);
+          ref
+              .read(newsSearchProvider.notifier)
+              .search(_searchKeyword, newLocale);
         });
       }
     }
@@ -68,7 +70,8 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
 
   void _onScroll() {
     if (_searchKeyword.isEmpty) return;
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 300) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 300) {
       ref.read(newsSearchProvider.notifier).loadMore();
     }
   }
@@ -82,7 +85,9 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
 
   Future<void> _onRefresh() async {
     if (_searchKeyword.isNotEmpty) {
-      await ref.read(newsSearchProvider.notifier).search(_searchKeyword, _locale);
+      await ref
+          .read(newsSearchProvider.notifier)
+          .search(_searchKeyword, _locale);
     }
   }
 
@@ -100,19 +105,27 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
             padding: const EdgeInsets.fromLTRB(22, 12, 22, 0),
             child: Text(
               'news.header'.tr().toUpperCase(),
-              style: AppTextStyles.display(46, context).copyWith(color: colors.text),
+              style: AppTextStyles.display(
+                46,
+                context,
+              ).copyWith(color: colors.text),
             ),
           ),
           const SizedBox(height: 14),
           // ── Search bar ──
           Padding(
             padding: const EdgeInsets.fromLTRB(22, 0, 22, 0),
-            child: NewsSearchBar(onSearch: _onSearch, controller: _searchController),
+            child: NewsSearchBar(
+              onSearch: _onSearch,
+              controller: _searchController,
+            ),
           ),
           const SizedBox(height: 8),
           // ── Body ──
           Expanded(
-            child: _searchKeyword.isNotEmpty ? _buildSearchResults() : _buildSectionsLayout(colors),
+            child: _searchKeyword.isNotEmpty
+                ? _buildSearchResults()
+                : _buildSectionsLayout(colors),
           ),
         ],
       ),
@@ -128,7 +141,10 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
     if (state.error != null && state.articles.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          context.showErrorDialog(title: 'news.load_error'.tr(), error: state.error!);
+          context.showErrorDialog(
+            title: 'news.load_error'.tr(),
+            error: state.error!,
+          );
         }
       });
     }
@@ -145,7 +161,10 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
 
     if (state.articles.isEmpty) {
       return Center(
-        child: Text('news.no_results'.tr(), style: Theme.of(context).textTheme.bodyMedium),
+        child: Text(
+          'news.no_results'.tr(),
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
       );
     }
 
@@ -162,7 +181,9 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
           if (index == state.articles.length) {
             return Padding(
               padding: const EdgeInsets.all(16),
-              child: Center(child: CircularProgressIndicator(color: colors.accent)),
+              child: Center(
+                child: CircularProgressIndicator(color: colors.accent),
+              ),
             );
           }
           final article = state.articles[index];
@@ -187,11 +208,15 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
 
     final latestAsync = ref.watch(newsSectionPreviewProvider(latestKey));
     final footballAsync = ref.watch(newsSectionPreviewProvider(footballKey));
-    final basketballAsync = ref.watch(newsSectionPreviewProvider(basketballKey));
+    final basketballAsync = ref.watch(
+      newsSectionPreviewProvider(basketballKey),
+    );
     final esportsAsync = ref.watch(newsSectionPreviewProvider(esportsKey));
 
     final carouselLoading =
-        footballAsync.isLoading || basketballAsync.isLoading || esportsAsync.isLoading;
+        footballAsync.isLoading ||
+        basketballAsync.isLoading ||
+        esportsAsync.isLoading;
     final carouselArticles = <NewsArticle>[
       ...footballAsync.valueOrNull?.take(2).toList() ?? [],
       ...basketballAsync.valueOrNull?.take(2).toList() ?? [],
@@ -226,7 +251,8 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
           latestAsync.when(
             loading: () => _sectionSkeleton(colors),
             error: (_, _) => const SizedBox.shrink(),
-            data: (articles) => _buildSectionArticles(articles.take(4).toList(), colors),
+            data: (articles) =>
+                _buildSectionArticles(articles.take(4).toList(), colors),
           ),
           const SizedBox(height: 22),
           // ── Football section ──
@@ -234,7 +260,10 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
             title: 'news.tab.football'.tr(),
             onMore: () => context.push(
               AppRoutes.newsCategoryList,
-              extra: (title: 'news.tab.football'.tr(), keyword: _footballKeyword),
+              extra: (
+                title: 'news.tab.football'.tr(),
+                keyword: _footballKeyword,
+              ),
             ),
           ),
           _SportSection(
@@ -250,7 +279,10 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
             title: 'news.tab.basketball'.tr(),
             onMore: () => context.push(
               AppRoutes.newsCategoryList,
-              extra: (title: 'news.tab.basketball'.tr(), keyword: _basketballKeyword),
+              extra: (
+                title: 'news.tab.basketball'.tr(),
+                keyword: _basketballKeyword,
+              ),
             ),
           ),
           _SportSection(
@@ -289,7 +321,8 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
           children: [
             NewsCard(
               article: articles[i],
-              onTap: () => context.push(AppRoutes.newsDetailPath(articles[i].id)),
+              onTap: () =>
+                  context.push(AppRoutes.newsDetailPath(articles[i].id)),
             ),
             if (i < articles.length - 1)
               Divider(height: 1, indent: 22, endIndent: 22, color: colors.line),
@@ -305,7 +338,8 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
         return Column(
           children: [
             const NewsCard.loading(),
-            if (i < 3) Divider(height: 1, indent: 22, endIndent: 22, color: colors.line),
+            if (i < 3)
+              Divider(height: 1, indent: 22, endIndent: 22, color: colors.line),
           ],
         );
       }),
@@ -351,7 +385,8 @@ class _SportSection extends ConsumerWidget {
       (i) => Column(
         children: [
           const NewsCard.loading(),
-          if (i < 3) Divider(height: 1, indent: 22, endIndent: 22, color: colors.line),
+          if (i < 3)
+            Divider(height: 1, indent: 22, endIndent: 22, color: colors.line),
         ],
       ),
     ),
@@ -388,24 +423,25 @@ class _SportSection extends ConsumerWidget {
     ),
   );
 
-  Widget _buildGrid(BuildContext context, List<NewsArticle> items) => GridView.builder(
-    shrinkWrap: true,
-    physics: const NeverScrollableScrollPhysics(),
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 2,
-      crossAxisSpacing: 10,
-      mainAxisSpacing: 10,
-      childAspectRatio: 1,
-    ),
-    itemCount: items.length,
-    itemBuilder: (context, i) => NewsCard(
-      grid: true,
-      article: items[i],
-      categoryLabel: sectionLabel,
-      onTap: () => context.push(AppRoutes.newsDetailPath(items[i].id)),
-    ),
-  );
+  Widget _buildGrid(BuildContext context, List<NewsArticle> items) =>
+      GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: 1,
+        ),
+        itemCount: items.length,
+        itemBuilder: (context, i) => NewsCard(
+          grid: true,
+          article: items[i],
+          categoryLabel: sectionLabel,
+          onTap: () => context.push(AppRoutes.newsDetailPath(items[i].id)),
+        ),
+      );
 }
 
 // ── Section header row ────────────────────────────────────────────────────────
@@ -428,13 +464,18 @@ class _SectionHeader extends StatelessWidget {
         children: [
           Text(
             title.toUpperCase(),
-            style: AppTextStyles.display(22, context).copyWith(color: colors.text),
+            style: AppTextStyles.display(
+              22,
+              context,
+            ).copyWith(color: colors.text),
           ),
           GestureDetector(
             onTap: onMore,
             child: Text(
               'news.more'.tr(),
-              style: AppTextStyles.mono(10).copyWith(color: colors.text3, letterSpacing: 0.14 * 10),
+              style: AppTextStyles.mono(
+                10,
+              ).copyWith(color: colors.text3, letterSpacing: 0.14 * 10),
             ),
           ),
         ],
@@ -499,7 +540,8 @@ class _FeaturedCarouselState extends State<_FeaturedCarousel> {
                 controller: _pageController,
                 itemCount: widget.articles.length,
                 onPageChanged: (i) => setState(() => _currentPage = i),
-                itemBuilder: (_, i) => _FeaturedSlide(article: widget.articles[i]),
+                itemBuilder: (_, i) =>
+                    _FeaturedSlide(article: widget.articles[i]),
               ),
               // dot indicators
               Positioned(
@@ -549,7 +591,10 @@ class _FeaturedSlide extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 stops: const [0.3, 1.0],
-                colors: [Colors.transparent, const Color(0xFF0E0E0E).withValues(alpha: 0.95)],
+                colors: [
+                  Colors.transparent,
+                  const Color(0xFF0E0E0E).withValues(alpha: 0.95),
+                ],
               ),
             ),
           ),
@@ -560,7 +605,10 @@ class _FeaturedSlide extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 9,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: colors.accent.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
@@ -568,7 +616,9 @@ class _FeaturedSlide extends StatelessWidget {
                   ),
                   child: Text(
                     '● ${'news.featured'.tr()}',
-                    style: AppTextStyles.mono(9).copyWith(color: colors.accent, letterSpacing: 1.2),
+                    style: AppTextStyles.mono(
+                      9,
+                    ).copyWith(color: colors.accent, letterSpacing: 1.2),
                   ),
                 ),
                 Column(
@@ -631,10 +681,8 @@ class _FeaturedImage extends StatelessWidget {
     return CachedNetworkImage(
       imageUrl: url!,
       fit: BoxFit.cover,
-      placeholder: (context, url) => Skeletonizer(
-        enabled: true,
-        child: Container(color: colors.surface),
-      ),
+      placeholder: (context, url) =>
+          Skeletonizer(enabled: true, child: Container(color: colors.surface)),
       errorBuilder: (context, error, stackTrace) => Container(
         color: colors.surface2,
         child: Icon(Icons.broken_image_outlined, color: colors.text3, size: 48),
@@ -655,7 +703,10 @@ class _FeaturedSkeleton extends StatelessWidget {
         enabled: true,
         child: Container(
           height: 260,
-          decoration: BoxDecoration(color: colors.surface, borderRadius: BorderRadius.circular(16)),
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
       ),
     );

@@ -56,10 +56,10 @@ class BadmintonStat {
   String get awayDisplay => _fmt(awayValue);
 
   factory BadmintonStat.fromList(List<dynamic> list) => BadmintonStat(
-        typeCode: (list[0] as num).toInt(),
-        homeValue: double.tryParse(list[1]?.toString() ?? '0') ?? 0,
-        awayValue: double.tryParse(list[2]?.toString() ?? '0') ?? 0,
-      );
+    typeCode: (list[0] as num).toInt(),
+    homeValue: double.tryParse(list[1]?.toString() ?? '0') ?? 0,
+    awayValue: double.tryParse(list[2]?.toString() ?? '0') ?? 0,
+  );
 }
 
 // ─── Stats set (per-set or overall) ──────────────────────────────────────────

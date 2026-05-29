@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/cricket_status.dart';
 import 'package:sports_app/src/features/event/domain/models/cricket_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/cricket_match_events.dart';
@@ -21,10 +20,12 @@ class CricketMatchDetailScreen extends ConsumerStatefulWidget {
   final String matchId;
 
   @override
-  ConsumerState<CricketMatchDetailScreen> createState() => _CricketMatchDetailScreenState();
+  ConsumerState<CricketMatchDetailScreen> createState() =>
+      _CricketMatchDetailScreenState();
 }
 
-class _CricketMatchDetailScreenState extends SportDetailScaffoldState<CricketMatchDetailScreen> {
+class _CricketMatchDetailScreenState
+    extends SportDetailScaffoldState<CricketMatchDetailScreen> {
   @override
   String get matchId => widget.matchId;
 
@@ -37,7 +38,14 @@ class _CricketMatchDetailScreenState extends SportDetailScaffoldState<CricketMat
   @override
   (String?, int?) watchDetail() {
     final v =
-        ref.watch(matchDetailProvider(sport: SportType.cricket, matchId: matchId)).valueOrNull
+        ref
+                .watch(
+                  matchDetailProvider(
+                    sport: SportType.cricket,
+                    matchId: matchId,
+                  ),
+                )
+                .valueOrNull
             as CricketMatchDetail?;
     return (v?.leagueName, v?.matchTime);
   }
@@ -47,12 +55,11 @@ class _CricketMatchDetailScreenState extends SportDetailScaffoldState<CricketMat
     BuildContext context, {
     String? leagueName,
     int? matchTimestamp,
-  }) =>
-      _CricketMatchHeader(
-        matchId: matchId,
-        leagueName: leagueName,
-        matchTimestamp: matchTimestamp,
-      );
+  }) => _CricketMatchHeader(
+    matchId: matchId,
+    leagueName: leagueName,
+    matchTimestamp: matchTimestamp,
+  );
 
   @override
   List<Tab> buildTabs(BuildContext context) => [
@@ -84,7 +91,9 @@ class _CricketMatchHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.cricket, matchId: matchId));
+    final detailAsync = ref.watch(
+      matchDetailProvider(sport: SportType.cricket, matchId: matchId),
+    );
     final rt = ref.watch(
       sportRealtimeProvider(
         SportType.cricket,
@@ -122,9 +131,29 @@ class _CricketHeaderContent extends StatelessWidget {
     final awayInnings = innings.where((i) => i.team == 2).lastOrNull;
 
     final isNotStarted = effStatusId == 1;
-    const liveStatuses = {2, 3, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545};
+    const liveStatuses = {
+      2,
+      3,
+      532,
+      533,
+      534,
+      535,
+      536,
+      537,
+      538,
+      539,
+      540,
+      541,
+      542,
+      543,
+      544,
+      545,
+    };
     final isLive = liveStatuses.contains(effStatusId);
-    final statusLabel = cricketStatusLabel(effStatusId, detail.statusDescription);
+    final statusLabel = cricketStatusLabel(
+      effStatusId,
+      detail.statusDescription,
+    );
     final statusColor = isLive ? colors.live : colors.text3;
     final scoreColor = isLive ? colors.accent : colors.text3;
 
@@ -145,7 +174,10 @@ class _CricketHeaderContent extends StatelessWidget {
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.display(12, context).copyWith(color: colors.text),
+                    style: AppTextStyles.display(
+                      12,
+                      context,
+                    ).copyWith(color: colors.text),
                   ),
                 ],
               ),
@@ -157,7 +189,10 @@ class _CricketHeaderContent extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor,
                       borderRadius: BorderRadius.circular(6),
@@ -165,7 +200,9 @@ class _CricketHeaderContent extends StatelessWidget {
                     child: Text(
                       statusLabel.toUpperCase(),
                       style: AppTextStyles.display(11, context).copyWith(
-                        color: statusColor.computeLuminance() > 0.5 ? const Color(0xFF0E0E0E) : Colors.white,
+                        color: statusColor.computeLuminance() > 0.5
+                            ? const Color(0xFF0E0E0E)
+                            : Colors.white,
                         letterSpacing: 0.1 * 11,
                       ),
                     ),
@@ -174,7 +211,10 @@ class _CricketHeaderContent extends StatelessWidget {
                   if (isNotStarted)
                     Text(
                       '–  –',
-                      style: AppTextStyles.display(40, context).copyWith(color: scoreColor),
+                      style: AppTextStyles.display(
+                        40,
+                        context,
+                      ).copyWith(color: scoreColor),
                     )
                   else if (homeInnings != null && awayInnings != null) ...[
                     Row(
@@ -182,27 +222,44 @@ class _CricketHeaderContent extends StatelessWidget {
                       children: [
                         Text(
                           '${homeInnings.runs}/${homeInnings.wickets}',
-                          style: AppTextStyles.display(26, context).copyWith(color: scoreColor),
+                          style: AppTextStyles.display(
+                            26,
+                            context,
+                          ).copyWith(color: scoreColor),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child:  Text('–', style: AppTextStyles.display(22, context).copyWith(color: context.appColors.text3)),
+                          child: Text(
+                            '–',
+                            style: AppTextStyles.display(
+                              22,
+                              context,
+                            ).copyWith(color: context.appColors.text3),
+                          ),
                         ),
                         Text(
                           '${awayInnings.runs}/${awayInnings.wickets}',
-                          style: AppTextStyles.display(26, context).copyWith(color: scoreColor),
+                          style: AppTextStyles.display(
+                            26,
+                            context,
+                          ).copyWith(color: scoreColor),
                         ),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Text(
                       '(${_formatOvers(homeInnings.overs)}) · (${_formatOvers(awayInnings.overs)})',
-                      style: AppTextStyles.mono(10).copyWith(color: colors.text3),
+                      style: AppTextStyles.mono(
+                        10,
+                      ).copyWith(color: colors.text3),
                     ),
                   ] else
                     Text(
                       '–  –',
-                      style: AppTextStyles.display(40, context).copyWith(color: scoreColor),
+                      style: AppTextStyles.display(
+                        40,
+                        context,
+                      ).copyWith(color: scoreColor),
                     ),
                 ],
               ),
@@ -219,7 +276,10 @@ class _CricketHeaderContent extends StatelessWidget {
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.display(12, context).copyWith(color: colors.text),
+                    style: AppTextStyles.display(
+                      12,
+                      context,
+                    ).copyWith(color: colors.text),
                   ),
                 ],
               ),
@@ -240,15 +300,23 @@ class _ScoreTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.cricket, matchId: matchId));
-    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.cricket, matchId: matchId));
+    final detailAsync = ref.watch(
+      matchDetailProvider(sport: SportType.cricket, matchId: matchId),
+    );
+    final eventsAsync = ref.watch(
+      matchEventsProvider(sport: SportType.cricket, matchId: matchId),
+    );
 
     return detailAsync.when(
-      loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
+      loading: () => Center(
+        child: CircularProgressIndicator(color: context.appColors.accent),
+      ),
       error: (_, __) => Center(
         child: Text(
           'event.error.load_failed'.tr(),
-          style: AppTextStyles.body(13).copyWith(color: context.appColors.text3),
+          style: AppTextStyles.body(
+            13,
+          ).copyWith(color: context.appColors.text3),
         ),
       ),
       data: (obj) {
@@ -258,14 +326,22 @@ class _ScoreTab extends ConsumerWidget {
         final innings = ev?.innings ?? detail.innings;
         final results = ev?.results ?? detail.results;
 
-        return _CricketScoreContent(detail: detail, innings: innings, results: results);
+        return _CricketScoreContent(
+          detail: detail,
+          innings: innings,
+          results: results,
+        );
       },
     );
   }
 }
 
 class _CricketScoreContent extends StatelessWidget {
-  const _CricketScoreContent({required this.detail, required this.innings, this.results});
+  const _CricketScoreContent({
+    required this.detail,
+    required this.innings,
+    this.results,
+  });
 
   final CricketMatchDetail detail;
   final List<CricketInnings> innings;
@@ -289,7 +365,9 @@ class _CricketScoreContent extends StatelessWidget {
           namedArgs: {'winner': winnerName, 'margin': '${r.margin}'},
         );
       case 3:
-        return 'event.cricket.detail.won_by_innings'.tr(namedArgs: {'winner': winnerName});
+        return 'event.cricket.detail.won_by_innings'.tr(
+          namedArgs: {'winner': winnerName},
+        );
       default:
         if (r.result == 3) return 'event.cricket.detail.draw'.tr();
         return '';
@@ -311,7 +389,10 @@ class _CricketScoreContent extends StatelessWidget {
             decoration: BoxDecoration(
               color: colors.surface,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: colors.accent.withValues(alpha: 0.4), width: 0.5),
+              border: Border.all(
+                color: colors.accent.withValues(alpha: 0.4),
+                width: 0.5,
+              ),
             ),
             child: Text(
               resultText,
@@ -329,7 +410,10 @@ class _CricketScoreContent extends StatelessWidget {
             children: [
               // Header row
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 child: Row(
                   children: [
                     const Expanded(flex: 2, child: SizedBox()),
@@ -365,13 +449,20 @@ class _CricketScoreContent extends StatelessWidget {
                 ...innings.asMap().entries.map((e) {
                   final idx = e.key;
                   final inning = e.value;
-                  final teamLogo = inning.team == 1 ? detail.homeInfo.logo : detail.awayInfo.logo;
-                  final teamName = inning.team == 1 ? detail.homeName : detail.awayName;
+                  final teamLogo = inning.team == 1
+                      ? detail.homeInfo.logo
+                      : detail.awayInfo.logo;
+                  final teamName = inning.team == 1
+                      ? detail.homeName
+                      : detail.awayName;
                   final isLast = idx == innings.length - 1;
                   return Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
                         child: Row(
                           children: [
                             Expanded(
@@ -385,7 +476,9 @@ class _CricketScoreContent extends StatelessWidget {
                                       teamName,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: AppTextStyles.body(12).copyWith(color: colors.text2),
+                                      style: AppTextStyles.body(
+                                        12,
+                                      ).copyWith(color: colors.text2),
                                     ),
                                   ),
                                 ],
@@ -405,20 +498,25 @@ class _CricketScoreContent extends StatelessWidget {
                               child: Text(
                                 '${inning.wickets}',
                                 textAlign: TextAlign.center,
-                                style: AppTextStyles.mono(13).copyWith(color: colors.text2),
+                                style: AppTextStyles.mono(
+                                  13,
+                                ).copyWith(color: colors.text2),
                               ),
                             ),
                             Expanded(
                               child: Text(
                                 inning.overs.toStringAsFixed(1),
                                 textAlign: TextAlign.center,
-                                style: AppTextStyles.mono(13).copyWith(color: colors.text2),
+                                style: AppTextStyles.mono(
+                                  13,
+                                ).copyWith(color: colors.text2),
                               ),
                             ),
                           ],
                         ),
                       ),
-                      if (!isLast) Divider(height: 1, thickness: 0.5, color: colors.line),
+                      if (!isLast)
+                        Divider(height: 1, thickness: 0.5, color: colors.line),
                     ],
                   );
                 }),
@@ -478,8 +576,12 @@ class _StatsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.cricket, matchId: matchId));
-    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.cricket, matchId: matchId));
+    final eventsAsync = ref.watch(
+      matchEventsProvider(sport: SportType.cricket, matchId: matchId),
+    );
+    final detailAsync = ref.watch(
+      matchDetailProvider(sport: SportType.cricket, matchId: matchId),
+    );
 
     final ev = eventsAsync.valueOrNull as CricketMatchEventsData?;
     final detail = detailAsync.valueOrNull as CricketMatchDetail?;
@@ -488,17 +590,29 @@ class _StatsTab extends ConsumerWidget {
       return Center(
         child: Text(
           'event.cricket.detail.no_stats'.tr(),
-          style: AppTextStyles.body(13).copyWith(color: context.appColors.text3),
+          style: AppTextStyles.body(
+            13,
+          ).copyWith(color: context.appColors.text3),
         ),
       );
     }
 
-    final innings = ev.innings.isNotEmpty ? ev.innings : (detail?.innings ?? []);
+    final innings = ev.innings.isNotEmpty
+        ? ev.innings
+        : (detail?.innings ?? []);
     final stats = _computeCricketStats(innings, ev.inningStats);
 
     final battingRows = <(String, int, int)>[
-      ('event.cricket.detail.stat_runs', stats.home.battingRuns, stats.away.battingRuns),
-      ('event.cricket.detail.stat_balls_faced', stats.home.ballsFaced, stats.away.ballsFaced),
+      (
+        'event.cricket.detail.stat_runs',
+        stats.home.battingRuns,
+        stats.away.battingRuns,
+      ),
+      (
+        'event.cricket.detail.stat_balls_faced',
+        stats.home.ballsFaced,
+        stats.away.ballsFaced,
+      ),
       ('event.cricket.detail.stat_fours', stats.home.fours, stats.away.fours),
       ('event.cricket.detail.stat_sixes', stats.home.sixes, stats.away.sixes),
     ];
@@ -506,9 +620,21 @@ class _StatsTab extends ConsumerWidget {
     final bowlingRows = <(String, int, int)>[
       ('event.cricket.detail.stat_wides', stats.home.wides, stats.away.wides),
       ('event.cricket.detail.stat_byes', stats.home.byes, stats.away.byes),
-      ('event.cricket.detail.stat_leg_byes', stats.home.legByes, stats.away.legByes),
-      ('event.cricket.detail.stat_penalty', stats.home.penalty, stats.away.penalty),
-      ('event.cricket.detail.stat_no_balls', stats.home.noBalls, stats.away.noBalls),
+      (
+        'event.cricket.detail.stat_leg_byes',
+        stats.home.legByes,
+        stats.away.legByes,
+      ),
+      (
+        'event.cricket.detail.stat_penalty',
+        stats.home.penalty,
+        stats.away.penalty,
+      ),
+      (
+        'event.cricket.detail.stat_no_balls',
+        stats.home.noBalls,
+        stats.away.noBalls,
+      ),
       ('event.cricket.detail.stat_extra', stats.home.extra, stats.away.extra),
     ];
 
@@ -520,7 +646,8 @@ class _StatsTab extends ConsumerWidget {
             title: 'event.cricket.detail.batting_comparison'.tr(),
             rows: battingRows,
           ),
-        if (battingRows.isNotEmpty && bowlingRows.isNotEmpty) const SizedBox(height: 12),
+        if (battingRows.isNotEmpty && bowlingRows.isNotEmpty)
+          const SizedBox(height: 12),
         if (bowlingRows.isNotEmpty)
           _ArenaStatSection(
             title: 'event.cricket.detail.bowling_comparison'.tr(),
@@ -558,12 +685,17 @@ class _ArenaStatSection extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 title.toUpperCase(),
-                style: AppTextStyles.display(12, context).copyWith(color: colors.text),
+                style: AppTextStyles.display(
+                  12,
+                  context,
+                ).copyWith(color: colors.text),
               ),
             ],
           ),
         ),
-        ...rows.map((r) => ArenaStatBar(label: r.$1.tr(), home: r.$2, away: r.$3)),
+        ...rows.map(
+          (r) => ArenaStatBar(label: r.$1.tr(), home: r.$2, away: r.$3),
+        ),
         const SizedBox(height: 4),
       ],
     );
@@ -633,7 +765,10 @@ class _SituationTabState extends ConsumerState<_SituationTab> {
                   child: GestureDetector(
                     onTap: () => setState(() => _selectedIndex = e.key),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: isSelected ? colors.accent : colors.surface2,
                         borderRadius: BorderRadius.circular(20),
@@ -646,7 +781,9 @@ class _SituationTabState extends ConsumerState<_SituationTab> {
                             .tr(namedArgs: {'n': '${e.value.inning}'})
                             .toUpperCase(),
                         style: AppTextStyles.mono(10).copyWith(
-                          color: isSelected ? const Color(0xFF0E0E0E) : colors.text2,
+                          color: isSelected
+                              ? const Color(0xFF0E0E0E)
+                              : colors.text2,
                           letterSpacing: 0.1 * 10,
                         ),
                       ),
@@ -740,7 +877,9 @@ class _BallRow extends StatelessWidget {
           Icon(iconData, color: iconColor, size: 20),
           const SizedBox(width: 12),
           Text(
-            'event.cricket.detail.ball_runs'.tr(namedArgs: {'n': '${ball.runs}'}),
+            'event.cricket.detail.ball_runs'.tr(
+              namedArgs: {'n': '${ball.runs}'},
+            ),
             style: AppTextStyles.mono(13).copyWith(color: runTextColor),
           ),
           if (extraLabel != null) ...[

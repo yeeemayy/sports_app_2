@@ -116,43 +116,44 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
 
     _engine!.onMessageReceived =
         (RCIMIWMessage? message, int? left, bool? offline, bool? hasPackage) {
-      if (!mounted || message == null) return;
-      if (message.targetId != _roomCid) return;
-      if (message is! RCIMIWTextMessage) return;
+          if (!mounted || message == null) return;
+          if (message.targetId != _roomCid) return;
+          if (message is! RCIMIWTextMessage) return;
 
-      final senderName = message.userInfo?.name ?? message.senderUserId ?? '';
-      final text = message.text ?? '';
-      if (text.isEmpty) return;
+          final senderName =
+              message.userInfo?.name ?? message.senderUserId ?? '';
+          final text = message.text ?? '';
+          if (text.isEmpty) return;
 
-      final chatMsg = _ChatMessage(
-        senderName: senderName,
-        senderId: message.senderUserId ?? '',
-        text: text,
-        isOwn: message.senderUserId == _myId,
-      );
+          final chatMsg = _ChatMessage(
+            senderName: senderName,
+            senderId: message.senderUserId ?? '',
+            text: text,
+            isOwn: message.senderUserId == _myId,
+          );
 
-      if (offline == true) {
-        if (_initialSyncDone) {
-          // The empty-room fallback already marked sync complete before these
-          // offline messages arrived — add directly so they are not lost.
-          setState(() => _messages.add(chatMsg));
-          _scrollToBottom();
-        } else {
-          // History/offline message — buffer until the last one arrives (left == 0).
-          setState(() => _bufferedMessages.add(chatMsg));
-          if ((left ?? 0) == 0) {
-            // Last history message received — flush buffer, then show pending entry.
-            _flushHistory();
+          if (offline == true) {
+            if (_initialSyncDone) {
+              // The empty-room fallback already marked sync complete before these
+              // offline messages arrived — add directly so they are not lost.
+              setState(() => _messages.add(chatMsg));
+              _scrollToBottom();
+            } else {
+              // History/offline message — buffer until the last one arrives (left == 0).
+              setState(() => _bufferedMessages.add(chatMsg));
+              if ((left ?? 0) == 0) {
+                // Last history message received — flush buffer, then show pending entry.
+                _flushHistory();
+              }
+            }
+          } else {
+            // Live message. If history hasn't flushed yet, flush now so the entry
+            // message (if pending) appears before any live messages.
+            if (!_initialSyncDone) _flushHistory();
+            setState(() => _messages.add(chatMsg));
+            _scrollToBottom();
           }
-        }
-      } else {
-        // Live message. If history hasn't flushed yet, flush now so the entry
-        // message (if pending) appears before any live messages.
-        if (!_initialSyncDone) _flushHistory();
-        setState(() => _messages.add(chatMsg));
-        _scrollToBottom();
-      }
-    };
+        };
 
     Future<void> onConnectedResult(int? code) async {
       if (code == 0) {
@@ -172,7 +173,8 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
             });
             // Only send the entry message when the user is logged in.
             final isLoggedIn =
-                ref.read(authNotifierProvider).valueOrNull?.isAuthenticated ?? false;
+                ref.read(authNotifierProvider).valueOrNull?.isAuthenticated ??
+                false;
             if (isLoggedIn) {
               // Delay so that the chatroom's offline message batch starts
               // arriving before we send the entry message.
@@ -185,7 +187,10 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
             }
           }
         }
-      } else if (code == 34001 && mounted && _engine != null && !_didRetry34001) {
+      } else if (code == 34001 &&
+          mounted &&
+          _engine != null &&
+          !_didRetry34001) {
         // 34001: server still has a previous session active — wait briefly and retry once.
         _didRetry34001 = true;
         await Future.delayed(const Duration(milliseconds: 800));
@@ -260,7 +265,12 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
       // If history is still loading, park the message in _pendingEntryMsg so
       // _flushHistory() appends it after all offline messages. Otherwise append directly.
       if (mounted) {
-        final chatMsg = _ChatMessage(senderName: name, senderId: _myId ?? '', text: text, isOwn: true);
+        final chatMsg = _ChatMessage(
+          senderName: name,
+          senderId: _myId ?? '',
+          text: text,
+          isOwn: true,
+        );
         if (_initialSyncDone) {
           setState(() => _messages.add(chatMsg));
           _scrollToBottom();
@@ -275,7 +285,8 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
 
   Future<void> _sendMessage() async {
     final text = _inputController.text.trim();
-    if (text.isEmpty || _engine == null || !_connected || _roomCid == null) return;
+    if (text.isEmpty || _engine == null || !_connected || _roomCid == null)
+      return;
     _inputController.clear();
 
     // Optimistic local append
@@ -322,7 +333,8 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final isLoggedIn = ref.watch(authNotifierProvider).valueOrNull?.isAuthenticated ?? false;
+    final isLoggedIn =
+        ref.watch(authNotifierProvider).valueOrNull?.isAuthenticated ?? false;
 
     ref.listen(authNotifierProvider, (prev, next) {
       final prevAuth = prev?.valueOrNull;
@@ -436,17 +448,19 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
         ),
         child: TextButton.icon(
           onPressed: () => context.push(
-  '${AppRoutes.login}?returnPath=${Uri.encodeComponent(AppRoutes.anchorPath(widget.anchorId))}',
-),
+            '${AppRoutes.login}?returnPath=${Uri.encodeComponent(AppRoutes.anchorPath(widget.anchorId))}',
+          ),
           icon: const Icon(Icons.lock_outline, size: 16),
           label: Text.rich(
-            TextSpan(children: [
-              TextSpan(
-                text: 'anchor.detail.chats.login_to_chat_action'.tr(),
-                style: TextStyle(color: context.appColors.accent),
-              ),
-              TextSpan(text: 'anchor.detail.chats.login_to_chat_suffix'.tr()),
-            ]),
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: 'anchor.detail.chats.login_to_chat_action'.tr(),
+                  style: TextStyle(color: context.appColors.accent),
+                ),
+                TextSpan(text: 'anchor.detail.chats.login_to_chat_suffix'.tr()),
+              ],
+            ),
           ),
           style: TextButton.styleFrom(
             minimumSize: const Size(double.infinity, 44),
@@ -474,7 +488,10 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
                 hintText: 'anchor.detail.chats.input.hint'.tr(),
                 hintStyle: const TextStyle(fontSize: 13),
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
                   borderSide: BorderSide(color: context.appColors.lineStrong),
@@ -500,9 +517,14 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
             ),
-            child: Text('anchor.detail.chats.send'.tr(), style: const TextStyle(fontSize: 13)),
+            child: Text(
+              'anchor.detail.chats.send'.tr(),
+              style: const TextStyle(fontSize: 13),
+            ),
           ),
         ],
       ),

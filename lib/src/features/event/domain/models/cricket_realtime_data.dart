@@ -20,7 +20,24 @@ class CricketRealtimeData implements SportRealtimeData {
   final List<CricketInnings> innings;
   final CricketResults? results;
 
-  static const _liveStatuses = {2, 3, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545};
+  static const _liveStatuses = {
+    2,
+    3,
+    532,
+    533,
+    534,
+    535,
+    536,
+    537,
+    538,
+    539,
+    540,
+    541,
+    542,
+    543,
+    544,
+    545,
+  };
   bool get isLive => _liveStatuses.contains(statusId);
 
   factory CricketRealtimeData.fromJson(Map<String, dynamic> json) {

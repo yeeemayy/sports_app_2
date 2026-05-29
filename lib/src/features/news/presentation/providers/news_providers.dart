@@ -80,13 +80,20 @@ class NewsPaginated extends _$NewsPaginated {
     await _loadPage(state.currentPage + 1, replace: false);
   }
 
-  Future<void> _loadPage(int page, {required bool replace, bool silent = false}) async {
-    if (replace && !silent) state = state.copyWith(isLoading: true, clearError: true);
+  Future<void> _loadPage(
+    int page, {
+    required bool replace,
+    bool silent = false,
+  }) async {
+    if (replace && !silent)
+      state = state.copyWith(isLoading: true, clearError: true);
     try {
       final response = await ref
           .read(newsRepositoryProvider.notifier)
           .getNewsList(locale: _locale, page: page);
-      final articles = replace ? response.list : [...state.articles, ...response.list];
+      final articles = replace
+          ? response.list
+          : [...state.articles, ...response.list];
       state = state.copyWith(
         articles: articles,
         currentPage: response.meta.currentPage,
@@ -138,7 +145,9 @@ class NewsSearch extends _$NewsSearch {
       final response = await ref
           .read(newsRepositoryProvider.notifier)
           .searchNews(locale: _locale, keywords: _keywords, page: page);
-      final articles = replace ? response.data : [...state.articles, ...response.data];
+      final articles = replace
+          ? response.data
+          : [...state.articles, ...response.data];
       state = state.copyWith(
         articles: articles,
         currentPage: response.currentPage,
@@ -147,7 +156,7 @@ class NewsSearch extends _$NewsSearch {
         isLoadingMore: false,
         clearError: true,
       );
-    } catch (e, st) {
+    } catch (e) {
       state = state.copyWith(isLoading: false, isLoadingMore: false, error: e);
     }
   }
@@ -158,7 +167,10 @@ class NewsSearch extends _$NewsSearch {
 // ---------------------------------------------------------------------------
 
 @riverpod
-Future<List<NewsArticle>> newsFirstPage(NewsFirstPageRef ref, String locale) async {
+Future<List<NewsArticle>> newsFirstPage(
+  NewsFirstPageRef ref,
+  String locale,
+) async {
   final keyword = locale == 'cn' ? '足球' : 'Football';
   final response = await ref
       .watch(newsRepositoryProvider.notifier)
@@ -172,5 +184,7 @@ Future<List<NewsArticle>> newsFirstPage(NewsFirstPageRef ref, String locale) asy
 
 @riverpod
 Future<NewsDetail> newsDetail(NewsDetailRef ref, int id, String locale) {
-  return ref.watch(newsRepositoryProvider.notifier).getNewsDetail(locale: locale, id: id);
+  return ref
+      .watch(newsRepositoryProvider.notifier)
+      .getNewsDetail(locale: locale, id: id);
 }

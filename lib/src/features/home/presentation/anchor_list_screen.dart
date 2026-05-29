@@ -59,8 +59,9 @@ class _AnchorListScreenState extends ConsumerState<AnchorListScreen> {
     if (_isLoadingMore) return;
     setState(() => _isLoadingMore = true);
     try {
-      final response =
-          await ref.read(anchorListProvider(page: _currentPage + 1).future);
+      final response = await ref.read(
+        anchorListProvider(page: _currentPage + 1).future,
+      );
       setState(() {
         _currentPage++;
         _lastPage = response.lastPage;
@@ -110,7 +111,11 @@ class _AnchorListScreenState extends ConsumerState<AnchorListScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.wifi_off_rounded, size: 48, color: Colors.grey.shade400),
+                      Icon(
+                        Icons.wifi_off_rounded,
+                        size: 48,
+                        color: Colors.grey.shade400,
+                      ),
                       const SizedBox(height: 12),
                       Text(
                         'home.error.load_failed'.tr(),

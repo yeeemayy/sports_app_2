@@ -13,7 +13,10 @@ class BannerRepository extends _$BannerRepository {
 
   Future<BannerModel> getBanner() async {
     final dio = ref.read(apiServiceProvider).httpClient;
-    final response = await dio.get('/anchor/banner', queryParameters: {'appid': EnvConfig.appId});
+    final response = await dio.get(
+      '/anchor/banner',
+      queryParameters: {'appid': EnvConfig.appId},
+    );
 
     final json = response.data as Map<String, dynamic>;
     debugPrint('[BannerRepository] raw response: $json');

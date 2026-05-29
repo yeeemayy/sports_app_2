@@ -39,7 +39,9 @@ class PlayerDetailScreen extends ConsumerWidget {
       );
     }
 
-    final playerAsync = ref.watch(footballPlayerDetailProvider(playerId: playerId));
+    final playerAsync = ref.watch(
+      footballPlayerDetailProvider(playerId: playerId),
+    );
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -48,7 +50,9 @@ class PlayerDetailScreen extends ConsumerWidget {
         error: (e, _) => Center(
           child: Text(
             'league.empty'.tr(),
-            style: AppTextStyles.body(14).copyWith(color: context.appColors.text2),
+            style: AppTextStyles.body(
+              14,
+            ).copyWith(color: context.appColors.text2),
           ),
         ),
         data: (player) => _FootballPlayerBody(player: player),
@@ -106,7 +110,10 @@ List<_CharEntry> _parseCharList(dynamic raw) {
   return raw
       .whereType<List>()
       .where((e) => e.length >= 2)
-      .map<_CharEntry>((e) => (typeId: (e[0] as num).toInt(), worldRank: (e[1] as num).toInt()))
+      .map<_CharEntry>(
+        (e) =>
+            (typeId: (e[0] as num).toInt(), worldRank: (e[1] as num).toInt()),
+      )
       .toList();
 }
 
@@ -139,13 +146,18 @@ class _FootballPlayerBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = _accentColor();
-    final gradientEnd = HSLColor.fromColor(
-      accent,
-    ).withLightness((HSLColor.fromColor(accent).lightness + 0.15).clamp(0, 1)).toColor();
+    final gradientEnd = HSLColor.fromColor(accent)
+        .withLightness(
+          (HSLColor.fromColor(accent).lightness + 0.15).clamp(0, 1),
+        )
+        .toColor();
 
     final countryFlagUrl = player.countryDetails?.logo ?? player.nationalLogo;
     final countryName = player.countryDetails?.name != null
-        ? context.localizedName(en: player.countryDetails!.name, cn: player.countryDetails?.cnName)
+        ? context.localizedName(
+            en: player.countryDetails!.name,
+            cn: player.countryDetails?.cnName,
+          )
         : null;
 
     final specificPos = _specificMainPosition(player);
@@ -153,10 +165,14 @@ class _FootballPlayerBody extends StatelessWidget {
     final footLabel = _footLabel();
     final abilityEntries = _parseAbility(player);
     final advantages = _parseCharList(
-      player.characteristicsRaw?.isNotEmpty == true ? player.characteristicsRaw![0] : null,
+      player.characteristicsRaw?.isNotEmpty == true
+          ? player.characteristicsRaw![0]
+          : null,
     );
     final disadvantages = _parseCharList(
-      (player.characteristicsRaw?.length ?? 0) >= 2 ? player.characteristicsRaw![1] : null,
+      (player.characteristicsRaw?.length ?? 0) >= 2
+          ? player.characteristicsRaw![1]
+          : null,
     );
     final hasChar = advantages.isNotEmpty || disadvantages.isNotEmpty;
 
@@ -183,15 +199,21 @@ class _FootballPlayerBody extends StatelessWidget {
           ),
         ),
         if (secondaryPos.isNotEmpty)
-          SliverToBoxAdapter(child: _SecondaryPositionsStrip(positions: secondaryPos)),
-        if (_hasCareerInfo()) SliverToBoxAdapter(child: _CareerInfoCard(player: player)),
+          SliverToBoxAdapter(
+            child: _SecondaryPositionsStrip(positions: secondaryPos),
+          ),
+        if (_hasCareerInfo())
+          SliverToBoxAdapter(child: _CareerInfoCard(player: player)),
         if (abilityEntries.isNotEmpty)
           SliverToBoxAdapter(
             child: _AbilitySection(entries: abilityEntries, accent: accent),
           ),
         if (hasChar)
           SliverToBoxAdapter(
-            child: _CharacteristicsSection(advantages: advantages, disadvantages: disadvantages),
+            child: _CharacteristicsSection(
+              advantages: advantages,
+              disadvantages: disadvantages,
+            ),
           ),
         const SliverToBoxAdapter(child: SizedBox(height: 40)),
       ],
@@ -202,7 +224,11 @@ class _FootballPlayerBody extends StatelessWidget {
 // ─── Basketball Player Body ──────────────────────────────────────────────────
 
 class _BasketballPlayerDetail extends StatelessWidget {
-  const _BasketballPlayerDetail({required this.playerId, this.stat, this.squadPlayer});
+  const _BasketballPlayerDetail({
+    required this.playerId,
+    this.stat,
+    this.squadPlayer,
+  });
 
   final String playerId;
   final BasketballPlayerStat? stat;
@@ -223,9 +249,11 @@ class _BasketballPlayerDetail extends StatelessWidget {
     final position = stat?.player?.position ?? squadPlayer?.position;
     final shirtNumber = stat?.player?.shirtNumber ?? squadPlayer?.shirtNumber;
     final accent = _accentColor(playerId);
-    final gradientEnd = HSLColor.fromColor(
-      accent,
-    ).withLightness((HSLColor.fromColor(accent).lightness + 0.15).clamp(0, 1)).toColor();
+    final gradientEnd = HSLColor.fromColor(accent)
+        .withLightness(
+          (HSLColor.fromColor(accent).lightness + 0.15).clamp(0, 1),
+        )
+        .toColor();
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -248,7 +276,8 @@ class _BasketballPlayerDetail extends StatelessWidget {
               weight: squadPlayer?.weight,
             ),
           ),
-          if (stat != null) SliverToBoxAdapter(child: _BasketballStatGrid(stat: stat!)),
+          if (stat != null)
+            SliverToBoxAdapter(child: _BasketballStatGrid(stat: stat!)),
           const SliverToBoxAdapter(child: SizedBox(height: 40)),
         ],
       ),
@@ -292,7 +321,10 @@ class _PlayerHero extends StatelessWidget {
         iconSize: 24,
         style: IconButton.styleFrom(
           backgroundColor: Colors.white.withValues(alpha: 0.15),
-          side: BorderSide(color: Colors.white.withValues(alpha: 0.3), width: 0.5),
+          side: BorderSide(
+            color: Colors.white.withValues(alpha: 0.3),
+            width: 0.5,
+          ),
           shape: const CircleBorder(),
         ),
       ),
@@ -301,18 +333,22 @@ class _PlayerHero extends StatelessWidget {
         titlePadding: const EdgeInsetsDirectional.fromSTEB(56, 0, 16, 14),
         title: Builder(
           builder: (context) {
-            final settings =
-                context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
+            final settings = context
+                .dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
             if (settings == null) return const SizedBox.shrink();
-            final t = ((settings.maxExtent - settings.currentExtent) /
-                    (settings.maxExtent - settings.minExtent))
-                .clamp(0.0, 1.0);
+            final t =
+                ((settings.maxExtent - settings.currentExtent) /
+                        (settings.maxExtent - settings.minExtent))
+                    .clamp(0.0, 1.0);
             final opacity = ((t - 0.7) / 0.3).clamp(0.0, 1.0);
             return Opacity(
               opacity: opacity,
               child: Text(
                 name,
-                style: AppTextStyles.display(15, context).copyWith(color: Colors.white),
+                style: AppTextStyles.display(
+                  15,
+                  context,
+                ).copyWith(color: Colors.white),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -364,7 +400,10 @@ class _PlayerHero extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.white.withValues(alpha: 0.15),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
                     ),
                     child: ClipOval(
                       child: logo != null
@@ -392,8 +431,10 @@ class _PlayerHero extends StatelessWidget {
                       children: [
                         Text(
                           name,
-                          style: AppTextStyles.display(20, context)
-                              .copyWith(color: Colors.white, height: 1.1),
+                          style: AppTextStyles.display(
+                            20,
+                            context,
+                          ).copyWith(color: Colors.white, height: 1.1),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -404,7 +445,8 @@ class _PlayerHero extends StatelessWidget {
                           children: [
                             if (position != null)
                               _HeroChip(label: _localizedPosition(position!)),
-                            if (nationalityFlagUrl != null && nationalityFlagUrl!.isNotEmpty)
+                            if (nationalityFlagUrl != null &&
+                                nationalityFlagUrl!.isNotEmpty)
                               _NationalityChip(
                                 flagUrl: nationalityFlagUrl!,
                                 name: nationalityName,
@@ -440,7 +482,9 @@ class _HeroChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: AppTextStyles.mono(9).copyWith(color: Colors.white, letterSpacing: 9 * 0.1),
+        style: AppTextStyles.mono(
+          9,
+        ).copyWith(color: Colors.white, letterSpacing: 9 * 0.1),
       ),
     );
   }
@@ -476,7 +520,9 @@ class _NationalityChip extends StatelessWidget {
             const SizedBox(width: 5),
             Text(
               name!,
-              style: AppTextStyles.mono(9).copyWith(color: Colors.white, letterSpacing: 9 * 0.1),
+              style: AppTextStyles.mono(
+                9,
+              ).copyWith(color: Colors.white, letterSpacing: 9 * 0.1),
             ),
           ],
         ],
@@ -488,7 +534,12 @@ class _NationalityChip extends StatelessWidget {
 // ─── Bio Strip ───────────────────────────────────────────────────────────────
 
 class _BioStrip extends StatelessWidget {
-  const _BioStrip({required this.age, required this.height, required this.weight, this.extra});
+  const _BioStrip({
+    required this.age,
+    required this.height,
+    required this.weight,
+    this.extra,
+  });
 
   final int? age;
   final int? height;
@@ -498,9 +549,18 @@ class _BioStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cells = <Widget>[
-      _BioCell(label: 'league.squad.age'.tr(), value: age != null ? '$age' : '--'),
-      _BioCell(label: 'league.squad.height'.tr(), value: height != null ? '${height}cm' : '--'),
-      _BioCell(label: 'league.squad.weight'.tr(), value: weight != null ? '${weight}kg' : '--'),
+      _BioCell(
+        label: 'league.squad.age'.tr(),
+        value: age != null ? '$age' : '--',
+      ),
+      _BioCell(
+        label: 'league.squad.height'.tr(),
+        value: height != null ? '${height}cm' : '--',
+      ),
+      _BioCell(
+        label: 'league.squad.weight'.tr(),
+        value: weight != null ? '${weight}kg' : '--',
+      ),
       ?extra,
     ];
 
@@ -514,7 +574,8 @@ class _BioStrip extends StatelessWidget {
       child: Row(
         children: [
           for (int i = 0; i < cells.length; i++) ...[
-            if (i > 0) Container(width: 0.5, height: 36, color: context.appColors.line),
+            if (i > 0)
+              Container(width: 0.5, height: 36, color: context.appColors.line),
             Expanded(child: cells[i]),
           ],
         ],
@@ -576,17 +637,24 @@ class _SecondaryPositionsStrip extends StatelessWidget {
             children: positions
                 .map(
                   (pos) => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: context.appColors.surface2,
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: context.appColors.line, width: 0.5),
+                      border: Border.all(
+                        color: context.appColors.line,
+                        width: 0.5,
+                      ),
                     ),
                     child: Text(
                       _localizedPosition(pos),
-                      style: AppTextStyles.mono(
-                        9,
-                      ).copyWith(color: context.appColors.text2, letterSpacing: 9 * 0.1),
+                      style: AppTextStyles.mono(9).copyWith(
+                        color: context.appColors.text2,
+                        letterSpacing: 9 * 0.1,
+                      ),
                     ),
                   ),
                 )
@@ -637,16 +705,23 @@ class _CareerInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = <({String label, String value})>[
       if ((player.birthday ?? 0) > 0)
-        (label: 'league.player.born'.tr(), value: _formatBirthday(player.birthday!)),
+        (
+          label: 'league.player.born'.tr(),
+          value: _formatBirthday(player.birthday!),
+        ),
       if ((player.marketValue ?? 0) > 0)
         (
           label: 'league.player.market_val'.tr(),
-          value: _formatMarketValue(player.marketValue!, player.marketValueCurrency),
+          value: _formatMarketValue(
+            player.marketValue!,
+            player.marketValueCurrency,
+          ),
         ),
       if ((player.contractUntil ?? 0) > 0)
         (
           label: 'league.player.contract'.tr(),
-          value: '${DateTime.fromMillisecondsSinceEpoch(player.contractUntil! * 1000).year}',
+          value:
+              '${DateTime.fromMillisecondsSinceEpoch(player.contractUntil! * 1000).year}',
         ),
     ];
 
@@ -675,21 +750,26 @@ class _CareerInfoCard extends StatelessWidget {
                       endIndent: 16,
                     ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           items[i].label,
-                          style: AppTextStyles.mono(
-                            10,
-                          ).copyWith(color: context.appColors.text2, letterSpacing: 10 * 0.1),
+                          style: AppTextStyles.mono(10).copyWith(
+                            color: context.appColors.text2,
+                            letterSpacing: 10 * 0.1,
+                          ),
                         ),
                         Text(
                           items[i].value,
-                          style: AppTextStyles.body(
-                            14,
-                          ).copyWith(color: context.appColors.text, fontWeight: FontWeight.w600),
+                          style: AppTextStyles.body(14).copyWith(
+                            color: context.appColors.text,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ],
                     ),
@@ -745,9 +825,10 @@ class _AbilitySection extends StatelessWidget {
                         width: 88,
                         child: Text(
                           _abilityName(e.typeId),
-                          style: AppTextStyles.mono(
-                            10,
-                          ).copyWith(color: context.appColors.text2, letterSpacing: 10 * 0.08),
+                          style: AppTextStyles.mono(10).copyWith(
+                            color: context.appColors.text2,
+                            letterSpacing: 10 * 0.08,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -768,9 +849,10 @@ class _AbilitySection extends StatelessWidget {
                         width: 28,
                         child: Text(
                           '${e.rating}',
-                          style: AppTextStyles.body(
-                            13,
-                          ).copyWith(color: context.appColors.text, fontWeight: FontWeight.w700),
+                          style: AppTextStyles.body(13).copyWith(
+                            color: context.appColors.text,
+                            fontWeight: FontWeight.w700,
+                          ),
                           textAlign: TextAlign.right,
                         ),
                       ),
@@ -789,7 +871,10 @@ class _AbilitySection extends StatelessWidget {
 // ─── Characteristics Section ─────────────────────────────────────────────────
 
 class _CharacteristicsSection extends StatelessWidget {
-  const _CharacteristicsSection({required this.advantages, required this.disadvantages});
+  const _CharacteristicsSection({
+    required this.advantages,
+    required this.disadvantages,
+  });
 
   final List<_CharEntry> advantages;
   final List<_CharEntry> disadvantages;
@@ -821,33 +906,46 @@ class _CharacteristicsSection extends StatelessWidget {
                 if (advantages.isNotEmpty) ...[
                   Text(
                     'league.player.strengths'.tr(),
-                    style: AppTextStyles.mono(
-                      9,
-                    ).copyWith(color: context.appColors.text2, letterSpacing: 9 * 0.12),
+                    style: AppTextStyles.mono(9).copyWith(
+                      color: context.appColors.text2,
+                      letterSpacing: 9 * 0.12,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 6,
                     runSpacing: 6,
                     children: advantages
-                        .map((e) => _CharChip(label: _charName(e.typeId), positive: true))
+                        .map(
+                          (e) => _CharChip(
+                            label: _charName(e.typeId),
+                            positive: true,
+                          ),
+                        )
                         .toList(),
                   ),
                 ],
-                if (advantages.isNotEmpty && disadvantages.isNotEmpty) const SizedBox(height: 14),
+                if (advantages.isNotEmpty && disadvantages.isNotEmpty)
+                  const SizedBox(height: 14),
                 if (disadvantages.isNotEmpty) ...[
                   Text(
                     'league.player.weaknesses'.tr(),
-                    style: AppTextStyles.mono(
-                      9,
-                    ).copyWith(color: context.appColors.text2, letterSpacing: 9 * 0.12),
+                    style: AppTextStyles.mono(9).copyWith(
+                      color: context.appColors.text2,
+                      letterSpacing: 9 * 0.12,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 6,
                     runSpacing: 6,
                     children: disadvantages
-                        .map((e) => _CharChip(label: _charName(e.typeId), positive: false))
+                        .map(
+                          (e) => _CharChip(
+                            label: _charName(e.typeId),
+                            positive: false,
+                          ),
+                        )
                         .toList(),
                   ),
                 ],
@@ -867,7 +965,9 @@ class _CharChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = positive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1);
+    final bg = positive
+        ? Colors.green.withValues(alpha: 0.1)
+        : Colors.red.withValues(alpha: 0.1);
     final fg = positive ? Colors.green.shade600 : Colors.red.shade500;
 
     return Container(
@@ -879,7 +979,9 @@ class _CharChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: AppTextStyles.mono(9).copyWith(color: fg, letterSpacing: 9 * 0.08),
+        style: AppTextStyles.mono(
+          9,
+        ).copyWith(color: fg, letterSpacing: 9 * 0.08),
       ),
     );
   }
@@ -929,9 +1031,10 @@ class _BasketballStatGrid extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         item.label,
-                        style: AppTextStyles.mono(
-                          8,
-                        ).copyWith(color: context.appColors.text2, letterSpacing: 8 * 0.1),
+                        style: AppTextStyles.mono(8).copyWith(
+                          color: context.appColors.text2,
+                          letterSpacing: 8 * 0.1,
+                        ),
                       ),
                     ],
                   ),

@@ -25,18 +25,15 @@ class SessionExpiredInterceptor extends Interceptor {
   SessionExpiredInterceptor({
     required Future<String?> Function(Dio dio) reLoginCallback,
     required Future<void> Function() onExpiredCallback,
-  })  : _reLoginCallback = reLoginCallback,
-        _onExpiredCallback = onExpiredCallback;
+  }) : _reLoginCallback = reLoginCallback,
+       _onExpiredCallback = onExpiredCallback;
 
   /// Called by [ApiClient] after the [Dio] instance is created so the
   /// interceptor can fetch and retry requests.
   void setDio(Dio dio) => _dio = dio;
 
   @override
-  void onResponse(
-    Response response,
-    ResponseInterceptorHandler handler,
-  ) async {
+  void onResponse(Response response, ResponseInterceptorHandler handler) async {
     final data = response.data;
 
     // Not a session-expired payload — pass through.

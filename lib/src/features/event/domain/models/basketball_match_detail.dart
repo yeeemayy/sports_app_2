@@ -57,12 +57,18 @@ class BasketballMatchDetail {
   final BasketballTeamDetailInfo awayInfo;
   final BasketballLeagueDetailInfo leagueInfo;
 
-  String get homeName =>
-      SportMatch.teamName({'en_name': homeInfo.enName, 'cn_name': homeInfo.cnName});
-  String get awayName =>
-      SportMatch.teamName({'en_name': awayInfo.enName, 'cn_name': awayInfo.cnName});
-  String get leagueName =>
-      SportMatch.teamName({'en_name': leagueInfo.enName, 'cn_name': leagueInfo.cnName});
+  String get homeName => SportMatch.teamName({
+    'en_name': homeInfo.enName,
+    'cn_name': homeInfo.cnName,
+  });
+  String get awayName => SportMatch.teamName({
+    'en_name': awayInfo.enName,
+    'cn_name': awayInfo.cnName,
+  });
+  String get leagueName => SportMatch.teamName({
+    'en_name': leagueInfo.enName,
+    'cn_name': leagueInfo.cnName,
+  });
 
   factory BasketballMatchDetail.fromJson(Map<String, dynamic> json) {
     final d = json['matchDetails'] is Map
@@ -80,12 +86,12 @@ class BasketballMatchDetail {
         : <String, dynamic>{};
 
     List<int> parseSections(Map<String, dynamic> info) => [
-          info['section_1'] as int? ?? 0,
-          info['section_2'] as int? ?? 0,
-          info['section_3'] as int? ?? 0,
-          info['section_4'] as int? ?? 0,
-          info['section_overtime'] as int? ?? 0,
-        ];
+      info['section_1'] as int? ?? 0,
+      info['section_2'] as int? ?? 0,
+      info['section_3'] as int? ?? 0,
+      info['section_4'] as int? ?? 0,
+      info['section_overtime'] as int? ?? 0,
+    ];
 
     return BasketballMatchDetail(
       id: d['id'] as String? ?? '',

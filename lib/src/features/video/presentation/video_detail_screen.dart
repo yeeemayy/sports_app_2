@@ -174,21 +174,14 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
         error: (e, _) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (context.mounted) {
-              context.showErrorDialog(
-                title: 'video.load_error'.tr(),
-                error: e,
-              );
+              context.showErrorDialog(title: 'video.load_error'.tr(), error: e);
             }
           });
           return Column(
             children: [
               _buildVideoArea(),
               Expanded(
-                child: Center(
-                  child: Text(
-                    'home.error.load_failed'.tr(),
-                  ),
-                ),
+                child: Center(child: Text('home.error.load_failed'.tr())),
               ),
             ],
           );
@@ -216,13 +209,18 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            DateFormat('yyyy-MM-dd hh:mm').format(DateTime.parse(detail.createTime)),
+                            DateFormat(
+                              'yyyy-MM-dd hh:mm',
+                            ).format(DateTime.parse(detail.createTime)),
                             style: context.textTheme.bodySmall,
                           ),
                         ],
                       ),
                     ),
-                    HomeSectionTitle(title: 'video.more_videos'.tr(), icon: 'assets/images/news.png'),
+                    HomeSectionTitle(
+                      title: 'video.more_videos'.tr(),
+                      icon: 'assets/images/news.png',
+                    ),
                     HomeVideoList(
                       locale: _locale,
                       page: _randomPage,
@@ -317,14 +315,20 @@ class _ControlsOverlay extends StatelessWidget {
                 Expanded(
                   child: SliderTheme(
                     data: SliderTheme.of(context).copyWith(
-                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                      overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+                      thumbShape: const RoundSliderThumbShape(
+                        enabledThumbRadius: 6,
+                      ),
+                      overlayShape: const RoundSliderOverlayShape(
+                        overlayRadius: 12,
+                      ),
                       trackHeight: 2,
                     ),
                     child: Slider(
                       value: progress,
                       onChanged: (v) => onSeek(
-                        Duration(milliseconds: (v * duration.inMilliseconds).round()),
+                        Duration(
+                          milliseconds: (v * duration.inMilliseconds).round(),
+                        ),
                       ),
                       activeColor: Colors.white,
                       inactiveColor: Colors.white38,

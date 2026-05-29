@@ -8,7 +8,11 @@ enum SportType {
   baseball('baseball', 'baseballMatchList', 'event.sport.baseball'),
   volleyball('volleyball', 'volleyballMatchList', 'event.sport.volleyball'),
   badminton('badminton', 'badmintonMatchList', 'event.sport.badminton'),
-  tableTennis('table_tennis', 'table_tennisMatchList', 'event.sport.table_tennis'),
+  tableTennis(
+    'table_tennis',
+    'table_tennisMatchList',
+    'event.sport.table_tennis',
+  ),
   iceHockey('hockey', 'hockeyMatchList', 'event.sport.ice_hockey'),
   amFootball('amfootball', 'amFootballMatchList', 'event.sport.am_football');
 

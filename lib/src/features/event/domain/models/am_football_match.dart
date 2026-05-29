@@ -21,6 +21,7 @@ class AmFootballMatch with _$AmFootballMatch implements SportMatch {
     required String leagueName,
     required String leagueLogo,
     int? matchTime,
+
     /// Per-quarter breakdown keyed by "p1".."p4" plus "ft" (total points).
     Map<String, dynamic>? scores,
     String? description,
@@ -32,9 +33,15 @@ class AmFootballMatch with _$AmFootballMatch implements SportMatch {
       _$AmFootballMatchFromJson(json);
 
   factory AmFootballMatch.fromSportJson(Map<String, dynamic> json) {
-    final homeInfo = json['homeInfo'] is Map ? (json['homeInfo'] as Map).cast<String, dynamic>() : <String, dynamic>{};
-    final awayInfo = json['awayInfo'] is Map ? (json['awayInfo'] as Map).cast<String, dynamic>() : <String, dynamic>{};
-    final leagueInfo = json['leagueInfo'] is Map ? (json['leagueInfo'] as Map).cast<String, dynamic>() : <String, dynamic>{};
+    final homeInfo = json['homeInfo'] is Map
+        ? (json['homeInfo'] as Map).cast<String, dynamic>()
+        : <String, dynamic>{};
+    final awayInfo = json['awayInfo'] is Map
+        ? (json['awayInfo'] as Map).cast<String, dynamic>()
+        : <String, dynamic>{};
+    final leagueInfo = json['leagueInfo'] is Map
+        ? (json['leagueInfo'] as Map).cast<String, dynamic>()
+        : <String, dynamic>{};
     final (homeScore, awayScore) = SportMatch.ftScore(json);
 
     return AmFootballMatch(
@@ -50,7 +57,9 @@ class AmFootballMatch with _$AmFootballMatch implements SportMatch {
       leagueName: SportMatch.teamName(leagueInfo),
       leagueLogo: leagueInfo['logo'] as String? ?? '',
       matchTime: json['match_time'] as int?,
-      scores: json['scores'] is Map ? (json['scores'] as Map).cast<String, dynamic>() : null,
+      scores: json['scores'] is Map
+          ? (json['scores'] as Map).cast<String, dynamic>()
+          : null,
       description: json['description'] as String?,
       oddsEuro: (json['odds']?['euro'] as List?)?.toList(),
       statusDescription: json['statusDescription'] as String?,

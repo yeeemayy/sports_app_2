@@ -129,7 +129,9 @@ class CustomTextField extends StatelessWidget {
                   : null,
               suffixIcon: suffixIcon,
               filled: true,
-              fillColor: enabled ? resolvedBgColor : context.appColors.accent.withValues(alpha: 0.2),
+              fillColor: enabled
+                  ? resolvedBgColor
+                  : context.appColors.accent.withValues(alpha: 0.2),
               helperText: helperText,
               helperMaxLines: 6,
               helperStyle: TextStyle(

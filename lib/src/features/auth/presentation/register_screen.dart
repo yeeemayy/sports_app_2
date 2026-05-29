@@ -65,7 +65,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       ref.read(otpTimerNotifierProvider.notifier).start();
     } catch (e) {
       if (mounted) {
-        context.showErrorDialog(title: 'auth.register.otp_error_title'.tr(), error: e);
+        context.showErrorDialog(
+          title: 'auth.register.otp_error_title'.tr(),
+          error: e,
+        );
       }
     } finally {
       if (mounted) setState(() => _isSendingOtp = false);
@@ -75,7 +78,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     try {
-      await ref.read(authNotifierProvider.notifier).register(
+      await ref
+          .read(authNotifierProvider.notifier)
+          .register(
             nickname: _nicknameController.text.trim(),
             telephone: _telephoneController.text.trim(),
             password: _passwordController.text,
@@ -94,7 +99,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorDialog(title: 'auth.register.error_title'.tr(), error: e);
+        context.showErrorDialog(
+          title: 'auth.register.error_title'.tr(),
+          error: e,
+        );
       }
     }
   }
@@ -123,9 +131,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       label: 'auth.field.nickname'.tr(),
                       child: TextFormField(
                         controller: _nicknameController,
-                        style: AppTextStyles.mono(15).copyWith(color: scheme.onSurface),
+                        style: AppTextStyles.mono(
+                          15,
+                        ).copyWith(color: scheme.onSurface),
                         cursorColor: scheme.primary,
-                        onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                        onTapOutside: (_) =>
+                            FocusManager.instance.primaryFocus?.unfocus(),
                         decoration: authInputDecoration(
                           context,
                           hintText: 'auth.field.nickname_hint'.tr(),
@@ -141,9 +152,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       child: TextFormField(
                         controller: _telephoneController,
                         keyboardType: TextInputType.phone,
-                        style: AppTextStyles.mono(15).copyWith(color: scheme.onSurface),
+                        style: AppTextStyles.mono(
+                          15,
+                        ).copyWith(color: scheme.onSurface),
                         cursorColor: scheme.primary,
-                        onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                        onTapOutside: (_) =>
+                            FocusManager.instance.primaryFocus?.unfocus(),
                         decoration: authInputDecoration(
                           context,
                           hintText: 'auth.field.telephone_hint'.tr(),
@@ -154,15 +168,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               children: [
                                 Text(
                                   '+86',
-                                  style: AppTextStyles.mono(13).copyWith(
-                                    color: scheme.onSurface,
-                                  ),
+                                  style: AppTextStyles.mono(
+                                    13,
+                                  ).copyWith(color: scheme.onSurface),
                                 ),
                                 const SizedBox(width: 8),
                                 Container(
                                   width: 0.5,
                                   height: 18,
-                                  color: scheme.onSurface.withValues(alpha: 0.18),
+                                  color: scheme.onSurface.withValues(
+                                    alpha: 0.18,
+                                  ),
                                 ),
                               ],
                             ),
@@ -179,20 +195,26 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       child: TextFormField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
-                        style: AppTextStyles.mono(15).copyWith(color: scheme.onSurface),
+                        style: AppTextStyles.mono(
+                          15,
+                        ).copyWith(color: scheme.onSurface),
                         cursorColor: scheme.primary,
-                        onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                        onTapOutside: (_) =>
+                            FocusManager.instance.primaryFocus?.unfocus(),
                         decoration: authInputDecoration(
                           context,
                           hintText: 'auth.field.password_hint'.tr(),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
                               color: scheme.onSurface.withValues(alpha: 0.62),
                               size: 18,
                             ),
-                            onPressed: () =>
-                                setState(() => _obscurePassword = !_obscurePassword),
+                            onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
                           ),
                         ),
                         validator: (v) => v == null || v.isEmpty
@@ -206,9 +228,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       child: TextFormField(
                         controller: _confirmPasswordController,
                         obscureText: _obscureConfirmPassword,
-                        style: AppTextStyles.mono(15).copyWith(color: scheme.onSurface),
+                        style: AppTextStyles.mono(
+                          15,
+                        ).copyWith(color: scheme.onSurface),
                         cursorColor: scheme.primary,
-                        onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                        onTapOutside: (_) =>
+                            FocusManager.instance.primaryFocus?.unfocus(),
                         decoration: authInputDecoration(
                           context,
                           hintText: 'auth.field.confirm_password_hint'.tr(),
@@ -221,7 +246,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               size: 18,
                             ),
                             onPressed: () => setState(
-                              () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                              () => _obscureConfirmPassword =
+                                  !_obscureConfirmPassword,
                             ),
                           ),
                         ),
@@ -240,8 +266,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             child: TextFormField(
                               controller: _smsController,
                               keyboardType: TextInputType.number,
-                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                              style: AppTextStyles.mono(15).copyWith(color: scheme.onSurface),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              style: AppTextStyles.mono(
+                                15,
+                              ).copyWith(color: scheme.onSurface),
                               cursorColor: scheme.primary,
                               onTapOutside: (_) =>
                                   FocusManager.instance.primaryFocus?.unfocus(),
@@ -258,7 +288,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           _OtpButton(
                             countdown: countdown,
                             isSending: _isSendingOtp,
-                            phoneEmpty: _telephoneController.text.trim().isEmpty,
+                            phoneEmpty: _telephoneController.text
+                                .trim()
+                                .isEmpty,
                             onTap: _sendOtp,
                           ),
                         ],
@@ -309,10 +341,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(
-            'assets/images/image_02.jpeg',
-            fit: BoxFit.cover,
-          ),
+          Image.asset('assets/images/image_02.jpeg', fit: BoxFit.cover),
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -328,9 +357,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             right: 24,
             child: Text(
               'auth.register.hero_title'.tr(),
-              style: AppTextStyles.display(42, context).copyWith(
-                height: 0.9,
-              ),
+              style: AppTextStyles.display(42, context).copyWith(height: 0.9),
             ),
           ),
         ],
@@ -365,9 +392,7 @@ class _OtpButton extends StatelessWidget {
           color: scheme.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: disabled
-                ? Theme.of(context).dividerColor
-                : scheme.primary,
+            color: disabled ? Theme.of(context).dividerColor : scheme.primary,
             width: 0.5,
           ),
         ),

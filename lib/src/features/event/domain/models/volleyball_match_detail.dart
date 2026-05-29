@@ -55,12 +55,18 @@ class VolleyballMatchDetail {
   final VolleyballTeamDetailInfo awayInfo;
   final VolleyballLeagueDetailInfo leagueInfo;
 
-  String get homeName =>
-      SportMatch.teamName({'en_name': homeInfo.enName, 'cn_name': homeInfo.cnName});
-  String get awayName =>
-      SportMatch.teamName({'en_name': awayInfo.enName, 'cn_name': awayInfo.cnName});
-  String get leagueName =>
-      SportMatch.teamName({'en_name': leagueInfo.enName, 'cn_name': leagueInfo.cnName});
+  String get homeName => SportMatch.teamName({
+    'en_name': homeInfo.enName,
+    'cn_name': homeInfo.cnName,
+  });
+  String get awayName => SportMatch.teamName({
+    'en_name': awayInfo.enName,
+    'cn_name': awayInfo.cnName,
+  });
+  String get leagueName => SportMatch.teamName({
+    'en_name': leagueInfo.enName,
+    'cn_name': leagueInfo.cnName,
+  });
 
   static const _liveStatuses = {432, 434, 436, 438, 440};
   bool get isLive => _liveStatuses.contains(statusId);

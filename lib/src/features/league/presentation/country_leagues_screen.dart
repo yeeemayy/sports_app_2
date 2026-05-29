@@ -29,9 +29,15 @@ class CountryLeaguesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final leaguesAsync = switch (sport) {
-      LeagueSport.football => ref.watch(footballLeaguesByCountryProvider(countryId: countryId)),
-      LeagueSport.basketball => ref.watch(basketballLeaguesByCountryProvider(countryId: countryId)),
-      final s => ref.watch(sportLeaguesByBrowseIdProvider(sport: s, id: countryId)),
+      LeagueSport.football => ref.watch(
+        footballLeaguesByCountryProvider(countryId: countryId),
+      ),
+      LeagueSport.basketball => ref.watch(
+        basketballLeaguesByCountryProvider(countryId: countryId),
+      ),
+      final s => ref.watch(
+        sportLeaguesByBrowseIdProvider(sport: s, id: countryId),
+      ),
     };
 
     return Scaffold(
@@ -46,7 +52,10 @@ class CountryLeaguesScreen extends ConsumerWidget {
                 children: [
                   IconButton(
                     onPressed: () => context.pop(),
-                    icon: Icon(Icons.arrow_circle_left_outlined, color: context.appColors.text),
+                    icon: Icon(
+                      Icons.arrow_circle_left_outlined,
+                      color: context.appColors.text,
+                    ),
                     iconSize: 24,
                     padding: EdgeInsets.zero,
                   ),
@@ -67,7 +76,9 @@ class CountryLeaguesScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          context.localizedName(en: countryName, cn: countryNameCn).toUpperCase(),
+                          context
+                              .localizedName(en: countryName, cn: countryNameCn)
+                              .toUpperCase(),
                           style: AppTextStyles.display(
                             26,
                             context,
@@ -75,10 +86,13 @@ class CountryLeaguesScreen extends ConsumerWidget {
                         ),
                         leaguesAsync.maybeWhen(
                           data: (l) => Text(
-                            'league.competitions'.tr(namedArgs: {'n': '${l.length}'}),
-                            style: AppTextStyles.mono(
-                              10,
-                            ).copyWith(color: context.appColors.text3, letterSpacing: 10 * 0.14),
+                            'league.competitions'.tr(
+                              namedArgs: {'n': '${l.length}'},
+                            ),
+                            style: AppTextStyles.mono(10).copyWith(
+                              color: context.appColors.text3,
+                              letterSpacing: 10 * 0.14,
+                            ),
                           ),
                           orElse: () => const SizedBox.shrink(),
                         ),
@@ -96,14 +110,18 @@ class CountryLeaguesScreen extends ConsumerWidget {
                 error: (e, _) => Center(
                   child: Text(
                     'league.empty'.tr(),
-                    style: AppTextStyles.body(14).copyWith(color: context.appColors.text3),
+                    style: AppTextStyles.body(
+                      14,
+                    ).copyWith(color: context.appColors.text3),
                   ),
                 ),
                 data: (leagues) => leagues.isEmpty
                     ? Center(
                         child: Text(
                           'league.empty'.tr(),
-                          style: AppTextStyles.body(14).copyWith(color: context.appColors.text3),
+                          style: AppTextStyles.body(
+                            14,
+                          ).copyWith(color: context.appColors.text3),
                         ),
                       )
                     : ListView.builder(
@@ -146,11 +164,16 @@ class _CountryLeagueRow extends StatelessWidget {
     final compTypeColor = _compTypeColor(context, item.type);
 
     return GestureDetector(
-      onTap: () => context.push(AppRoutes.leagueDetailPath(sport.apiPath, item.id), extra: item),
+      onTap: () => context.push(
+        AppRoutes.leagueDetailPath(sport.apiPath, item.id),
+        extra: item,
+      ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
         decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: context.appColors.line, width: 0.5)),
+          border: Border(
+            bottom: BorderSide(color: context.appColors.line, width: 0.5),
+          ),
         ),
         child: Row(
           children: [
@@ -160,7 +183,8 @@ class _CountryLeagueRow extends StatelessWidget {
                 width: 46,
                 height: 46,
                 fit: BoxFit.cover,
-                placeholder: (_, _) => Container(color: context.appColors.surface2),
+                placeholder: (_, _) =>
+                    Container(color: context.appColors.surface2),
                 errorBuilder: (_, _, _) => Container(
                   width: 46,
                   height: 46,
@@ -188,31 +212,37 @@ class _CountryLeagueRow extends StatelessWidget {
                       context,
                     ).copyWith(color: context.appColors.text, height: 1),
                   ),
-                  if (sport == LeagueSport.football || sport == LeagueSport.basketball) ...[
+                  if (sport == LeagueSport.football ||
+                      sport == LeagueSport.basketball) ...[
                     const SizedBox(height: 7),
                     Row(
                       children: [
                         if (item.shortName != null) ...[
                           Text(
                             item.shortName!,
-                            style: AppTextStyles.mono(
-                              9,
-                            ).copyWith(color: context.appColors.text3, letterSpacing: 9 * 0.1),
+                            style: AppTextStyles.mono(9).copyWith(
+                              color: context.appColors.text3,
+                              letterSpacing: 9 * 0.1,
+                            ),
                           ),
                           _dot(context),
                         ],
                         if (compTypeKey != null)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 1,
+                            ),
                             decoration: BoxDecoration(
                               color: compTypeColor.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
                               compTypeKey.tr(),
-                              style: AppTextStyles.mono(
-                                8,
-                              ).copyWith(color: compTypeColor, letterSpacing: 8 * 0.1),
+                              style: AppTextStyles.mono(8).copyWith(
+                                color: compTypeColor,
+                                letterSpacing: 8 * 0.1,
+                              ),
                             ),
                           ),
                       ],
@@ -221,7 +251,11 @@ class _CountryLeagueRow extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, size: 16, color: context.appColors.text3),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 16,
+              color: context.appColors.text3,
+            ),
           ],
         ),
       ),
@@ -233,7 +267,10 @@ class _CountryLeagueRow extends StatelessWidget {
     child: Container(
       width: 3,
       height: 3,
-      decoration: BoxDecoration(shape: BoxShape.circle, color: context.appColors.lineStrong),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: context.appColors.lineStrong,
+      ),
     ),
   );
 }

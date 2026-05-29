@@ -17,11 +17,36 @@ class AppWrapper extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
 
   static const _tabs = [
-    (labelKey: 'nav.home', icon: Icons.home_outlined, activeIcon: Icons.home, path: AppRoutes.home),
-    (labelKey: 'nav.live', icon: Icons.play_circle_outline, activeIcon: Icons.play_circle, path: AppRoutes.anchor),
-    (labelKey: 'nav.news', icon: Icons.article_outlined, activeIcon: Icons.article, path: AppRoutes.news),
-    (labelKey: 'nav.league', icon: Icons.emoji_events_outlined, activeIcon: Icons.emoji_events, path: AppRoutes.league),
-    (labelKey: 'nav.me', icon: Icons.person_outline, activeIcon: Icons.person, path: AppRoutes.profile),
+    (
+      labelKey: 'nav.home',
+      icon: Icons.home_outlined,
+      activeIcon: Icons.home,
+      path: AppRoutes.home,
+    ),
+    (
+      labelKey: 'nav.live',
+      icon: Icons.play_circle_outline,
+      activeIcon: Icons.play_circle,
+      path: AppRoutes.anchor,
+    ),
+    (
+      labelKey: 'nav.news',
+      icon: Icons.article_outlined,
+      activeIcon: Icons.article,
+      path: AppRoutes.news,
+    ),
+    (
+      labelKey: 'nav.league',
+      icon: Icons.emoji_events_outlined,
+      activeIcon: Icons.emoji_events,
+      path: AppRoutes.league,
+    ),
+    (
+      labelKey: 'nav.me',
+      icon: Icons.person_outline,
+      activeIcon: Icons.person,
+      path: AppRoutes.profile,
+    ),
   ];
 
   void _onTap(WidgetRef ref, BuildContext context, int index) {
@@ -66,9 +91,14 @@ class AppWrapper extends ConsumerWidget {
                 child: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.72),
+                    color: Theme.of(
+                      context,
+                    ).scaffoldBackgroundColor.withValues(alpha: 0.72),
                     borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: Theme.of(context).dividerColor, width: 0.5),
+                    border: Border.all(
+                      color: Theme.of(context).dividerColor,
+                      width: 0.5,
+                    ),
                     boxShadow: const [
                       BoxShadow(
                         color: Color.fromRGBO(0, 0, 0, 0.5),
@@ -106,7 +136,11 @@ class AppWrapper extends ConsumerWidget {
 }
 
 class _ActiveNavItem extends StatelessWidget {
-  const _ActiveNavItem({required this.label, required this.icon, required this.onTap});
+  const _ActiveNavItem({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
 
   final String label;
   final IconData icon;
@@ -126,7 +160,11 @@ class _ActiveNavItem extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: Theme.of(context).colorScheme.onPrimary, size: 18),
+            Icon(
+              icon,
+              color: Theme.of(context).colorScheme.onPrimary,
+              size: 18,
+            ),
             const SizedBox(width: 6),
             Text(
               label.toUpperCase(),
@@ -156,7 +194,13 @@ class _InactiveNavItem extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        child: Icon(icon, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.62), size: 18),
+        child: Icon(
+          icon,
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurface.withValues(alpha: 0.62),
+          size: 18,
+        ),
       ),
     );
   }

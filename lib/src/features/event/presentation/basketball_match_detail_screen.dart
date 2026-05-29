@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/basketball_match_detail.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/domain/models/basketball_match_events.dart';
@@ -38,9 +37,16 @@ class _BasketballMatchDetailScreenState
 
   @override
   (String?, int?) watchDetail() {
-    final v = ref
-        .watch(matchDetailProvider(sport: SportType.basketball, matchId: matchId))
-        .valueOrNull as BasketballMatchDetail?;
+    final v =
+        ref
+                .watch(
+                  matchDetailProvider(
+                    sport: SportType.basketball,
+                    matchId: matchId,
+                  ),
+                )
+                .valueOrNull
+            as BasketballMatchDetail?;
     return (v?.leagueName, v?.matchTime);
   }
 
@@ -49,12 +55,11 @@ class _BasketballMatchDetailScreenState
     BuildContext context, {
     String? leagueName,
     int? matchTimestamp,
-  }) =>
-      _BasketballHeader(
-        matchId: matchId,
-        leagueName: leagueName,
-        matchTimestamp: matchTimestamp,
-      );
+  }) => _BasketballHeader(
+    matchId: matchId,
+    leagueName: leagueName,
+    matchTimestamp: matchTimestamp,
+  );
 
   @override
   List<Tab> buildTabs(BuildContext context) => [
@@ -84,13 +89,16 @@ class _BasketballHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync =
-        ref.watch(matchDetailProvider(sport: SportType.basketball, matchId: matchId));
-    final eventsAsync =
-        ref.watch(matchEventsProvider(sport: SportType.basketball, matchId: matchId));
+    final detailAsync = ref.watch(
+      matchDetailProvider(sport: SportType.basketball, matchId: matchId),
+    );
+    final eventsAsync = ref.watch(
+      matchEventsProvider(sport: SportType.basketball, matchId: matchId),
+    );
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.basketball)
-          .select((map) => map[matchId] as BasketballRealtimeData?),
+      sportRealtimeProvider(
+        SportType.basketball,
+      ).select((map) => map[matchId] as BasketballRealtimeData?),
     );
 
     return SportDetailHeaderShell<BasketballMatchDetail>(
@@ -108,12 +116,12 @@ class _BasketballHeader extends ConsumerWidget {
             eventsData?.awayTotal ?? rt?.awayTotal ?? detail.awayInfo.total;
 
         final periodKey = _periodKey(effStatusId);
-        final periodLabel =
-            periodKey.isNotEmpty ? periodKey.tr() : (detail.statusDescription ?? '');
+        final periodLabel = periodKey.isNotEmpty
+            ? periodKey.tr()
+            : (detail.statusDescription ?? '');
 
         final showClock = eventsData?.showClock ?? rt?.showClock ?? false;
-        final clockDisplay =
-            eventsData?.clockDisplay ?? rt?.clockDisplay ?? '';
+        final clockDisplay = eventsData?.clockDisplay ?? rt?.clockDisplay ?? '';
         final isNoScore = const {0, 1}.contains(effStatusId);
 
         final statusColor = _statusColor(effStatusId, context.appColors);
@@ -204,8 +212,10 @@ class _ScoreBlock extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.display(13, context)
-                    .copyWith(color: colors.text),
+                style: AppTextStyles.display(
+                  13,
+                  context,
+                ).copyWith(color: colors.text),
               ),
             ],
           ),
@@ -216,7 +226,10 @@ class _ScoreBlock extends StatelessWidget {
             children: [
               if (statusLabel.isNotEmpty)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor,
                     borderRadius: BorderRadius.circular(6),
@@ -224,7 +237,9 @@ class _ScoreBlock extends StatelessWidget {
                   child: Text(
                     statusLabel.toUpperCase(),
                     style: AppTextStyles.display(11, context).copyWith(
-                      color: statusColor.computeLuminance() > 0.5 ? const Color(0xFF0E0E0E) : Colors.white,
+                      color: statusColor.computeLuminance() > 0.5
+                          ? const Color(0xFF0E0E0E)
+                          : Colors.white,
                       letterSpacing: 0.1 * 11,
                     ),
                   ),
@@ -244,8 +259,11 @@ class _ScoreBlock extends StatelessWidget {
                 children: [
                   Text(
                     homeScore,
-                    style: AppTextStyles.display(56, context)
-                        .copyWith(color: statusColor == colors.live ? colors.accent : statusColor),
+                    style: AppTextStyles.display(56, context).copyWith(
+                      color: statusColor == colors.live
+                          ? colors.accent
+                          : statusColor,
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -259,8 +277,11 @@ class _ScoreBlock extends StatelessWidget {
                   ),
                   Text(
                     awayScore,
-                    style: AppTextStyles.display(56, context)
-                        .copyWith(color: statusColor == colors.live ? colors.accent : statusColor),
+                    style: AppTextStyles.display(56, context).copyWith(
+                      color: statusColor == colors.live
+                          ? colors.accent
+                          : statusColor,
+                    ),
                   ),
                 ],
               ),
@@ -278,8 +299,10 @@ class _ScoreBlock extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.display(13, context)
-                    .copyWith(color: colors.text),
+                style: AppTextStyles.display(
+                  13,
+                  context,
+                ).copyWith(color: colors.text),
               ),
             ],
           ),
@@ -299,10 +322,12 @@ class _OverviewTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.appColors;
-    final detailAsync =
-        ref.watch(matchDetailProvider(sport: SportType.basketball, matchId: matchId));
-    final eventsAsync =
-        ref.watch(matchEventsProvider(sport: SportType.basketball, matchId: matchId));
+    final detailAsync = ref.watch(
+      matchDetailProvider(sport: SportType.basketball, matchId: matchId),
+    );
+    final eventsAsync = ref.watch(
+      matchEventsProvider(sport: SportType.basketball, matchId: matchId),
+    );
 
     final detail = detailAsync.valueOrNull as BasketballMatchDetail?;
 
@@ -336,10 +361,10 @@ class _OverviewTab extends ConsumerWidget {
       data: (obj) {
         final events = obj as BasketballMatchEventsData?;
         final effStatusId = events?.statusId ?? detail?.statusId ?? 0;
-        final homeQ = events?.homeQuarterScores ??
-            detail?.homeInfo.sectionScores ?? [];
-        final awayQ = events?.awayQuarterScores ??
-            detail?.awayInfo.sectionScores ?? [];
+        final homeQ =
+            events?.homeQuarterScores ?? detail?.homeInfo.sectionScores ?? [];
+        final awayQ =
+            events?.awayQuarterScores ?? detail?.awayInfo.sectionScores ?? [];
         final homeTotal = events?.homeTotal ?? detail?.homeInfo.total ?? 0;
         final awayTotal = events?.awayTotal ?? detail?.awayInfo.total ?? 0;
 
@@ -391,8 +416,14 @@ class _OverviewContent extends StatelessWidget {
   final String matchId;
   final bool isEnded;
 
-  List<BasketballStat> _placeholders() =>
-      List.generate(7, (i) => BasketballStat(typeCode: i + 1, homeValue: double.nan, awayValue: double.nan));
+  List<BasketballStat> _placeholders() => List.generate(
+    7,
+    (i) => BasketballStat(
+      typeCode: i + 1,
+      homeValue: double.nan,
+      awayValue: double.nan,
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -407,7 +438,10 @@ class _OverviewContent extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
           child: Text(
             'event.basketball.detail.q1'.tr().replaceAll('Q1', 'BY QUARTER'),
-            style: AppTextStyles.display(18, context).copyWith(color: colors.text),
+            style: AppTextStyles.display(
+              18,
+              context,
+            ).copyWith(color: colors.text),
           ),
         ),
         _QuarterTable(
@@ -427,13 +461,18 @@ class _OverviewContent extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
           child: Text(
             'event.basketball.detail.overview'.tr().toUpperCase(),
-            style: AppTextStyles.display(18, context).copyWith(color: colors.text),
+            style: AppTextStyles.display(
+              18,
+              context,
+            ).copyWith(color: colors.text),
           ),
         ),
         ...statsToShow.map((s) {
           final h = s.homeValue.isNaN ? 0.0 : s.homeValue;
           final a = s.awayValue.isNaN ? 0.0 : s.awayValue;
-          final label = s.labelKey.isNotEmpty ? s.labelKey.tr() : '${s.typeCode}';
+          final label = s.labelKey.isNotEmpty
+              ? s.labelKey.tr()
+              : '${s.typeCode}';
           return ArenaStatBar(label: label, home: h, away: a);
         }),
       ],
@@ -466,7 +505,12 @@ class _QuarterTable extends StatelessWidget {
 
   int? get _activeIdx {
     return switch (statusId) {
-      2 => 0, 4 => 1, 6 => 2, 8 => 3, 9 || 13 => 4, _ => null,
+      2 => 0,
+      4 => 1,
+      6 => 2,
+      8 => 3,
+      9 || 13 => 4,
+      _ => null,
     };
   }
 
@@ -477,7 +521,8 @@ class _QuarterTable extends StatelessWidget {
   }
 
   bool get _showOT {
-    final hasOt = (homeQ.length > 4 && homeQ[4] > 0) ||
+    final hasOt =
+        (homeQ.length > 4 && homeQ[4] > 0) ||
         (awayQ.length > 4 && awayQ[4] > 0);
     return statusId == 9 || hasOt;
   }
@@ -526,10 +571,9 @@ class _QuarterTable extends StatelessWidget {
                   child: Text(
                     'event.basketball.detail.total'.tr(),
                     textAlign: TextAlign.center,
-                    style: AppTextStyles.mono(9).copyWith(
-                      color: colors.accent,
-                      letterSpacing: 0.12 * 9,
-                    ),
+                    style: AppTextStyles.mono(
+                      9,
+                    ).copyWith(color: colors.accent, letterSpacing: 0.12 * 9),
                   ),
                 ),
               ],
@@ -537,15 +581,27 @@ class _QuarterTable extends StatelessWidget {
           ),
           Divider(height: 0.5, thickness: 0.5, color: colors.line),
           _ScoreRow(
-            logo: homeLogo, scores: homeQ, total: homeTotal,
-            showOT: _showOT, activeIdx: activeIdx, reached: _reached,
-            colors: colors, context: context, isLast: false,
+            logo: homeLogo,
+            scores: homeQ,
+            total: homeTotal,
+            showOT: _showOT,
+            activeIdx: activeIdx,
+            reached: _reached,
+            colors: colors,
+            context: context,
+            isLast: false,
           ),
           Divider(height: 0.5, thickness: 0.5, color: colors.line),
           _ScoreRow(
-            logo: awayLogo, scores: awayQ, total: awayTotal,
-            showOT: _showOT, activeIdx: activeIdx, reached: _reached,
-            colors: colors, context: context, isLast: true,
+            logo: awayLogo,
+            scores: awayQ,
+            total: awayTotal,
+            showOT: _showOT,
+            activeIdx: activeIdx,
+            reached: _reached,
+            colors: colors,
+            context: context,
+            isLast: true,
           ),
         ],
       ),
@@ -608,8 +664,10 @@ class _ScoreRow extends StatelessWidget {
             child: Text(
               '$total',
               textAlign: TextAlign.center,
-              style: AppTextStyles.display(18, context)
-                  .copyWith(color: colors.accent),
+              style: AppTextStyles.display(
+                18,
+                context,
+              ).copyWith(color: colors.accent),
             ),
           ),
         ],
@@ -648,17 +706,22 @@ class _SquadTabState extends ConsumerState<_SquadTab>
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
-    final detail = ref
-        .watch(matchDetailProvider(sport: SportType.basketball, matchId: widget.matchId))
-        .valueOrNull as BasketballMatchDetail?;
+    final detail =
+        ref
+                .watch(
+                  matchDetailProvider(
+                    sport: SportType.basketball,
+                    matchId: widget.matchId,
+                  ),
+                )
+                .valueOrNull
+            as BasketballMatchDetail?;
 
     final homeTeamId = detail?.homeTeamId ?? '';
     final awayTeamId = detail?.awayTeamId ?? '';
 
     if (homeTeamId.isEmpty && awayTeamId.isEmpty) {
-      return Center(
-        child: CircularProgressIndicator(color: colors.accent),
-      );
+      return Center(child: CircularProgressIndicator(color: colors.accent));
     }
 
     return Column(
@@ -683,8 +746,14 @@ class _SquadTabState extends ConsumerState<_SquadTab>
             splashBorderRadius: BorderRadius.circular(8),
             padding: const EdgeInsets.all(3),
             tabs: [
-              _TeamTab(logo: detail?.homeInfo.logo, name: detail?.homeName ?? ''),
-              _TeamTab(logo: detail?.awayInfo.logo, name: detail?.awayName ?? ''),
+              _TeamTab(
+                logo: detail?.homeInfo.logo,
+                name: detail?.homeName ?? '',
+              ),
+              _TeamTab(
+                logo: detail?.awayInfo.logo,
+                name: detail?.awayName ?? '',
+              ),
             ],
           ),
         ),
@@ -794,10 +863,9 @@ class _PlayerRow extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               '${player.shirtNumber}',
-              style: AppTextStyles.mono(11).copyWith(
-                color: colors.accent,
-                fontWeight: FontWeight.w700,
-              ),
+              style: AppTextStyles.mono(
+                11,
+              ).copyWith(color: colors.accent, fontWeight: FontWeight.w700),
             ),
           ),
           const SizedBox(width: 8),

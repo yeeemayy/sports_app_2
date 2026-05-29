@@ -64,8 +64,8 @@ extension _TeamStatTypeX on _TeamStatType {
 
   static double _passAccNum(FootballTeamStat t) =>
       (t.passes != null && t.passes! > 0 && t.passesAccuracy != null)
-          ? (t.passesAccuracy! / t.passes!) * 100
-          : 0;
+      ? (t.passesAccuracy! / t.passes!) * 100
+      : 0;
 }
 
 class FootballTeamStatsTab extends ConsumerStatefulWidget {
@@ -88,15 +88,20 @@ class _FootballTeamStatsTabState extends ConsumerState<FootballTeamStatsTab> {
 
   @override
   Widget build(BuildContext context) {
-    final async = ref.watch(footballTeamStatsProvider(leagueId: widget.leagueId));
+    final async = ref.watch(
+      footballTeamStatsProvider(leagueId: widget.leagueId),
+    );
 
     return LeagueTabContent(
       async: async,
       builder: (teams) {
-        final sorted = [...teams]..sort((a, b) {
-          final cmp = _statType.sortValue(a).compareTo(_statType.sortValue(b));
-          return _statType.sortAscending ? cmp : -cmp;
-        });
+        final sorted = [...teams]
+          ..sort((a, b) {
+            final cmp = _statType
+                .sortValue(a)
+                .compareTo(_statType.sortValue(b));
+            return _statType.sortAscending ? cmp : -cmp;
+          });
 
         return Column(
           children: [
@@ -189,7 +194,9 @@ class _StatChip extends StatelessWidget {
         child: Text(
           label,
           style: AppTextStyles.mono(9).copyWith(
-            color: selected ? context.appColors.accent : context.appColors.text3,
+            color: selected
+                ? context.appColors.accent
+                : context.appColors.text3,
             fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
@@ -244,10 +251,7 @@ class _TeamStatRow extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                context.localizedName(
-                  en: team.team.name,
-                  cn: team.team.cnName,
-                ),
+                context.localizedName(en: team.team.name, cn: team.team.cnName),
                 style: AppTextStyles.mono(
                   13,
                 ).copyWith(color: context.appColors.text),

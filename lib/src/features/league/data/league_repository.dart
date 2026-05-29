@@ -29,190 +29,177 @@ class LeagueRepository {
   LeagueRepository(this._ref);
   final LeagueRepositoryRef _ref;
 
+  // ─── Private fetch helpers ─────────────────────────────────────────────────
+
+  Future<List<T>> _getKeyedList<T>(
+    String path,
+    String key,
+    T Function(Map<String, dynamic>) fromJson,
+  ) async {
+    final res = await _ref.read(sportsApiServiceProvider).get(path);
+    return (res.data[key] as List)
+        .map((j) => fromJson(j as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<T> _getKeyedObject<T>(
+    String path,
+    String key,
+    T Function(Map<String, dynamic>) fromJson,
+  ) async {
+    final res = await _ref.read(sportsApiServiceProvider).get(path);
+    return fromJson(res.data[key] as Map<String, dynamic>);
+  }
+
+  Future<List<T>> _getRawList<T>(
+    String path,
+    T Function(Map<String, dynamic>) fromJson,
+  ) async {
+    final res = await _ref.read(sportsApiServiceProvider).get(path);
+    return (res.data as List)
+        .map((j) => fromJson(j as Map<String, dynamic>))
+        .toList();
+  }
+
   // ─── Football ──────────────────────────────────────────────────────────────
 
-  Future<List<LeagueItem>> getFootballHotLeagues() async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res = await dio.get('/football/league/list');
-    final list = res.data['footballHotLeaguesList'] as List;
-    return list
-        .map((j) => LeagueItem.fromJson(j as Map<String, dynamic>))
-        .toList();
-  }
+  Future<List<LeagueItem>> getFootballHotLeagues() => _getKeyedList(
+    '/football/league/list',
+    'footballHotLeaguesList',
+    LeagueItem.fromJson,
+  );
 
-  Future<List<CountryModel>> getFootballCountries() async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res = await dio.get('/football/country/list');
-    final list = res.data['countryList'] as List;
-    return list
-        .map((j) => CountryModel.fromJson(j as Map<String, dynamic>))
-        .toList();
-  }
+  Future<List<CountryModel>> getFootballCountries() => _getKeyedList(
+    '/football/country/list',
+    'countryList',
+    CountryModel.fromJson,
+  );
 
   Future<List<CountryLeagueItem>> getFootballLeaguesByCountry(
-      String countryId) async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res =
-        await dio.get('/football/country/leagues/$countryId');
-    final list = res.data as List;
-    return list
-        .map((j) => CountryLeagueItem.fromJson(j as Map<String, dynamic>))
-        .toList();
-  }
+    String countryId,
+  ) => _getRawList(
+    '/football/country/leagues/$countryId',
+    CountryLeagueItem.fromJson,
+  );
 
-  Future<LeagueDetailModel> getFootballLeagueDetail(String leagueId) async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res = await dio.get('/football/league/details/$leagueId');
-    return LeagueDetailModel.fromJson(
-        res.data['leagueDetails'] as Map<String, dynamic>);
-  }
+  Future<LeagueDetailModel> getFootballLeagueDetail(String leagueId) =>
+      _getKeyedObject(
+        '/football/league/details/$leagueId',
+        'leagueDetails',
+        LeagueDetailModel.fromJson,
+      );
 
-  Future<List<FootballStandingsGroup>> getFootballStandings(
-      String leagueId) async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res =
-        await dio.get('/football/league/season/standings/$leagueId');
-    final list = res.data['standings'] as List;
-    return list
-        .map((j) =>
-            FootballStandingsGroup.fromJson(j as Map<String, dynamic>))
-        .toList();
-  }
+  Future<List<FootballStandingsGroup>> getFootballStandings(String leagueId) =>
+      _getKeyedList(
+        '/football/league/season/standings/$leagueId',
+        'standings',
+        FootballStandingsGroup.fromJson,
+      );
 
-  Future<List<FootballPlayerStat>> getFootballPlayerStats(
-      String leagueId) async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res =
-        await dio.get('/football/league/season/playersStats/$leagueId');
-    final list = res.data['playersStats'] as List;
-    return list
-        .map((j) => FootballPlayerStat.fromJson(j as Map<String, dynamic>))
-        .toList();
-  }
+  Future<List<FootballPlayerStat>> getFootballPlayerStats(String leagueId) =>
+      _getKeyedList(
+        '/football/league/season/playersStats/$leagueId',
+        'playersStats',
+        FootballPlayerStat.fromJson,
+      );
 
-  Future<List<FootballTeamStat>> getFootballTeamStats(
-      String leagueId) async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res =
-        await dio.get('/football/league/season/teamsStats/$leagueId');
-    final list = res.data['teamsStats'] as List;
-    return list
-        .map((j) => FootballTeamStat.fromJson(j as Map<String, dynamic>))
-        .toList();
-  }
+  Future<List<FootballTeamStat>> getFootballTeamStats(String leagueId) =>
+      _getKeyedList(
+        '/football/league/season/teamsStats/$leagueId',
+        'teamsStats',
+        FootballTeamStat.fromJson,
+      );
 
   Future<TeamDetailModel> getFootballTeamDetail(String teamId) async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res = await dio.get('/football/team/details/$teamId');
+    final res = await _ref
+        .read(sportsApiServiceProvider)
+        .get('/football/team/details/$teamId');
     return TeamDetailModel.fromJson(res.data as Map<String, dynamic>);
   }
 
-  Future<List<SquadPlayer>> getFootballSquad(String teamId) async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res = await dio.get('/football/team/squad/$teamId');
-    final list = res.data['teamPlayers'] as List;
-    return list
-        .map((j) => SquadPlayer.fromJson(j as Map<String, dynamic>))
-        .toList();
-  }
+  Future<List<SquadPlayer>> getFootballSquad(String teamId) => _getKeyedList(
+    '/football/team/squad/$teamId',
+    'teamPlayers',
+    SquadPlayer.fromJson,
+  );
 
-  Future<FootballPlayerDetail> getFootballPlayerDetail(
-      String playerId) async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res = await dio.get('/football/player/details/$playerId');
-    return FootballPlayerDetail.fromJson(
-        res.data['playerDetails'] as Map<String, dynamic>);
-  }
+  Future<FootballPlayerDetail> getFootballPlayerDetail(String playerId) =>
+      _getKeyedObject(
+        '/football/player/details/$playerId',
+        'playerDetails',
+        FootballPlayerDetail.fromJson,
+      );
 
   // ─── Basketball ────────────────────────────────────────────────────────────
 
-  Future<List<LeagueItem>> getBasketballHotLeagues() async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res = await dio.get('/basketball/league/list');
-    final list = res.data['basketballHotLeaguesList'] as List;
-    return list
-        .map((j) => LeagueItem.fromJson(j as Map<String, dynamic>))
-        .toList();
-  }
+  Future<List<LeagueItem>> getBasketballHotLeagues() => _getKeyedList(
+    '/basketball/league/list',
+    'basketballHotLeaguesList',
+    LeagueItem.fromJson,
+  );
 
-  Future<List<CountryModel>> getBasketballCountries() async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res = await dio.get('/basketball/country/list');
-    final list = res.data['countryList'] as List;
-    return list
-        .map((j) => CountryModel.fromJson(j as Map<String, dynamic>))
-        .toList();
-  }
+  Future<List<CountryModel>> getBasketballCountries() => _getKeyedList(
+    '/basketball/country/list',
+    'countryList',
+    CountryModel.fromJson,
+  );
 
   Future<List<CountryLeagueItem>> getBasketballLeaguesByCountry(
-      String countryId) async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res =
-        await dio.get('/basketball/country/leagues/$countryId');
-    final list = res.data as List;
-    return list
-        .map((j) => CountryLeagueItem.fromJson(j as Map<String, dynamic>))
-        .toList();
-  }
+    String countryId,
+  ) => _getRawList(
+    '/basketball/country/leagues/$countryId',
+    CountryLeagueItem.fromJson,
+  );
 
-  Future<LeagueDetailModel> getBasketballLeagueDetail(
-      String leagueId) async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res = await dio.get('/basketball/league/details/$leagueId');
-    final data = res.data['leagueDetails'] as Map<String, dynamic>;
-    return LeagueDetailModel.fromJson(data);
-  }
+  Future<LeagueDetailModel> getBasketballLeagueDetail(String leagueId) =>
+      _getKeyedObject(
+        '/basketball/league/details/$leagueId',
+        'leagueDetails',
+        LeagueDetailModel.fromJson,
+      );
 
   Future<Map<String, BasketballConferenceGroup>> getBasketballStandings(
-      String leagueId) async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res =
-        await dio.get('/basketball/league/season/standings/$leagueId');
+    String leagueId,
+  ) async {
+    final res = await _ref
+        .read(sportsApiServiceProvider)
+        .get('/basketball/league/season/standings/$leagueId');
     final map = res.data['standings'] as Map<String, dynamic>;
-    return map.map((key, value) => MapEntry(
-          key,
-          BasketballConferenceGroup.fromJson(value as Map<String, dynamic>),
-        ));
+    return map.map(
+      (key, value) => MapEntry(
+        key,
+        BasketballConferenceGroup.fromJson(value as Map<String, dynamic>),
+      ),
+    );
   }
 
   Future<List<BasketballPlayerStat>> getBasketballPlayerStats(
-      String leagueId) async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res =
-        await dio.get('/basketball/league/season/playersStats/$leagueId');
-    final list = res.data['playersStats'] as List;
-    return list
-        .map((j) =>
-            BasketballPlayerStat.fromJson(j as Map<String, dynamic>))
-        .toList();
-  }
+    String leagueId,
+  ) => _getKeyedList(
+    '/basketball/league/season/playersStats/$leagueId',
+    'playersStats',
+    BasketballPlayerStat.fromJson,
+  );
 
-  Future<List<BasketballTeamStat>> getBasketballTeamStats(
-      String leagueId) async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res =
-        await dio.get('/basketball/league/season/teamsStats/$leagueId');
-    final list = res.data['teamsStats'] as List;
-    return list
-        .map((j) =>
-            BasketballTeamStat.fromJson(j as Map<String, dynamic>))
-        .toList();
-  }
+  Future<List<BasketballTeamStat>> getBasketballTeamStats(String leagueId) =>
+      _getKeyedList(
+        '/basketball/league/season/teamsStats/$leagueId',
+        'teamsStats',
+        BasketballTeamStat.fromJson,
+      );
 
   Future<TeamDetailModel> getBasketballTeamDetail(String teamId) async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res = await dio.get('/basketball/team/details/$teamId');
+    final res = await _ref
+        .read(sportsApiServiceProvider)
+        .get('/basketball/team/details/$teamId');
     return TeamDetailModel.fromJson(res.data as Map<String, dynamic>);
   }
 
-  Future<List<SquadPlayer>> getBasketballSquad(String teamId) async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res = await dio.get('/basketball/team/squad/$teamId');
-    final list = res.data['teamPlayers'] as List;
-    return list
-        .map((j) => SquadPlayer.fromJson(j as Map<String, dynamic>))
-        .toList();
-  }
+  Future<List<SquadPlayer>> getBasketballSquad(String teamId) => _getKeyedList(
+    '/basketball/team/squad/$teamId',
+    'teamPlayers',
+    SquadPlayer.fromJson,
+  );
 
   // ─── Generic methods for Tennis, Cricket, Baseball, Volleyball,
   //     Badminton, Table Tennis, Ice Hockey, American Football ──────────────
@@ -234,26 +221,17 @@ class LeagueRepository {
     final dio = _ref.read(sportsApiServiceProvider);
 
     if (sport.usesCategoryBrowse!) {
-      // /category/list
-      final res =
-          await dio.get('/${sport.apiPath}/category/list');
-      final List raw;
-      if (sport == LeagueSport.badminton) {
-        raw = res.data['categoryList'] as List;
-      } else {
-        // cricket, table_tennis, hockey, amfootball → wrapped in 'data'
-        raw = res.data['data'] as List;
-      }
+      final res = await dio.get('/${sport.apiPath}/category/list');
+      // badminton uses 'categoryList'; others wrap in 'data'
+      final List raw = sport == LeagueSport.badminton
+          ? res.data['categoryList'] as List
+          : res.data['data'] as List;
       return raw
-          .map((j) =>
-              CountryModel.fromCategoryJson(j as Map<String, dynamic>))
+          .map((j) => CountryModel.fromCategoryJson(j as Map<String, dynamic>))
           .toList();
     } else {
-      // /country/list  (baseball, volleyball)
-      final res =
-          await dio.get('/${sport.apiPath}/country/list');
-      final List raw = res.data['countryList'] as List;
-      return raw
+      final res = await dio.get('/${sport.apiPath}/country/list');
+      return (res.data['countryList'] as List)
           .map((j) => CountryModel.fromJson(j as Map<String, dynamic>))
           .toList();
     }
@@ -261,90 +239,83 @@ class LeagueRepository {
 
   /// Returns leagues under a given country or category id.
   Future<List<CountryLeagueItem>> getLeaguesByBrowseId(
-      LeagueSport sport, String id) async {
-    final dio = _ref.read(sportsApiServiceProvider);
+    LeagueSport sport,
+    String id,
+  ) async {
     final useCategory = sport.usesCategoryBrowse ?? false;
-    final endpoint = useCategory
+    final path = useCategory
         ? '/${sport.apiPath}/category/leagues/$id'
         : '/${sport.apiPath}/country/leagues/$id';
+    final res = await _ref.read(sportsApiServiceProvider).get(path);
 
-    final res = await dio.get(endpoint);
-
-    final List raw;
-    if (sport == LeagueSport.badminton ||
-        sport == LeagueSport.baseball ||
-        sport == LeagueSport.volleyball) {
-      // Returns array directly (no wrapper)
-      raw = res.data as List;
-    } else {
-      // cricket, table_tennis, hockey, amfootball → wrapped in 'data'
-      raw = res.data['data'] as List;
-    }
+    // badminton, baseball, volleyball return a bare array; others wrap in 'data'
+    final List raw =
+        (sport == LeagueSport.badminton ||
+            sport == LeagueSport.baseball ||
+            sport == LeagueSport.volleyball)
+        ? res.data as List
+        : res.data['data'] as List;
 
     return raw
-        .map((j) =>
-            CountryLeagueItem.fromJson(j as Map<String, dynamic>))
+        .map((j) => CountryLeagueItem.fromJson(j as Map<String, dynamic>))
         .toList();
   }
 
-  /// Fetches league detail for any new sport (all wrap in 'leagueDetails').
   Future<LeagueDetailModel> getGenericLeagueDetail(
-      LeagueSport sport, String leagueId) async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res =
-        await dio.get('/${sport.apiPath}/league/details/$leagueId');
-    return LeagueDetailModel.fromJson(
-        res.data['leagueDetails'] as Map<String, dynamic>);
-  }
+    LeagueSport sport,
+    String leagueId,
+  ) => _getKeyedObject(
+    '/${sport.apiPath}/league/details/$leagueId',
+    'leagueDetails',
+    LeagueDetailModel.fromJson,
+  );
 
-  /// Fetches standings for any new sport.  All use the same map format.
   Future<Map<String, GenericStandingsGroup>> getGenericStandings(
-      LeagueSport sport, String leagueId) async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res = await dio
+    LeagueSport sport,
+    String leagueId,
+  ) async {
+    final res = await _ref
+        .read(sportsApiServiceProvider)
         .get('/${sport.apiPath}/league/season/standings/$leagueId');
     final map = res.data['standings'] as Map<String, dynamic>? ?? {};
-    return map.map((key, value) => MapEntry(
-          key,
-          GenericStandingsGroup.fromJson(value as Map<String, dynamic>),
-        ));
+    return map.map(
+      (key, value) => MapEntry(
+        key,
+        GenericStandingsGroup.fromJson(value as Map<String, dynamic>),
+      ),
+    );
   }
 
-  /// Fetches team / participant detail for any new sport.
-  /// AmFootball wraps the object in a 'data' key.
+  /// AmFootball wraps the team object in a 'data' key; all others return it directly.
   Future<SimpleTeamDetail> getGenericTeamDetail(
-      LeagueSport sport, String teamId) async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res =
-        await dio.get('/${sport.apiPath}/team/details/$teamId');
-    final Map<String, dynamic> data;
-    if (sport == LeagueSport.amFootball) {
-      data = res.data['data'] as Map<String, dynamic>;
-    } else {
-      data = res.data as Map<String, dynamic>;
-    }
+    LeagueSport sport,
+    String teamId,
+  ) async {
+    final res = await _ref
+        .read(sportsApiServiceProvider)
+        .get('/${sport.apiPath}/team/details/$teamId');
+    final data = sport == LeagueSport.amFootball
+        ? res.data['data'] as Map<String, dynamic>
+        : res.data as Map<String, dynamic>;
     return SimpleTeamDetail.fromJson(data);
   }
 
-  /// Fetches American Football team lineup/roster.
   Future<List<AmFootballLineupPlayer>> getAmFootballLineup(
-      String teamId) async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res =
-        await dio.get('/amfootball/team/lineup/details/$teamId');
-    final list = res.data['data'] as List? ?? [];
-    return list
-        .map((j) =>
-            AmFootballLineupPlayer.fromJson(j as Map<String, dynamic>))
+    String teamId,
+  ) async {
+    final res = await _ref
+        .read(sportsApiServiceProvider)
+        .get('/amfootball/team/lineup/details/$teamId');
+    return ((res.data['data'] as List?) ?? [])
+        .map((j) => AmFootballLineupPlayer.fromJson(j as Map<String, dynamic>))
         .toList();
   }
 
-  /// Fetches the Tennis parent competition list for the "Other Leagues" section.
   Future<List<LeagueItem>> getTennisParentLeagues() async {
-    final dio = _ref.read(sportsApiServiceProvider);
-    final res = await dio.get('/tennis/competition/parent/list');
-    final list = res.data['data'] as List? ?? [];
-    return list.map((j) {
+    final res = await _ref
+        .read(sportsApiServiceProvider)
+        .get('/tennis/competition/parent/list');
+    return ((res.data['data'] as List?) ?? []).map((j) {
       final m = j as Map<String, dynamic>;
       return LeagueItem(
         id: (m['id'] as String?) ?? '',

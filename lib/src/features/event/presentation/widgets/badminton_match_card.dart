@@ -28,23 +28,33 @@ class BadmintonMatchCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.badminton)
-          .select((map) => map[match.id] as BadmintonRealtimeData?),
+      sportRealtimeProvider(
+        SportType.badminton,
+      ).select((map) => map[match.id] as BadmintonRealtimeData?),
     );
 
     final effectiveStatusId = rt?.statusId ?? match.statusId;
     final effectiveHomeSets = rt?.homeSets ?? extractSetScores(match.scores, 0);
     final effectiveAwaySets = rt?.awaySets ?? extractSetScores(match.scores, 1);
-    final effectiveHomeTotal = rt?.homeTotal ?? int.tryParse(match.homeScore) ?? 0;
-    final effectiveAwayTotal = rt?.awayTotal ?? int.tryParse(match.awayScore) ?? 0;
+    final effectiveHomeTotal =
+        rt?.homeTotal ?? int.tryParse(match.homeScore) ?? 0;
+    final effectiveAwayTotal =
+        rt?.awayTotal ?? int.tryParse(match.awayScore) ?? 0;
 
-    final statusLabel = badmintonStatusLabel(effectiveStatusId, match.statusDescription);
+    final statusLabel = badmintonStatusLabel(
+      effectiveStatusId,
+      match.statusDescription,
+    );
     final isLive = _liveStatuses.contains(effectiveStatusId);
     final isNotStarted = effectiveStatusId == 1;
 
     // Current (last) set scores for live display
-    final homeCurrentSet = effectiveHomeSets.isNotEmpty ? effectiveHomeSets.last : 0;
-    final awayCurrentSet = effectiveAwaySets.isNotEmpty ? effectiveAwaySets.last : 0;
+    final homeCurrentSet = effectiveHomeSets.isNotEmpty
+        ? effectiveHomeSets.last
+        : 0;
+    final awayCurrentSet = effectiveAwaySets.isNotEmpty
+        ? effectiveAwaySets.last
+        : 0;
 
     return MatchCardShell(
       onTap: () => context.push(AppRoutes.badmintonMatchDetailPath(match.id)),
@@ -122,7 +132,9 @@ class _RallyRow extends StatelessWidget {
         Expanded(
           child: Text(
             name,
-            style: AppTextStyles.mono(11).copyWith(color: context.appColors.text),
+            style: AppTextStyles.mono(
+              11,
+            ).copyWith(color: context.appColors.text),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -141,9 +153,16 @@ class _RallyRow extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: won
-                      ? (isLive ? context.appColors.accent : context.appColors.text)
+                      ? (isLive
+                            ? context.appColors.accent
+                            : context.appColors.text)
                       : context.appColors.surface2,
-                  border: won ? null : Border.all(color: context.appColors.lineStrong, width: 0.5),
+                  border: won
+                      ? null
+                      : Border.all(
+                          color: context.appColors.lineStrong,
+                          width: 0.5,
+                        ),
                 ),
               );
             }),

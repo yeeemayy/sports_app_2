@@ -22,7 +22,8 @@ class BasketballMatchCard extends ConsumerStatefulWidget {
   final BasketballMatch match;
 
   @override
-  ConsumerState<BasketballMatchCard> createState() => _BasketballMatchCardState();
+  ConsumerState<BasketballMatchCard> createState() =>
+      _BasketballMatchCardState();
 }
 
 class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
@@ -37,8 +38,16 @@ class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
   @override
   void initState() {
     super.initState();
-    _homeCtrl = AnimationController(vsync: this, duration: _highlightDuration, value: 1.0);
-    _awayCtrl = AnimationController(vsync: this, duration: _highlightDuration, value: 1.0);
+    _homeCtrl = AnimationController(
+      vsync: this,
+      duration: _highlightDuration,
+      value: 1.0,
+    );
+    _awayCtrl = AnimationController(
+      vsync: this,
+      duration: _highlightDuration,
+      value: 1.0,
+    );
   }
 
   @override
@@ -61,7 +70,10 @@ class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
     super.dispose();
   }
 
-  void _onRealtimeUpdate(BasketballRealtimeData? prev, BasketballRealtimeData? next) {
+  void _onRealtimeUpdate(
+    BasketballRealtimeData? prev,
+    BasketballRealtimeData? next,
+  ) {
     if (next == null || prev == null) return;
     if (next.homeTotal > prev.homeTotal) _homeCtrl.forward(from: 0);
     if (next.awayTotal > prev.awayTotal) _awayCtrl.forward(from: 0);
@@ -83,8 +95,12 @@ class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
     );
 
     final effectiveStatusId = rt?.statusId ?? widget.match.statusId;
-    final effectiveHomeScore = rt != null ? rt.homeTotal.toString() : widget.match.homeScore;
-    final effectiveAwayScore = rt != null ? rt.awayTotal.toString() : widget.match.awayScore;
+    final effectiveHomeScore = rt != null
+        ? rt.homeTotal.toString()
+        : widget.match.homeScore;
+    final effectiveAwayScore = rt != null
+        ? rt.awayTotal.toString()
+        : widget.match.awayScore;
     final effectivePeriodLabel = rt != null
         ? (rt.periodLabelKey.isEmpty ? null : rt.periodLabelKey.tr())
         : widget.match.statusDescription;
@@ -94,10 +110,13 @@ class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
 
     final isLive = effectiveStatusId > 0 && effectiveStatusId < 10;
     final isUpcoming = effectiveStatusId == 1 || effectiveStatusId == 0;
-    final scoreColor = isLive ? context.appColors.accent : context.appColors.text;
+    final scoreColor = isLive
+        ? context.appColors.accent
+        : context.appColors.text;
 
     return MatchCardShell(
-      onTap: () => context.push(AppRoutes.basketballMatchDetailPath(widget.match.id)),
+      onTap: () =>
+          context.push(AppRoutes.basketballMatchDetailPath(widget.match.id)),
       child: Column(
         children: [
           MatchCardHeader(
@@ -123,11 +142,17 @@ class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
               Expanded(
                 child: Column(
                   children: [
-                    SportLogo(url: widget.match.homeLogo, size: 32, circular: true),
+                    SportLogo(
+                      url: widget.match.homeLogo,
+                      size: 32,
+                      circular: true,
+                    ),
                     const SizedBox(height: 5),
                     Text(
                       widget.match.homeName,
-                      style: AppTextStyles.mono(11).copyWith(color: context.appColors.text2),
+                      style: AppTextStyles.mono(
+                        11,
+                      ).copyWith(color: context.appColors.text2),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
@@ -156,7 +181,10 @@ class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
                       child: Text(
                         isUpcoming ? '-' : effectiveHomeScore,
                         textAlign: TextAlign.center,
-                        style: AppTextStyles.display(36, context).copyWith(color: scoreColor),
+                        style: AppTextStyles.display(
+                          36,
+                          context,
+                        ).copyWith(color: scoreColor),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -182,7 +210,10 @@ class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
                       child: Text(
                         isUpcoming ? '-' : effectiveAwayScore,
                         textAlign: TextAlign.center,
-                        style: AppTextStyles.display(36, context).copyWith(color: scoreColor),
+                        style: AppTextStyles.display(
+                          36,
+                          context,
+                        ).copyWith(color: scoreColor),
                       ),
                     ),
                   ],
@@ -192,11 +223,17 @@ class _BasketballMatchCardState extends ConsumerState<BasketballMatchCard>
               Expanded(
                 child: Column(
                   children: [
-                    SportLogo(url: widget.match.awayLogo, size: 32, circular: true),
+                    SportLogo(
+                      url: widget.match.awayLogo,
+                      size: 32,
+                      circular: true,
+                    ),
                     const SizedBox(height: 5),
                     Text(
                       widget.match.awayName,
-                      style: AppTextStyles.mono(11).copyWith(color: context.appColors.text2),
+                      style: AppTextStyles.mono(
+                        11,
+                      ).copyWith(color: context.appColors.text2),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
@@ -244,14 +281,20 @@ class _StatusFooter extends StatelessWidget {
               ),
               child: Text(
                 periodLabel!,
-                style: AppTextStyles.mono(9).copyWith(color: context.appColors.ink),
+                style: AppTextStyles.mono(
+                  9,
+                ).copyWith(color: context.appColors.ink),
               ),
             ),
-          if (clockDisplay != null && clockDisplay != '0' && clockDisplay!.isNotEmpty) ...[
+          if (clockDisplay != null &&
+              clockDisplay != '0' &&
+              clockDisplay!.isNotEmpty) ...[
             const SizedBox(width: 6),
             Text(
               clockDisplay!,
-              style: AppTextStyles.mono(10).copyWith(color: context.appColors.accent),
+              style: AppTextStyles.mono(
+                10,
+              ).copyWith(color: context.appColors.accent),
             ),
           ],
         ],
@@ -262,7 +305,9 @@ class _StatusFooter extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          isUpcoming ? 'event.status.upcoming'.tr() : 'event.status.finished'.tr(),
+          isUpcoming
+              ? 'event.status.upcoming'.tr()
+              : 'event.status.finished'.tr(),
           style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
         ),
       ],

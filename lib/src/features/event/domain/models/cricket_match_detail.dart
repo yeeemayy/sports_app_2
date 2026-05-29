@@ -45,11 +45,11 @@ class CricketInnings {
   final int wickets;
 
   factory CricketInnings.fromList(List<dynamic> list) => CricketInnings(
-        team: (list[0] as num?)?.toInt() ?? 0,
-        runs: (list[1] as num?)?.toInt() ?? 0,
-        overs: double.tryParse(list[2]?.toString() ?? '0') ?? 0,
-        wickets: (list[3] as num?)?.toInt() ?? 0,
-      );
+    team: (list[0] as num?)?.toInt() ?? 0,
+    runs: (list[1] as num?)?.toInt() ?? 0,
+    overs: double.tryParse(list[2]?.toString() ?? '0') ?? 0,
+    wickets: (list[3] as num?)?.toInt() ?? 0,
+  );
 }
 
 @immutable
@@ -68,10 +68,10 @@ class CricketResults {
   final int result;
 
   factory CricketResults.fromJson(Map<String, dynamic> json) => CricketResults(
-        winby: (json['winby'] as num?)?.toInt() ?? 0,
-        margin: (json['margin'] as num?)?.toInt() ?? 0,
-        result: (json['result'] as num?)?.toInt() ?? 0,
-      );
+    winby: (json['winby'] as num?)?.toInt() ?? 0,
+    margin: (json['margin'] as num?)?.toInt() ?? 0,
+    result: (json['result'] as num?)?.toInt() ?? 0,
+  );
 }
 
 @immutable
@@ -98,14 +98,37 @@ class CricketMatchDetail {
   final List<CricketInnings> innings;
   final CricketResults? results;
 
-  String get homeName =>
-      SportMatch.teamName({'en_name': homeInfo.enName, 'cn_name': homeInfo.cnName});
-  String get awayName =>
-      SportMatch.teamName({'en_name': awayInfo.enName, 'cn_name': awayInfo.cnName});
-  String get leagueName =>
-      SportMatch.teamName({'en_name': leagueInfo.enName, 'cn_name': leagueInfo.cnName});
+  String get homeName => SportMatch.teamName({
+    'en_name': homeInfo.enName,
+    'cn_name': homeInfo.cnName,
+  });
+  String get awayName => SportMatch.teamName({
+    'en_name': awayInfo.enName,
+    'cn_name': awayInfo.cnName,
+  });
+  String get leagueName => SportMatch.teamName({
+    'en_name': leagueInfo.enName,
+    'cn_name': leagueInfo.cnName,
+  });
 
-  static const _liveStatuses = {2, 3, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545};
+  static const _liveStatuses = {
+    2,
+    3,
+    532,
+    533,
+    534,
+    535,
+    536,
+    537,
+    538,
+    539,
+    540,
+    541,
+    542,
+    543,
+    544,
+    545,
+  };
   bool get isLive => _liveStatuses.contains(statusId);
 
   factory CricketMatchDetail.fromJson(Map<String, dynamic> json) {

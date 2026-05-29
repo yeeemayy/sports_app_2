@@ -109,7 +109,8 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
     await Navigator.of(context).push(
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (_) => AnchorVideoFullscreenPage(controller: _videoController!),
+        builder: (_) =>
+            AnchorVideoFullscreenPage(controller: _videoController!),
       ),
     );
     if (mounted && wasPlaying && _videoController != null) {
@@ -271,10 +272,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
                 child: Center(
                   child: Text(
                     'anchor.detail.offline'.tr(),
-                    style: const TextStyle(
-                      color: Colors.white60,
-                      fontSize: 14,
-                    ),
+                    style: const TextStyle(color: Colors.white60, fontSize: 14),
                   ),
                 ),
               ),
@@ -408,10 +406,9 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
       loading: () => Center(
         child: Text(
           'anchor.detail.loading'.tr(),
-          style: AppTextStyles.mono(11).copyWith(
-            color: colors.text3,
-            letterSpacing: 1.4,
-          ),
+          style: AppTextStyles.mono(
+            11,
+          ).copyWith(color: colors.text3, letterSpacing: 1.4),
         ),
       ),
       error: (_, _) => Center(
@@ -551,12 +548,14 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
           insets: EdgeInsets.zero,
         ),
         indicatorSize: TabBarIndicatorSize.label,
-        labelStyle: AppTextStyles.display(16, context).copyWith(
-          letterSpacing: 0.08 * 16,
-        ),
-        unselectedLabelStyle: AppTextStyles.display(16, context).copyWith(
-          letterSpacing: 0.08 * 16,
-        ),
+        labelStyle: AppTextStyles.display(
+          16,
+          context,
+        ).copyWith(letterSpacing: 0.08 * 16),
+        unselectedLabelStyle: AppTextStyles.display(
+          16,
+          context,
+        ).copyWith(letterSpacing: 0.08 * 16),
         labelColor: colors.text,
         unselectedLabelColor: colors.text3,
         dividerColor: Colors.transparent,
@@ -609,8 +608,10 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
                 children: [
                   Text(
                     detail.nickname,
-                    style: AppTextStyles.display(18, context)
-                        .copyWith(color: colors.text),
+                    style: AppTextStyles.display(
+                      18,
+                      context,
+                    ).copyWith(color: colors.text),
                   ),
                   const SizedBox(height: 3),
                   Row(
@@ -623,8 +624,9 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
                       const SizedBox(width: 4),
                       Text(
                         '${detail.collect}',
-                        style: AppTextStyles.mono(11)
-                            .copyWith(color: colors.text2),
+                        style: AppTextStyles.mono(
+                          11,
+                        ).copyWith(color: colors.text2),
                       ),
                     ],
                   ),
@@ -637,10 +639,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
         const SizedBox(height: 20),
         Divider(height: 0, color: colors.lineStrong),
         const SizedBox(height: 18),
-        _InfoRow(
-          label: 'anchor.detail.info.title'.tr(),
-          value: detail.title,
-        ),
+        _InfoRow(label: 'anchor.detail.info.title'.tr(), value: detail.title),
         const SizedBox(height: 16),
         _InfoRow(
           label: 'anchor.detail.info.followers'.tr(),
@@ -707,9 +706,10 @@ class _LivePulseBadgeState extends State<_LivePulseBadge>
       vsync: this,
       duration: const Duration(milliseconds: 1400),
     )..repeat(reverse: true);
-    _scale = Tween<double>(begin: 1.0, end: 0.7).animate(
-      CurvedAnimation(parent: _anim, curve: Curves.easeInOut),
-    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 0.7,
+    ).animate(CurvedAnimation(parent: _anim, curve: Curves.easeInOut));
   }
 
   @override
@@ -839,8 +839,10 @@ class _AnchorVideoStrip extends StatelessWidget {
                   Flexible(
                     child: Text(
                       detail.nickname.toUpperCase(),
-                      style: AppTextStyles.display(17, context)
-                          .copyWith(color: colors.text),
+                      style: AppTextStyles.display(
+                        17,
+                        context,
+                      ).copyWith(color: colors.text),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -859,10 +861,9 @@ class _AnchorVideoStrip extends StatelessWidget {
               const SizedBox(height: 3),
               Text(
                 detail.title.toUpperCase(),
-                style: AppTextStyles.mono(10).copyWith(
-                  color: colors.text2,
-                  letterSpacing: 1.4,
-                ),
+                style: AppTextStyles.mono(
+                  10,
+                ).copyWith(color: colors.text2, letterSpacing: 1.4),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -880,12 +881,17 @@ class _RefAppButton extends StatelessWidget {
   final String icon;
   final String name;
   final String url;
-  const _RefAppButton({required this.icon, required this.name, required this.url});
+  const _RefAppButton({
+    required this.icon,
+    required this.name,
+    required this.url,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+      onTap: () =>
+          launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -917,10 +923,9 @@ class _InfoRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: AppTextStyles.mono(10).copyWith(
-            color: colors.text3,
-            letterSpacing: 1.6,
-          ),
+          style: AppTextStyles.mono(
+            10,
+          ).copyWith(color: colors.text3, letterSpacing: 1.6),
         ),
         const SizedBox(height: 5),
         Text(

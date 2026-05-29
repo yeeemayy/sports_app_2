@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/table_tennis_status.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/domain/models/table_tennis_match_detail.dart';
@@ -21,7 +20,8 @@ class TableTennisMatchDetailScreen extends ConsumerStatefulWidget {
   final String matchId;
 
   @override
-  ConsumerState<TableTennisMatchDetailScreen> createState() => _TableTennisMatchDetailScreenState();
+  ConsumerState<TableTennisMatchDetailScreen> createState() =>
+      _TableTennisMatchDetailScreenState();
 }
 
 class _TableTennisMatchDetailScreenState
@@ -38,7 +38,14 @@ class _TableTennisMatchDetailScreenState
   @override
   (String?, int?) watchDetail() {
     final v =
-        ref.watch(matchDetailProvider(sport: SportType.tableTennis, matchId: matchId)).valueOrNull
+        ref
+                .watch(
+                  matchDetailProvider(
+                    sport: SportType.tableTennis,
+                    matchId: matchId,
+                  ),
+                )
+                .valueOrNull
             as TableTennisMatchDetail?;
     return (v?.leagueName, v?.matchTime);
   }
@@ -48,12 +55,11 @@ class _TableTennisMatchDetailScreenState
     BuildContext context, {
     String? leagueName,
     int? matchTimestamp,
-  }) =>
-      _TableTennisMatchHeader(
-        matchId: matchId,
-        leagueName: leagueName,
-        matchTimestamp: matchTimestamp,
-      );
+  }) => _TableTennisMatchHeader(
+    matchId: matchId,
+    leagueName: leagueName,
+    matchTimestamp: matchTimestamp,
+  );
 
   @override
   List<Tab> buildTabs(BuildContext context) => [
@@ -83,10 +89,16 @@ class _TableTennisMatchHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.tableTennis, matchId: matchId));
-    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.tableTennis, matchId: matchId));
+    final detailAsync = ref.watch(
+      matchDetailProvider(sport: SportType.tableTennis, matchId: matchId),
+    );
+    final eventsAsync = ref.watch(
+      matchEventsProvider(sport: SportType.tableTennis, matchId: matchId),
+    );
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.tableTennis).select((map) => map[matchId] as TableTennisRealtimeData?),
+      sportRealtimeProvider(
+        SportType.tableTennis,
+      ).select((map) => map[matchId] as TableTennisRealtimeData?),
     );
 
     return SportDetailHeaderShell<TableTennisMatchDetail>(
@@ -104,7 +116,11 @@ class _TableTennisMatchHeader extends ConsumerWidget {
 }
 
 class _TableTennisHeaderContent extends StatelessWidget {
-  const _TableTennisHeaderContent({required this.detail, this.rt, this.eventsData});
+  const _TableTennisHeaderContent({
+    required this.detail,
+    this.rt,
+    this.eventsData,
+  });
 
   final TableTennisMatchDetail detail;
   final TableTennisRealtimeData? rt;
@@ -114,14 +130,16 @@ class _TableTennisHeaderContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.appColors;
     final effStatusId = eventsData?.statusId ?? rt?.statusId ?? detail.statusId;
-    final homeTotal = eventsData?.homeTotal ?? rt?.homeTotal ?? detail.homeInfo.totalScore;
-    final awayTotal = eventsData?.awayTotal ?? rt?.awayTotal ?? detail.awayInfo.totalScore;
-    final homeSets = eventsData?.homeSets ?? rt?.homeSets ?? detail.homeInfo.setScores;
-    final awaySets = eventsData?.awaySets ?? rt?.awaySets ?? detail.awayInfo.setScores;
-
+    final homeTotal =
+        eventsData?.homeTotal ?? rt?.homeTotal ?? detail.homeInfo.totalScore;
+    final awayTotal =
+        eventsData?.awayTotal ?? rt?.awayTotal ?? detail.awayInfo.totalScore;
     final isNotStarted = effStatusId == 1;
     final isLive = effStatusId >= 3 && effStatusId < 100;
-    final statusLabel = tableTennisStatusLabel(effStatusId, detail.statusDescription);
+    final statusLabel = tableTennisStatusLabel(
+      effStatusId,
+      detail.statusDescription,
+    );
     final statusColor = isLive ? colors.live : colors.text3;
     final scoreColor = isLive ? colors.accent : colors.text;
 
@@ -141,7 +159,10 @@ class _TableTennisHeaderContent extends StatelessWidget {
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.display(12, context).copyWith(color: colors.text),
+                    style: AppTextStyles.display(
+                      12,
+                      context,
+                    ).copyWith(color: colors.text),
                   ),
                 ],
               ),
@@ -152,7 +173,10 @@ class _TableTennisHeaderContent extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor,
                       borderRadius: BorderRadius.circular(6),
@@ -160,22 +184,36 @@ class _TableTennisHeaderContent extends StatelessWidget {
                     child: Text(
                       statusLabel.toUpperCase(),
                       style: AppTextStyles.display(11, context).copyWith(
-                        color: statusColor.computeLuminance() > 0.5 ? const Color(0xFF0E0E0E) : Colors.white,
+                        color: statusColor.computeLuminance() > 0.5
+                            ? const Color(0xFF0E0E0E)
+                            : Colors.white,
                         letterSpacing: 0.1 * 11,
                       ),
                     ),
                   ),
                   const SizedBox(height: 10),
                   if (isNotStarted)
-                    Text('– –', style: AppTextStyles.display(40, context).copyWith(color: scoreColor))
+                    Text(
+                      '– –',
+                      style: AppTextStyles.display(
+                        40,
+                        context,
+                      ).copyWith(color: scoreColor),
+                    )
                   else
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('$homeTotal', style: AppTextStyles.display(48, context).copyWith(color: scoreColor)),
+                        Text(
+                          '$homeTotal',
+                          style: AppTextStyles.display(
+                            48,
+                            context,
+                          ).copyWith(color: scoreColor),
+                        ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child:  Text(
+                          child: Text(
                             '–',
                             style: AppTextStyles.display(
                               22,
@@ -183,7 +221,13 @@ class _TableTennisHeaderContent extends StatelessWidget {
                             ).copyWith(color: context.appColors.text3),
                           ),
                         ),
-                        Text('$awayTotal', style: AppTextStyles.display(48, context).copyWith(color: scoreColor)),
+                        Text(
+                          '$awayTotal',
+                          style: AppTextStyles.display(
+                            48,
+                            context,
+                          ).copyWith(color: scoreColor),
+                        ),
                       ],
                     ),
                 ],
@@ -200,7 +244,10 @@ class _TableTennisHeaderContent extends StatelessWidget {
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.display(12, context).copyWith(color: colors.text),
+                    style: AppTextStyles.display(
+                      12,
+                      context,
+                    ).copyWith(color: colors.text),
                   ),
                 ],
               ),
@@ -220,23 +267,42 @@ class _ScoreTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.tableTennis, matchId: matchId));
-    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.tableTennis, matchId: matchId));
+    final detailAsync = ref.watch(
+      matchDetailProvider(sport: SportType.tableTennis, matchId: matchId),
+    );
+    final eventsAsync = ref.watch(
+      matchEventsProvider(sport: SportType.tableTennis, matchId: matchId),
+    );
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.tableTennis).select((map) => map[matchId] as TableTennisRealtimeData?),
+      sportRealtimeProvider(
+        SportType.tableTennis,
+      ).select((map) => map[matchId] as TableTennisRealtimeData?),
     );
 
     return detailAsync.when(
-      loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
-      error: (_, __) => Center(child: Text('event.error.load_failed'.tr(), style: AppTextStyles.body(13).copyWith(color: context.appColors.text3))),
+      loading: () => Center(
+        child: CircularProgressIndicator(color: context.appColors.accent),
+      ),
+      error: (_, __) => Center(
+        child: Text(
+          'event.error.load_failed'.tr(),
+          style: AppTextStyles.body(
+            13,
+          ).copyWith(color: context.appColors.text3),
+        ),
+      ),
       data: (obj) {
         final detail = obj as TableTennisMatchDetail;
         final ev = eventsAsync.valueOrNull as TableTennisMatchEventsData?;
         final effStatusId = ev?.statusId ?? rt?.statusId ?? detail.statusId;
-        final homeSets = ev?.homeSets ?? rt?.homeSets ?? detail.homeInfo.setScores;
-        final awaySets = ev?.awaySets ?? rt?.awaySets ?? detail.awayInfo.setScores;
-        final homeTotal = ev?.homeTotal ?? rt?.homeTotal ?? detail.homeInfo.totalScore;
-        final awayTotal = ev?.awayTotal ?? rt?.awayTotal ?? detail.awayInfo.totalScore;
+        final homeSets =
+            ev?.homeSets ?? rt?.homeSets ?? detail.homeInfo.setScores;
+        final awaySets =
+            ev?.awaySets ?? rt?.awaySets ?? detail.awayInfo.setScores;
+        final homeTotal =
+            ev?.homeTotal ?? rt?.homeTotal ?? detail.homeInfo.totalScore;
+        final awayTotal =
+            ev?.awayTotal ?? rt?.awayTotal ?? detail.awayInfo.totalScore;
 
         return _SetScoreTable(
           statusId: effStatusId,
@@ -274,14 +340,22 @@ class _SetScoreTable extends StatelessWidget {
 
   int? get _activeSetIndex {
     switch (statusId) {
-      case 51: return 0;
-      case 52: return 1;
-      case 53: return 2;
-      case 54: return 3;
-      case 55: return 4;
-      case 472: return 5;
-      case 473: return 6;
-      default: return null;
+      case 51:
+        return 0;
+      case 52:
+        return 1;
+      case 53:
+        return 2;
+      case 54:
+        return 3;
+      case 55:
+        return 4;
+      case 472:
+        return 5;
+      case 473:
+        return 6;
+      default:
+        return null;
     }
   }
 
@@ -297,12 +371,23 @@ class _SetScoreTable extends StatelessWidget {
         children: [
           SportLogo(url: logo, size: 18),
           const SizedBox(width: 6),
-          Flexible(child: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTextStyles.body(12).copyWith(color: colors.text))),
+          Flexible(
+            child: Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.body(12).copyWith(color: colors.text),
+            ),
+          ),
         ],
       ),
     );
 
-    Widget scoreCell(String value, {bool isActive = false, bool isBold = false}) => Expanded(
+    Widget scoreCell(
+      String value, {
+      bool isActive = false,
+      bool isBold = false,
+    }) => Expanded(
       child: Text(
         value,
         textAlign: TextAlign.center,
@@ -326,7 +411,10 @@ class _SetScoreTable extends StatelessWidget {
             children: [
               // Header: [empty] [Home] [Away]
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 child: Row(
                   children: [
                     const Expanded(child: SizedBox()),
@@ -343,20 +431,31 @@ class _SetScoreTable extends StatelessWidget {
                 return Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
                       child: Row(
                         children: [
                           Expanded(
                             child: Text(
-                              'event.table_tennis.detail.set_n'.tr(namedArgs: {'n': '${i + 1}'}).toUpperCase(),
+                              'event.table_tennis.detail.set_n'
+                                  .tr(namedArgs: {'n': '${i + 1}'})
+                                  .toUpperCase(),
                               style: AppTextStyles.mono(9).copyWith(
                                 color: isActive ? colors.accent : colors.text3,
                                 letterSpacing: 0.14 * 9,
                               ),
                             ),
                           ),
-                          scoreCell(hasScore ? '${homeSets[i]}' : '—', isActive: isActive),
-                          scoreCell(hasScore ? '${awaySets[i]}' : '—', isActive: isActive),
+                          scoreCell(
+                            hasScore ? '${homeSets[i]}' : '—',
+                            isActive: isActive,
+                          ),
+                          scoreCell(
+                            hasScore ? '${awaySets[i]}' : '—',
+                            isActive: isActive,
+                          ),
                         ],
                       ),
                     ),
@@ -366,13 +465,19 @@ class _SetScoreTable extends StatelessWidget {
               }),
               // Total row
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 child: Row(
                   children: [
                     Expanded(
                       child: Text(
                         'event.table_tennis.detail.total'.tr().toUpperCase(),
-                        style: AppTextStyles.mono(9).copyWith(color: colors.text3, letterSpacing: 0.14 * 9),
+                        style: AppTextStyles.mono(9).copyWith(
+                          color: colors.text3,
+                          letterSpacing: 0.14 * 9,
+                        ),
                       ),
                     ),
                     scoreCell('$homeTotal', isBold: true),
@@ -403,24 +508,44 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
-    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.tableTennis, matchId: widget.matchId));
+    final eventsAsync = ref.watch(
+      matchEventsProvider(
+        sport: SportType.tableTennis,
+        matchId: widget.matchId,
+      ),
+    );
 
     return eventsAsync.when(
-      loading: () => Center(child: CircularProgressIndicator(color: colors.accent)),
-      error: (_, __) => Center(child: Text('event.error.load_failed'.tr(), style: AppTextStyles.body(13).copyWith(color: colors.text3))),
+      loading: () =>
+          Center(child: CircularProgressIndicator(color: colors.accent)),
+      error: (_, __) => Center(
+        child: Text(
+          'event.error.load_failed'.tr(),
+          style: AppTextStyles.body(13).copyWith(color: colors.text3),
+        ),
+      ),
       data: (obj) {
         final events = obj as TableTennisMatchEventsData?;
         if (events == null || events.statSets.isEmpty) {
-          return Center(child: Text('event.table_tennis.detail.no_stats'.tr(), style: AppTextStyles.body(13).copyWith(color: colors.text3)));
+          return Center(
+            child: Text(
+              'event.table_tennis.detail.no_stats'.tr(),
+              style: AppTextStyles.body(13).copyWith(color: colors.text3),
+            ),
+          );
         }
 
-        final setIndices = events.statSets.map((s) => s.setIndex).toSet().toList()..sort();
+        final setIndices =
+            events.statSets.map((s) => s.setIndex).toSet().toList()..sort();
         final safeIdx = _selectedIdx.clamp(0, setIndices.length - 1);
         final tabLabels = setIndices.map((idx) {
           if (idx == 0) return 'event.table_tennis.detail.overall'.tr();
           return 'event.table_tennis.detail.set_n'.tr(namedArgs: {'n': '$idx'});
         }).toList();
-        final stats = events.statSets.where((s) => s.setIndex == setIndices[safeIdx]).expand((s) => s.stats).toList();
+        final stats = events.statSets
+            .where((s) => s.setIndex == setIndices[safeIdx])
+            .expand((s) => s.stats)
+            .toList();
 
         return Column(
           children: [
@@ -438,16 +563,23 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                       onTap: () => setState(() => _selectedIdx = i),
                       child: Container(
                         margin: const EdgeInsets.only(right: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: isSelected ? colors.accent : colors.surface2,
                           borderRadius: BorderRadius.circular(20),
-                          border: isSelected ? null : Border.all(color: colors.line, width: 0.5),
+                          border: isSelected
+                              ? null
+                              : Border.all(color: colors.line, width: 0.5),
                         ),
                         child: Text(
                           tabLabels[i].toUpperCase(),
                           style: AppTextStyles.mono(10).copyWith(
-                            color: isSelected ? const Color(0xFF0E0E0E) : colors.text2,
+                            color: isSelected
+                                ? const Color(0xFF0E0E0E)
+                                : colors.text2,
                             letterSpacing: 0.1 * 10,
                           ),
                         ),
@@ -460,16 +592,33 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
             Divider(height: 1, thickness: 0.5, color: colors.line),
             Expanded(
               child: stats.isEmpty
-                  ? Center(child: Text('event.table_tennis.detail.no_stats'.tr(), style: AppTextStyles.body(13).copyWith(color: colors.text3)))
+                  ? Center(
+                      child: Text(
+                        'event.table_tennis.detail.no_stats'.tr(),
+                        style: AppTextStyles.body(
+                          13,
+                        ).copyWith(color: colors.text3),
+                      ),
+                    )
                   : ListView.builder(
                       padding: const EdgeInsets.only(bottom: 20),
                       itemCount: stats.length,
                       itemBuilder: (context, i) {
                         final stat = stats[i];
-                        final home = stat.homeValue.isNaN ? 0.0 : stat.homeValue.abs();
-                        final away = stat.awayValue.isNaN ? 0.0 : stat.awayValue.abs();
-                        final label = stat.labelKey.isNotEmpty ? stat.labelKey.tr() : '${stat.typeCode}';
-                        return ArenaStatBar(label: label, home: home, away: away);
+                        final home = stat.homeValue.isNaN
+                            ? 0.0
+                            : stat.homeValue.abs();
+                        final away = stat.awayValue.isNaN
+                            ? 0.0
+                            : stat.awayValue.abs();
+                        final label = stat.labelKey.isNotEmpty
+                            ? stat.labelKey.tr()
+                            : '${stat.typeCode}';
+                        return ArenaStatBar(
+                          label: label,
+                          home: home,
+                          away: away,
+                        );
                       },
                     ),
             ),

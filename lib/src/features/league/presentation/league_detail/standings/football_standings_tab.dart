@@ -72,9 +72,10 @@ class _FootballStandingsTabState extends ConsumerState<FootballStandingsTab> {
               ],
               colWidths: const [14, 22, 0, 24, 24, 24, 24, 56, 32],
             ),
-            for (final group in (groups.toList()
-                  ..sort((a, b) =>
-                      (a.conference ?? '').compareTo(b.conference ?? ''))))
+            for (final group
+                in (groups.toList()..sort(
+                  (a, b) => (a.conference ?? '').compareTo(b.conference ?? ''),
+                )))
               for (int i = 0; i < group.rows.length; i++)
                 _FootballStandingsRow(
                   row: group.rows[i],
@@ -164,9 +165,7 @@ class _FilterChip extends StatelessWidget {
               : Colors.transparent,
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
-            color: selected
-                ? context.appColors.accent
-                : context.appColors.line,
+            color: selected ? context.appColors.accent : context.appColors.line,
             width: 0.8,
           ),
         ),
@@ -279,9 +278,9 @@ class _FootballStandingsRow extends StatelessWidget {
               width: 56,
               child: Text(
                 '$goals:$goalsAgainst',
-                style: AppTextStyles.mono(10).copyWith(
-                  color: context.appColors.text2,
-                ),
+                style: AppTextStyles.mono(
+                  10,
+                ).copyWith(color: context.appColors.text2),
                 textAlign: TextAlign.center,
               ),
             ),

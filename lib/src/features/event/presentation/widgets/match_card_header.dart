@@ -25,15 +25,14 @@ class MatchCardHeader extends StatelessWidget {
         Expanded(
           child: Text(
             leagueName,
-            style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+            style: AppTextStyles.mono(
+              9,
+            ).copyWith(color: context.appColors.text3),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        if (statusWidget != null) ...[
-          const SizedBox(width: 6),
-          statusWidget!,
-        ],
+        if (statusWidget != null) ...[const SizedBox(width: 6), statusWidget!],
         const SizedBox(width: 6),
         Text(
           matchTime,

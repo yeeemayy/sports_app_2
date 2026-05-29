@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/badminton_status.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/domain/models/badminton_match_detail.dart';
@@ -21,7 +20,8 @@ class BadmintonMatchDetailScreen extends ConsumerStatefulWidget {
   final String matchId;
 
   @override
-  ConsumerState<BadmintonMatchDetailScreen> createState() => _BadmintonMatchDetailScreenState();
+  ConsumerState<BadmintonMatchDetailScreen> createState() =>
+      _BadmintonMatchDetailScreenState();
 }
 
 class _BadmintonMatchDetailScreenState
@@ -38,18 +38,28 @@ class _BadmintonMatchDetailScreenState
   @override
   (String?, int?) watchDetail() {
     final v =
-        ref.watch(matchDetailProvider(sport: SportType.badminton, matchId: matchId)).valueOrNull
+        ref
+                .watch(
+                  matchDetailProvider(
+                    sport: SportType.badminton,
+                    matchId: matchId,
+                  ),
+                )
+                .valueOrNull
             as BadmintonMatchDetail?;
     return (v?.leagueName, v?.matchTime);
   }
 
   @override
-  Widget buildHeader(BuildContext context, {String? leagueName, int? matchTimestamp}) =>
-      _BadmintonMatchHeader(
-        matchId: matchId,
-        leagueName: leagueName,
-        matchTimestamp: matchTimestamp,
-      );
+  Widget buildHeader(
+    BuildContext context, {
+    String? leagueName,
+    int? matchTimestamp,
+  }) => _BadmintonMatchHeader(
+    matchId: matchId,
+    leagueName: leagueName,
+    matchTimestamp: matchTimestamp,
+  );
 
   @override
   List<Tab> buildTabs(BuildContext context) => [
@@ -67,7 +77,11 @@ class _BadmintonMatchDetailScreenState
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 class _BadmintonMatchHeader extends ConsumerWidget {
-  const _BadmintonMatchHeader({required this.matchId, this.leagueName, this.matchTimestamp});
+  const _BadmintonMatchHeader({
+    required this.matchId,
+    this.leagueName,
+    this.matchTimestamp,
+  });
 
   final String matchId;
   final String? leagueName;
@@ -102,7 +116,11 @@ class _BadmintonMatchHeader extends ConsumerWidget {
 }
 
 class _BadmintonHeaderContent extends StatelessWidget {
-  const _BadmintonHeaderContent({required this.detail, this.rt, this.eventsData});
+  const _BadmintonHeaderContent({
+    required this.detail,
+    this.rt,
+    this.eventsData,
+  });
 
   final BadmintonMatchDetail detail;
   final BadmintonRealtimeData? rt;
@@ -113,14 +131,16 @@ class _BadmintonHeaderContent extends StatelessWidget {
     final colors = context.appColors;
     final effStatusId = eventsData?.statusId ?? rt?.statusId ?? detail.statusId;
 
-    final homeTotal = eventsData?.homeTotal ?? rt?.homeTotal ?? detail.homeInfo.totalScore;
-    final awayTotal = eventsData?.awayTotal ?? rt?.awayTotal ?? detail.awayInfo.totalScore;
-    final homeSets = eventsData?.homeSets ?? rt?.homeSets ?? detail.homeInfo.setScores;
-    final awaySets = eventsData?.awaySets ?? rt?.awaySets ?? detail.awayInfo.setScores;
-
+    final homeTotal =
+        eventsData?.homeTotal ?? rt?.homeTotal ?? detail.homeInfo.totalScore;
+    final awayTotal =
+        eventsData?.awayTotal ?? rt?.awayTotal ?? detail.awayInfo.totalScore;
     final isNotStarted = effStatusId == 1;
     final isLive = effStatusId >= 3 && effStatusId < 100;
-    final statusLabel = badmintonStatusLabel(effStatusId, detail.statusDescription);
+    final statusLabel = badmintonStatusLabel(
+      effStatusId,
+      detail.statusDescription,
+    );
     final statusColor = isLive ? colors.live : colors.text3;
     final scoreColor = isLive ? colors.accent : colors.text3;
 
@@ -140,7 +160,10 @@ class _BadmintonHeaderContent extends StatelessWidget {
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.display(12, context).copyWith(color: colors.text),
+                    style: AppTextStyles.display(
+                      12,
+                      context,
+                    ).copyWith(color: colors.text),
                   ),
                 ],
               ),
@@ -151,7 +174,10 @@ class _BadmintonHeaderContent extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor,
                       borderRadius: BorderRadius.circular(6),
@@ -170,7 +196,10 @@ class _BadmintonHeaderContent extends StatelessWidget {
                   if (isNotStarted)
                     Text(
                       '– –',
-                      style: AppTextStyles.display(40, context).copyWith(color: scoreColor),
+                      style: AppTextStyles.display(
+                        40,
+                        context,
+                      ).copyWith(color: scoreColor),
                     )
                   else
                     Row(
@@ -178,18 +207,27 @@ class _BadmintonHeaderContent extends StatelessWidget {
                       children: [
                         Text(
                           '$homeTotal',
-                          style: AppTextStyles.display(48, context).copyWith(color: scoreColor),
+                          style: AppTextStyles.display(
+                            48,
+                            context,
+                          ).copyWith(color: scoreColor),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: Text(
                             ':',
-                            style: AppTextStyles.display(40, context).copyWith(color: colors.text3),
+                            style: AppTextStyles.display(
+                              40,
+                              context,
+                            ).copyWith(color: colors.text3),
                           ),
                         ),
                         Text(
                           '$awayTotal',
-                          style: AppTextStyles.display(48, context).copyWith(color: scoreColor),
+                          style: AppTextStyles.display(
+                            48,
+                            context,
+                          ).copyWith(color: scoreColor),
                         ),
                       ],
                     ),
@@ -207,7 +245,10 @@ class _BadmintonHeaderContent extends StatelessWidget {
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.display(12, context).copyWith(color: colors.text),
+                    style: AppTextStyles.display(
+                      12,
+                      context,
+                    ).copyWith(color: colors.text),
                   ),
                 ],
               ),
@@ -241,21 +282,29 @@ class _ScoreTab extends ConsumerWidget {
     );
 
     return detailAsync.when(
-      loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
+      loading: () => Center(
+        child: CircularProgressIndicator(color: context.appColors.accent),
+      ),
       error: (_, __) => Center(
         child: Text(
           'event.error.load_failed'.tr(),
-          style: AppTextStyles.body(13).copyWith(color: context.appColors.text3),
+          style: AppTextStyles.body(
+            13,
+          ).copyWith(color: context.appColors.text3),
         ),
       ),
       data: (obj) {
         final detail = obj as BadmintonMatchDetail;
         final ev = eventsAsync.valueOrNull as BadmintonMatchEventsData?;
         final effStatusId = ev?.statusId ?? rt?.statusId ?? detail.statusId;
-        final homeSets = ev?.homeSets ?? rt?.homeSets ?? detail.homeInfo.setScores;
-        final awaySets = ev?.awaySets ?? rt?.awaySets ?? detail.awayInfo.setScores;
-        final homeTotal = ev?.homeTotal ?? rt?.homeTotal ?? detail.homeInfo.totalScore;
-        final awayTotal = ev?.awayTotal ?? rt?.awayTotal ?? detail.awayInfo.totalScore;
+        final homeSets =
+            ev?.homeSets ?? rt?.homeSets ?? detail.homeInfo.setScores;
+        final awaySets =
+            ev?.awaySets ?? rt?.awaySets ?? detail.awayInfo.setScores;
+        final homeTotal =
+            ev?.homeTotal ?? rt?.homeTotal ?? detail.homeInfo.totalScore;
+        final awayTotal =
+            ev?.awayTotal ?? rt?.awayTotal ?? detail.awayInfo.totalScore;
 
         return _SetScoreTable(
           statusId: effStatusId,
@@ -326,7 +375,10 @@ class _SetScoreTable extends StatelessWidget {
     final activeIdx = _activeSetIndex;
 
     final setLabels = setCount > 0
-        ? List.generate(setCount, (i) => setKeyPrefix.tr(namedArgs: {'n': '${i + 1}'}))
+        ? List.generate(
+            setCount,
+            (i) => setKeyPrefix.tr(namedArgs: {'n': '${i + 1}'}),
+          )
         : [
             setKeyPrefix.tr(namedArgs: {'n': '1'}),
             setKeyPrefix.tr(namedArgs: {'n': '2'}),
@@ -346,7 +398,10 @@ class _SetScoreTable extends StatelessWidget {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 child: Row(
                   children: [
                     const Expanded(child: SizedBox()),
@@ -367,9 +422,10 @@ class _SetScoreTable extends StatelessWidget {
                       child: Text(
                         totalKey.tr().toUpperCase(),
                         textAlign: TextAlign.center,
-                        style: AppTextStyles.mono(
-                          9,
-                        ).copyWith(color: colors.text3, letterSpacing: 0.14 * 9),
+                        style: AppTextStyles.mono(9).copyWith(
+                          color: colors.text3,
+                          letterSpacing: 0.14 * 9,
+                        ),
                       ),
                     ),
                   ],
@@ -485,7 +541,8 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
     );
 
     return eventsAsync.when(
-      loading: () => Center(child: CircularProgressIndicator(color: colors.accent)),
+      loading: () =>
+          Center(child: CircularProgressIndicator(color: colors.accent)),
       error: (_, __) => Center(
         child: Text(
           'event.error.load_failed'.tr(),
@@ -503,7 +560,8 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
           );
         }
 
-        final setIndices = events.statSets.map((s) => s.setIndex).toSet().toList()..sort();
+        final setIndices =
+            events.statSets.map((s) => s.setIndex).toSet().toList()..sort();
         final safeIdx = _selectedIdx.clamp(0, setIndices.length - 1);
         final tabLabels = setIndices.map((idx) {
           if (idx == 0) return 'event.badminton.detail.overall'.tr();
@@ -530,16 +588,23 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                       onTap: () => setState(() => _selectedIdx = i),
                       child: Container(
                         margin: const EdgeInsets.only(right: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: isSelected ? colors.accent : colors.surface2,
                           borderRadius: BorderRadius.circular(20),
-                          border: isSelected ? null : Border.all(color: colors.line, width: 0.5),
+                          border: isSelected
+                              ? null
+                              : Border.all(color: colors.line, width: 0.5),
                         ),
                         child: Text(
                           tabLabels[i].toUpperCase(),
                           style: AppTextStyles.mono(10).copyWith(
-                            color: isSelected ? const Color(0xFF0E0E0E) : colors.text2,
+                            color: isSelected
+                                ? const Color(0xFF0E0E0E)
+                                : colors.text2,
                             letterSpacing: 0.1 * 10,
                           ),
                         ),
@@ -555,7 +620,9 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                   ? Center(
                       child: Text(
                         'event.badminton.detail.no_stats'.tr(),
-                        style: AppTextStyles.body(13).copyWith(color: colors.text3),
+                        style: AppTextStyles.body(
+                          13,
+                        ).copyWith(color: colors.text3),
                       ),
                     )
                   : ListView.builder(
@@ -563,12 +630,20 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                       itemCount: stats.length,
                       itemBuilder: (context, i) {
                         final stat = stats[i];
-                        final home = stat.homeValue.isNaN ? 0.0 : stat.homeValue.abs();
-                        final away = stat.awayValue.isNaN ? 0.0 : stat.awayValue.abs();
+                        final home = stat.homeValue.isNaN
+                            ? 0.0
+                            : stat.homeValue.abs();
+                        final away = stat.awayValue.isNaN
+                            ? 0.0
+                            : stat.awayValue.abs();
                         final label = stat.labelKey.isNotEmpty
                             ? stat.labelKey.tr()
                             : '${stat.typeCode}';
-                        return ArenaStatBar(label: label, home: home, away: away);
+                        return ArenaStatBar(
+                          label: label,
+                          home: home,
+                          away: away,
+                        );
                       },
                     ),
             ),

@@ -75,7 +75,7 @@ class CricketBowlingStats {
     required this.legByes,
     required this.noBalls,
     required this.penalty,
-    required this.extra
+    required this.extra,
   });
 
   final String teamId;
@@ -160,7 +160,9 @@ class CricketMatchEventsData {
     }
 
     final timeline = _parseTimeline(json['timeline'] as List<dynamic>? ?? []);
-    final inningStats = _parseInningStats(json['players'] as List<dynamic>? ?? []);
+    final inningStats = _parseInningStats(
+      json['players'] as List<dynamic>? ?? [],
+    );
 
     return CricketMatchEventsData(
       id: id,
@@ -230,24 +232,31 @@ class CricketMatchEventsData {
         final extraType = b[4] as String? ?? '';
         final isWicket = wicketSet.contains('${overNum}_${ballNum}');
 
-        oversMap.putIfAbsent(overNum, () => []).add(CricketBall(
-          overNumber: overNum,
-          ballNumber: ballNum,
-          runs: runs,
-          extraRuns: extraRuns,
-          extraType: extraType,
-          isWicket: isWicket,
-        ));
+        oversMap
+            .putIfAbsent(overNum, () => [])
+            .add(
+              CricketBall(
+                overNumber: overNum,
+                ballNumber: ballNum,
+                runs: runs,
+                extraRuns: extraRuns,
+                extraType: extraType,
+                isWicket: isWicket,
+              ),
+            );
       }
 
       final overs = oversMap.entries.map((e) {
         final sortedBalls = List<CricketBall>.from(e.value)
           ..sort((a, b) => a.ballNumber.compareTo(b.ballNumber));
         return CricketOver(overNumber: e.key, balls: sortedBalls);
-      }).toList()
-        ..sort((a, b) => a.overNumber.compareTo(b.overNumber));
+      }).toList()..sort((a, b) => a.overNumber.compareTo(b.overNumber));
 
-      return CricketTimelineInning(inning: inning, teamId: teamId, overs: overs);
+      return CricketTimelineInning(
+        inning: inning,
+        teamId: teamId,
+        overs: overs,
+      );
     }).toList();
   }
 }

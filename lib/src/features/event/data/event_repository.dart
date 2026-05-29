@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:sports_app/src/core/services/api_service.dart' show sportsApiServiceProvider;
+import 'package:sports_app/src/core/services/api_service.dart'
+    show sportsApiServiceProvider;
 import 'package:sports_app/src/features/event/domain/models/basketball_team_squad.dart';
 import 'package:sports_app/src/features/event/domain/models/football_lineup.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_match.dart';
@@ -29,7 +30,10 @@ class EventRepository extends _$EventRepository {
 
     return (
       matches: list
-          .map((item) => SportMatch.fromSportJson(item as Map<String, dynamic>, sport))
+          .map(
+            (item) =>
+                SportMatch.fromSportJson(item as Map<String, dynamic>, sport),
+          )
           .toList(),
       totalPage: totalPage,
     );
@@ -45,18 +49,27 @@ class EventRepository extends _$EventRepository {
     final path = '/${sport.apiPath}/match/list/today-by-match-time';
     final response = await dio.get(
       path,
-      queryParameters: {'matchStatus': matchStatus, 'date': ?date, 'page': page},
+      queryParameters: {
+        'matchStatus': matchStatus,
+        'date': ?date,
+        'page': page,
+      },
     );
 
     final json = response.data as Map<String, dynamic>;
-    debugPrint('[EventRepository] ${sport.apiPath} liveMatches=${json['liveMatches']}');
+    debugPrint(
+      '[EventRepository] ${sport.apiPath} liveMatches=${json['liveMatches']}',
+    );
 
     final list = json[sport.matchListKey] as List<dynamic>? ?? [];
     final totalPage = (json['totalPage'] as num?)?.toInt() ?? 1;
 
     return (
       matches: list
-          .map((item) => SportMatch.fromSportJson(item as Map<String, dynamic>, sport))
+          .map(
+            (item) =>
+                SportMatch.fromSportJson(item as Map<String, dynamic>, sport),
+          )
           .toList(),
       totalPage: totalPage,
     );
@@ -69,7 +82,12 @@ class EventRepository extends _$EventRepository {
     final json = response.data as Map<String, dynamic>;
     final list = json['footballMatchList'] as List<dynamic>? ?? [];
     return list
-        .map((item) => SportMatch.fromSportJson(item as Map<String, dynamic>, SportType.football))
+        .map(
+          (item) => SportMatch.fromSportJson(
+            item as Map<String, dynamic>,
+            SportType.football,
+          ),
+        )
         .toList();
   }
 
@@ -123,6 +141,8 @@ class EventRepository extends _$EventRepository {
     final json = response.data as Map<String, dynamic>;
     if (json['teamPlayers'] is! List) return [];
     final list = json['teamPlayers'] as List<dynamic>? ?? [];
-    return list.map((item) => BasketballPlayer.fromJson(item as Map<String, dynamic>)).toList();
+    return list
+        .map((item) => BasketballPlayer.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 }

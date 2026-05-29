@@ -17,7 +17,8 @@ class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
 
   @override
-  ConsumerState<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+  ConsumerState<ForgotPasswordScreen> createState() =>
+      _ForgotPasswordScreenState();
 }
 
 class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
@@ -58,11 +59,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     }
     setState(() => _isSendingOtp = true);
     try {
-      await ref.read(authRepositoryProvider.notifier).requestSms(telephone: telephone, scene: 11);
+      await ref
+          .read(authRepositoryProvider.notifier)
+          .requestSms(telephone: telephone, scene: 11);
       ref.read(otpTimerNotifierProvider.notifier).start();
     } catch (e) {
       if (mounted) {
-        context.showErrorDialog(title: 'auth.forgot.otp_error_title'.tr(), error: e);
+        context.showErrorDialog(
+          title: 'auth.forgot.otp_error_title'.tr(),
+          error: e,
+        );
       }
     } finally {
       if (mounted) setState(() => _isSendingOtp = false);
@@ -106,8 +112,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               },
               onCloseSameWithPrimaryButton: true,
             ),
-            error: (e, _) =>
-                context.showErrorDialog(title: 'auth.forgot.error_title'.tr(), error: e),
+            error: (e, _) => context.showErrorDialog(
+              title: 'auth.forgot.error_title'.tr(),
+              error: e,
+            ),
           );
     }
   }
@@ -149,10 +157,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(
-            'assets/images/image_04.jpg',
-            fit: BoxFit.cover,
-          ),
+          Image.asset('assets/images/image_04.jpg', fit: BoxFit.cover),
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -172,11 +177,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               children: [
                 Text(
                   'auth.forgot.hero_title'.tr(),
-                  style: AppTextStyles.display(38, context).copyWith(height: 0.9),
+                  style: AppTextStyles.display(
+                    38,
+                    context,
+                  ).copyWith(height: 0.9),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _step == 1 ? 'auth.forgot.step1_label'.tr() : 'auth.forgot.step2_label'.tr(),
+                  _step == 1
+                      ? 'auth.forgot.step1_label'.tr()
+                      : 'auth.forgot.step2_label'.tr(),
                   style: AppTextStyles.mono(10).copyWith(letterSpacing: 1.5),
                 ),
               ],
@@ -201,7 +211,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               keyboardType: TextInputType.phone,
               style: AppTextStyles.mono(15).copyWith(color: scheme.onSurface),
               cursorColor: scheme.primary,
-              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+              onTapOutside: (_) =>
+                  FocusManager.instance.primaryFocus?.unfocus(),
               decoration: authInputDecoration(
                 context,
                 hintText: 'auth.field.telephone_hint'.tr(),
@@ -210,7 +221,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('+86', style: AppTextStyles.mono(13).copyWith(color: scheme.onSurface)),
+                      Text(
+                        '+86',
+                        style: AppTextStyles.mono(
+                          13,
+                        ).copyWith(color: scheme.onSurface),
+                      ),
                       const SizedBox(width: 8),
                       Container(
                         width: 0.5,
@@ -221,8 +237,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   ),
                 ),
               ),
-              validator: (v) =>
-                  v == null || v.trim().isEmpty ? 'auth.validation.telephone_required'.tr() : null,
+              validator: (v) => v == null || v.trim().isEmpty
+                  ? 'auth.validation.telephone_required'.tr()
+                  : null,
             ),
           ),
           const SizedBox(height: 14),
@@ -236,12 +253,19 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     controller: _smsController,
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    style: AppTextStyles.mono(15).copyWith(color: scheme.onSurface),
+                    style: AppTextStyles.mono(
+                      15,
+                    ).copyWith(color: scheme.onSurface),
                     cursorColor: scheme.primary,
-                    onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                    decoration: authInputDecoration(context, hintText: 'auth.field.sms_code'.tr()),
-                    validator: (v) =>
-                        v == null || v.trim().isEmpty ? 'auth.validation.sms_required'.tr() : null,
+                    onTapOutside: (_) =>
+                        FocusManager.instance.primaryFocus?.unfocus(),
+                    decoration: authInputDecoration(
+                      context,
+                      hintText: 'auth.field.sms_code'.tr(),
+                    ),
+                    validator: (v) => v == null || v.trim().isEmpty
+                        ? 'auth.validation.sms_required'.tr()
+                        : null,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -255,7 +279,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             ),
           ),
           const SizedBox(height: 28),
-          PrimaryCtaButton(label: 'auth.forgot.next'.tr(), isLoading: false, onTap: _goToStep2),
+          PrimaryCtaButton(
+            label: 'auth.forgot.next'.tr(),
+            isLoading: false,
+            onTap: _goToStep2,
+          ),
         ],
       ),
     );
@@ -275,7 +303,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               obscureText: _obscurePassword,
               style: AppTextStyles.mono(15).copyWith(color: scheme.onSurface),
               cursorColor: scheme.primary,
-              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+              onTapOutside: (_) =>
+                  FocusManager.instance.primaryFocus?.unfocus(),
               decoration: authInputDecoration(
                 context,
                 hintText: 'auth.field.new_password_hint'.tr(),
@@ -285,11 +314,13 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     color: scheme.onSurface.withValues(alpha: 0.62),
                     size: 18,
                   ),
-                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                  onPressed: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
                 ),
               ),
-              validator: (v) =>
-                  v == null || v.isEmpty ? 'auth.validation.password_required'.tr() : null,
+              validator: (v) => v == null || v.isEmpty
+                  ? 'auth.validation.password_required'.tr()
+                  : null,
             ),
           ),
           const SizedBox(height: 14),
@@ -300,22 +331,27 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               obscureText: _obscureConfirmPassword,
               style: AppTextStyles.mono(15).copyWith(color: scheme.onSurface),
               cursorColor: scheme.primary,
-              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+              onTapOutside: (_) =>
+                  FocusManager.instance.primaryFocus?.unfocus(),
               decoration: authInputDecoration(
                 context,
                 hintText: 'auth.field.confirm_password_hint'.tr(),
                 suffixIcon: IconButton(
                   icon: Icon(
-                    _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                    _obscureConfirmPassword
+                        ? Icons.visibility_off
+                        : Icons.visibility,
                     color: scheme.onSurface.withValues(alpha: 0.62),
                     size: 18,
                   ),
-                  onPressed: () =>
-                      setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                  onPressed: () => setState(
+                    () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                  ),
                 ),
               ),
               validator: (v) {
-                if (v == null || v.isEmpty) return 'auth.validation.password_required'.tr();
+                if (v == null || v.isEmpty)
+                  return 'auth.validation.password_required'.tr();
                 if (v != _passwordController.text) {
                   return 'auth.validation.confirm_password_mismatch'.tr();
                 }
@@ -370,14 +406,21 @@ class _OtpSendButton extends StatelessWidget {
               ? SizedBox(
                   height: 16,
                   width: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: scheme.primary),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: scheme.primary,
+                  ),
                 )
               : Text(
                   countdown > 0
-                      ? 'auth.otp.resend_countdown'.tr(namedArgs: {'seconds': '$countdown'})
+                      ? 'auth.otp.resend_countdown'.tr(
+                          namedArgs: {'seconds': '$countdown'},
+                        )
                       : 'auth.otp.send'.tr(),
                   style: AppTextStyles.mono(11).copyWith(
-                    color: disabled ? scheme.onSurface.withValues(alpha: 0.36) : scheme.primary,
+                    color: disabled
+                        ? scheme.onSurface.withValues(alpha: 0.36)
+                        : scheme.primary,
                     letterSpacing: 0.8,
                   ),
                 ),

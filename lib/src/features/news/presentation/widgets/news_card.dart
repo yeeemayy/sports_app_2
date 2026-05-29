@@ -25,10 +25,10 @@ class NewsCard extends StatelessWidget {
   }) : _loading = false;
 
   const NewsCard.loading({super.key, this.grid = false})
-      : article = null,
-        onTap = null,
-        categoryLabel = '',
-        _loading = true;
+    : article = null,
+      onTap = null,
+      categoryLabel = '',
+      _loading = true;
 
   final NewsArticle? article;
   final VoidCallback? onTap;
@@ -74,10 +74,9 @@ class NewsCard extends StatelessWidget {
                         const SizedBox(width: 5),
                         Text(
                           categoryLabel.toUpperCase(),
-                          style: AppTextStyles.mono(9).copyWith(
-                            color: colors.accent,
-                            letterSpacing: 1.44,
-                          ),
+                          style: AppTextStyles.mono(
+                            9,
+                          ).copyWith(color: colors.accent, letterSpacing: 1.44),
                         ),
                       ],
                     ),
@@ -87,10 +86,10 @@ class NewsCard extends StatelessWidget {
                     a.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.display(17, context).copyWith(
-                      color: colors.text,
-                      height: 1.05,
-                    ),
+                    style: AppTextStyles.display(
+                      17,
+                      context,
+                    ).copyWith(color: colors.text, height: 1.05),
                   ),
                   if (a.description.isNotEmpty) ...[
                     const SizedBox(height: 5),
@@ -98,19 +97,17 @@ class NewsCard extends StatelessWidget {
                       a.description,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.body(12).copyWith(
-                        color: colors.text3,
-                        height: 1.4,
-                      ),
+                      style: AppTextStyles.body(
+                        12,
+                      ).copyWith(color: colors.text3, height: 1.4),
                     ),
                   ],
                   const SizedBox(height: 8),
                   Text(
                     '● ${_timeAgo(a.createdAt)}',
-                    style: AppTextStyles.mono(9).copyWith(
-                      color: colors.text3,
-                      letterSpacing: 1.08,
-                    ),
+                    style: AppTextStyles.mono(
+                      9,
+                    ).copyWith(color: colors.text3, letterSpacing: 1.08),
                   ),
                 ],
               ),
@@ -128,7 +125,7 @@ class NewsCard extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          color: colors.surface
+          color: colors.surface,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,51 +138,52 @@ class NewsCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (categoryLabel.isNotEmpty) ...[
-                  Row(
-                    children: [
-                      Container(
-                        width: 4,
-                        height: 4,
-                        decoration: BoxDecoration(color: colors.accent, shape: BoxShape.circle),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        categoryLabel.toUpperCase(),
-                        style: AppTextStyles.mono(8).copyWith(
-                          color: colors.accent,
-                          letterSpacing: 1.44,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (categoryLabel.isNotEmpty) ...[
+                    Row(
+                      children: [
+                        Container(
+                          width: 4,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: colors.accent,
+                            shape: BoxShape.circle,
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 4),
+                        Text(
+                          categoryLabel.toUpperCase(),
+                          style: AppTextStyles.mono(
+                            8,
+                          ).copyWith(color: colors.accent, letterSpacing: 1.44),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                  ],
+                  Text(
+                    a.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.display(
+                      14,
+                      context,
+                    ).copyWith(color: colors.text, height: 1.1),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 5),
+                  Text(
+                    '● ${_timeAgo(a.createdAt)}',
+                    style: AppTextStyles.mono(
+                      8,
+                    ).copyWith(color: colors.text3, letterSpacing: 1.08),
+                  ),
                 ],
-                Text(
-                  a.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.display(14, context).copyWith(
-                    color: colors.text,
-                    height: 1.1,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  '● ${_timeAgo(a.createdAt)}',
-                  style: AppTextStyles.mono(8).copyWith(
-                    color: colors.text3,
-                    letterSpacing: 1.08,
-                  ),
-                ),
-              ],
+              ),
             ),
-          )
           ],
         ),
       ),
@@ -206,7 +204,6 @@ class NewsCard extends StatelessWidget {
   }
 }
 
-
 class _GridCoverImage extends StatelessWidget {
   const _GridCoverImage({required this.url});
 
@@ -224,10 +221,8 @@ class _GridCoverImage extends StatelessWidget {
     return CachedNetworkImage(
       imageUrl: url!,
       fit: BoxFit.cover,
-      placeholder: (context, url) => Skeletonizer(
-        enabled: true,
-        child: ColoredBox(color: colors.surface),
-      ),
+      placeholder: (context, url) =>
+          Skeletonizer(enabled: true, child: ColoredBox(color: colors.surface)),
       errorBuilder: (context, url, error) => ColoredBox(
         color: colors.surface2,
         child: Icon(Icons.broken_image_outlined, color: colors.text3),
@@ -235,7 +230,6 @@ class _GridCoverImage extends StatelessWidget {
     );
   }
 }
-
 
 class _CoverImage extends StatelessWidget {
   const _CoverImage({required this.url});

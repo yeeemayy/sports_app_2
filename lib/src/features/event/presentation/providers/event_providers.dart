@@ -61,11 +61,18 @@ class SportMatchesPaginated extends _$SportMatchesPaginated {
     );
   }
 
-  Future<({List<SportMatch> matches, int totalPage})> _fetch({required int page}) {
+  Future<({List<SportMatch> matches, int totalPage})> _fetch({
+    required int page,
+  }) {
     final repo = ref.read(eventRepositoryProvider.notifier);
     return _isHot
         ? repo.getHotLeagueMatches(sport: _sport, page: page)
-        : repo.getMatches(sport: _sport, matchStatus: _matchStatus, date: _date, page: page);
+        : repo.getMatches(
+            sport: _sport,
+            matchStatus: _matchStatus,
+            date: _date,
+            page: page,
+          );
   }
 
   Future<void> loadMore() async {
@@ -75,11 +82,16 @@ class SportMatchesPaginated extends _$SportMatchesPaginated {
     try {
       final nextPage = current.currentPage + 1;
       final result = await _fetch(page: nextPage);
-      state = AsyncData(PaginatedMatchResult(
-        matches: [...current.matches, ...result.matches.where((m) => m.statusId != 0)],
-        currentPage: nextPage,
-        totalPage: result.totalPage,
-      ));
+      state = AsyncData(
+        PaginatedMatchResult(
+          matches: [
+            ...current.matches,
+            ...result.matches.where((m) => m.statusId != 0),
+          ],
+          currentPage: nextPage,
+          totalPage: result.totalPage,
+        ),
+      );
     } catch (_) {
       state = AsyncData(current.copyWith(isLoadingMore: false));
     }
@@ -91,7 +103,9 @@ Future<List<SportMatch>> footballScheduledMatches(
   FootballScheduledMatchesRef ref, {
   required String date,
 }) {
-  return ref.watch(eventRepositoryProvider.notifier).getScheduledMatches(date: date);
+  return ref
+      .watch(eventRepositoryProvider.notifier)
+      .getScheduledMatches(date: date);
 }
 
 @riverpod
@@ -99,7 +113,9 @@ Future<FootballLineups?> footballMatchLineups(
   FootballMatchLineupsRef ref, {
   required String matchId,
 }) {
-  return ref.watch(eventRepositoryProvider.notifier).getFootballMatchLineups(matchId);
+  return ref
+      .watch(eventRepositoryProvider.notifier)
+      .getFootballMatchLineups(matchId);
 }
 
 @riverpod
@@ -107,7 +123,9 @@ Future<List<BasketballPlayer>> basketballTeamSquad(
   BasketballTeamSquadRef ref, {
   required String teamId,
 }) {
-  return ref.watch(eventRepositoryProvider.notifier).getBasketballTeamSquad(teamId);
+  return ref
+      .watch(eventRepositoryProvider.notifier)
+      .getBasketballTeamSquad(teamId);
 }
 
 /// Generic match detail provider family keyed by [SportType].
@@ -123,7 +141,9 @@ Future<Object> matchDetail(
   required SportType sport,
   required String matchId,
 }) {
-  return ref.watch(eventRepositoryProvider.notifier).getMatchDetail(sport, matchId);
+  return ref
+      .watch(eventRepositoryProvider.notifier)
+      .getMatchDetail(sport, matchId);
 }
 
 /// Generic match events provider family keyed by [SportType].
@@ -139,5 +159,7 @@ Future<Object?> matchEvents(
   required SportType sport,
   required String matchId,
 }) {
-  return ref.watch(eventRepositoryProvider.notifier).getMatchEvents(sport, matchId);
+  return ref
+      .watch(eventRepositoryProvider.notifier)
+      .getMatchEvents(sport, matchId);
 }

@@ -54,10 +54,10 @@ class BaseballStat {
   }
 
   factory BaseballStat.fromList(List<dynamic> list) => BaseballStat(
-        typeCode: (list[0] as num).toInt(),
-        homeValue: double.tryParse(list[1]?.toString() ?? '0') ?? 0,
-        awayValue: double.tryParse(list[2]?.toString() ?? '0') ?? 0,
-      );
+    typeCode: (list[0] as num).toInt(),
+    homeValue: double.tryParse(list[1]?.toString() ?? '0') ?? 0,
+    awayValue: double.tryParse(list[2]?.toString() ?? '0') ?? 0,
+  );
 }
 
 // ─── Stats set (full match or per-inning) ─────────────────────────────────────
@@ -164,7 +164,9 @@ class BaseballMatchEventsData {
     }).toList();
 
     return BaseballMatchEventsData(
-      id: score.isNotEmpty ? (score[0] as String? ?? '') : (json['id'] as String? ?? ''),
+      id: score.isNotEmpty
+          ? (score[0] as String? ?? '')
+          : (json['id'] as String? ?? ''),
       statusId: score.length > 1 ? (score[1] as num?)?.toInt() ?? 0 : 0,
       inningCount: inningKeys.length,
       home: BaseballInningScores(

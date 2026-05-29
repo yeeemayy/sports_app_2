@@ -51,12 +51,18 @@ class BaseballMatchDetail {
   /// Full scores map from API: ft, p1..p9, h, e.
   final Map<String, dynamic> scores;
 
-  String get homeName =>
-      SportMatch.teamName({'en_name': homeInfo.enName, 'cn_name': homeInfo.cnName});
-  String get awayName =>
-      SportMatch.teamName({'en_name': awayInfo.enName, 'cn_name': awayInfo.cnName});
-  String get leagueName =>
-      SportMatch.teamName({'en_name': leagueInfo.enName, 'cn_name': leagueInfo.cnName});
+  String get homeName => SportMatch.teamName({
+    'en_name': homeInfo.enName,
+    'cn_name': homeInfo.cnName,
+  });
+  String get awayName => SportMatch.teamName({
+    'en_name': awayInfo.enName,
+    'cn_name': awayInfo.cnName,
+  });
+  String get leagueName => SportMatch.teamName({
+    'en_name': leagueInfo.enName,
+    'cn_name': leagueInfo.cnName,
+  });
 
   factory BaseballMatchDetail.fromJson(Map<String, dynamic> json) {
     final d = json['matchDetails'] is Map

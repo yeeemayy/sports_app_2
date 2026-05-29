@@ -55,10 +55,10 @@ class VolleyballStat {
   String get awayDisplay => _fmt(awayValue);
 
   factory VolleyballStat.fromList(List<dynamic> list) => VolleyballStat(
-        typeCode: (list[0] as num).toInt(),
-        homeValue: double.tryParse(list[1]?.toString() ?? '0') ?? 0,
-        awayValue: double.tryParse(list[2]?.toString() ?? '0') ?? 0,
-      );
+    typeCode: (list[0] as num).toInt(),
+    homeValue: double.tryParse(list[1]?.toString() ?? '0') ?? 0,
+    awayValue: double.tryParse(list[2]?.toString() ?? '0') ?? 0,
+  );
 }
 
 // ─── Stats set (per-set or overall) ──────────────────────────────────────────

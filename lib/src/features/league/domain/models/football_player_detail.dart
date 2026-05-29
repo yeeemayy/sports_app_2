@@ -35,10 +35,13 @@ class FootballPlayerDetail with _$FootballPlayerDetail {
     @JsonKey(name: 'market_value') int? marketValue,
     @JsonKey(name: 'market_value_currency') String? marketValueCurrency,
     @JsonKey(name: 'contract_until') int? contractUntil,
+
     /// positions[0] = specific main position string, positions[1] = List<String> of secondary positions
     @JsonKey(name: 'positions') List<dynamic>? positionsRaw,
+
     /// Each entry: [typeId, rating, avgScore] — rating out of 100
     @JsonKey(name: 'ability') List<dynamic>? abilityRaw,
+
     /// [advantages, disadvantages] — each is List<[typeId, worldRank]>
     @JsonKey(name: 'characteristics') List<dynamic>? characteristicsRaw,
     @JsonKey(name: 'cn_name') String? cnName,

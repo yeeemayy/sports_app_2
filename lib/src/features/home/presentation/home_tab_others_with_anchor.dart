@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
 import 'package:sports_app/src/features/home/presentation/providers/banner_providers.dart';
-import 'package:sports_app/src/features/home/presentation/widgets/home_banner_carousel.dart';
 import 'package:sports_app/src/features/home/presentation/widgets/home_section_title.dart';
 import 'package:sports_app/src/features/home/presentation/widgets/home_anchor_live_grid.dart';
 import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
@@ -20,11 +19,11 @@ class HomeTabOthers extends ConsumerWidget {
     final anchorsAsync = ref.watch(anchorListProvider());
 
     return RefreshIndicator(
-      onRefresh: () async {
-        ref.refresh(anchorListProvider().future);
-        ref.refresh(bannerProvider.future);
-        ref.refresh(newsFirstPageProvider(context.localeCode).future);
-      },
+      onRefresh: () => Future.wait([
+        ref.refresh(anchorListProvider().future),
+        ref.refresh(bannerProvider.future),
+        ref.refresh(newsFirstPageProvider(context.localeCode).future),
+      ]),
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         clipBehavior: Clip.none,
@@ -50,7 +49,11 @@ class HomeTabOthers extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(vertical: 48),
                       child: Column(
                         children: [
-                          Icon(Icons.wifi_off_rounded, size: 48, color: Colors.grey.shade400),
+                          Icon(
+                            Icons.wifi_off_rounded,
+                            size: 48,
+                            color: Colors.grey.shade400,
+                          ),
                           const SizedBox(height: 12),
                           Text(
                             'home.error.load_failed'.tr(),
@@ -58,7 +61,8 @@ class HomeTabOthers extends ConsumerWidget {
                           ),
                           const SizedBox(height: 16),
                           TextButton(
-                            onPressed: () => ref.refresh(anchorListProvider().future),
+                            onPressed: () =>
+                                ref.refresh(anchorListProvider().future),
                             child: Text('common.retry'.tr()),
                           ),
                         ],

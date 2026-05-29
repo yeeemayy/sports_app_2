@@ -39,7 +39,10 @@ class IceHockeyMatchCard extends ConsumerWidget {
     final effectiveAwaySets = rt?.awaySets ?? extractSetScores(match.scores, 1);
     final effectiveHomeScore = rt?.homeScore.toString() ?? match.homeScore;
     final effectiveAwayScore = rt?.awayScore.toString() ?? match.awayScore;
-    final statusLabel = iceHockeyStatusLabel(effectiveStatusId, match.statusDescription);
+    final statusLabel = iceHockeyStatusLabel(
+      effectiveStatusId,
+      match.statusDescription,
+    );
     final isLive = _liveStatuses.contains(effectiveStatusId);
     final isNotStarted = effectiveStatusId == 1;
 
@@ -49,10 +52,14 @@ class IceHockeyMatchCard extends ConsumerWidget {
         : -1;
 
     // Pad to 4 columns: P1, P2, P3, OT
-    final homePeriods = List<int?>.generate(4, (i) =>
-        i < effectiveHomeSets.length ? effectiveHomeSets[i] : null);
-    final awayPeriods = List<int?>.generate(4, (i) =>
-        i < effectiveAwaySets.length ? effectiveAwaySets[i] : null);
+    final homePeriods = List<int?>.generate(
+      4,
+      (i) => i < effectiveHomeSets.length ? effectiveHomeSets[i] : null,
+    );
+    final awayPeriods = List<int?>.generate(
+      4,
+      (i) => i < effectiveAwaySets.length ? effectiveAwaySets[i] : null,
+    );
 
     return MatchCardShell(
       onTap: () => context.push(AppRoutes.iceHockeyMatchDetailPath(match.id)),
@@ -93,9 +100,17 @@ class IceHockeyMatchCard extends ConsumerWidget {
               context: context,
             ),
           ] else ...[
-            _NotStartedTeamRow(logo: match.homeLogo, name: match.homeName, context: context),
+            _NotStartedTeamRow(
+              logo: match.homeLogo,
+              name: match.homeName,
+              context: context,
+            ),
             const SizedBox(height: 6),
-            _NotStartedTeamRow(logo: match.awayLogo, name: match.awayName, context: context),
+            _NotStartedTeamRow(
+              logo: match.awayLogo,
+              name: match.awayName,
+              context: context,
+            ),
           ],
           // Status badge
           if (statusLabel.isNotEmpty) ...[
@@ -125,7 +140,9 @@ class _GridHeaderRow extends StatelessWidget {
             child: Text(
               _labels[i],
               style: AppTextStyles.mono(9).copyWith(
-                color: isActive ? context.appColors.accent : context.appColors.text3,
+                color: isActive
+                    ? context.appColors.accent
+                    : context.appColors.text3,
               ),
             ),
           );
@@ -167,7 +184,9 @@ class _GridTeamRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   name,
-                  style: AppTextStyles.mono(11).copyWith(color: context.appColors.text2),
+                  style: AppTextStyles.mono(
+                    11,
+                  ).copyWith(color: context.appColors.text2),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -185,7 +204,9 @@ class _GridTeamRow extends StatelessWidget {
               style: AppTextStyles.mono(11).copyWith(
                 color: isActive
                     ? context.appColors.accent
-                    : (score != null ? context.appColors.text2 : context.appColors.text3),
+                    : (score != null
+                          ? context.appColors.text2
+                          : context.appColors.text3),
               ),
             ),
           );
@@ -226,7 +247,11 @@ class _GridCell extends StatelessWidget {
 }
 
 class _NotStartedTeamRow extends StatelessWidget {
-  const _NotStartedTeamRow({required this.logo, required this.name, required this.context});
+  const _NotStartedTeamRow({
+    required this.logo,
+    required this.name,
+    required this.context,
+  });
   final String logo;
   final String name;
   final BuildContext context;
@@ -240,7 +265,9 @@ class _NotStartedTeamRow extends StatelessWidget {
         Expanded(
           child: Text(
             name,
-            style: AppTextStyles.mono(11).copyWith(color: context.appColors.text),
+            style: AppTextStyles.mono(
+              11,
+            ).copyWith(color: context.appColors.text),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -251,7 +278,10 @@ class _NotStartedTeamRow extends StatelessWidget {
           child: Text(
             '-',
             textAlign: TextAlign.center,
-            style: AppTextStyles.display(20, context).copyWith(color: context.appColors.text3),
+            style: AppTextStyles.display(
+              20,
+              context,
+            ).copyWith(color: context.appColors.text3),
           ),
         ),
       ],

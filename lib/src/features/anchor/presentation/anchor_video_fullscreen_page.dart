@@ -6,10 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 
 class AnchorVideoFullscreenPage extends StatefulWidget {
-  const AnchorVideoFullscreenPage({
-    super.key,
-    required this.controller,
-  });
+  const AnchorVideoFullscreenPage({super.key, required this.controller});
 
   final VideoPlayerController controller;
 
@@ -18,8 +15,7 @@ class AnchorVideoFullscreenPage extends StatefulWidget {
       _AnchorVideoFullscreenPageState();
 }
 
-class _AnchorVideoFullscreenPageState
-    extends State<AnchorVideoFullscreenPage> {
+class _AnchorVideoFullscreenPageState extends State<AnchorVideoFullscreenPage> {
   bool _showControls = true;
   Timer? _controlsTimer;
 
@@ -54,34 +50,17 @@ class _AnchorVideoFullscreenPageState
     _scheduleHide();
   }
 
-  void _togglePlayPause() {
-    final controller = widget.controller;
-    if (controller.value.isPlaying) {
-      controller.pause();
-    } else {
-      controller.play();
-    }
-    setState(() {});
-    _scheduleHide();
-  }
-
   Future<void> _enterFullscreen() async {
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-    await SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.immersiveSticky,
-    );
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
   Future<void> _exitFullscreen() async {
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
-    await SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.edgeToEdge,
-    );
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
 
   Future<void> _handleExit() async {
@@ -157,7 +136,6 @@ class _AnchorVideoFullscreenPageState
                         //     ),
                         //   ),
                         // ),
-
                         const Spacer(),
 
                         Align(

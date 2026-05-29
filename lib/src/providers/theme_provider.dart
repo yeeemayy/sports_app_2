@@ -5,7 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 const _kThemeModeKey = 'theme_mode';
 
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-  throw UnimplementedError('Override sharedPreferencesProvider in ProviderScope');
+  throw UnimplementedError(
+    'Override sharedPreferencesProvider in ProviderScope',
+  );
 });
 
 class ThemeModeNotifier extends Notifier<ThemeMode> {
@@ -30,4 +32,6 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
   }
 }
 
-final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);
+final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(
+  ThemeModeNotifier.new,
+);

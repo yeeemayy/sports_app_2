@@ -15,12 +15,17 @@ import 'package:sports_app/src/features/league/presentation/utils/logo_color.dar
 import 'package:sports_app/src/routes/app_routes.dart';
 
 class TeamDetailScreen extends ConsumerWidget {
-  const TeamDetailScreen({super.key, required this.sport, required this.teamId});
+  const TeamDetailScreen({
+    super.key,
+    required this.sport,
+    required this.teamId,
+  });
 
   final LeagueSport sport;
   final String teamId;
 
-  bool get _isFullSport => sport == LeagueSport.football || sport == LeagueSport.basketball;
+  bool get _isFullSport =>
+      sport == LeagueSport.football || sport == LeagueSport.basketball;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -59,10 +64,13 @@ class _FullTeamDetail extends ConsumerWidget {
         error: (e, _) => Center(
           child: Text(
             'league.empty'.tr(),
-            style: AppTextStyles.body(14).copyWith(color: context.appColors.text3),
+            style: AppTextStyles.body(
+              14,
+            ).copyWith(color: context.appColors.text3),
           ),
         ),
-        data: (team) => _TeamDetailBody(sport: sport, team: team, squadAsync: squadAsync),
+        data: (team) =>
+            _TeamDetailBody(sport: sport, team: team, squadAsync: squadAsync),
       ),
     );
   }
@@ -78,7 +86,9 @@ class _GenericTeamDetail extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(genericTeamDetailProvider(sport: sport, teamId: teamId));
+    final async = ref.watch(
+      genericTeamDetailProvider(sport: sport, teamId: teamId),
+    );
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -87,7 +97,9 @@ class _GenericTeamDetail extends ConsumerWidget {
         error: (e, _) => Center(
           child: Text(
             'league.empty'.tr(),
-            style: AppTextStyles.body(14).copyWith(color: context.appColors.text3),
+            style: AppTextStyles.body(
+              14,
+            ).copyWith(color: context.appColors.text3),
           ),
         ),
         data: (team) => CustomScrollView(
@@ -121,7 +133,9 @@ class _AmFootballTeamDetail extends ConsumerWidget {
         error: (e, _) => Center(
           child: Text(
             'league.empty'.tr(),
-            style: AppTextStyles.body(14).copyWith(color: context.appColors.text3),
+            style: AppTextStyles.body(
+              14,
+            ).copyWith(color: context.appColors.text3),
           ),
         ),
         data: (team) => CustomScrollView(
@@ -149,9 +163,20 @@ class _AmFootballLineupSection extends StatelessWidget {
   final List<AmFootballLineupPlayer> lineup;
 
   static const _positionOrder = [
-    'QB', 'RB', 'WR', 'TE', 'OL',
-    'DL', 'DE', 'LB', 'CB', 'S', 'EDGE',
-    'P', 'PK', 'LS',
+    'QB',
+    'RB',
+    'WR',
+    'TE',
+    'OL',
+    'DL',
+    'DE',
+    'LB',
+    'CB',
+    'S',
+    'EDGE',
+    'P',
+    'PK',
+    'LS',
   ];
 
   @override
@@ -175,7 +200,10 @@ class _AmFootballLineupSection extends StatelessWidget {
       }
     }
 
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: sections);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: sections,
+    );
   }
 }
 
@@ -191,7 +219,9 @@ class _AmFootballPlayerRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: context.appColors.line, width: 0.5)),
+        border: Border(
+          bottom: BorderSide(color: context.appColors.line, width: 0.5),
+        ),
       ),
       child: Row(
         children: [
@@ -199,7 +229,9 @@ class _AmFootballPlayerRow extends StatelessWidget {
             width: 32,
             child: Text(
               '#${player.jerseyNo}',
-              style: AppTextStyles.mono(10).copyWith(color: context.appColors.text3),
+              style: AppTextStyles.mono(
+                10,
+              ).copyWith(color: context.appColors.text3),
               textAlign: TextAlign.center,
             ),
           ),
@@ -219,8 +251,10 @@ class _AmFootballPlayerRow extends StatelessWidget {
           Expanded(
             child: Text(
               name ?? '-',
-              style: AppTextStyles.display(13, context)
-                  .copyWith(color: context.appColors.text, height: 1.1),
+              style: AppTextStyles.display(
+                13,
+                context,
+              ).copyWith(color: context.appColors.text, height: 1.1),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -231,14 +265,18 @@ class _AmFootballPlayerRow extends StatelessWidget {
   }
 
   Widget _playerPlaceholder(BuildContext context) => Container(
-        width: 34,
-        height: 34,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: context.appColors.surface2,
-        ),
-        child: Icon(Icons.person_outline_rounded, size: 18, color: context.appColors.text3),
-      );
+    width: 34,
+    height: 34,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: context.appColors.surface2,
+    ),
+    child: Icon(
+      Icons.person_outline_rounded,
+      size: 18,
+      color: context.appColors.text3,
+    ),
+  );
 }
 
 class _GenericTeamHero extends StatefulWidget {
@@ -249,7 +287,8 @@ class _GenericTeamHero extends StatefulWidget {
   State<_GenericTeamHero> createState() => _GenericTeamHeroState();
 }
 
-class _GenericTeamHeroState extends State<_GenericTeamHero> with LogoColorMixin<_GenericTeamHero> {
+class _GenericTeamHeroState extends State<_GenericTeamHero>
+    with LogoColorMixin<_GenericTeamHero> {
   @override
   void initState() {
     super.initState();
@@ -280,12 +319,15 @@ class _GenericTeamHeroState extends State<_GenericTeamHero> with LogoColorMixin<
             child: Text(
               (widget.team.abbr ??
                       widget.team.shortName ??
-                      context.localizedName(en: widget.team.name, cn: widget.team.cnName))
+                      context.localizedName(
+                        en: widget.team.name,
+                        cn: widget.team.cnName,
+                      ))
                   .toUpperCase(),
-              style: AppTextStyles.display(
-                72,
-                context,
-              ).copyWith(color: Colors.white.withValues(alpha: 0.07), height: 1),
+              style: AppTextStyles.display(72, context).copyWith(
+                color: Colors.white.withValues(alpha: 0.07),
+                height: 1,
+              ),
             ),
           ),
           SafeArea(
@@ -293,12 +335,18 @@ class _GenericTeamHeroState extends State<_GenericTeamHero> with LogoColorMixin<
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
               child: IconButton(
                 onPressed: () => context.pop(),
-                icon: const Icon(Icons.arrow_circle_left_outlined, color: Colors.white),
+                icon: const Icon(
+                  Icons.arrow_circle_left_outlined,
+                  color: Colors.white,
+                ),
                 iconSize: 24,
                 padding: EdgeInsets.zero,
                 style: IconButton.styleFrom(
                   backgroundColor: Colors.white.withValues(alpha: 0.15),
-                  side: BorderSide(color: Colors.white.withValues(alpha: 0.3), width: 0.5),
+                  side: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.3),
+                    width: 0.5,
+                  ),
                   shape: const CircleBorder(),
                 ),
               ),
@@ -323,8 +371,11 @@ class _GenericTeamHeroState extends State<_GenericTeamHero> with LogoColorMixin<
                     child: CachedNetworkImage(
                       imageUrl: widget.team.logo ?? '',
                       fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) =>
-                          const Icon(Icons.shield_outlined, color: Colors.white54, size: 28),
+                      errorBuilder: (_, _, _) => const Icon(
+                        Icons.shield_outlined,
+                        color: Colors.white54,
+                        size: 28,
+                      ),
                     ),
                   ),
                 ),
@@ -335,13 +386,17 @@ class _GenericTeamHeroState extends State<_GenericTeamHero> with LogoColorMixin<
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        context.localizedName(en: widget.team.name, cn: widget.team.cnName),
+                        context.localizedName(
+                          en: widget.team.name,
+                          cn: widget.team.cnName,
+                        ),
                         style: AppTextStyles.display(
                           20,
                           context,
                         ).copyWith(color: Colors.white, height: 1.1),
                       ),
-                      if (widget.team.abbr != null || widget.team.shortName != null) ...[
+                      if (widget.team.abbr != null ||
+                          widget.team.shortName != null) ...[
                         const SizedBox(height: 4),
                         Text(
                           widget.team.abbr ?? widget.team.shortName!,
@@ -366,7 +421,11 @@ class _GenericTeamHeroState extends State<_GenericTeamHero> with LogoColorMixin<
 // ─── Body ──────────────────────────────────────────────────────────────────
 
 class _TeamDetailBody extends StatelessWidget {
-  const _TeamDetailBody({required this.sport, required this.team, required this.squadAsync});
+  const _TeamDetailBody({
+    required this.sport,
+    required this.team,
+    required this.squadAsync,
+  });
 
   final LeagueSport sport;
   final TeamDetailModel team;
@@ -389,7 +448,9 @@ class _TeamDetailBody extends StatelessWidget {
               child: Center(
                 child: Text(
                   'league.empty'.tr(),
-                  style: AppTextStyles.body(14).copyWith(color: context.appColors.text3),
+                  style: AppTextStyles.body(
+                    14,
+                  ).copyWith(color: context.appColors.text3),
                 ),
               ),
             ),
@@ -425,7 +486,10 @@ class _TeamHeroState extends State<_TeamHero> with LogoColorMixin<_TeamHero> {
   Widget build(BuildContext context) {
     final baseColor = _baseColor;
     final gradientEnd = lightenColor(baseColor);
-    final teamName = context.localizedName(en: widget.team.name, cn: widget.team.cnName);
+    final teamName = context.localizedName(
+      en: widget.team.name,
+      cn: widget.team.cnName,
+    );
 
     return SliverAppBar(
       expandedHeight: 170,
@@ -438,7 +502,10 @@ class _TeamHeroState extends State<_TeamHero> with LogoColorMixin<_TeamHero> {
         iconSize: 24,
         style: IconButton.styleFrom(
           backgroundColor: Colors.white.withValues(alpha: 0.15),
-          side: BorderSide(color: Colors.white.withValues(alpha: 0.3), width: 0.5),
+          side: BorderSide(
+            color: Colors.white.withValues(alpha: 0.3),
+            width: 0.5,
+          ),
           shape: const CircleBorder(),
         ),
       ),
@@ -447,12 +514,14 @@ class _TeamHeroState extends State<_TeamHero> with LogoColorMixin<_TeamHero> {
         titlePadding: const EdgeInsetsDirectional.fromSTEB(56, 0, 16, 14),
         title: Builder(
           builder: (context) {
-            final settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
+            final settings = context
+                .dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
             if (settings == null) return const SizedBox.shrink();
             // t = 0 fully expanded → 1 fully collapsed, normalised with minExtent
-            final t = ((settings.maxExtent - settings.currentExtent) /
-                    (settings.maxExtent - settings.minExtent))
-                .clamp(0.0, 1.0);
+            final t =
+                ((settings.maxExtent - settings.currentExtent) /
+                        (settings.maxExtent - settings.minExtent))
+                    .clamp(0.0, 1.0);
             // Only fade in during the last 30 % of collapse so it appears
             // only once the bar is nearly fully pinned.
             final opacity = ((t - 0.7) / 0.3).clamp(0.0, 1.0);
@@ -460,7 +529,10 @@ class _TeamHeroState extends State<_TeamHero> with LogoColorMixin<_TeamHero> {
               opacity: opacity,
               child: Text(
                 teamName,
-                style: AppTextStyles.display(15, context).copyWith(color: Colors.white),
+                style: AppTextStyles.display(
+                  15,
+                  context,
+                ).copyWith(color: Colors.white),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -490,10 +562,10 @@ class _TeamHeroState extends State<_TeamHero> with LogoColorMixin<_TeamHero> {
                 child: Text(
                   (widget.team.shortName ?? teamName).toUpperCase(),
                   textAlign: TextAlign.right,
-                  style: AppTextStyles.display(
-                    72,
-                    context,
-                  ).copyWith(color: Colors.white.withValues(alpha: 0.07), height: 1),
+                  style: AppTextStyles.display(72, context).copyWith(
+                    color: Colors.white.withValues(alpha: 0.07),
+                    height: 1,
+                  ),
                 ),
               ),
             ),
@@ -595,9 +667,15 @@ class _TeamInfoStrip extends StatelessWidget {
             label: 'league.team.total_players'.tr(),
           ),
           _divider(context),
-          _StripCell(value: '${team.foreignPlayers ?? '--'}', label: 'league.team.foreign'.tr()),
+          _StripCell(
+            value: '${team.foreignPlayers ?? '--'}',
+            label: 'league.team.foreign'.tr(),
+          ),
           _divider(context),
-          _StripCell(value: '${team.nationalPlayers ?? '--'}', label: 'league.squad.nat'.tr()),
+          _StripCell(
+            value: '${team.nationalPlayers ?? '--'}',
+            label: 'league.squad.nat'.tr(),
+          ),
         ],
       ),
     );
@@ -645,14 +723,16 @@ class _SquadSection extends StatelessWidget {
   final LeagueSport sport;
   final List<SquadPlayer> squad;
 
-  List<String> get _positionOrder =>
-      sport == LeagueSport.football ? ['GK', 'DEF', 'MID', 'FWD'] : ['PG', 'SG', 'SF', 'PF', 'C'];
+  List<String> get _positionOrder => sport == LeagueSport.football
+      ? ['GK', 'DEF', 'MID', 'FWD']
+      : ['PG', 'SG', 'SF', 'PF', 'C'];
 
   String _normalizePosition(String? raw) {
     if (raw == null) return 'FWD';
     final u = raw.toUpperCase();
     if (sport == LeagueSport.football) {
-      if (u.contains('G') && (u.contains('K') || u.contains('GOAL'))) return 'GK';
+      if (u.contains('G') && (u.contains('K') || u.contains('GOAL')))
+        return 'GK';
       if (u.contains('D')) return 'DEF';
       if (u.contains('M')) return 'MID';
       return 'FWD';
@@ -696,7 +776,10 @@ class _SquadSection extends StatelessWidget {
       }
     }
 
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: sections);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: sections,
+    );
   }
 }
 
@@ -735,7 +818,9 @@ class _SquadColumnHeader extends StatelessWidget {
               width: 28,
               child: Text(
                 'league.squad.num'.tr(),
-                style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+                style: AppTextStyles.mono(
+                  9,
+                ).copyWith(color: context.appColors.text3),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -743,14 +828,18 @@ class _SquadColumnHeader extends StatelessWidget {
           Expanded(
             child: Text(
               'league.squad.player'.tr(),
-              style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+              style: AppTextStyles.mono(
+                9,
+              ).copyWith(color: context.appColors.text3),
             ),
           ),
           SizedBox(
             width: 36,
             child: Text(
               'league.squad.nat'.tr(),
-              style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+              style: AppTextStyles.mono(
+                9,
+              ).copyWith(color: context.appColors.text3),
               textAlign: TextAlign.center,
             ),
           ),
@@ -758,7 +847,9 @@ class _SquadColumnHeader extends StatelessWidget {
             width: 36,
             child: Text(
               'league.squad.age'.tr(),
-              style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+              style: AppTextStyles.mono(
+                9,
+              ).copyWith(color: context.appColors.text3),
               textAlign: TextAlign.center,
             ),
           ),
@@ -766,7 +857,9 @@ class _SquadColumnHeader extends StatelessWidget {
             width: 52,
             child: Text(
               'league.squad.height'.tr(),
-              style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+              style: AppTextStyles.mono(
+                9,
+              ).copyWith(color: context.appColors.text3),
               textAlign: TextAlign.center,
             ),
           ),
@@ -784,12 +877,16 @@ class _PlayerRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () =>
-          context.push(AppRoutes.leaguePlayerPath(sport.apiPath, player.id), extra: player),
+      onTap: () => context.push(
+        AppRoutes.leaguePlayerPath(sport.apiPath, player.id),
+        extra: player,
+      ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
         decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: context.appColors.line, width: 0.5)),
+          border: Border(
+            bottom: BorderSide(color: context.appColors.line, width: 0.5),
+          ),
         ),
         child: Row(
           children: [
@@ -799,7 +896,9 @@ class _PlayerRow extends StatelessWidget {
                 width: 28,
                 child: Text(
                   player.shirtNumber != null ? '#${player.shirtNumber}' : '--',
-                  style: AppTextStyles.mono(10).copyWith(color: context.appColors.text3),
+                  style: AppTextStyles.mono(
+                    10,
+                  ).copyWith(color: context.appColors.text3),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -849,7 +948,9 @@ class _PlayerRow extends StatelessWidget {
               width: 36,
               child: Text(
                 player.nationality ?? '--',
-                style: AppTextStyles.mono(11).copyWith(color: context.appColors.text3),
+                style: AppTextStyles.mono(
+                  11,
+                ).copyWith(color: context.appColors.text3),
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -860,7 +961,9 @@ class _PlayerRow extends StatelessWidget {
               width: 36,
               child: Text(
                 player.age != null ? '${player.age}' : '--',
-                style: AppTextStyles.mono(11).copyWith(color: context.appColors.text3),
+                style: AppTextStyles.mono(
+                  11,
+                ).copyWith(color: context.appColors.text3),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -873,7 +976,9 @@ class _PlayerRow extends StatelessWidget {
                           ? '${player.height}cm'
                           : '--'
                     : '--',
-                style: AppTextStyles.mono(11).copyWith(color: context.appColors.text3),
+                style: AppTextStyles.mono(
+                  11,
+                ).copyWith(color: context.appColors.text3),
                 textAlign: TextAlign.center,
               ),
             ),

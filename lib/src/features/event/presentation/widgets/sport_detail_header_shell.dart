@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
 
 /// Arena-styled gradient header shell used by every sport detail screen.
 ///
@@ -67,14 +66,16 @@ class SportDetailHeaderShell<T> extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Nav bar
-                _ArenaNavBar(leagueName: leagueName, matchTimestamp: matchTimestamp),
+                _ArenaNavBar(
+                  leagueName: leagueName,
+                  matchTimestamp: matchTimestamp,
+                ),
 
                 // Sport-specific score content
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
                   child: detailAsync.when(
-                    loading: () =>
-                        fallback ?? SizedBox(height: skeletonHeight),
+                    loading: () => fallback ?? SizedBox(height: skeletonHeight),
                     error: (_, __) =>
                         fallback ?? SizedBox(height: skeletonHeight),
                     data: (obj) => builder(obj as T),
@@ -116,7 +117,10 @@ class _ArenaNavBar extends StatelessWidget {
           // Back button
           IconButton(
             onPressed: () => context.pop(),
-            icon: const Icon(Icons.arrow_circle_left_outlined, color: Colors.white),
+            icon: const Icon(
+              Icons.arrow_circle_left_outlined,
+              color: Colors.white,
+            ),
             iconSize: 24,
             padding: EdgeInsets.zero,
             style: IconButton.styleFrom(
@@ -133,10 +137,9 @@ class _ArenaNavBar extends StatelessWidget {
                 if (leagueName != null && leagueName!.isNotEmpty)
                   Text(
                     leagueName!.toUpperCase(),
-                    style: AppTextStyles.mono(10).copyWith(
-                      color: colors.text2,
-                      letterSpacing: 0.18 * 10,
-                    ),
+                    style: AppTextStyles.mono(
+                      10,
+                    ).copyWith(color: colors.text2, letterSpacing: 0.18 * 10),
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -144,10 +147,9 @@ class _ArenaNavBar extends StatelessWidget {
                 if (subtitle.isNotEmpty)
                   Text(
                     subtitle.toUpperCase(),
-                    style: AppTextStyles.mono(9).copyWith(
-                      color: colors.text3,
-                      letterSpacing: 0.14 * 9,
-                    ),
+                    style: AppTextStyles.mono(
+                      9,
+                    ).copyWith(color: colors.text3, letterSpacing: 0.14 * 9),
                     textAlign: TextAlign.center,
                   ),
               ],

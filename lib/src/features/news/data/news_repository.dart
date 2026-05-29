@@ -25,7 +25,10 @@ class NewsRepository extends _$NewsRepository {
     return NewsListResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<NewsDetail> getNewsDetail({required String locale, required int id}) async {
+  Future<NewsDetail> getNewsDetail({
+    required String locale,
+    required int id,
+  }) async {
     final dio = ref.read(newsApiServiceProvider);
     final response = await dio.get(
       '/post/$locale/$id',
@@ -43,7 +46,11 @@ class NewsRepository extends _$NewsRepository {
     final dio = ref.read(newsApiServiceProvider);
     final response = await dio.get(
       '/post-keyword/$locale/$keywords',
-      queryParameters: {'page': page, 'perPage': perPage, 'appId': EnvConfig.appId},
+      queryParameters: {
+        'page': page,
+        'perPage': perPage,
+        'appId': EnvConfig.appId,
+      },
     );
     return NewsSearchResponse.fromJson(response.data as Map<String, dynamic>);
   }

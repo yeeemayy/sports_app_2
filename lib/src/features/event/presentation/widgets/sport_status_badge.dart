@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 
 class SportStatusBadge extends StatefulWidget {
-  const SportStatusBadge({super.key, required this.label, required this.isLive});
+  const SportStatusBadge({
+    super.key,
+    required this.label,
+    required this.isLive,
+  });
 
   final String label;
   final bool isLive;
@@ -11,14 +15,17 @@ class SportStatusBadge extends StatefulWidget {
   State<SportStatusBadge> createState() => _SportStatusBadgeState();
 }
 
-class _SportStatusBadgeState extends State<SportStatusBadge> with SingleTickerProviderStateMixin {
+class _SportStatusBadgeState extends State<SportStatusBadge>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _blinkCtrl;
 
   @override
   void initState() {
     super.initState();
-    _blinkCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000))
-      ..repeat();
+    _blinkCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat();
   }
 
   @override
@@ -38,7 +45,9 @@ class _SportStatusBadgeState extends State<SportStatusBadge> with SingleTickerPr
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       decoration: BoxDecoration(
-        color: widget.isLive ? context.appColors.live : context.appColors.surface2,
+        color: widget.isLive
+            ? context.appColors.live
+            : context.appColors.surface2,
         borderRadius: BorderRadius.circular(6),
       ),
       child: hasApostrophe
@@ -52,7 +61,9 @@ class _SportStatusBadgeState extends State<SportStatusBadge> with SingleTickerPr
                     TextSpan(
                       text: "'",
                       style: baseStyle.copyWith(
-                        color: fg.withValues(alpha: _blinkCtrl.value < 0.5 ? 1.0 : 0.0),
+                        color: fg.withValues(
+                          alpha: _blinkCtrl.value < 0.5 ? 1.0 : 0.0,
+                        ),
                       ),
                     ),
                   ],

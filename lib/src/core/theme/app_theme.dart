@@ -150,7 +150,11 @@ class AppColors extends ThemeExtension<AppColors> {
       success: Color.lerp(success, other.success, t)!,
       danger: Color.lerp(danger, other.danger, t)!,
       shimmerBase: Color.lerp(shimmerBase, other.shimmerBase, t)!,
-      shimmerHighlight: Color.lerp(shimmerHighlight, other.shimmerHighlight, t)!,
+      shimmerHighlight: Color.lerp(
+        shimmerHighlight,
+        other.shimmerHighlight,
+        t,
+      )!,
       inningHeaderBg: Color.lerp(inningHeaderBg, other.inningHeaderBg, t)!,
       inningAwayRowBg: Color.lerp(inningAwayRowBg, other.inningAwayRowBg, t)!,
       inningHomeRowBg: Color.lerp(inningHomeRowBg, other.inningHomeRowBg, t)!,
@@ -168,12 +172,11 @@ class AppTextStyles {
         : GoogleFonts.anton(fontSize: size, height: 0.85);
   }
 
-  static TextStyle body(double size) => GoogleFonts.spaceGrotesk(fontSize: size);
+  static TextStyle body(double size) =>
+      GoogleFonts.spaceGrotesk(fontSize: size);
 
-  static TextStyle mono(double size) => GoogleFonts.jetBrainsMono(
-    fontSize: size,
-    letterSpacing: size * 0.16,
-  );
+  static TextStyle mono(double size) =>
+      GoogleFonts.jetBrainsMono(fontSize: size, letterSpacing: size * 0.16);
 }
 
 extension AppColorsExtension on BuildContext {

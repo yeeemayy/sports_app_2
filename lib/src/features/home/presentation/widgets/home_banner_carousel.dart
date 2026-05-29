@@ -80,9 +80,13 @@ class _HomeBannerCarouselState extends ConsumerState<HomeBannerCarousel> {
                   return _carouselItem(
                     article.imageUrl ?? '',
                     title: article.title,
-                    subtitle: article.description.replaceAll(RegExp(r'<[^>]*>'), ''),
+                    subtitle: article.description.replaceAll(
+                      RegExp(r'<[^>]*>'),
+                      '',
+                    ),
                     onTap: article.imageUrl != null
-                        ? () => context.push(AppRoutes.newsDetailPath(article.id))
+                        ? () =>
+                              context.push(AppRoutes.newsDetailPath(article.id))
                         : null,
                   );
                 },
@@ -96,7 +100,12 @@ class _HomeBannerCarouselState extends ConsumerState<HomeBannerCarousel> {
     );
   }
 
-  Widget _carouselItem(String url, {String? title, String? subtitle, VoidCallback? onTap}) {
+  Widget _carouselItem(
+    String url, {
+    String? title,
+    String? subtitle,
+    VoidCallback? onTap,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: ClipRRect(
@@ -125,7 +134,10 @@ class _HomeBannerCarouselState extends ConsumerState<HomeBannerCarousel> {
                         right: 0,
                         bottom: 0,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
                           decoration: const BoxDecoration(
                             gradient: LinearGradient(
                               begin: Alignment.bottomCenter,
@@ -155,7 +167,10 @@ class _HomeBannerCarouselState extends ConsumerState<HomeBannerCarousel> {
                                       const SizedBox(height: 2),
                                       Text(
                                         subtitle,
-                                        style: const TextStyle(color: Colors.white70, fontSize: 12),
+                                        style: const TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 12,
+                                        ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -163,7 +178,10 @@ class _HomeBannerCarouselState extends ConsumerState<HomeBannerCarousel> {
                                   ],
                                 ),
                               ),
-                              Icon(Icons.keyboard_arrow_right, color: Colors.white),
+                              Icon(
+                                Icons.keyboard_arrow_right,
+                                color: Colors.white,
+                              ),
                             ],
                           ),
                         ),

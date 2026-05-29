@@ -1,7 +1,5 @@
-import 'package:country_code_picker/country_code_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/shared_widgets/custom_text_field.dart';
 
 class CountryPhoneNumberTextField extends StatefulWidget {
@@ -17,10 +15,12 @@ class CountryPhoneNumberTextField extends StatefulWidget {
   });
 
   @override
-  State<CountryPhoneNumberTextField> createState() => _CountryPhoneNumberTextFieldState();
+  State<CountryPhoneNumberTextField> createState() =>
+      _CountryPhoneNumberTextFieldState();
 }
 
-class _CountryPhoneNumberTextFieldState extends State<CountryPhoneNumberTextField> {
+class _CountryPhoneNumberTextFieldState
+    extends State<CountryPhoneNumberTextField> {
   @override
   Widget build(BuildContext context) {
     return CustomTextField(
@@ -35,7 +35,11 @@ class _CountryPhoneNumberTextFieldState extends State<CountryPhoneNumberTextFiel
           children: [
             Text('+86'),
             SizedBox(width: 8),
-            const SizedBox(height: 20, width: 0, child: VerticalDivider(color: Colors.grey)),
+            const SizedBox(
+              height: 20,
+              width: 0,
+              child: VerticalDivider(color: Colors.grey),
+            ),
           ],
         ),
       ),

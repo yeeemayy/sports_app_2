@@ -18,7 +18,11 @@ import 'package:sports_app/src/routes/app_routes.dart';
 const _kHeroHeight = 160.0;
 
 class LeagueDetailScreen extends ConsumerStatefulWidget {
-  const LeagueDetailScreen({super.key, required this.sport, required this.leagueId});
+  const LeagueDetailScreen({
+    super.key,
+    required this.sport,
+    required this.leagueId,
+  });
 
   final LeagueSport sport;
   final String leagueId;
@@ -31,7 +35,8 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
   int _tabIndex = 0;
 
   bool get _isFullSport =>
-      widget.sport == LeagueSport.football || widget.sport == LeagueSport.basketball;
+      widget.sport == LeagueSport.football ||
+      widget.sport == LeagueSport.basketball;
 
   List<String> get _tabs {
     if (_isFullSport) {
@@ -64,11 +69,15 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final detailAsync = switch (widget.sport) {
-      LeagueSport.football => ref.watch(footballLeagueDetailProvider(leagueId: widget.leagueId)),
+      LeagueSport.football => ref.watch(
+        footballLeagueDetailProvider(leagueId: widget.leagueId),
+      ),
       LeagueSport.basketball => ref.watch(
         basketballLeagueDetailProvider(leagueId: widget.leagueId),
       ),
-      final s => ref.watch(sportLeagueDetailProvider(sport: s, leagueId: widget.leagueId)),
+      final s => ref.watch(
+        sportLeagueDetailProvider(sport: s, leagueId: widget.leagueId),
+      ),
     };
 
     return Scaffold(
@@ -78,7 +87,11 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
         error: (e, _) => _buildError(),
         data: (detail) => Column(
           children: [
-            LeagueDetailHeader(detail: detail, sport: widget.sport, onBack: () => context.pop()),
+            LeagueDetailHeader(
+              detail: detail,
+              sport: widget.sport,
+              onBack: () => context.pop(),
+            ),
             if (_tabs.isNotEmpty) ...[
               if (_tabs.length > 1)
                 LeagueInnerTabBar(
@@ -93,7 +106,10 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
                       ? IndexedStack(
                           index: _tabIndex,
                           children: [
-                            LeagueOverviewTab(detail: detail, sport: widget.sport),
+                            LeagueOverviewTab(
+                              detail: detail,
+                              sport: widget.sport,
+                            ),
                             LeagueStandingsTab(
                               sport: widget.sport,
                               leagueId: widget.leagueId,
@@ -103,7 +119,10 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
                               sport: widget.sport,
                               leagueId: widget.leagueId,
                               onPlayerTap: (playerId) => context.push(
-                                AppRoutes.leaguePlayerPath(widget.sport.apiPath, playerId),
+                                AppRoutes.leaguePlayerPath(
+                                  widget.sport.apiPath,
+                                  playerId,
+                                ),
                               ),
                             ),
                             LeagueTeamStatsTab(
@@ -144,7 +163,10 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
         _buildBackButton(),
         Skeletonizer(
           enabled: true,
-          child: Container(height: _kHeroHeight, color: context.appColors.surface2),
+          child: Container(
+            height: _kHeroHeight,
+            color: context.appColors.surface2,
+          ),
         ),
       ],
     );
@@ -160,11 +182,17 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.error_outline, color: context.appColors.text3, size: 48),
+                Icon(
+                  Icons.error_outline,
+                  color: context.appColors.text3,
+                  size: 48,
+                ),
                 const SizedBox(height: 12),
                 Text(
                   'league.empty'.tr(),
-                  style: AppTextStyles.body(14).copyWith(color: context.appColors.text3),
+                  style: AppTextStyles.body(
+                    14,
+                  ).copyWith(color: context.appColors.text3),
                 ),
               ],
             ),

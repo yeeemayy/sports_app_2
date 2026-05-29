@@ -32,7 +32,9 @@ class BaseballRealtimeData implements SportRealtimeData {
     final ft = scoreData['ft'] as List<dynamic>?;
 
     return BaseballRealtimeData(
-      id: score.isNotEmpty ? (score[0] as String? ?? '') : (json['id'] as String? ?? ''),
+      id: score.isNotEmpty
+          ? (score[0] as String? ?? '')
+          : (json['id'] as String? ?? ''),
       statusId: score.length > 1 ? (score[1] as num?)?.toInt() ?? 0 : 0,
       homeScore: ft != null && ft.isNotEmpty ? (ft[0] as String? ?? '0') : '0',
       awayScore: ft != null && ft.length > 1 ? (ft[1] as String? ?? '0') : '0',

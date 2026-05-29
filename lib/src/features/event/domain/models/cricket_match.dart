@@ -33,7 +33,8 @@ class CricketMatch with _$CricketMatch implements SportMatch {
     return raw.whereType<List<dynamic>>().map(CricketInnings.fromList).toList();
   }
 
-  factory CricketMatch.fromJson(Map<String, dynamic> json) => _$CricketMatchFromJson(json);
+  factory CricketMatch.fromJson(Map<String, dynamic> json) =>
+      _$CricketMatchFromJson(json);
 
   factory CricketMatch.fromSportJson(Map<String, dynamic> json) {
     final homeInfo = json['homeInfo'] is Map
@@ -65,7 +66,8 @@ class CricketMatch with _$CricketMatch implements SportMatch {
       statusDescription: json['statusDescription'] as String?,
       rawInnings: json['extra_scores'] is List
           ? []
-          : ((json['extra_scores'] as Map?)?.cast<String, dynamic>()['innings'] as List?)
+          : ((json['extra_scores'] as Map?)?.cast<String, dynamic>()['innings']
+                    as List?)
                 ?.whereType<List<dynamic>>()
                 .toList(),
     );

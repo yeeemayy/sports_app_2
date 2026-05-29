@@ -21,7 +21,8 @@ class IceHockeyMatchDetailScreen extends ConsumerStatefulWidget {
   final String matchId;
 
   @override
-  ConsumerState<IceHockeyMatchDetailScreen> createState() => _IceHockeyMatchDetailScreenState();
+  ConsumerState<IceHockeyMatchDetailScreen> createState() =>
+      _IceHockeyMatchDetailScreenState();
 }
 
 class _IceHockeyMatchDetailScreenState
@@ -38,18 +39,28 @@ class _IceHockeyMatchDetailScreenState
   @override
   (String?, int?) watchDetail() {
     final v =
-        ref.watch(matchDetailProvider(sport: SportType.iceHockey, matchId: matchId)).valueOrNull
+        ref
+                .watch(
+                  matchDetailProvider(
+                    sport: SportType.iceHockey,
+                    matchId: matchId,
+                  ),
+                )
+                .valueOrNull
             as IceHockeyMatchDetail?;
     return (v?.leagueName, v?.matchTime);
   }
 
   @override
-  Widget buildHeader(BuildContext context, {String? leagueName, int? matchTimestamp}) =>
-      _IceHockeyMatchHeader(
-        matchId: matchId,
-        leagueName: leagueName,
-        matchTimestamp: matchTimestamp,
-      );
+  Widget buildHeader(
+    BuildContext context, {
+    String? leagueName,
+    int? matchTimestamp,
+  }) => _IceHockeyMatchHeader(
+    matchId: matchId,
+    leagueName: leagueName,
+    matchTimestamp: matchTimestamp,
+  );
 
   @override
   List<Tab> buildTabs(BuildContext context) => [
@@ -69,7 +80,11 @@ class _IceHockeyMatchDetailScreenState
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 class _IceHockeyMatchHeader extends ConsumerWidget {
-  const _IceHockeyMatchHeader({required this.matchId, this.leagueName, this.matchTimestamp});
+  const _IceHockeyMatchHeader({
+    required this.matchId,
+    this.leagueName,
+    this.matchTimestamp,
+  });
 
   final String matchId;
   final String? leagueName;
@@ -112,7 +127,10 @@ class _IceHockeyHeaderContent extends StatelessWidget {
     final isNotStarted = effStatusId == 1;
     const liveStatuses = {30, 331, 31, 332, 32, 6, 10, 8, 13};
     final isLive = liveStatuses.contains(effStatusId);
-    final statusLabel = iceHockeyStatusLabel(effStatusId, detail.statusDescription);
+    final statusLabel = iceHockeyStatusLabel(
+      effStatusId,
+      detail.statusDescription,
+    );
     final pillColor = isLive ? colors.live : colors.text2;
     final scoreColor = isLive ? colors.accent : colors.text;
 
@@ -131,7 +149,9 @@ class _IceHockeyHeaderContent extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.body(12).copyWith(fontWeight: FontWeight.w600),
+                style: AppTextStyles.body(
+                  12,
+                ).copyWith(fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -142,7 +162,10 @@ class _IceHockeyHeaderContent extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 3,
+                ),
                 decoration: BoxDecoration(
                   color: pillColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
@@ -171,18 +194,27 @@ class _IceHockeyHeaderContent extends StatelessWidget {
                   children: [
                     Text(
                       homeScore,
-                      style: AppTextStyles.display(48, context).copyWith(color: scoreColor),
+                      style: AppTextStyles.display(
+                        48,
+                        context,
+                      ).copyWith(color: scoreColor),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Text(
                         '–',
-                        style: AppTextStyles.display(32, context).copyWith(color: colors.text3),
+                        style: AppTextStyles.display(
+                          32,
+                          context,
+                        ).copyWith(color: colors.text3),
                       ),
                     ),
                     Text(
                       awayScore,
-                      style: AppTextStyles.display(48, context).copyWith(color: scoreColor),
+                      style: AppTextStyles.display(
+                        48,
+                        context,
+                      ).copyWith(color: scoreColor),
                     ),
                   ],
                 ),
@@ -201,7 +233,9 @@ class _IceHockeyHeaderContent extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.body(12).copyWith(fontWeight: FontWeight.w600),
+                style: AppTextStyles.body(
+                  12,
+                ).copyWith(fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -233,7 +267,9 @@ class _ScoreTab extends ConsumerWidget {
     );
 
     return detailAsync.when(
-      loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
+      loading: () => Center(
+        child: CircularProgressIndicator(color: context.appColors.accent),
+      ),
       error: (_, __) => Center(
         child: Text(
           'event.error.load_failed'.tr(),
@@ -254,8 +290,16 @@ class _ScoreTab extends ConsumerWidget {
         final awayOt = ev?.awayOt ?? rt?.awayOt ?? _p(detail.scores, 'ot', 1);
         final homeAp = ev?.homeAp ?? rt?.homeAp ?? _p(detail.scores, 'ap', 0);
         final awayAp = ev?.awayAp ?? rt?.awayAp ?? _p(detail.scores, 'ap', 1);
-        final homeTotal = ev?.homeScore ?? rt?.homeScore ?? int.tryParse(detail.homeScore) ?? 0;
-        final awayTotal = ev?.awayScore ?? rt?.awayScore ?? int.tryParse(detail.awayScore) ?? 0;
+        final homeTotal =
+            ev?.homeScore ??
+            rt?.homeScore ??
+            int.tryParse(detail.homeScore) ??
+            0;
+        final awayTotal =
+            ev?.awayScore ??
+            rt?.awayScore ??
+            int.tryParse(detail.awayScore) ??
+            0;
         final effStatusId = ev?.statusId ?? rt?.statusId ?? detail.statusId;
 
         return _IceHockeyScoreTable(
@@ -334,8 +378,22 @@ class _IceHockeyScoreTable extends StatelessWidget {
       'event.ice_hockey.detail.total'.tr(),
     ];
 
-    final homeScores = [homeP1, homeP2, homeP3, if (_hasOt) homeOt, if (_hasAp) homeAp, homeTotal];
-    final awayScores = [awayP1, awayP2, awayP3, if (_hasOt) awayOt, if (_hasAp) awayAp, awayTotal];
+    final homeScores = [
+      homeP1,
+      homeP2,
+      homeP3,
+      if (_hasOt) homeOt,
+      if (_hasAp) homeAp,
+      homeTotal,
+    ];
+    final awayScores = [
+      awayP1,
+      awayP2,
+      awayP3,
+      if (_hasOt) awayOt,
+      if (_hasAp) awayAp,
+      awayTotal,
+    ];
 
     return ListView(
       padding: const EdgeInsets.all(12),
@@ -350,7 +408,10 @@ class _IceHockeyScoreTable extends StatelessWidget {
             children: [
               // Header: [empty] | Home | Away
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
                 child: Row(
                   spacing: 2,
                   children: [
@@ -368,9 +429,10 @@ class _IceHockeyScoreTable extends StatelessWidget {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               textAlign: TextAlign.center,
-                              style: AppTextStyles.body(
-                                12,
-                              ).copyWith(color: colors.text, fontWeight: FontWeight.w600),
+                              style: AppTextStyles.body(12).copyWith(
+                                color: colors.text,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
@@ -389,9 +451,10 @@ class _IceHockeyScoreTable extends StatelessWidget {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               textAlign: TextAlign.center,
-                              style: AppTextStyles.body(
-                                12,
-                              ).copyWith(color: colors.text, fontWeight: FontWeight.w600),
+                              style: AppTextStyles.body(12).copyWith(
+                                color: colors.text,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
@@ -407,14 +470,19 @@ class _IceHockeyScoreTable extends StatelessWidget {
                 return Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
                       child: Row(
                         children: [
                           Expanded(
                             flex: 2,
                             child: Text(
                               columns[i],
-                              style: AppTextStyles.mono(11).copyWith(color: colors.text3),
+                              style: AppTextStyles.mono(
+                                11,
+                              ).copyWith(color: colors.text3),
                             ),
                           ),
                           Expanded(
@@ -423,10 +491,13 @@ class _IceHockeyScoreTable extends StatelessWidget {
                               '${homeScores[i]}',
                               textAlign: TextAlign.center,
                               style: isTotal
-                                  ? AppTextStyles.mono(
-                                      14,
-                                    ).copyWith(color: colors.accent, fontWeight: FontWeight.w800)
-                                  : AppTextStyles.mono(13).copyWith(color: colors.text2),
+                                  ? AppTextStyles.mono(14).copyWith(
+                                      color: colors.accent,
+                                      fontWeight: FontWeight.w800,
+                                    )
+                                  : AppTextStyles.mono(
+                                      13,
+                                    ).copyWith(color: colors.text2),
                             ),
                           ),
                           Expanded(
@@ -435,10 +506,13 @@ class _IceHockeyScoreTable extends StatelessWidget {
                               '${awayScores[i]}',
                               textAlign: TextAlign.center,
                               style: isTotal
-                                  ? AppTextStyles.mono(
-                                      14,
-                                    ).copyWith(color: colors.accent, fontWeight: FontWeight.w800)
-                                  : AppTextStyles.mono(13).copyWith(color: colors.text2),
+                                  ? AppTextStyles.mono(14).copyWith(
+                                      color: colors.accent,
+                                      fontWeight: FontWeight.w800,
+                                    )
+                                  : AppTextStyles.mono(
+                                      13,
+                                    ).copyWith(color: colors.text2),
                             ),
                           ),
                         ],
@@ -471,7 +545,9 @@ class _StatsTab extends ConsumerWidget {
     );
 
     return eventsAsync.when(
-      loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
+      loading: () => Center(
+        child: CircularProgressIndicator(color: context.appColors.accent),
+      ),
       error: (_, __) => Center(
         child: Text(
           'event.error.load_failed'.tr(),
@@ -520,7 +596,9 @@ class _EventsTab extends ConsumerWidget {
     );
 
     return eventsAsync.when(
-      loading: () => Center(child: CircularProgressIndicator(color: context.appColors.accent)),
+      loading: () => Center(
+        child: CircularProgressIndicator(color: context.appColors.accent),
+      ),
       error: (_, __) => Center(
         child: Text(
           'event.error.load_failed'.tr(),
@@ -575,10 +653,20 @@ class _IceHockeyIncidentTimeline extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
             indicator: _TimeIndicator(timeLabel: incident.timeLabel),
           ),
-          beforeLineStyle: LineStyle(color: context.appColors.line, thickness: 1),
-          afterLineStyle: LineStyle(color: context.appColors.line, thickness: 1),
-          startChild: isHome ? _IncidentCell(incident: incident, isHome: true) : null,
-          endChild: !isHome ? _IncidentCell(incident: incident, isHome: false) : null,
+          beforeLineStyle: LineStyle(
+            color: context.appColors.line,
+            thickness: 1,
+          ),
+          afterLineStyle: LineStyle(
+            color: context.appColors.line,
+            thickness: 1,
+          ),
+          startChild: isHome
+              ? _IncidentCell(incident: incident, isHome: true)
+              : null,
+          endChild: !isHome
+              ? _IncidentCell(incident: incident, isHome: false)
+              : null,
         );
       },
     );
@@ -600,7 +688,10 @@ class _TimeIndicator extends StatelessWidget {
         border: Border.all(color: colors.line),
       ),
       alignment: Alignment.center,
-      child: Text(timeLabel, style: AppTextStyles.mono(10).copyWith(color: colors.text3)),
+      child: Text(
+        timeLabel,
+        style: AppTextStyles.mono(10).copyWith(color: colors.text3),
+      ),
     );
   }
 }
@@ -700,7 +791,9 @@ class _IncidentBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: AppTextStyles.mono(9).copyWith(color: color, fontWeight: FontWeight.w700),
+        style: AppTextStyles.mono(
+          9,
+        ).copyWith(color: color, fontWeight: FontWeight.w700),
       ),
     );
   }

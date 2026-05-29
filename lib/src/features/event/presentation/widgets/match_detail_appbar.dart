@@ -9,7 +9,11 @@ import 'package:sports_app/src/extensions/context_extensions.dart';
 /// is a positive Unix timestamp (seconds), formats and shows the match date
 /// below it in a locale-aware format.
 class MatchDetailAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const MatchDetailAppBar({super.key, required this.leagueName, this.matchTimestamp});
+  const MatchDetailAppBar({
+    super.key,
+    required this.leagueName,
+    this.matchTimestamp,
+  });
 
   final String leagueName;
 
@@ -44,7 +48,9 @@ class MatchDetailAppBar extends StatelessWidget implements PreferredSizeWidget {
                     : 'yyyy MMM dd EEEE hh:mmaa',
                 context.locale.toString(),
               ).format(DateTime.fromMillisecondsSinceEpoch(ts * 1000)),
-              style: context.textTheme.labelSmall?.copyWith(color: Colors.white),
+              style: context.textTheme.labelSmall?.copyWith(
+                color: Colors.white,
+              ),
             ),
         ],
       ),

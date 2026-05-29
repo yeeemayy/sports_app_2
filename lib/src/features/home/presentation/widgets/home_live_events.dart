@@ -21,7 +21,9 @@ class HomeLiveEvents extends StatelessWidget {
         children: [
           Text(
             '中国台湾UBA大专篮球联赛',
-            style: context.textTheme.labelMedium?.copyWith(color: Colors.grey.shade500),
+            style: context.textTheme.labelMedium?.copyWith(
+              color: Colors.grey.shade500,
+            ),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -44,12 +46,14 @@ class HomeLiveEvents extends StatelessWidget {
               _buildContestee('黎明技术学院'),
               Text(
                 '55-58',
-                style: context.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                style: context.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               _buildContestee('虎尾科技大学'),
             ],
           ),
-          AnchorAvatar(size: 35)
+          AnchorAvatar(size: 35),
         ],
       ),
     );
@@ -66,7 +70,8 @@ class HomeLiveEvents extends StatelessWidget {
         ),
         child: ClipOval(
           child: CachedNetworkImage(
-            imageUrl: 'https://placehold.co/400x400/FFFFFF/898989.png?text=Image',
+            imageUrl:
+                'https://placehold.co/400x400/FFFFFF/898989.png?text=Image',
             fit: BoxFit.cover,
             placeholder: (context, url) => Skeletonizer(
               enabled: true,

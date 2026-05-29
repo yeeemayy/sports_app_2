@@ -35,10 +35,15 @@ class AmFootballMatchCard extends ConsumerWidget {
     final effectiveStatusId = rt?.statusId ?? match.statusId;
     final effectiveHomeScore = rt?.homeScore.toString() ?? match.homeScore;
     final effectiveAwayScore = rt?.awayScore.toString() ?? match.awayScore;
-    final statusLabel = amFootballStatusLabel(effectiveStatusId, match.statusDescription);
+    final statusLabel = amFootballStatusLabel(
+      effectiveStatusId,
+      match.statusDescription,
+    );
     final isLive = _liveStatuses.contains(effectiveStatusId);
     final isNotStarted = effectiveStatusId == 1;
-    final scoreColor = isLive ? context.appColors.accent : context.appColors.text;
+    final scoreColor = isLive
+        ? context.appColors.accent
+        : context.appColors.text;
 
     return MatchCardShell(
       onTap: () => context.push(AppRoutes.amFootballMatchDetailPath(match.id)),
@@ -63,7 +68,9 @@ class AmFootballMatchCard extends ConsumerWidget {
                     const SizedBox(height: 4),
                     Text(
                       match.homeName,
-                      style: AppTextStyles.mono(11).copyWith(color: context.appColors.text2),
+                      style: AppTextStyles.mono(
+                        11,
+                      ).copyWith(color: context.appColors.text2),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
@@ -76,13 +83,16 @@ class AmFootballMatchCard extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Text(
                   isNotStarted ? '-' : effectiveHomeScore,
-                  style: AppTextStyles.display(40, context).copyWith(color: scoreColor),
+                  style: AppTextStyles.display(
+                    40,
+                    context,
+                  ).copyWith(color: scoreColor),
                 ),
               ),
               // Center status column
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
-                child:  Text(
+                child: Text(
                   '–',
                   style: AppTextStyles.display(
                     22,
@@ -95,7 +105,10 @@ class AmFootballMatchCard extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Text(
                   isNotStarted ? '-' : effectiveAwayScore,
-                  style: AppTextStyles.display(40, context).copyWith(color: scoreColor),
+                  style: AppTextStyles.display(
+                    40,
+                    context,
+                  ).copyWith(color: scoreColor),
                 ),
               ),
               // Away side
@@ -106,7 +119,9 @@ class AmFootballMatchCard extends ConsumerWidget {
                     const SizedBox(height: 4),
                     Text(
                       match.awayName,
-                      style: AppTextStyles.mono(11).copyWith(color: context.appColors.text2),
+                      style: AppTextStyles.mono(
+                        11,
+                      ).copyWith(color: context.appColors.text2),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,

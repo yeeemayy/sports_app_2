@@ -10,9 +10,13 @@ class HomeAnchorLiveCard extends StatelessWidget {
   final bool _isLoading;
   final VoidCallback? onTap;
 
-  const HomeAnchorLiveCard({super.key, this.anchor, this.onTap}) : _isLoading = false;
+  const HomeAnchorLiveCard({super.key, this.anchor, this.onTap})
+    : _isLoading = false;
 
-  const HomeAnchorLiveCard.loading({super.key}) : anchor = null, _isLoading = true, onTap = null;
+  const HomeAnchorLiveCard.loading({super.key})
+    : anchor = null,
+      _isLoading = true,
+      onTap = null;
 
   String _formatCount(int count) {
     if (count >= 1000000) return '${(count / 1000000).toStringAsFixed(1)}M';
@@ -39,8 +43,10 @@ class HomeAnchorLiveCard extends StatelessWidget {
               CachedNetworkImage(
                 imageUrl: anchor!.cover,
                 fit: BoxFit.cover,
-                placeholder: (_, _) => Container(color: context.appColors.surface2),
-                errorBuilder: (_, _, _) => Container(color: context.appColors.surface2),
+                placeholder: (_, _) =>
+                    Container(color: context.appColors.surface2),
+                errorBuilder: (_, _, _) =>
+                    Container(color: context.appColors.surface2),
               )
             else
               Container(color: context.appColors.surface2),
@@ -53,7 +59,10 @@ class HomeAnchorLiveCard extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     stops: const [0.4, 1.0],
-                    colors: [Colors.transparent, Colors.black.withValues(alpha: 0.78)],
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.78),
+                    ],
                   ),
                 ),
               ),
@@ -68,22 +77,28 @@ class HomeAnchorLiveCard extends StatelessWidget {
                 children: [
                   if (isLive)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFE53935),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         'home.anchor.live_badge'.tr(),
-                        style: AppTextStyles.display(
-                          11,
-                          context,
-                        ).copyWith(color: Colors.white, letterSpacing: 11 * 0.04),
+                        style: AppTextStyles.display(11, context).copyWith(
+                          color: Colors.white,
+                          letterSpacing: 11 * 0.04,
+                        ),
                       ),
                     ),
                   const Spacer(),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.45),
                       borderRadius: BorderRadius.circular(20),
@@ -91,11 +106,18 @@ class HomeAnchorLiveCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.person_outline_outlined, size: 12, color: Colors.white),
+                        const Icon(
+                          Icons.person_outline_outlined,
+                          size: 12,
+                          color: Colors.white,
+                        ),
                         const SizedBox(width: 3),
                         Text(
                           _formatCount(anchor?.collect ?? 0),
-                          style: AppTextStyles.display(11, context).copyWith(color: Colors.white),
+                          style: AppTextStyles.display(
+                            11,
+                            context,
+                          ).copyWith(color: Colors.white),
                         ),
                       ],
                     ),
@@ -120,7 +142,11 @@ class HomeAnchorLiveCard extends StatelessWidget {
                       placeholder: (_, _) => Container(color: Colors.white24),
                       errorBuilder: (_, _, _) => Container(
                         color: Colors.white24,
-                        child: const Icon(Icons.person, color: Colors.white54, size: 18),
+                        child: const Icon(
+                          Icons.person,
+                          color: Colors.white54,
+                          size: 18,
+                        ),
                       ),
                     ),
                   ),
@@ -132,17 +158,20 @@ class HomeAnchorLiveCard extends StatelessWidget {
                       children: [
                         Text(
                           anchor?.nickname ?? '',
-                          style: AppTextStyles.display(
-                            13,
-                            context,
-                          ).copyWith(color: Colors.white, fontWeight: FontWeight.w600),
+                          style: AppTextStyles.display(13, context).copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         SizedBox(height: 3),
                         Text(
                           anchor?.title ?? '',
-                          style: AppTextStyles.display(10, context).copyWith(color: Colors.white70),
+                          style: AppTextStyles.display(
+                            10,
+                            context,
+                          ).copyWith(color: Colors.white70),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -151,7 +180,9 @@ class HomeAnchorLiveCard extends StatelessWidget {
                   ),
                   CircleAvatar(
                     radius: 16,
-                    backgroundColor: isLive ? context.appColors.accent : Colors.grey.shade300,
+                    backgroundColor: isLive
+                        ? context.appColors.accent
+                        : Colors.grey.shade300,
                     child: Image.asset(
                       'assets/images/equalizer.gif',
                       color: Colors.white,

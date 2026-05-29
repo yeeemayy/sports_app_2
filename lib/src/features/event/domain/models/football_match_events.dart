@@ -33,20 +33,20 @@ class MatchIncident {
   final String? outPlayerName;
 
   factory MatchIncident.fromJson(Map<String, dynamic> json) => MatchIncident(
-        type: json['type'] as int? ?? 0,
-        position: json['position'] as int? ?? 0,
-        time: json['time'] as int? ?? 0,
-        second: json['second'] as int?,
-        reason: json['reason'] as int?,
-        playerId: json['player_id'] as String?,
-        playerName: json['player_name'] as String?,
-        homeScore: json['home_score'] as int?,
-        awayScore: json['away_score'] as int?,
-        inPlayerId: json['in_player_id'] as String?,
-        inPlayerName: json['in_player_name'] as String?,
-        outPlayerId: json['out_player_id'] as String?,
-        outPlayerName: json['out_player_name'] as String?,
-      );
+    type: json['type'] as int? ?? 0,
+    position: json['position'] as int? ?? 0,
+    time: json['time'] as int? ?? 0,
+    second: json['second'] as int?,
+    reason: json['reason'] as int?,
+    playerId: json['player_id'] as String?,
+    playerName: json['player_name'] as String?,
+    homeScore: json['home_score'] as int?,
+    awayScore: json['away_score'] as int?,
+    inPlayerId: json['in_player_id'] as String?,
+    inPlayerName: json['in_player_name'] as String?,
+    outPlayerId: json['out_player_id'] as String?,
+    outPlayerName: json['out_player_name'] as String?,
+  );
 }
 
 @immutable
@@ -59,10 +59,10 @@ class MatchStat {
   final int away;
 
   factory MatchStat.fromJson(Map<String, dynamic> json) => MatchStat(
-        label: json['key'] is String ? json['key'] as String : null,
-        home: (json['home'] as num? ?? 0).toInt(),
-        away: (json['away'] as num? ?? 0).toInt(),
-      );
+    label: json['key'] is String ? json['key'] as String : null,
+    home: (json['home'] as num? ?? 0).toInt(),
+    away: (json['away'] as num? ?? 0).toInt(),
+  );
 }
 
 @immutable
@@ -85,7 +85,9 @@ class FootballMatchEvents {
     final score = json['score'] as List<dynamic>?;
     return FootballMatchEvents(
       id: json['id'] as String? ?? '',
-      kickoffTimestamp: score != null && score.length > 4 ? score[4] as int? : null,
+      kickoffTimestamp: score != null && score.length > 4
+          ? score[4] as int?
+          : null,
       incidents: (json['incidents'] as List<dynamic>? ?? [])
           .map((e) => MatchIncident.fromJson(e as Map<String, dynamic>))
           .toList(),

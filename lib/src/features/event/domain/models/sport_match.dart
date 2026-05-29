@@ -53,7 +53,8 @@ abstract class SportMatch {
   /// Prefers Chinese names when locale is zh, English names otherwise.
   static String teamName(Map<String, dynamic> info) {
     final cn = info['cn_name'] as String?;
-    final en = info['en_name'] as String? ??
+    final en =
+        info['en_name'] as String? ??
         info['en_short_name'] as String? ??
         info['short_name'] as String?;
     if (AppLocale.isChinese) {

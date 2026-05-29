@@ -253,11 +253,7 @@ class _StatItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 20,
-            color: iconColor ?? colors.text3,
-          ),
+          Icon(icon, size: 20, color: iconColor ?? colors.text3),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -266,18 +262,17 @@ class _StatItem extends StatelessWidget {
               children: [
                 Text(
                   value,
-                  style: AppTextStyles.display(18, context).copyWith(
-                    color: colors.text,
-                    height: 1.1,
-                  ),
+                  style: AppTextStyles.display(
+                    18,
+                    context,
+                  ).copyWith(color: colors.text, height: 1.1),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   label,
-                  style: AppTextStyles.mono(9).copyWith(
-                    color: colors.text3,
-                    letterSpacing: 9 * 0.1,
-                  ),
+                  style: AppTextStyles.mono(
+                    9,
+                  ).copyWith(color: colors.text3, letterSpacing: 9 * 0.1),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

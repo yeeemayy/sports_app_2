@@ -41,7 +41,9 @@ class BaseballMatchCard extends ConsumerWidget {
     final isLive = baseballLiveStatuses.contains(effective.statusId);
     final isNotStarted = effective.statusId == 1;
     final label = baseballStatusLabel(effective.statusId);
-    final scoreColor = isLive ? context.appColors.accent : context.appColors.text;
+    final scoreColor = isLive
+        ? context.appColors.accent
+        : context.appColors.text;
 
     return MatchCardShell(
       onTap: () => context.push(AppRoutes.baseballMatchDetailPath(match.id)),
@@ -66,7 +68,9 @@ class BaseballMatchCard extends ConsumerWidget {
                     const SizedBox(height: 5),
                     Text(
                       match.homeName,
-                      style: AppTextStyles.mono(11).copyWith(color: context.appColors.text2),
+                      style: AppTextStyles.mono(
+                        11,
+                      ).copyWith(color: context.appColors.text2),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
@@ -80,13 +84,22 @@ class BaseballMatchCard extends ConsumerWidget {
                 child: Text(
                   isNotStarted ? '-' : effective.homeScore,
                   textAlign: TextAlign.center,
-                  style: AppTextStyles.display(34, context).copyWith(color: scoreColor),
+                  style: AppTextStyles.display(
+                    34,
+                    context,
+                  ).copyWith(color: scoreColor),
                 ),
               ),
               // Center status
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text('–', style: AppTextStyles.display(22, context).copyWith(color: context.appColors.text3)),
+                child: Text(
+                  '–',
+                  style: AppTextStyles.display(
+                    22,
+                    context,
+                  ).copyWith(color: context.appColors.text3),
+                ),
               ),
               // Away score
               SizedBox(
@@ -94,7 +107,10 @@ class BaseballMatchCard extends ConsumerWidget {
                 child: Text(
                   isNotStarted ? '-' : effective.awayScore,
                   textAlign: TextAlign.center,
-                  style: AppTextStyles.display(34, context).copyWith(color: scoreColor),
+                  style: AppTextStyles.display(
+                    34,
+                    context,
+                  ).copyWith(color: scoreColor),
                 ),
               ),
               // Away team
@@ -105,7 +121,9 @@ class BaseballMatchCard extends ConsumerWidget {
                     const SizedBox(height: 5),
                     Text(
                       match.awayName,
-                      style: AppTextStyles.mono(11).copyWith(color: context.appColors.text2),
+                      style: AppTextStyles.mono(
+                        11,
+                      ).copyWith(color: context.appColors.text2),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,

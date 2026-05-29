@@ -38,7 +38,8 @@ class HomeAnchorLiveGrid extends StatelessWidget {
             ? const HomeAnchorLiveCard.loading()
             : HomeAnchorLiveCard(
                 anchor: anchors![index],
-                onTap: () => context.push(AppRoutes.anchorPath(anchors![index].id)),
+                onTap: () =>
+                    context.push(AppRoutes.anchorPath(anchors![index].id)),
               );
         return AspectRatio(aspectRatio: _aspectRatio(index), child: child);
       },

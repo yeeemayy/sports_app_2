@@ -8,7 +8,12 @@ import 'package:sports_app/src/shared_widgets/avatar.dart';
 /// Set [circular] to `true` for round player avatars (uses [BoxFit.cover]).
 /// Defaults to square with [BoxFit.contain].
 class SportLogo extends StatelessWidget {
-  const SportLogo({super.key, required this.url, required this.size, this.circular = false});
+  const SportLogo({
+    super.key,
+    required this.url,
+    required this.size,
+    this.circular = false,
+  });
 
   final String? url;
   final double size;
@@ -30,7 +35,8 @@ class SportLogo extends StatelessWidget {
           enabled: true,
           child: AvatarFallback(size: size, iconSize: size * 0.5),
         ),
-        errorBuilder: (_, _, _) => AvatarFallback(size: size, iconSize: size * 0.5),
+        errorBuilder: (_, _, _) =>
+            AvatarFallback(size: size, iconSize: size * 0.5),
       );
     }
 

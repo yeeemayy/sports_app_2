@@ -35,7 +35,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       await ref
           .read(authNotifierProvider.notifier)
-          .login(telephone: _telephoneController.text.trim(), password: _passwordController.text);
+          .login(
+            telephone: _telephoneController.text.trim(),
+            password: _passwordController.text,
+          );
       if (mounted) {
         context.go(AppRoutes.home);
         if (widget.returnPath != null) {
@@ -69,9 +72,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   children: [
                     Text(
                       'auth.login.subtitle'.tr(),
-                      style: AppTextStyles.body(
-                        13,
-                      ).copyWith(color: scheme.onSurface.withValues(alpha: 0.62)),
+                      style: AppTextStyles.body(13).copyWith(
+                        color: scheme.onSurface.withValues(alpha: 0.62),
+                      ),
                     ),
                     const SizedBox(height: 20),
                     LabeledField(
@@ -79,9 +82,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: TextFormField(
                         controller: _telephoneController,
                         keyboardType: TextInputType.phone,
-                        style: AppTextStyles.mono(15).copyWith(color: scheme.onSurface),
+                        style: AppTextStyles.mono(
+                          15,
+                        ).copyWith(color: scheme.onSurface),
                         cursorColor: scheme.primary,
-                        onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                        onTapOutside: (_) =>
+                            FocusManager.instance.primaryFocus?.unfocus(),
                         decoration: authInputDecoration(
                           context,
                           hintText: 'auth.field.telephone_hint'.tr(),
@@ -92,13 +98,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               children: [
                                 Text(
                                   '+86',
-                                  style: AppTextStyles.mono(13).copyWith(color: scheme.onSurface),
+                                  style: AppTextStyles.mono(
+                                    13,
+                                  ).copyWith(color: scheme.onSurface),
                                 ),
                                 const SizedBox(width: 8),
                                 Container(
                                   width: 0.5,
                                   height: 18,
-                                  color: scheme.onSurface.withValues(alpha: 0.18),
+                                  color: scheme.onSurface.withValues(
+                                    alpha: 0.18,
+                                  ),
                                 ),
                               ],
                             ),
@@ -115,19 +125,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: TextFormField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
-                        style: AppTextStyles.mono(15).copyWith(color: scheme.onSurface),
+                        style: AppTextStyles.mono(
+                          15,
+                        ).copyWith(color: scheme.onSurface),
                         cursorColor: scheme.primary,
-                        onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                        onTapOutside: (_) =>
+                            FocusManager.instance.primaryFocus?.unfocus(),
                         decoration: authInputDecoration(
                           context,
                           hintText: 'auth.field.password_hint'.tr(),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
                               color: scheme.onSurface.withValues(alpha: 0.62),
                               size: 18,
                             ),
-                            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                            onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
                           ),
                         ),
                         validator: (v) => v == null || v.isEmpty
@@ -160,17 +177,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       children: [
                         Text(
                           'auth.login.no_account'.tr(),
-                          style: AppTextStyles.body(
-                            13,
-                          ).copyWith(color: scheme.onSurface.withValues(alpha: 0.62)),
+                          style: AppTextStyles.body(13).copyWith(
+                            color: scheme.onSurface.withValues(alpha: 0.62),
+                          ),
                         ),
                         GestureDetector(
                           onTap: () => context.push(AppRoutes.register),
                           child: Text(
                             '  ${'auth.login.register'.tr()} →',
-                            style: AppTextStyles.body(
-                              13,
-                            ).copyWith(color: scheme.primary, fontWeight: FontWeight.w600),
+                            style: AppTextStyles.body(13).copyWith(
+                              color: scheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ],
@@ -192,10 +210,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(
-            'assets/images/image_01.jpeg',
-            fit: BoxFit.cover,
-          ),
+          Image.asset('assets/images/image_01.jpeg', fit: BoxFit.cover),
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -214,11 +229,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.55),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Theme.of(context).colorScheme.primary, width: 0.5),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 0.5,
+                    ),
                   ),
                   child: Text(
                     'auth.login.welcome_back'.tr(),
@@ -228,7 +249,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 12),
                 Text(
                   'auth.login.hero_title'.tr(),
-                  style: AppTextStyles.display(46, context).copyWith(height: 0.9),
+                  style: AppTextStyles.display(
+                    46,
+                    context,
+                  ).copyWith(height: 0.9),
                 ),
               ],
             ),

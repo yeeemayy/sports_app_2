@@ -32,8 +32,8 @@ class SetScoreDisplay extends StatelessWidget {
     final scoreColor = isNotStarted
         ? Colors.grey.shade400
         : isLive
-            ? context.appColors.accent
-            : context.appColors.text;
+        ? context.appColors.accent
+        : context.appColors.text;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -63,7 +63,9 @@ class SetScoreDisplay extends StatelessWidget {
         if (homeSets.isNotEmpty)
           Text(
             '${homeSets.last}:${awaySets.last}',
-            style: context.textTheme.labelMedium?.copyWith(color: Colors.grey.shade500),
+            style: context.textTheme.labelMedium?.copyWith(
+              color: Colors.grey.shade500,
+            ),
           ),
       ],
     );

@@ -20,8 +20,10 @@ class RefAppModel with _$RefAppModel {
 class BannerModel with _$BannerModel {
   const factory BannerModel({
     required int id,
+    // ignore: invalid_annotation_target
     @JsonKey(name: 'app_name') String? appName,
     required String cover,
+    // ignore: invalid_annotation_target
     @JsonKey(name: 'ref_app') required List<RefAppModel> refApp,
     required String updated,
   }) = _BannerModel;

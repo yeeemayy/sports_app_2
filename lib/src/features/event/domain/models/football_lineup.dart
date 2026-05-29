@@ -8,8 +8,10 @@ class LineupPlayer with _$LineupPlayer {
   const factory LineupPlayer({
     required String id,
     required String name,
+    // ignore: invalid_annotation_target
     @JsonKey(name: 'cn_name') String? cnName,
     required String logo,
+    // ignore: invalid_annotation_target
     @JsonKey(name: 'shirt_number') required int shirtNumber,
     required String position,
     required int? x,
@@ -19,7 +21,8 @@ class LineupPlayer with _$LineupPlayer {
     required int captain,
   }) = _LineupPlayer;
 
-  factory LineupPlayer.fromJson(Map<String, dynamic> json) => _$LineupPlayerFromJson(json);
+  factory LineupPlayer.fromJson(Map<String, dynamic> json) =>
+      _$LineupPlayerFromJson(json);
 }
 
 @freezed
@@ -29,5 +32,6 @@ class FootballLineups with _$FootballLineups {
     required List<LineupPlayer> away,
   }) = _FootballLineups;
 
-  factory FootballLineups.fromJson(Map<String, dynamic> json) => _$FootballLineupsFromJson(json);
+  factory FootballLineups.fromJson(Map<String, dynamic> json) =>
+      _$FootballLineupsFromJson(json);
 }

@@ -24,13 +24,15 @@ class AnchorAvatar extends StatelessWidget {
           ),
           child: ClipOval(
             child: CachedNetworkImage(
-              imageUrl: 'https://placehold.co/400x400/FFFFFF/898989.png?text=Image',
+              imageUrl:
+                  'https://placehold.co/400x400/FFFFFF/898989.png?text=Image',
               fit: BoxFit.cover,
               placeholder: (context, url) => Skeletonizer(
                 enabled: true,
                 child: const ColoredBox(color: Colors.grey),
               ),
-              errorWidget: (context, url, error) => ColoredBox(color: Colors.grey.shade200),
+              errorWidget: (context, url, error) =>
+                  ColoredBox(color: Colors.grey.shade200),
             ),
           ),
         ),
@@ -38,7 +40,10 @@ class AnchorAvatar extends StatelessWidget {
           bottom: -4,
           child: Badge(
             padding: EdgeInsets.symmetric(horizontal: 6),
-            label: Text('anchor.detail.live'.tr(), style: TextStyle(fontSize: 12 * (size / 60))),
+            label: Text(
+              'anchor.detail.live'.tr(),
+              style: TextStyle(fontSize: 12 * (size / 60)),
+            ),
             backgroundColor: context.appColors.accent,
           ),
         ),
@@ -55,7 +60,10 @@ class AvatarFallback extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(color: Colors.grey.shade200, shape: BoxShape.circle),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        shape: BoxShape.circle,
+      ),
       width: size,
       height: size,
       child: Icon(Icons.person, size: iconSize, color: Colors.grey.shade400),

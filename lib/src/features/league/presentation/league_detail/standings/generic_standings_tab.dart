@@ -110,7 +110,8 @@ class GenericStandingsTab extends ConsumerWidget {
                 ],
               ),
             ),
-            for (final entry in (groups.entries.toList()
+            for (final entry
+                in (groups.entries.toList()
                   ..sort((a, b) => a.key.compareTo(b.key)))) ...[
               if (groups.length > 1) ConferenceHeader(name: entry.key),
               for (final row in entry.value.rows)
@@ -228,8 +229,8 @@ class _GenericStandingsRow extends StatelessWidget {
               child: Text(
                 showWinRate
                     ? (row.winRate != null
-                        ? row.winRate!.toStringAsFixed(3)
-                        : '-')
+                          ? row.winRate!.toStringAsFixed(3)
+                          : '-')
                     : '${row.points ?? '-'}',
                 style: AppTextStyles.mono(12).copyWith(
                   color: context.appColors.text,

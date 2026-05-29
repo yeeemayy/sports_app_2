@@ -31,8 +31,12 @@ class BasketballRealtimeData implements SportRealtimeData {
 
   factory BasketballRealtimeData.fromJson(Map<String, dynamic> json) {
     final score = json['score'] as List<dynamic>;
-    final homeScores = (score[3] as List<dynamic>).map((e) => (e as num).toInt()).toList();
-    final awayScores = (score[4] as List<dynamic>).map((e) => (e as num).toInt()).toList();
+    final homeScores = (score[3] as List<dynamic>)
+        .map((e) => (e as num).toInt())
+        .toList();
+    final awayScores = (score[4] as List<dynamic>)
+        .map((e) => (e as num).toInt())
+        .toList();
 
     final timer = json['timer'] as List<dynamic>?;
 
@@ -46,8 +50,14 @@ class BasketballRealtimeData implements SportRealtimeData {
     final int homeOt;
     final int awayOt;
     if (otScores != null && otScores.length >= 2) {
-      homeOt = (otScores[0] as List<dynamic>).fold(0, (a, b) => a + (b as num).toInt());
-      awayOt = (otScores[1] as List<dynamic>).fold(0, (a, b) => a + (b as num).toInt());
+      homeOt = (otScores[0] as List<dynamic>).fold(
+        0,
+        (a, b) => a + (b as num).toInt(),
+      );
+      awayOt = (otScores[1] as List<dynamic>).fold(
+        0,
+        (a, b) => a + (b as num).toInt(),
+      );
     } else {
       homeOt = homeScores.length > 4 ? homeScores[4] : 0;
       awayOt = awayScores.length > 4 ? awayScores[4] : 0;
@@ -138,13 +148,13 @@ class BasketballRealtimeData implements SportRealtimeData {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        statusId,
-        homeTotal,
-        awayTotal,
-        timerRunning,
-        timerCountdown,
-        timerUpdateTime,
-        timerRemaining,
-      );
+    id,
+    statusId,
+    homeTotal,
+    awayTotal,
+    timerRunning,
+    timerCountdown,
+    timerUpdateTime,
+    timerRemaining,
+  );
 }

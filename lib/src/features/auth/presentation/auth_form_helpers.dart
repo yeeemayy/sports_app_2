@@ -10,9 +10,9 @@ InputDecoration authInputDecoration(
   final scheme = Theme.of(context).colorScheme;
   return InputDecoration(
     hintText: hintText,
-    hintStyle: AppTextStyles.mono(13).copyWith(
-      color: scheme.onSurface.withValues(alpha: 0.36),
-    ),
+    hintStyle: AppTextStyles.mono(
+      13,
+    ).copyWith(color: scheme.onSurface.withValues(alpha: 0.36)),
     prefixIcon: prefixIcon,
     suffixIcon: suffixIcon,
     filled: true,
@@ -51,7 +51,9 @@ class LabeledField extends StatelessWidget {
         Text(
           label.toUpperCase(),
           style: AppTextStyles.mono(10).copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.36),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.36),
             letterSpacing: 1.5,
           ),
         ),
@@ -83,7 +85,9 @@ class PrimaryCtaButton extends StatelessWidget {
         height: 60,
         padding: const EdgeInsets.symmetric(horizontal: 22),
         decoration: BoxDecoration(
-          color: isLoading ? scheme.primary.withValues(alpha: 0.6) : scheme.primary,
+          color: isLoading
+              ? scheme.primary.withValues(alpha: 0.6)
+              : scheme.primary,
           borderRadius: BorderRadius.circular(24),
         ),
         child: Row(
@@ -100,10 +104,10 @@ class PrimaryCtaButton extends StatelessWidget {
                   )
                 : Text(
                     label,
-                    style: AppTextStyles.display(18, context).copyWith(
-                      color: scheme.onPrimary,
-                      height: 1,
-                    ),
+                    style: AppTextStyles.display(
+                      18,
+                      context,
+                    ).copyWith(color: scheme.onPrimary, height: 1),
                   ),
             Container(
               width: 36,

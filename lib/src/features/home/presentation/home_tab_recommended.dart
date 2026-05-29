@@ -23,40 +23,53 @@ class HomeTabRecommended extends ConsumerWidget {
         children: [
           HomeSectionTitle(
             title: 'home.section.live_events'.tr(),
-            subtitle: 'home.section.live_events_count'.tr(namedArgs: {'count': '14'}),
+            subtitle: 'home.section.live_events_count'.tr(
+              namedArgs: {'count': '14'},
+            ),
           ),
           SizedBox(
             height: 200,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 10,
+              ),
               itemCount: 10,
               separatorBuilder: (context, index) => const SizedBox(width: 12),
               itemBuilder: (context, index) => const HomeLiveEvents(),
             ),
           ),
           bannerAsync.whenOrNull(
-            data: (banner) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: CachedNetworkImage(
-                  imageUrl: banner.cover,
-                  width: double.maxFinite,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Skeletonizer(
-                    enabled: true,
-                    child: const SizedBox(
-                      height: 180,
-                      child: ColoredBox(color: Colors.grey),
+                data: (banner) => Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 20,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: CachedNetworkImage(
+                      imageUrl: banner.cover,
+                      width: double.maxFinite,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Skeletonizer(
+                        enabled: true,
+                        child: const SizedBox(
+                          height: 180,
+                          child: ColoredBox(color: Colors.grey),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) =>
+                          const SizedBox.shrink(),
                     ),
                   ),
-                  errorWidget: (context, url, error) => const SizedBox.shrink(),
                 ),
-              ),
-            ),
-          ) ?? const SizedBox.shrink(),
-          HomeSectionTitle(title: 'home.section.anchor_rankings'.tr(), onPressed: () {}),
+              ) ??
+              const SizedBox.shrink(),
+          HomeSectionTitle(
+            title: 'home.section.anchor_rankings'.tr(),
+            onPressed: () {},
+          ),
           SizedBox(
             height: 75,
             child: ListView.separated(
@@ -67,7 +80,10 @@ class HomeTabRecommended extends ConsumerWidget {
               itemBuilder: (context, index) => const AnchorAvatar(),
             ),
           ),
-          HomeSectionTitle(title: 'home.section.anchor_live'.tr(), onPressed: () {}),
+          HomeSectionTitle(
+            title: 'home.section.anchor_live'.tr(),
+            onPressed: () {},
+          ),
           anchorsAsync.when(
             loading: () => HomeAnchorLiveGrid(),
             error: (err, stack) {

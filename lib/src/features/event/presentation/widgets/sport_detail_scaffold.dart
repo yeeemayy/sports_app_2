@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
@@ -92,13 +91,14 @@ abstract class SportDetailScaffoldState<T extends ConsumerStatefulWidget>
             Container(
               color: colors.surface,
               child: TabBar(
-                labelStyle: AppTextStyles.display(13, context).copyWith(
-                  letterSpacing: 0.04 * 13,
-                ),
-                unselectedLabelStyle:
-                    AppTextStyles.display(13, context).copyWith(
-                  letterSpacing: 0.04 * 13,
-                ),
+                labelStyle: AppTextStyles.display(
+                  13,
+                  context,
+                ).copyWith(letterSpacing: 0.04 * 13),
+                unselectedLabelStyle: AppTextStyles.display(
+                  13,
+                  context,
+                ).copyWith(letterSpacing: 0.04 * 13),
                 labelColor: colors.text,
                 unselectedLabelColor: colors.text3,
                 indicatorColor: colors.accent,
@@ -109,9 +109,7 @@ abstract class SportDetailScaffoldState<T extends ConsumerStatefulWidget>
                 tabs: tabs,
               ),
             ),
-            Expanded(
-              child: TabBarView(children: buildTabViews(context)),
-            ),
+            Expanded(child: TabBarView(children: buildTabViews(context))),
           ],
         ),
       ),

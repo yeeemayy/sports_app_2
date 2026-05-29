@@ -4,7 +4,11 @@ import 'package:sports_app/src/core/theme/app_theme.dart';
 
 /// A scrollable list of skeleton-animated placeholder cards.
 class ShimmerLoadingList extends StatelessWidget {
-  const ShimmerLoadingList({super.key, this.itemCount = 8, this.itemHeight = 80});
+  const ShimmerLoadingList({
+    super.key,
+    this.itemCount = 8,
+    this.itemHeight = 80,
+  });
 
   final int itemCount;
   final double itemHeight;

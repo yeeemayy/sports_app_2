@@ -48,12 +48,12 @@ class MatchRealtimeData implements SportRealtimeData {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        statusId,
-        homeScore,
-        homeHtScore,
-        awayScore,
-        awayHtScore,
-        kickoffTimestamp,
-      );
+    id,
+    statusId,
+    homeScore,
+    homeHtScore,
+    awayScore,
+    awayHtScore,
+    kickoffTimestamp,
+  );
 }

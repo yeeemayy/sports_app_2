@@ -18,9 +18,12 @@ class PredictionRepository {
       .collection('userVotes')
       .doc(uid);
 
-  Stream<PredictionTally> tallyStream(String matchId) => _tallyRef(matchId)
-      .snapshots()
-      .map((s) => s.exists ? PredictionTally.fromMap(s.data()!) : const PredictionTally());
+  Stream<PredictionTally> tallyStream(String matchId) =>
+      _tallyRef(matchId).snapshots().map(
+        (s) => s.exists
+            ? PredictionTally.fromMap(s.data()!)
+            : const PredictionTally(),
+      );
 
   Stream<PredictionPick?> userVoteStream(String matchId, String uid) =>
       _userVoteRef(matchId, uid).snapshots().map((s) {
@@ -47,7 +50,9 @@ class PredictionRepository {
       final userSnap = await tx.get(userRef);
       final tallySnap = await tx.get(tallyRef);
 
-      final prevRaw = userSnap.exists ? (userSnap.data()?['pick'] as String?) : null;
+      final prevRaw = userSnap.exists
+          ? (userSnap.data()?['pick'] as String?)
+          : null;
       if (prevRaw != null) return; // already voted — one vote per user
 
       final Map<String, dynamic> tallyUpdates = {

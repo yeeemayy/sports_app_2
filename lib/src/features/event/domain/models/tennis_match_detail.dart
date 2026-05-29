@@ -67,12 +67,18 @@ class TennisMatchDetail {
   /// 1 = home serving, 2 = away serving
   final int? servingSide;
 
-  String get homeName =>
-      SportMatch.teamName({'en_name': homeInfo.enName, 'cn_name': homeInfo.cnName});
-  String get awayName =>
-      SportMatch.teamName({'en_name': awayInfo.enName, 'cn_name': awayInfo.cnName});
-  String get leagueName =>
-      SportMatch.teamName({'en_name': leagueInfo.enName, 'cn_name': leagueInfo.cnName});
+  String get homeName => SportMatch.teamName({
+    'en_name': homeInfo.enName,
+    'cn_name': homeInfo.cnName,
+  });
+  String get awayName => SportMatch.teamName({
+    'en_name': awayInfo.enName,
+    'cn_name': awayInfo.cnName,
+  });
+  String get leagueName => SportMatch.teamName({
+    'en_name': leagueInfo.enName,
+    'cn_name': leagueInfo.cnName,
+  });
 
   static const _liveStatuses = {3, 51, 52, 53, 54, 55};
   bool get isLive => _liveStatuses.contains(statusId);

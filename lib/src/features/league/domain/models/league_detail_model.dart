@@ -66,7 +66,8 @@ class LeagueDetailModel with _$LeagueDetailModel {
     @JsonKey(name: 'cur_round') int? curRound,
     @JsonKey(name: 'round_count') int? roundCount,
     @JsonKey(name: 'cn_name') String? cnName,
-    @JsonKey(name: 'curr_season_details') LeagueSeasonDetails? currSeasonDetails,
+    @JsonKey(name: 'curr_season_details')
+    LeagueSeasonDetails? currSeasonDetails,
     @JsonKey(name: 'categoryDetails') LeagueCategoryDetails? categoryDetails,
   }) = _LeagueDetailModel;
 

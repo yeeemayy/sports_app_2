@@ -69,7 +69,11 @@ GoRouter appRouter(AppRouterRef ref) {
     routes: [
       StatefulShellRoute.indexedStack(
         builder:
-            (BuildContext context, GoRouterState state, StatefulNavigationShell navigationShell) {
+            (
+              BuildContext context,
+              GoRouterState state,
+              StatefulNavigationShell navigationShell,
+            ) {
               return AppWrapper(navigationShell: navigationShell);
             },
         branches: <StatefulShellBranch>[
@@ -77,7 +81,8 @@ GoRouter appRouter(AppRouterRef ref) {
             routes: <RouteBase>[
               GoRoute(
                 path: AppRoutes.home,
-                builder: (BuildContext context, GoRouterState state) => const EventScreen(),
+                builder: (BuildContext context, GoRouterState state) =>
+                    const EventScreen(),
               ),
             ],
           ),
@@ -85,7 +90,8 @@ GoRouter appRouter(AppRouterRef ref) {
             routes: <RouteBase>[
               GoRoute(
                 path: AppRoutes.anchor,
-                builder: (BuildContext context, GoRouterState state) => const AnchorScreen(),
+                builder: (BuildContext context, GoRouterState state) =>
+                    const AnchorScreen(),
                 routes: [
                   GoRoute(
                     path: '/anchor-list',
@@ -96,7 +102,9 @@ GoRouter appRouter(AppRouterRef ref) {
                         path: '/:anchorId',
                         parentNavigatorKey: rootNavigatorKey,
                         builder: (context, state) => AnchorDetailScreen(
-                          anchorId: int.parse(state.pathParameters['anchorId']!),
+                          anchorId: int.parse(
+                            state.pathParameters['anchorId']!,
+                          ),
                         ),
                       ),
                     ],
@@ -109,7 +117,8 @@ GoRouter appRouter(AppRouterRef ref) {
             routes: <RouteBase>[
               GoRoute(
                 path: AppRoutes.news,
-                builder: (BuildContext context, GoRouterState state) => const NewsScreen(),
+                builder: (BuildContext context, GoRouterState state) =>
+                    const NewsScreen(),
               ),
             ],
           ),
@@ -126,7 +135,8 @@ GoRouter appRouter(AppRouterRef ref) {
             routes: <RouteBase>[
               GoRoute(
                 path: AppRoutes.profile,
-                builder: (BuildContext context, GoRouterState state) => const ProfileScreen(),
+                builder: (BuildContext context, GoRouterState state) =>
+                    const ProfileScreen(),
                 routes: [
                   GoRoute(
                     parentNavigatorKey: rootNavigatorKey,
@@ -230,8 +240,9 @@ GoRouter appRouter(AppRouterRef ref) {
       ),
       GoRoute(
         path: AppRoutes.basketballMatchDetail,
-        builder: (context, state) =>
-            BasketballMatchDetailScreen(matchId: state.pathParameters['matchId']!),
+        builder: (context, state) => BasketballMatchDetailScreen(
+          matchId: state.pathParameters['matchId']!,
+        ),
       ),
       GoRoute(
         path: AppRoutes.tennisMatchDetail,
@@ -240,33 +251,39 @@ GoRouter appRouter(AppRouterRef ref) {
       ),
       GoRoute(
         path: AppRoutes.badmintonMatchDetail,
-        builder: (context, state) =>
-            BadmintonMatchDetailScreen(matchId: state.pathParameters['matchId']!),
+        builder: (context, state) => BadmintonMatchDetailScreen(
+          matchId: state.pathParameters['matchId']!,
+        ),
       ),
       GoRoute(
         path: AppRoutes.tableTennisMatchDetail,
-        builder: (context, state) =>
-            TableTennisMatchDetailScreen(matchId: state.pathParameters['matchId']!),
+        builder: (context, state) => TableTennisMatchDetailScreen(
+          matchId: state.pathParameters['matchId']!,
+        ),
       ),
       GoRoute(
         path: AppRoutes.baseballMatchDetail,
-        builder: (context, state) =>
-            BaseballMatchDetailScreen(matchId: state.pathParameters['matchId']!),
+        builder: (context, state) => BaseballMatchDetailScreen(
+          matchId: state.pathParameters['matchId']!,
+        ),
       ),
       GoRoute(
         path: AppRoutes.volleyballMatchDetail,
-        builder: (context, state) =>
-            VolleyballMatchDetailScreen(matchId: state.pathParameters['matchId']!),
+        builder: (context, state) => VolleyballMatchDetailScreen(
+          matchId: state.pathParameters['matchId']!,
+        ),
       ),
       GoRoute(
         path: AppRoutes.iceHockeyMatchDetail,
-        builder: (context, state) =>
-            IceHockeyMatchDetailScreen(matchId: state.pathParameters['matchId']!),
+        builder: (context, state) => IceHockeyMatchDetailScreen(
+          matchId: state.pathParameters['matchId']!,
+        ),
       ),
       GoRoute(
         path: AppRoutes.amFootballMatchDetail,
-        builder: (context, state) =>
-            AmFootballMatchDetailScreen(matchId: state.pathParameters['matchId']!),
+        builder: (context, state) => AmFootballMatchDetailScreen(
+          matchId: state.pathParameters['matchId']!,
+        ),
       ),
       GoRoute(
         path: AppRoutes.cricketMatchDetail,
@@ -275,32 +292,46 @@ GoRouter appRouter(AppRouterRef ref) {
       ),
       GoRoute(
         path: AppRoutes.newsDetail,
-        builder: (context, state) =>
-            NewsDetailScreen(newsId: int.parse(state.pathParameters['newsId']!)),
+        builder: (context, state) => NewsDetailScreen(
+          newsId: int.parse(state.pathParameters['newsId']!),
+        ),
       ),
       GoRoute(
         path: AppRoutes.newsCategoryList,
         builder: (context, state) {
-          final extra = state.extra as ({String title, String keyword});
-          return NewsCategoryScreen(title: extra.title, keyword: extra.keyword);
+          final extra = state.extra;
+          final category = extra is ({String title, String keyword})
+              ? extra
+              : (title: 'news.section.latest', keyword: '');
+          return NewsCategoryScreen(
+            title: category.title,
+            keyword: category.keyword,
+          );
         },
       ),
       GoRoute(
         path: AppRoutes.videoDetail,
         builder: (context, state) => VideoDetailScreen(
           videoId: int.parse(state.pathParameters['videoId']!),
-          currentPage: int.tryParse(state.uri.queryParameters['page'] ?? '') ?? 1,
-          lastPage: int.tryParse(state.uri.queryParameters['lastPage'] ?? '') ?? 1,
+          currentPage:
+              int.tryParse(state.uri.queryParameters['page'] ?? '') ?? 1,
+          lastPage:
+              int.tryParse(state.uri.queryParameters['lastPage'] ?? '') ?? 1,
         ),
       ),
       GoRoute(
         path: AppRoutes.login,
         builder: (context, state) {
           final encoded = state.uri.queryParameters['returnPath'];
-          return LoginScreen(returnPath: encoded != null ? Uri.decodeComponent(encoded) : null);
+          return LoginScreen(
+            returnPath: encoded != null ? Uri.decodeComponent(encoded) : null,
+          );
         },
       ),
-      GoRoute(path: AppRoutes.register, builder: (context, state) => const RegisterScreen()),
+      GoRoute(
+        path: AppRoutes.register,
+        builder: (context, state) => const RegisterScreen(),
+      ),
       GoRoute(
         path: AppRoutes.forgotPassword,
         builder: (context, state) => const ForgotPasswordScreen(),

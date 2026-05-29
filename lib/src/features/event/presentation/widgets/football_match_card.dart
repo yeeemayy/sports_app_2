@@ -38,16 +38,24 @@ class FootballMatchCard extends ConsumerWidget {
             awayScore: rt.awayScore.toString(),
             htHomeScore: rt.homeHtScore.toString(),
             htAwayScore: rt.awayHtScore.toString(),
-            counterTiming: rt.kickoffTimestamp != 0 ? rt.kickoffTimestamp : match.counterTiming,
+            counterTiming: rt.kickoffTimestamp != 0
+                ? rt.kickoffTimestamp
+                : match.counterTiming,
           );
 
     final isNotStarted = const {0, 1, 13}.contains(effective.statusId);
     final isLive = const {2, 3, 4, 5, 6, 7}.contains(effective.statusId);
-    final hasHtScore = effective.htHomeScore != null && effective.htAwayScore != null;
-    final scoreColor = isLive ? context.appColors.accent : context.appColors.text;
+    final hasHtScore =
+        effective.htHomeScore != null && effective.htAwayScore != null;
+    final scoreColor = isLive
+        ? context.appColors.accent
+        : context.appColors.text;
 
     return MatchCardShell(
-      onTap: () => context.push(AppRoutes.footballMatchDetailPath(match.id), extra: match),
+      onTap: () => context.push(
+        AppRoutes.footballMatchDetailPath(match.id),
+        extra: match,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -58,7 +66,12 @@ class FootballMatchCard extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           if (!isNotStarted && effective.statusLabel.isNotEmpty) ...[
-            Center(child: SportStatusBadge(label: effective.statusLabel, isLive: isLive)),
+            Center(
+              child: SportStatusBadge(
+                label: effective.statusLabel,
+                isLive: isLive,
+              ),
+            ),
           ],
           // Face-off row
           Row(
@@ -79,7 +92,10 @@ class FootballMatchCard extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: Text(
                   isNotStarted ? '-' : effective.homeScore,
-                  style: AppTextStyles.display(30, context).copyWith(color: scoreColor),
+                  style: AppTextStyles.display(
+                    30,
+                    context,
+                  ).copyWith(color: scoreColor),
                 ),
               ),
               // Center separator
@@ -98,7 +114,10 @@ class FootballMatchCard extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: Text(
                   isNotStarted ? '-' : effective.awayScore,
-                  style: AppTextStyles.display(30, context).copyWith(color: scoreColor),
+                  style: AppTextStyles.display(
+                    30,
+                    context,
+                  ).copyWith(color: scoreColor),
                 ),
               ),
               // Away team
@@ -122,7 +141,9 @@ class FootballMatchCard extends ConsumerWidget {
             Center(
               child: Text(
                 '${effective.htHomeScore}-${effective.htAwayScore}  ${'event.football.ht'.tr()}',
-                style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+                style: AppTextStyles.mono(
+                  9,
+                ).copyWith(color: context.appColors.text3),
               ),
             ),
           ],
@@ -157,7 +178,9 @@ class _TeamColumn extends StatelessWidget {
         const SizedBox(height: 5),
         Text(
           name,
-          style: AppTextStyles.mono(11).copyWith(color: context.appColors.text2),
+          style: AppTextStyles.mono(
+            11,
+          ).copyWith(color: context.appColors.text2),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,
@@ -167,8 +190,10 @@ class _TeamColumn extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (yellowCards > 0) _CardDot(count: yellowCards, color: context.appColors.live),
-              if (redCards > 0) _CardDot(count: redCards, color: context.appColors.danger),
+              if (yellowCards > 0)
+                _CardDot(count: yellowCards, color: context.appColors.live),
+              if (redCards > 0)
+                _CardDot(count: redCards, color: context.appColors.danger),
             ],
           ),
         ],
@@ -187,10 +212,17 @@ class _CardDot extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(left: 3),
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3)),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(3),
+      ),
       child: Text(
         '$count',
-        style: TextStyle(fontSize: 10, color: context.appColors.ink, height: 1.2),
+        style: TextStyle(
+          fontSize: 10,
+          color: context.appColors.ink,
+          height: 1.2,
+        ),
       ),
     );
   }

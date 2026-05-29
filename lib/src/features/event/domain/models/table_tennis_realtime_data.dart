@@ -70,5 +70,6 @@ class TableTennisRealtimeData implements SportRealtimeData {
           awayTotal == other.awayTotal;
 
   @override
-  int get hashCode => Object.hash(id, statusId, servingSide, homeTotal, awayTotal);
+  int get hashCode =>
+      Object.hash(id, statusId, servingSide, homeTotal, awayTotal);
 }

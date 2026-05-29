@@ -12,18 +12,23 @@ typedef _SectionKey = ({String keywords, String locale});
 
 final newsSectionPreviewProvider = FutureProvider.autoDispose
     .family<List<NewsArticle>, _SectionKey>((ref, key) async {
-  if (key.keywords.isEmpty) {
-    final response = await ref
-        .read(newsRepositoryProvider.notifier)
-        .getNewsList(locale: key.locale, page: 1);
-    return response.list.take(4).toList();
-  } else {
-    final response = await ref
-        .read(newsRepositoryProvider.notifier)
-        .searchNews(locale: key.locale, keywords: key.keywords, page: 1, perPage: 6);
-    return response.data;
-  }
-});
+      if (key.keywords.isEmpty) {
+        final response = await ref
+            .read(newsRepositoryProvider.notifier)
+            .getNewsList(locale: key.locale, page: 1);
+        return response.list.take(4).toList();
+      } else {
+        final response = await ref
+            .read(newsRepositoryProvider.notifier)
+            .searchNews(
+              locale: key.locale,
+              keywords: key.keywords,
+              page: 1,
+              perPage: 6,
+            );
+        return response.data;
+      }
+    });
 
 // ---------------------------------------------------------------------------
 // Category full paginated — used by NewsCategoryScreen
@@ -31,7 +36,8 @@ final newsSectionPreviewProvider = FutureProvider.autoDispose
 // ---------------------------------------------------------------------------
 
 class NewsCategoryNotifier extends StateNotifier<NewsPaginatedState> {
-  NewsCategoryNotifier(this._ref, this._keyword) : super(const NewsPaginatedState());
+  NewsCategoryNotifier(this._ref, this._keyword)
+    : super(const NewsPaginatedState());
 
   final Ref _ref;
   final String _keyword;
@@ -88,5 +94,5 @@ class NewsCategoryNotifier extends StateNotifier<NewsPaginatedState> {
 
 final newsCategoryPaginatedProvider = StateNotifierProvider.autoDispose
     .family<NewsCategoryNotifier, NewsPaginatedState, String>(
-  (ref, keyword) => NewsCategoryNotifier(ref, keyword),
-);
+      (ref, keyword) => NewsCategoryNotifier(ref, keyword),
+    );

@@ -27,7 +27,11 @@ class FootballTeamDetailInfo {
 
 @immutable
 class FootballLeagueDetailInfo {
-  const FootballLeagueDetailInfo({required this.enName, required this.cnName, required this.logo});
+  const FootballLeagueDetailInfo({
+    required this.enName,
+    required this.cnName,
+    required this.logo,
+  });
 
   final String enName;
   final String cnName;
@@ -114,14 +118,20 @@ class FootballMatchDetail {
   String get homeScore => homeInfo.score.toString();
   String get awayScore => awayInfo.score.toString();
 
-  String get homeName =>
-      SportMatch.teamName({'en_name': homeInfo.enName, 'cn_name': homeInfo.cnName});
+  String get homeName => SportMatch.teamName({
+    'en_name': homeInfo.enName,
+    'cn_name': homeInfo.cnName,
+  });
 
-  String get awayName =>
-      SportMatch.teamName({'en_name': awayInfo.enName, 'cn_name': awayInfo.cnName});
+  String get awayName => SportMatch.teamName({
+    'en_name': awayInfo.enName,
+    'cn_name': awayInfo.cnName,
+  });
 
-  String get leagueName =>
-      SportMatch.teamName({'en_name': leagueInfo.enName, 'cn_name': leagueInfo.cnName});
+  String get leagueName => SportMatch.teamName({
+    'en_name': leagueInfo.enName,
+    'cn_name': leagueInfo.cnName,
+  });
 
   String statusLabel({int? kickoffTimestamp}) {
     switch (statusId) {
@@ -183,7 +193,9 @@ class FootballMatchDetail {
           .map((e) => (e as num).toInt())
           .toList(),
       environment: d['environment'] is Map
-          ? FootballMatchEnvironment.fromJson((d['environment'] as Map).cast<String, dynamic>())
+          ? FootballMatchEnvironment.fromJson(
+              (d['environment'] as Map).cast<String, dynamic>(),
+            )
           : null,
       counterTiming: d['counter_timing'] as int?,
       homeInfo: _parseTeamInfo(homeInfoJson, isHome: true),
@@ -197,7 +209,10 @@ class FootballMatchDetail {
   }
 }
 
-FootballTeamDetailInfo _parseTeamInfo(Map<String, dynamic> json, {required bool isHome}) {
+FootballTeamDetailInfo _parseTeamInfo(
+  Map<String, dynamic> json, {
+  required bool isHome,
+}) {
   return FootballTeamDetailInfo(
     enName: json['en_name'] as String? ?? '',
     cnName: json['cn_name'] as String? ?? '',

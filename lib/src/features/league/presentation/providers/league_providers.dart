@@ -34,57 +34,49 @@ Future<List<CountryModel>> footballCountries(FootballCountriesRef ref) =>
 Future<List<CountryLeagueItem>> footballLeaguesByCountry(
   FootballLeaguesByCountryRef ref, {
   required String countryId,
-}) =>
-    ref.read(leagueRepositoryProvider).getFootballLeaguesByCountry(countryId);
+}) => ref.read(leagueRepositoryProvider).getFootballLeaguesByCountry(countryId);
 
 @riverpod
 Future<LeagueDetailModel> footballLeagueDetail(
   FootballLeagueDetailRef ref, {
   required String leagueId,
-}) =>
-    ref.read(leagueRepositoryProvider).getFootballLeagueDetail(leagueId);
+}) => ref.read(leagueRepositoryProvider).getFootballLeagueDetail(leagueId);
 
 @riverpod
 Future<List<FootballStandingsGroup>> footballStandings(
   FootballStandingsRef ref, {
   required String leagueId,
-}) =>
-    ref.read(leagueRepositoryProvider).getFootballStandings(leagueId);
+}) => ref.read(leagueRepositoryProvider).getFootballStandings(leagueId);
 
 @riverpod
 Future<List<FootballPlayerStat>> footballPlayerStats(
   FootballPlayerStatsRef ref, {
   required String leagueId,
-}) =>
-    ref.read(leagueRepositoryProvider).getFootballPlayerStats(leagueId);
+}) => ref.read(leagueRepositoryProvider).getFootballPlayerStats(leagueId);
 
 @riverpod
 Future<List<FootballTeamStat>> footballTeamStats(
   FootballTeamStatsRef ref, {
   required String leagueId,
-}) =>
-    ref.read(leagueRepositoryProvider).getFootballTeamStats(leagueId);
+}) => ref.read(leagueRepositoryProvider).getFootballTeamStats(leagueId);
 
 @riverpod
 Future<TeamDetailModel> footballTeamDetail(
   FootballTeamDetailRef ref, {
   required String teamId,
-}) =>
-    ref.read(leagueRepositoryProvider).getFootballTeamDetail(teamId);
+}) => ref.read(leagueRepositoryProvider).getFootballTeamDetail(teamId);
 
 @riverpod
 Future<List<SquadPlayer>> footballSquad(
   FootballSquadRef ref, {
   required String teamId,
-}) =>
-    ref.read(leagueRepositoryProvider).getFootballSquad(teamId);
+}) => ref.read(leagueRepositoryProvider).getFootballSquad(teamId);
 
 @riverpod
 Future<FootballPlayerDetail> footballPlayerDetail(
   FootballPlayerDetailRef ref, {
   required String playerId,
-}) =>
-    ref.read(leagueRepositoryProvider).getFootballPlayerDetail(playerId);
+}) => ref.read(leagueRepositoryProvider).getFootballPlayerDetail(playerId);
 
 // ─── Basketball ────────────────────────────────────────────────────────────
 
@@ -107,43 +99,37 @@ Future<List<CountryLeagueItem>> basketballLeaguesByCountry(
 Future<LeagueDetailModel> basketballLeagueDetail(
   BasketballLeagueDetailRef ref, {
   required String leagueId,
-}) =>
-    ref.read(leagueRepositoryProvider).getBasketballLeagueDetail(leagueId);
+}) => ref.read(leagueRepositoryProvider).getBasketballLeagueDetail(leagueId);
 
 @riverpod
 Future<Map<String, BasketballConferenceGroup>> basketballStandings(
   BasketballStandingsRef ref, {
   required String leagueId,
-}) =>
-    ref.read(leagueRepositoryProvider).getBasketballStandings(leagueId);
+}) => ref.read(leagueRepositoryProvider).getBasketballStandings(leagueId);
 
 @riverpod
 Future<List<BasketballPlayerStat>> basketballPlayerStats(
   BasketballPlayerStatsRef ref, {
   required String leagueId,
-}) =>
-    ref.read(leagueRepositoryProvider).getBasketballPlayerStats(leagueId);
+}) => ref.read(leagueRepositoryProvider).getBasketballPlayerStats(leagueId);
 
 @riverpod
 Future<List<BasketballTeamStat>> basketballTeamStats(
   BasketballTeamStatsRef ref, {
   required String leagueId,
-}) =>
-    ref.read(leagueRepositoryProvider).getBasketballTeamStats(leagueId);
+}) => ref.read(leagueRepositoryProvider).getBasketballTeamStats(leagueId);
 
 @riverpod
 Future<TeamDetailModel> basketballTeamDetail(
   BasketballTeamDetailRef ref, {
   required String teamId,
-}) =>
-    ref.read(leagueRepositoryProvider).getBasketballTeamDetail(teamId);
+}) => ref.read(leagueRepositoryProvider).getBasketballTeamDetail(teamId);
 
 @riverpod
 Future<List<SquadPlayer>> basketballSquad(
   BasketballSquadRef ref, {
   required String teamId,
-}) =>
-    ref.read(leagueRepositoryProvider).getBasketballSquad(teamId);
+}) => ref.read(leagueRepositoryProvider).getBasketballSquad(teamId);
 
 // ─── Generic (Tennis, Cricket, Baseball, Volleyball, Badminton,
 //     Table Tennis, Ice Hockey, American Football) ────────────────────────
@@ -152,23 +138,20 @@ Future<List<SquadPlayer>> basketballSquad(
 Future<List<LeagueItem>> sportHotLeagues(
   SportHotLeaguesRef ref, {
   required LeagueSport sport,
-}) =>
-    ref.read(leagueRepositoryProvider).getHotLeagues(sport);
+}) => ref.read(leagueRepositoryProvider).getHotLeagues(sport);
 
 @riverpod
 Future<List<CountryModel>> sportBrowseItems(
   SportBrowseItemsRef ref, {
   required LeagueSport sport,
-}) =>
-    ref.read(leagueRepositoryProvider).getBrowseItems(sport);
+}) => ref.read(leagueRepositoryProvider).getBrowseItems(sport);
 
 @riverpod
 Future<List<CountryLeagueItem>> sportLeaguesByBrowseId(
   SportLeaguesByBrowseIdRef ref, {
   required LeagueSport sport,
   required String id,
-}) =>
-    ref.read(leagueRepositoryProvider).getLeaguesByBrowseId(sport, id);
+}) => ref.read(leagueRepositoryProvider).getLeaguesByBrowseId(sport, id);
 
 @riverpod
 Future<LeagueDetailModel> sportLeagueDetail(
@@ -183,23 +166,20 @@ Future<Map<String, GenericStandingsGroup>> genericStandings(
   GenericStandingsRef ref, {
   required LeagueSport sport,
   required String leagueId,
-}) =>
-    ref.read(leagueRepositoryProvider).getGenericStandings(sport, leagueId);
+}) => ref.read(leagueRepositoryProvider).getGenericStandings(sport, leagueId);
 
 @riverpod
 Future<SimpleTeamDetail> genericTeamDetail(
   GenericTeamDetailRef ref, {
   required LeagueSport sport,
   required String teamId,
-}) =>
-    ref.read(leagueRepositoryProvider).getGenericTeamDetail(sport, teamId);
+}) => ref.read(leagueRepositoryProvider).getGenericTeamDetail(sport, teamId);
 
 @riverpod
 Future<List<AmFootballLineupPlayer>> amFootballLineup(
   AmFootballLineupRef ref, {
   required String teamId,
-}) =>
-    ref.read(leagueRepositoryProvider).getAmFootballLineup(teamId);
+}) => ref.read(leagueRepositoryProvider).getAmFootballLineup(teamId);
 
 @riverpod
 Future<List<LeagueItem>> tennisParentLeagues(TennisParentLeaguesRef ref) =>

@@ -1,3 +1,5 @@
+import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
+
 enum LeagueSport {
   football,
   basketball,
@@ -90,6 +92,19 @@ enum LeagueSport {
     LeagueSport.football => true,
     LeagueSport.basketball => true,
     _ => false,
+  };
+
+  static LeagueSport fromSportType(SportType s) => switch (s) {
+    SportType.football => LeagueSport.football,
+    SportType.basketball => LeagueSport.basketball,
+    SportType.tennis => LeagueSport.tennis,
+    SportType.cricket => LeagueSport.cricket,
+    SportType.baseball => LeagueSport.baseball,
+    SportType.volleyball => LeagueSport.volleyball,
+    SportType.badminton => LeagueSport.badminton,
+    SportType.tableTennis => LeagueSport.tableTennis,
+    SportType.iceHockey => LeagueSport.iceHockey,
+    SportType.amFootball => LeagueSport.amFootball,
   };
 
   static LeagueSport fromString(String value) => switch (value) {

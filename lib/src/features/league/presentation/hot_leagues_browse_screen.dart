@@ -60,8 +60,10 @@ class _HotLeaguesBrowseScreenState
                 children: [
                   IconButton(
                     onPressed: () => context.pop(),
-                    icon: Icon(Icons.arrow_circle_left_outlined,
-                        color: context.appColors.text),
+                    icon: Icon(
+                      Icons.arrow_circle_left_outlined,
+                      color: context.appColors.text,
+                    ),
                     iconSize: 24,
                     padding: EdgeInsets.zero,
                   ),
@@ -69,8 +71,10 @@ class _HotLeaguesBrowseScreenState
                   Expanded(
                     child: Text(
                       'league.hot'.tr(),
-                      style: AppTextStyles.display(22, context)
-                          .copyWith(color: context.appColors.text, height: 1),
+                      style: AppTextStyles.display(
+                        22,
+                        context,
+                      ).copyWith(color: context.appColors.text, height: 1),
                     ),
                   ),
                 ],
@@ -90,29 +94,32 @@ class _HotLeaguesBrowseScreenState
               child: isLoading && all.isEmpty
                   ? const Center(child: CircularProgressIndicator())
                   : filtered.isEmpty
-                      ? Center(
-                          child: Text(
-                            'league.empty'.tr(),
-                            style: AppTextStyles.body(14).copyWith(
-                                color: context.appColors.text3),
-                          ),
-                        )
-                      : GridView.builder(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 4),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
+                  ? Center(
+                      child: Text(
+                        'league.empty'.tr(),
+                        style: AppTextStyles.body(
+                          14,
+                        ).copyWith(color: context.appColors.text3),
+                      ),
+                    )
+                  : GridView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
                             mainAxisSpacing: 12,
                             crossAxisSpacing: 12,
                             childAspectRatio: 1.3,
                           ),
-                          itemCount: filtered.length,
-                          itemBuilder: (context, i) {
-                            final (league, sport) = filtered[i];
-                            return _LeagueCard(league: league, sport: sport);
-                          },
-                        ),
+                      itemCount: filtered.length,
+                      itemBuilder: (context, i) {
+                        final (league, sport) = filtered[i];
+                        return _LeagueCard(league: league, sport: sport);
+                      },
+                    ),
             ),
           ],
         ),
@@ -172,9 +179,7 @@ class _FilterChip extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
-          color: active
-              ? context.appColors.accent
-              : context.appColors.surface2,
+          color: active ? context.appColors.accent : context.appColors.surface2,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
@@ -217,7 +222,8 @@ class _LeagueCardState extends State<_LeagueCard> {
         NetworkImage(widget.league.logo),
         maximumColorCount: 8,
       );
-      final picked = generator.darkVibrantColor ??
+      final picked =
+          generator.darkVibrantColor ??
           generator.vibrantColor ??
           generator.darkMutedColor ??
           generator.dominantColor;
@@ -231,9 +237,7 @@ class _LeagueCardState extends State<_LeagueCard> {
 
   Color get _effectiveEnd {
     final hsl = HSLColor.fromColor(_effectiveBase);
-    return hsl
-        .withLightness((hsl.lightness + 0.14).clamp(0.0, 1.0))
-        .toColor();
+    return hsl.withLightness((hsl.lightness + 0.14).clamp(0.0, 1.0)).toColor();
   }
 
   @override
@@ -278,7 +282,8 @@ class _LeagueCardState extends State<_LeagueCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    height: 50, width: 50,
+                    height: 50,
+                    width: 50,
                     alignment: Alignment.center,
                     decoration: const BoxDecoration(
                       color: Colors.white,
@@ -296,19 +301,24 @@ class _LeagueCardState extends State<_LeagueCard> {
                           shape: BoxShape.circle,
                           color: Colors.white.withValues(alpha: 0.15),
                         ),
-                        child: const Icon(Icons.emoji_events_outlined,
-                            color: Colors.white54, size: 20),
+                        child: const Icon(
+                          Icons.emoji_events_outlined,
+                          color: Colors.white54,
+                          size: 20,
+                        ),
                       ),
                     ),
                   ),
                   const Spacer(),
                   Text(
                     context.localizedName(
-                        en: widget.league.nameEn, cn: widget.league.nameCn),
-                    style: AppTextStyles.display(13, context).copyWith(
-                      color: Colors.white,
-                      height: 1.2,
+                      en: widget.league.nameEn,
+                      cn: widget.league.nameCn,
                     ),
+                    style: AppTextStyles.display(
+                      13,
+                      context,
+                    ).copyWith(color: Colors.white, height: 1.2),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),

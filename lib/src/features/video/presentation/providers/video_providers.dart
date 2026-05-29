@@ -11,20 +11,14 @@ Future<VideoListResponse> videoList(
   required String locale,
   int page = 1,
 }) {
-  return ref.watch(videoRepositoryProvider.notifier).getVideos(
-        locale: locale,
-        page: page,
-      );
+  return ref
+      .watch(videoRepositoryProvider.notifier)
+      .getVideos(locale: locale, page: page);
 }
 
 @riverpod
-Future<VideoDetail> videoDetail(
-  VideoDetailRef ref,
-  int id,
-  String locale,
-) {
-  return ref.watch(videoRepositoryProvider.notifier).getVideoDetail(
-        locale: locale,
-        id: id,
-      );
+Future<VideoDetail> videoDetail(VideoDetailRef ref, int id, String locale) {
+  return ref
+      .watch(videoRepositoryProvider.notifier)
+      .getVideoDetail(locale: locale, id: id);
 }

@@ -84,8 +84,10 @@ class _SearchLeaguesScreenState extends ConsumerState<SearchLeaguesScreen> {
                 children: [
                   IconButton(
                     onPressed: () => context.pop(),
-                    icon: Icon(Icons.arrow_circle_left_outlined,
-                        color: context.appColors.text),
+                    icon: Icon(
+                      Icons.arrow_circle_left_outlined,
+                      color: context.appColors.text,
+                    ),
                     iconSize: 24,
                     padding: EdgeInsets.zero,
                   ),
@@ -101,25 +103,35 @@ class _SearchLeaguesScreenState extends ConsumerState<SearchLeaguesScreen> {
                         controller: _controller,
                         autofocus: true,
                         onChanged: (v) => setState(() => _query = v),
-                        style: AppTextStyles.body(14)
-                            .copyWith(color: context.appColors.text),
+                        style: AppTextStyles.body(
+                          14,
+                        ).copyWith(color: context.appColors.text),
                         decoration: InputDecoration(
                           border: InputBorder.none,
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 11,
+                          ),
                           hintText: 'league.search_hint'.tr(),
-                          hintStyle: AppTextStyles.body(14)
-                              .copyWith(color: context.appColors.text3),
-                          prefixIcon: Icon(Icons.search_rounded,
-                              size: 18, color: context.appColors.text3),
+                          hintStyle: AppTextStyles.body(
+                            14,
+                          ).copyWith(color: context.appColors.text3),
+                          prefixIcon: Icon(
+                            Icons.search_rounded,
+                            size: 18,
+                            color: context.appColors.text3,
+                          ),
                           suffixIcon: _query.isNotEmpty
                               ? GestureDetector(
                                   onTap: () {
                                     _controller.clear();
                                     setState(() => _query = '');
                                   },
-                                  child: Icon(Icons.close_rounded,
-                                      size: 16, color: context.appColors.text3),
+                                  child: Icon(
+                                    Icons.close_rounded,
+                                    size: 16,
+                                    color: context.appColors.text3,
+                                  ),
                                 )
                               : null,
                         ),
@@ -146,21 +158,25 @@ class _SearchLeaguesScreenState extends ConsumerState<SearchLeaguesScreen> {
                         _query.isEmpty
                             ? 'league.search_hint'.tr()
                             : 'league.empty'.tr(),
-                        style: AppTextStyles.body(14)
-                            .copyWith(color: context.appColors.text3),
+                        style: AppTextStyles.body(
+                          14,
+                        ).copyWith(color: context.appColors.text3),
                       ),
                     )
                   : ListView(
                       children: [
                         if (matchedLeagues.isNotEmpty) ...[
                           _SectionHeader(label: 'league.tabs.standings'.tr()),
-                          ...matchedLeagues.map((t) =>
-                              _LeagueResultRow(league: t.$1, sport: t.$2)),
+                          ...matchedLeagues.map(
+                            (t) => _LeagueResultRow(league: t.$1, sport: t.$2),
+                          ),
                         ],
                         if (matchedCountries.isNotEmpty) ...[
                           _SectionHeader(label: 'league.by_country'.tr()),
-                          ...matchedCountries.map((t) =>
-                              _CountryResultRow(country: t.$1, sport: t.$2)),
+                          ...matchedCountries.map(
+                            (t) =>
+                                _CountryResultRow(country: t.$1, sport: t.$2),
+                          ),
                         ],
                       ],
                     ),
@@ -210,8 +226,11 @@ class _TypeFilterBar extends StatelessWidget {
 }
 
 class _TypeChip extends StatelessWidget {
-  const _TypeChip(
-      {required this.label, required this.active, required this.onTap});
+  const _TypeChip({
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
   final String label;
   final bool active;
   final VoidCallback onTap;
@@ -224,9 +243,7 @@ class _TypeChip extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
-          color: active
-              ? context.appColors.accent
-              : context.appColors.surface2,
+          color: active ? context.appColors.accent : context.appColors.surface2,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
@@ -253,10 +270,9 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(22, 16, 22, 6),
       child: Text(
         label,
-        style: AppTextStyles.mono(10).copyWith(
-          color: context.appColors.text3,
-          letterSpacing: 10 * 0.14,
-        ),
+        style: AppTextStyles.mono(
+          10,
+        ).copyWith(color: context.appColors.text3, letterSpacing: 10 * 0.14),
       ),
     );
   }
@@ -277,12 +293,10 @@ class _LeagueResultRow extends StatelessWidget {
         extra: league,
       ),
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
         decoration: BoxDecoration(
           border: Border(
-            bottom:
-                BorderSide(color: context.appColors.line, width: 0.5),
+            bottom: BorderSide(color: context.appColors.line, width: 0.5),
           ),
         ),
         child: Row(
@@ -300,8 +314,11 @@ class _LeagueResultRow extends StatelessWidget {
                     shape: BoxShape.circle,
                     color: context.appColors.surface2,
                   ),
-                  child: Icon(Icons.emoji_events_outlined,
-                      size: 18, color: context.appColors.text3),
+                  child: Icon(
+                    Icons.emoji_events_outlined,
+                    size: 18,
+                    color: context.appColors.text3,
+                  ),
                 ),
               ),
             ),
@@ -312,23 +329,25 @@ class _LeagueResultRow extends StatelessWidget {
                 children: [
                   Text(
                     context.localizedName(en: league.nameEn, cn: league.nameCn),
-                    style: AppTextStyles.display(14, context)
-                        .copyWith(color: context.appColors.text, height: 1.1),
+                    style: AppTextStyles.display(
+                      14,
+                      context,
+                    ).copyWith(color: context.appColors.text, height: 1.1),
                   ),
                   if (league.nameEnShort != null) ...[
                     const SizedBox(height: 2),
                     Text(
                       league.nameEnShort!,
-                      style: AppTextStyles.mono(9).copyWith(
-                          color: context.appColors.text3),
+                      style: AppTextStyles.mono(
+                        9,
+                      ).copyWith(color: context.appColors.text3),
                     ),
                   ],
                 ],
               ),
             ),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
                 color: context.appColors.surface2,
                 borderRadius: BorderRadius.circular(6),
@@ -361,12 +380,10 @@ class _CountryResultRow extends StatelessWidget {
         extra: country,
       ),
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
         decoration: BoxDecoration(
           border: Border(
-            bottom:
-                BorderSide(color: context.appColors.line, width: 0.5),
+            bottom: BorderSide(color: context.appColors.line, width: 0.5),
           ),
         ),
         child: Row(
@@ -384,8 +401,11 @@ class _CountryResultRow extends StatelessWidget {
                     shape: BoxShape.circle,
                     color: context.appColors.surface2,
                   ),
-                  child: Icon(Icons.flag_outlined,
-                      size: 18, color: context.appColors.text3),
+                  child: Icon(
+                    Icons.flag_outlined,
+                    size: 18,
+                    color: context.appColors.text3,
+                  ),
                 ),
               ),
             ),
@@ -393,12 +413,17 @@ class _CountryResultRow extends StatelessWidget {
             Expanded(
               child: Text(
                 context.localizedName(en: country.name, cn: country.cnName),
-                style: AppTextStyles.display(14, context)
-                    .copyWith(color: context.appColors.text, height: 1.1),
+                style: AppTextStyles.display(
+                  14,
+                  context,
+                ).copyWith(color: context.appColors.text, height: 1.1),
               ),
             ),
-            Icon(Icons.chevron_right_rounded,
-                size: 16, color: context.appColors.text3),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 16,
+              color: context.appColors.text3,
+            ),
           ],
         ),
       ),

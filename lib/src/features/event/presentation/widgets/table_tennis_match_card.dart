@@ -33,12 +33,17 @@ class TableTennisMatchCard extends ConsumerWidget {
     );
 
     final effectiveStatusId = rt?.statusId ?? match.statusId;
-    final effectiveHomeSets = rt?.homeSets ?? extractSetScores(match.scores, 0, maxSets: 7);
-    final effectiveAwaySets = rt?.awaySets ?? extractSetScores(match.scores, 1, maxSets: 7);
+    final effectiveHomeSets =
+        rt?.homeSets ?? extractSetScores(match.scores, 0, maxSets: 7);
+    final effectiveAwaySets =
+        rt?.awaySets ?? extractSetScores(match.scores, 1, maxSets: 7);
     final effectiveHomeTotal = rt?.homeTotal ?? int.tryParse(match.homeScore);
     final effectiveAwayTotal = rt?.awayTotal ?? int.tryParse(match.awayScore);
 
-    final statusLabel = tableTennisStatusLabel(effectiveStatusId, match.statusDescription);
+    final statusLabel = tableTennisStatusLabel(
+      effectiveStatusId,
+      match.statusDescription,
+    );
     final isLive = _liveStatuses.contains(effectiveStatusId);
     final isNotStarted = effectiveStatusId == 1;
     final activeSetIndex = isLive && effectiveHomeSets.isNotEmpty
@@ -119,7 +124,9 @@ class _InlineSetRow extends StatelessWidget {
         Expanded(
           child: Text(
             name,
-            style: AppTextStyles.mono(11).copyWith(color: context.appColors.text),
+            style: AppTextStyles.mono(
+              11,
+            ).copyWith(color: context.appColors.text),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -132,8 +139,14 @@ class _InlineSetRow extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: List.generate(sets.length, (i) {
               final isActive = i == activeSetIndex;
-              final won = sets[i] > (i < opponentSets.length ? opponentSets[i] : 0);
-              return _SmallSetBox(score: sets[i], isActive: isActive, isWon: won, isLive: isLive);
+              final won =
+                  sets[i] > (i < opponentSets.length ? opponentSets[i] : 0);
+              return _SmallSetBox(
+                score: sets[i],
+                isActive: isActive,
+                isWon: won,
+                isLive: isLive,
+              );
             }),
           ),
         ),
@@ -144,10 +157,9 @@ class _InlineSetRow extends StatelessWidget {
           child: Text(
             total != null ? '$total' : '-',
             textAlign: TextAlign.center,
-            style: AppTextStyles.display(
-              18,
-              context,
-            ).copyWith(color: isLive ? context.appColors.accent : context.appColors.text),
+            style: AppTextStyles.display(18, context).copyWith(
+              color: isLive ? context.appColors.accent : context.appColors.text,
+            ),
           ),
         ),
       ],

@@ -52,13 +52,20 @@ Future<void> showCustomStatusDialog({
                 Align(
                   alignment: Alignment.centerRight,
                   child: IconButton(
-                    visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
+                    visualDensity: const VisualDensity(
+                      horizontal: -4,
+                      vertical: -4,
+                    ),
                     constraints: const BoxConstraints(),
                     padding: EdgeInsets.zero,
                     onPressed: onCloseSameWithPrimaryButton
                         ? onButtonPressed
                         : () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close, size: 24, color: Color(0xFF9E9E9E)),
+                    icon: const Icon(
+                      Icons.close,
+                      size: 24,
+                      color: Color(0xFF9E9E9E),
+                    ),
                   ),
                 ),
 
@@ -103,7 +110,10 @@ Future<void> showCustomStatusDialog({
                     Text(
                       description ?? '',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 16, color: Color(0xFF757575)),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Color(0xFF757575),
+                      ),
                     ),
 
               const SizedBox(height: 32),
@@ -112,7 +122,8 @@ Future<void> showCustomStatusDialog({
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: buttonBackgroundColor ?? context.appColors.accent,
+                    backgroundColor:
+                        buttonBackgroundColor ?? context.appColors.accent,
                     foregroundColor: Colors.white,
                     minimumSize: const Size(0, 48),
                     shape: RoundedRectangleBorder(
@@ -122,7 +133,10 @@ Future<void> showCustomStatusDialog({
                   onPressed: onButtonPressed,
                   child: Text(
                     buttonText,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -139,9 +153,10 @@ Future<void> showCustomStatusDialog({
     },
     transitionBuilder: (context, animation, secondaryAnimation, child) {
       return ScaleTransition(
-        scale: Tween<double>(begin: 0.0, end: 1.0).animate(
-          CurvedAnimation(parent: animation, curve: Curves.elasticOut),
-        ),
+        scale: Tween<double>(
+          begin: 0.0,
+          end: 1.0,
+        ).animate(CurvedAnimation(parent: animation, curve: Curves.elasticOut)),
         child: child,
       );
     },

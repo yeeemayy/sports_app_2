@@ -54,9 +54,7 @@ class _LeagueDetailHeaderState extends State<LeagueDetailHeader>
     final apiC2 = _parseHex(widget.detail.secondaryColor);
 
     // Prefer API-supplied colors; fall back to palette → seeded → surface.
-    final c1 = apiC1 ??
-        logoColor ??
-        seededColorFromId(widget.detail.id);
+    final c1 = apiC1 ?? logoColor ?? seededColorFromId(widget.detail.id);
     final c2 = apiC2 ?? lightenColor(c1);
     final onHero = ThemeData.estimateBrightnessForColor(c1) == Brightness.dark
         ? Colors.white
@@ -94,12 +92,18 @@ class _LeagueDetailHeaderState extends State<LeagueDetailHeader>
             left: 16,
             child: IconButton(
               onPressed: widget.onBack,
-              icon: const Icon(Icons.arrow_circle_left_outlined, color: Colors.white),
+              icon: const Icon(
+                Icons.arrow_circle_left_outlined,
+                color: Colors.white,
+              ),
               iconSize: 24,
               padding: EdgeInsets.zero,
               style: IconButton.styleFrom(
                 backgroundColor: Colors.black.withValues(alpha: 0.3),
-                side: BorderSide(color: Colors.white.withValues(alpha: 0.15), width: 0.5),
+                side: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  width: 0.5,
+                ),
                 shape: const CircleBorder(),
               ),
             ),
@@ -132,7 +136,10 @@ class _LeagueDetailHeaderState extends State<LeagueDetailHeader>
                 const SizedBox(height: 8),
                 Text(
                   context
-                      .localizedName(en: widget.detail.name, cn: widget.detail.cnName)
+                      .localizedName(
+                        en: widget.detail.name,
+                        cn: widget.detail.cnName,
+                      )
                       .toUpperCase(),
                   style: AppTextStyles.display(
                     22,

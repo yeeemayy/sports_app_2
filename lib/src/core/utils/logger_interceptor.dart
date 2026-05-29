@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:sports_app/src/core/config/env_config.dart';
 
 class LoggerInterceptor extends Interceptor {
   @override
@@ -18,7 +17,9 @@ class LoggerInterceptor extends Interceptor {
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     debugPrint('[API] ← ${response.statusCode} ${response.requestOptions.uri}');
-    debugPrint('[Raw Response - ${response.requestOptions.uri.path}] ← ${response.data}');
+    debugPrint(
+      '[Raw Response - ${response.requestOptions.uri.path}] ← ${response.data}',
+    );
     handler.next(response);
   }
 

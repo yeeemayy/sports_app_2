@@ -19,7 +19,8 @@ class NewsDetailScreen extends ConsumerWidget {
     id: 0,
     title: 'Lorem ipsum dolor sit amet consectetur',
     description: '',
-    content: '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>'
+    content:
+        '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>'
         '<p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>'
         '<p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>'
         '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>'
@@ -40,7 +41,8 @@ class NewsDetailScreen extends ConsumerWidget {
     category: 0,
   );
 
-  String _locale(BuildContext context) => context.locale.languageCode == 'zh' ? 'cn' : 'en';
+  String _locale(BuildContext context) =>
+      context.locale.languageCode == 'zh' ? 'cn' : 'en';
 
   // Inline `line-height: NNpx` values are inflated by flutter_html vs browsers.
   // Strip them so flutter_html uses its default line spacing.
@@ -51,11 +53,18 @@ class NewsDetailScreen extends ConsumerWidget {
     result = result.replaceAll('src="/https://', 'src="https://');
     if (heroImageUrl != null) {
       result = result.replaceFirst(
-        RegExp(r'<img\b[^>]*src="' + RegExp.escape(heroImageUrl) + r'"[^>]*/?>'),
+        RegExp(
+          r'<img\b[^>]*src="' + RegExp.escape(heroImageUrl) + r'"[^>]*/?>',
+        ),
         '',
       );
     }
-    result = result.replaceAll(RegExp(r'<p[^>]*>\s*(?:<span[^>]*>\s*(?:<br\s*/?>\s*)?</span>\s*)*(?:<br\s*/?>)?\s*</p>'), '');
+    result = result.replaceAll(
+      RegExp(
+        r'<p[^>]*>\s*(?:<span[^>]*>\s*(?:<br\s*/?>\s*)?</span>\s*)*(?:<br\s*/?>)?\s*</p>',
+      ),
+      '',
+    );
     return result;
   }
 
@@ -68,14 +77,20 @@ class NewsDetailScreen extends ConsumerWidget {
     if (asyncDetail.hasError) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (context.mounted) {
-          context.showErrorDialog(title: 'news.detail_error'.tr(), error: asyncDetail.error!);
+          context.showErrorDialog(
+            title: 'news.detail_error'.tr(),
+            error: asyncDetail.error!,
+          );
         }
       });
       return Scaffold(
         backgroundColor: colors.ink,
         appBar: _buildAppBar(context, colors),
         body: Center(
-          child: Text('news.detail_error'.tr(), style: TextStyle(color: colors.text2)),
+          child: Text(
+            'news.detail_error'.tr(),
+            style: TextStyle(color: colors.text2),
+          ),
         ),
       );
     }
@@ -99,7 +114,10 @@ class NewsDetailScreen extends ConsumerWidget {
               surfaceTintColor: Colors.transparent,
               leading: IconButton(
                 onPressed: () => context.pop(),
-                icon: const Icon(Icons.arrow_circle_left_outlined, color: Colors.white),
+                icon: const Icon(
+                  Icons.arrow_circle_left_outlined,
+                  color: Colors.white,
+                ),
                 iconSize: 24,
                 style: IconButton.styleFrom(
                   backgroundColor: Colors.black.withValues(alpha: 0.5),
@@ -150,20 +168,19 @@ class NewsDetailScreen extends ConsumerWidget {
                     // Title
                     Text(
                       detail.title,
-                      style: AppTextStyles.display(28, context).copyWith(
-                        color: colors.text,
-                        height: 1.0,
-                      ),
+                      style: AppTextStyles.display(
+                        28,
+                        context,
+                      ).copyWith(color: colors.text, height: 1.0),
                     ),
                     const SizedBox(height: 10),
                     // Date
                     if (detail.createdAtBj != null)
                       Text(
                         detail.createdAtBj!,
-                        style: AppTextStyles.mono(10).copyWith(
-                          color: colors.text3,
-                          letterSpacing: 1.6,
-                        ),
+                        style: AppTextStyles.mono(
+                          10,
+                        ).copyWith(color: colors.text3, letterSpacing: 1.6),
                       ),
                     const SizedBox(height: 22),
                     // HTML body
@@ -172,19 +189,37 @@ class NewsDetailScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           for (int i = 0; i < 6; i++) ...[
-                            Container(height: 14, width: double.infinity, color: Colors.white),
+                            Container(
+                              height: 14,
+                              width: double.infinity,
+                              color: Colors.white,
+                            ),
                             const SizedBox(height: 6),
-                            Container(height: 14, width: double.infinity, color: Colors.white),
+                            Container(
+                              height: 14,
+                              width: double.infinity,
+                              color: Colors.white,
+                            ),
                             const SizedBox(height: 6),
-                            Container(height: 14, width: 180, color: Colors.white),
+                            Container(
+                              height: 14,
+                              width: 180,
+                              color: Colors.white,
+                            ),
                             const SizedBox(height: 20),
                           ],
                         ],
                       ),
                       child: Html(
-                        data: _cleanHtml(detail.content, heroImageUrl: detail.imageUrl),
+                        data: _cleanHtml(
+                          detail.content,
+                          heroImageUrl: detail.imageUrl,
+                        ),
                         style: {
-                          "*": Style(margin: Margins.zero, padding: HtmlPaddings.zero),
+                          "*": Style(
+                            margin: Margins.zero,
+                            padding: HtmlPaddings.zero,
+                          ),
                           "p": Style(margin: Margins.only(bottom: 20)),
                         },
                       ),
@@ -217,4 +252,3 @@ class NewsDetailScreen extends ConsumerWidget {
     );
   }
 }
-

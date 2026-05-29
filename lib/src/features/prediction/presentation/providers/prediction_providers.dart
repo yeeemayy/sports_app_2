@@ -19,7 +19,7 @@ final predictionTallyProvider = StreamProvider.family<PredictionTally, String>(
 
 final userVoteProvider =
     StreamProvider.family<PredictionPick?, ({String matchId, String uid})>(
-  (ref, args) => ref
-      .watch(predictionRepositoryProvider)
-      .userVoteStream(args.matchId, args.uid),
-);
+      (ref, args) => ref
+          .watch(predictionRepositoryProvider)
+          .userVoteStream(args.matchId, args.uid),
+    );

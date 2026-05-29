@@ -13,7 +13,11 @@ import 'package:sports_app/src/routes/app_routes.dart';
 /// [title] is the already-translated section label (used in the AppBar).
 /// [keyword] is the search keyword — empty string means "latest" (no filter).
 class NewsCategoryScreen extends ConsumerStatefulWidget {
-  const NewsCategoryScreen({super.key, required this.title, required this.keyword});
+  const NewsCategoryScreen({
+    super.key,
+    required this.title,
+    required this.keyword,
+  });
 
   final String title;
   final String keyword;
@@ -45,12 +49,15 @@ class _NewsCategoryScreenState extends ConsumerState<NewsCategoryScreen> {
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 300) {
-      ref.read(newsCategoryPaginatedProvider(widget.keyword).notifier).loadMore();
+      ref
+          .read(newsCategoryPaginatedProvider(widget.keyword).notifier)
+          .loadMore();
     }
   }
 
-  Future<void> _onRefresh() =>
-      ref.read(newsCategoryPaginatedProvider(widget.keyword).notifier).refresh();
+  Future<void> _onRefresh() => ref
+      .read(newsCategoryPaginatedProvider(widget.keyword).notifier)
+      .refresh();
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +67,10 @@ class _NewsCategoryScreenState extends ConsumerState<NewsCategoryScreen> {
     if (state.error != null && state.articles.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          context.showErrorDialog(title: 'news.load_error'.tr(), error: state.error!);
+          context.showErrorDialog(
+            title: 'news.load_error'.tr(),
+            error: state.error!,
+          );
         }
       });
     }
@@ -77,13 +87,20 @@ class _NewsCategoryScreenState extends ConsumerState<NewsCategoryScreen> {
               child: Row(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.arrow_back_ios_new_rounded, color: colors.text, size: 20),
+                    icon: Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: colors.text,
+                      size: 20,
+                    ),
                     onPressed: () => context.pop(),
                   ),
                   const SizedBox(width: 4),
                   Text(
                     widget.title.toUpperCase(),
-                    style: AppTextStyles.display(28, context).copyWith(color: colors.text),
+                    style: AppTextStyles.display(
+                      28,
+                      context,
+                    ).copyWith(color: colors.text),
                   ),
                 ],
               ),
@@ -116,7 +133,10 @@ class _NewsCategoryScreenState extends ConsumerState<NewsCategoryScreen> {
 
     if (state.articles.isEmpty) {
       return Center(
-        child: Text('news.no_results'.tr(), style: Theme.of(context).textTheme.bodyMedium),
+        child: Text(
+          'news.no_results'.tr(),
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
       );
     }
 
@@ -130,7 +150,9 @@ class _NewsCategoryScreenState extends ConsumerState<NewsCategoryScreen> {
         if (index == state.articles.length) {
           return Padding(
             padding: const EdgeInsets.all(16),
-            child: Center(child: CircularProgressIndicator(color: colors.accent)),
+            child: Center(
+              child: CircularProgressIndicator(color: colors.accent),
+            ),
           );
         }
         final article = state.articles[index];

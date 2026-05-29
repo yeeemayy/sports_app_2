@@ -47,7 +47,10 @@ class AuthNotifier extends _$AuthNotifier {
     }
   }
 
-  Future<void> login({required String telephone, required String password}) async {
+  Future<void> login({
+    required String telephone,
+    required String password,
+  }) async {
     state = const AsyncLoading();
     try {
       final repo = ref.read(authRepositoryProvider.notifier);
@@ -61,7 +64,7 @@ class AuthNotifier extends _$AuthNotifier {
 
       final user = await repo.fetchUser();
       state = AsyncData(AuthState(token: token, user: user));
-    } catch (e, st) {
+    } catch (e) {
       state = const AsyncData(AuthState());
       rethrow;
     }
@@ -91,7 +94,7 @@ class AuthNotifier extends _$AuthNotifier {
 
       final user = await repo.fetchUser();
       state = AsyncData(AuthState(token: token, user: user));
-    } catch (e, st) {
+    } catch (e) {
       state = const AsyncData(AuthState());
       rethrow;
     }

@@ -12,6 +12,7 @@ class CountryLeagueItem with _$CountryLeagueItem {
     required String name,
     @JsonKey(name: 'short_name') String? shortName,
     required String logo,
+
     /// 1 = regular league, 2 = cup
     int? type,
     @JsonKey(name: 'cur_season_id') String? curSeasonId,

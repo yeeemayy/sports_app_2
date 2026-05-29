@@ -63,7 +63,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       ),
     );
     if (source == null) return;
-    final image = await ImagePicker().pickImage(source: source, imageQuality: 85);
+    final image = await ImagePicker().pickImage(
+      source: source,
+      imageQuality: 85,
+    );
     if (image != null) setState(() => _pickedImage = image);
   }
 
@@ -79,7 +82,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       }
       await ref
           .read(authNotifierProvider.notifier)
-          .updateProfile(nickname: _nicknameController.text.trim(), avatarUrl: avatarUrl);
+          .updateProfile(
+            nickname: _nicknameController.text.trim(),
+            avatarUrl: avatarUrl,
+          );
       if (mounted) {
         await showCustomStatusDialog(
           context: context,
@@ -94,7 +100,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorDialog(title: 'profile.edit_error_title'.tr(), error: e);
+        context.showErrorDialog(
+          title: 'profile.edit_error_title'.tr(),
+          error: e,
+        );
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -171,7 +180,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                               decoration: BoxDecoration(
                                 color: Colors.black.withValues(alpha: 0.5),
                                 shape: BoxShape.circle,
-                                border: Border.all(color: colors.lineStrong, width: 0.5),
+                                border: Border.all(
+                                  color: colors.lineStrong,
+                                  width: 0.5,
+                                ),
                               ),
                               child: Icon(
                                 Icons.arrow_back_ios_new_rounded,
@@ -185,9 +197,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             child: Center(
                               child: Text(
                                 'profile.edit_title'.tr().toUpperCase(),
-                                style: AppTextStyles.display(18, context).copyWith(
-                                  color: colors.text,
-                                ),
+                                style: AppTextStyles.display(
+                                  18,
+                                  context,
+                                ).copyWith(color: colors.text),
                               ),
                             ),
                           ),
@@ -225,20 +238,27 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                             height: 94,
                                             fit: BoxFit.cover,
                                           )
-                                        : (avatarUrl != null && avatarUrl.isNotEmpty
-                                            ? CachedNetworkImage(
-                                                imageUrl: avatarUrl,
-                                                width: 94,
-                                                height: 94,
-                                                fit: BoxFit.cover,
-                                                placeholder: (context, url) => Skeletonizer(
-                                                  enabled: true,
-                                                  child: const ColoredBox(color: Colors.white),
-                                                ),
-                                                errorBuilder: (context, url, error) =>
-                                                    AvatarFallback(size: 94),
-                                              )
-                                            : AvatarFallback(size: 94)),
+                                        : (avatarUrl != null &&
+                                                  avatarUrl.isNotEmpty
+                                              ? CachedNetworkImage(
+                                                  imageUrl: avatarUrl,
+                                                  width: 94,
+                                                  height: 94,
+                                                  fit: BoxFit.cover,
+                                                  placeholder: (context, url) =>
+                                                      Skeletonizer(
+                                                        enabled: true,
+                                                        child: const ColoredBox(
+                                                          color: Colors.white,
+                                                        ),
+                                                      ),
+                                                  errorBuilder:
+                                                      (context, url, error) =>
+                                                          AvatarFallback(
+                                                            size: 94,
+                                                          ),
+                                                )
+                                              : AvatarFallback(size: 94)),
                                   ),
                                 ),
                                 // Camera badge
@@ -251,7 +271,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                     decoration: BoxDecoration(
                                       color: colors.accent,
                                       shape: BoxShape.circle,
-                                      border: Border.all(color: colors.ink, width: 2.5),
+                                      border: Border.all(
+                                        color: colors.ink,
+                                        width: 2.5,
+                                      ),
                                     ),
                                     child: const Icon(
                                       Icons.camera_alt_rounded,
@@ -280,10 +303,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   Center(
                     child: Text(
                       'profile.edit_change_avatar'.tr(),
-                      style: AppTextStyles.mono(10).copyWith(
-                        color: colors.text3,
-                        letterSpacing: 0.14 * 10,
-                      ),
+                      style: AppTextStyles.mono(
+                        10,
+                      ).copyWith(color: colors.text3, letterSpacing: 0.14 * 10),
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -308,7 +330,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: colors.accent,
                         foregroundColor: Colors.white,
-                        disabledBackgroundColor: colors.accent.withValues(alpha: 0.5),
+                        disabledBackgroundColor: colors.accent.withValues(
+                          alpha: 0.5,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),

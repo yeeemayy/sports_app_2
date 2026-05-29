@@ -82,13 +82,17 @@ class _FootballTopPlayersTabState extends ConsumerState<FootballTopPlayersTab> {
 
   @override
   Widget build(BuildContext context) {
-    final async = ref.watch(footballPlayerStatsProvider(leagueId: widget.leagueId));
+    final async = ref.watch(
+      footballPlayerStatsProvider(leagueId: widget.leagueId),
+    );
 
     return LeagueTabContent(
       async: async,
       builder: (players) {
         final sorted = [...players]
-          ..sort((a, b) => _statType.statValue(b).compareTo(_statType.statValue(a)));
+          ..sort(
+            (a, b) => _statType.statValue(b).compareTo(_statType.statValue(a)),
+          );
 
         return Column(
           children: [
@@ -184,7 +188,9 @@ class _StatChip extends StatelessWidget {
         child: Text(
           label,
           style: AppTextStyles.mono(9).copyWith(
-            color: selected ? context.appColors.accent : context.appColors.text3,
+            color: selected
+                ? context.appColors.accent
+                : context.appColors.text3,
             fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
           ),
         ),

@@ -38,7 +38,10 @@ class TokenHolder {
 class ApiClient {
   late final Dio httpClient;
 
-  ApiClient(TokenHolder tokenHolder, SessionExpiredInterceptor sessionExpiredInterceptor) {
+  ApiClient(
+    TokenHolder tokenHolder,
+    SessionExpiredInterceptor sessionExpiredInterceptor,
+  ) {
     httpClient = Dio(
       BaseOptions(
         baseUrl: EnvConfig.apiUrl,
@@ -84,7 +87,8 @@ class _SigningInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     final random = _randomString(32);
-    final timestamp = (DateTime.now().millisecondsSinceEpoch ~/ 1000).toString();
+    final timestamp = (DateTime.now().millisecondsSinceEpoch ~/ 1000)
+        .toString();
     final source = random + timestamp;
 
     final key = utf8.encode(_secretKey);
@@ -106,8 +110,12 @@ class _SigningInterceptor extends Interceptor {
   }
 
   String _randomString(int length) {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const chars =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     final rand = Random.secure();
-    return List.generate(length, (_) => chars[rand.nextInt(chars.length)]).join();
+    return List.generate(
+      length,
+      (_) => chars[rand.nextInt(chars.length)],
+    ).join();
   }
 }

@@ -114,8 +114,7 @@ class FootballPitchLineup extends StatelessWidget {
       h - (y / 100.0) * (h * 0.48) - h * 0.02;
 
   // Away: y=0 → top (own goal), y=100 → center line
-  static double _awayY(int y, double h) =>
-      (y / 100.0) * (h * 0.48) + h * 0.02;
+  static double _awayY(int y, double h) => (y / 100.0) * (h * 0.48) + h * 0.02;
 }
 
 // ─── Pitch Painter ────────────────────────────────────────────────────────────
@@ -197,13 +196,33 @@ class _PitchPainter extends CustomPainter {
     // Corner arcs (1m radius)
     final cr = 1.0 / 68.0 * w;
     canvas.drawArc(
-        Rect.fromCircle(center: Offset.zero, radius: cr), 0, math.pi / 2, false, line);
+      Rect.fromCircle(center: Offset.zero, radius: cr),
+      0,
+      math.pi / 2,
+      false,
+      line,
+    );
     canvas.drawArc(
-        Rect.fromCircle(center: Offset(w, 0), radius: cr), math.pi / 2, math.pi / 2, false, line);
+      Rect.fromCircle(center: Offset(w, 0), radius: cr),
+      math.pi / 2,
+      math.pi / 2,
+      false,
+      line,
+    );
     canvas.drawArc(
-        Rect.fromCircle(center: Offset(0, h), radius: cr), -math.pi / 2, math.pi / 2, false, line);
+      Rect.fromCircle(center: Offset(0, h), radius: cr),
+      -math.pi / 2,
+      math.pi / 2,
+      false,
+      line,
+    );
     canvas.drawArc(
-        Rect.fromCircle(center: Offset(w, h), radius: cr), math.pi, math.pi / 2, false, line);
+      Rect.fromCircle(center: Offset(w, h), radius: cr),
+      math.pi,
+      math.pi / 2,
+      false,
+      line,
+    );
   }
 
   @override
@@ -299,7 +318,11 @@ class _PlayerMarker extends StatelessWidget {
               color: Colors.white,
               height: 1.1,
               shadows: [
-                Shadow(color: Colors.black87, blurRadius: 4, offset: Offset(0, 1)),
+                Shadow(
+                  color: Colors.black87,
+                  blurRadius: 4,
+                  offset: Offset(0, 1),
+                ),
                 Shadow(color: Colors.black87, blurRadius: 2),
               ],
             ),
@@ -362,7 +385,9 @@ class _TeamLegendChip extends StatelessWidget {
     ];
     return Row(
       mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: reversed? MainAxisAlignment.end : MainAxisAlignment.start,
+      mainAxisAlignment: reversed
+          ? MainAxisAlignment.end
+          : MainAxisAlignment.start,
       children: reversed ? kids.reversed.toList() : kids,
     );
   }
@@ -390,10 +415,9 @@ class _SubsSection extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Text(
             'event.football.detail.substitutes'.tr().toUpperCase(),
-            style: AppTextStyles.mono(10).copyWith(
-              color: colors.text3,
-              letterSpacing: 0.14 * 10,
-            ),
+            style: AppTextStyles.mono(
+              10,
+            ).copyWith(color: colors.text3, letterSpacing: 0.14 * 10),
           ),
         ),
         Row(
@@ -440,8 +464,9 @@ class _SubsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment:
-          alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment: alignEnd
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
       children: [
         for (final p in players)
           Padding(
@@ -473,10 +498,9 @@ class _SubsList extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         '${p.shirtNumber}',
-        style: AppTextStyles.mono(9).copyWith(
-          color: color,
-          fontWeight: FontWeight.w700,
-        ),
+        style: AppTextStyles.mono(
+          9,
+        ).copyWith(color: color, fontWeight: FontWeight.w700),
       ),
     );
     final nameText = Flexible(
@@ -490,8 +514,6 @@ class _SubsList extends StatelessWidget {
     );
     final gap = const SizedBox(width: 6);
 
-    return reversed
-        ? [nameText, gap, numBox]
-        : [numBox, gap, nameText];
+    return reversed ? [nameText, gap, numBox] : [numBox, gap, nameText];
   }
 }

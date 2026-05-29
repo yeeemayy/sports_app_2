@@ -66,10 +66,10 @@ class TennisStat {
   String get awayDisplay => _fmt(awayValue);
 
   factory TennisStat.fromList(List<dynamic> list) => TennisStat(
-        typeCode: (list[0] as num).toInt(),
-        homeValue: double.tryParse(list[1]?.toString() ?? '0') ?? 0,
-        awayValue: double.tryParse(list[2]?.toString() ?? '0') ?? 0,
-      );
+    typeCode: (list[0] as num).toInt(),
+    homeValue: double.tryParse(list[1]?.toString() ?? '0') ?? 0,
+    awayValue: double.tryParse(list[2]?.toString() ?? '0') ?? 0,
+  );
 }
 
 // ─── Stats set (per-set or overall) ─────────────────────────────────────────
@@ -158,8 +158,10 @@ class TennisMatchEventsData {
       statSets.where((s) => s.setIndex == 0).expand((s) => s.stats).toList();
 
   /// Stats for a given set (1-based)
-  List<TennisStat> statsForSet(int setNumber) =>
-      statSets.where((s) => s.setIndex == setNumber).expand((s) => s.stats).toList();
+  List<TennisStat> statsForSet(int setNumber) => statSets
+      .where((s) => s.setIndex == setNumber)
+      .expand((s) => s.stats)
+      .toList();
 
   factory TennisMatchEventsData.fromJson(Map<String, dynamic> json) {
     final score = json['score'] as List<dynamic>? ?? [];
@@ -204,15 +206,21 @@ class TennisMatchEventsData {
         final rawPoints = rd['points'] as List<dynamic>? ?? [];
         final points = rawPoints
             .whereType<List<dynamic>>()
-            .map((p) => TennisGamePoint(
-                  home: p[0]?.toString() ?? '',
-                  away: p[1]?.toString() ?? '',
-                ))
+            .map(
+              (p) => TennisGamePoint(
+                home: p[0]?.toString() ?? '',
+                away: p[1]?.toString() ?? '',
+              ),
+            )
             .toList();
         return TennisRound(
           round: (rd['round'] as num).toInt(),
-          homeScore: scoreMap != null ? (scoreMap['home'] as num?)?.toInt() : null,
-          awayScore: scoreMap != null ? (scoreMap['away'] as num?)?.toInt() : null,
+          homeScore: scoreMap != null
+              ? (scoreMap['home'] as num?)?.toInt()
+              : null,
+          awayScore: scoreMap != null
+              ? (scoreMap['away'] as num?)?.toInt()
+              : null,
           serve: scoreMap != null ? (scoreMap['serve'] as num?)?.toInt() : null,
           points: points,
         );

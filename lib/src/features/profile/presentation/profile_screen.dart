@@ -40,7 +40,9 @@ class ProfileScreen extends ConsumerWidget {
         child: OutlinedButton(
           style: OutlinedButton.styleFrom(
             minimumSize: const Size(0, 48),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
           ),
           onPressed: () => context.pop(),
           child: Text('profile.logout_confirm_cancel'.tr()),
@@ -73,19 +75,24 @@ class ProfileScreen extends ConsumerWidget {
         }
         final storage = ref.read(authStorageServiceProvider.notifier);
         final credentials = await storage.readCredentials();
-        if (credentials == null || passwordController.text != credentials.password) {
-          errorNotifier.value = 'profile.delete_account_password_incorrect'.tr();
+        if (credentials == null ||
+            passwordController.text != credentials.password) {
+          errorNotifier.value = 'profile.delete_account_password_incorrect'
+              .tr();
           return;
         }
         errorNotifier.value = null;
-        context.pop();
+        if (context.mounted) context.pop();
         final notifier = ref.read(authNotifierProvider.notifier);
         try {
           await notifier.deleteAccount();
           if (context.mounted) context.go(AppRoutes.home);
         } catch (e) {
           if (context.mounted) {
-            context.showErrorDialog(title: 'profile.delete_account_error_title'.tr(), error: e);
+            context.showErrorDialog(
+              title: 'profile.delete_account_error_title'.tr(),
+              error: e,
+            );
           }
         }
       },
@@ -94,7 +101,9 @@ class ProfileScreen extends ConsumerWidget {
         child: OutlinedButton(
           style: OutlinedButton.styleFrom(
             minimumSize: const Size(0, 48),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
           ),
           onPressed: () => context.pop(),
           child: Text('profile.logout_confirm_cancel'.tr()),
@@ -117,14 +126,16 @@ class ProfileScreen extends ConsumerWidget {
       onButtonPressed: () async {
         context.pop();
         await ref.read(authNotifierProvider.notifier).logout();
-        context.go(AppRoutes.home);
+        if (context.mounted) context.go(AppRoutes.home);
       },
       secondaryButton: SizedBox(
         width: double.infinity,
         child: OutlinedButton(
           style: OutlinedButton.styleFrom(
             minimumSize: const Size(0, 48),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
           ),
           onPressed: () => context.pop(),
           child: Text('profile.logout_confirm_cancel'.tr()),
@@ -134,11 +145,27 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  void _showThemePicker(BuildContext context, WidgetRef ref, ThemeMode current) {
+  void _showThemePicker(
+    BuildContext context,
+    WidgetRef ref,
+    ThemeMode current,
+  ) {
     final options = [
-      (mode: ThemeMode.light, label: 'profile.theme_light', icon: Icons.light_mode_rounded),
-      (mode: ThemeMode.dark, label: 'profile.theme_dark', icon: Icons.dark_mode_rounded),
-      (mode: ThemeMode.system, label: 'profile.theme_system', icon: Icons.brightness_auto_rounded),
+      (
+        mode: ThemeMode.light,
+        label: 'profile.theme_light',
+        icon: Icons.light_mode_rounded,
+      ),
+      (
+        mode: ThemeMode.dark,
+        label: 'profile.theme_dark',
+        icon: Icons.dark_mode_rounded,
+      ),
+      (
+        mode: ThemeMode.system,
+        label: 'profile.theme_system',
+        icon: Icons.brightness_auto_rounded,
+      ),
     ];
 
     showModalBottomSheet<void>(
@@ -153,7 +180,9 @@ class ProfileScreen extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
                 child: Text(
                   'profile.toggle_dark_mode'.tr(),
-                  style: sheetContext.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                  style: sheetContext.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               const Divider(height: 0),
@@ -161,7 +190,9 @@ class ProfileScreen extends ConsumerWidget {
                 (opt) => ListTile(
                   leading: Icon(opt.icon),
                   title: Text(opt.label.tr()),
-                  trailing: current == opt.mode ? const Icon(Icons.check_rounded) : null,
+                  trailing: current == opt.mode
+                      ? const Icon(Icons.check_rounded)
+                      : null,
                   onTap: () {
                     ref.read(themeModeProvider.notifier).setThemeMode(opt.mode);
                     Navigator.of(sheetContext).pop();
@@ -195,14 +226,18 @@ class ProfileScreen extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
                 child: Text(
                   'profile.toggle_language'.tr(),
-                  style: sheetContext.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                  style: sheetContext.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               const Divider(height: 0),
               ...languages.map(
                 (lang) => ListTile(
                   title: Text(lang.label.tr()),
-                  trailing: current == lang.locale ? const Icon(Icons.check_rounded) : null,
+                  trailing: current == lang.locale
+                      ? const Icon(Icons.check_rounded)
+                      : null,
                   onTap: () {
                     context.setLocale(lang.locale);
                     Navigator.of(sheetContext).pop();
@@ -222,7 +257,8 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authNotifierProvider);
-    final isAuthenticated = authState.hasValue && (authState.value?.isAuthenticated ?? false);
+    final isAuthenticated =
+        authState.hasValue && (authState.value?.isAuthenticated ?? false);
     final user = authState.value?.user;
     final avatarUrl = user?.avatarUrl;
     debugPrint(avatarUrl);
@@ -309,18 +345,24 @@ class ProfileScreen extends ConsumerWidget {
                                     color: colors.ink,
                                   ),
                                   child: ClipOval(
-                                    child: avatarUrl != null && avatarUrl.isNotEmpty
+                                    child:
+                                        avatarUrl != null &&
+                                            avatarUrl.isNotEmpty
                                         ? CachedNetworkImage(
                                             imageUrl: avatarUrl,
                                             width: 98,
                                             height: 98,
                                             fit: BoxFit.cover,
-                                            placeholder: (context, url) => Skeletonizer(
-                                              enabled: true,
-                                              child: const ColoredBox(color: Colors.grey),
-                                            ),
-                                            errorBuilder: (context, url, error) =>
-                                                AvatarFallback(size: 98),
+                                            placeholder: (context, url) =>
+                                                Skeletonizer(
+                                                  enabled: true,
+                                                  child: const ColoredBox(
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                            errorBuilder:
+                                                (context, url, error) =>
+                                                    AvatarFallback(size: 98),
                                           )
                                         : AvatarFallback(size: 98),
                                   ),
@@ -335,7 +377,10 @@ class ProfileScreen extends ConsumerWidget {
                                     decoration: BoxDecoration(
                                       color: colors.accent,
                                       shape: BoxShape.circle,
-                                      border: Border.all(color: colors.ink, width: 2.5),
+                                      border: Border.all(
+                                        color: colors.ink,
+                                        width: 2.5,
+                                      ),
                                     ),
                                     child: const Icon(
                                       Icons.camera_alt_outlined,
@@ -355,9 +400,10 @@ class ProfileScreen extends ConsumerWidget {
                             padding: const EdgeInsets.only(bottom: 4),
                             child: Text(
                               nickname.toUpperCase(),
-                              style: AppTextStyles.display(32, context).copyWith(
-                                color: colors.text,
-                              ),
+                              style: AppTextStyles.display(
+                                32,
+                                context,
+                              ).copyWith(color: colors.text),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -380,12 +426,17 @@ class ProfileScreen extends ConsumerWidget {
                 children: [
                   Text(
                     'profile.guest_mode_title'.tr().toUpperCase(),
-                    style: AppTextStyles.display(28, context).copyWith(color: colors.text),
+                    style: AppTextStyles.display(
+                      28,
+                      context,
+                    ).copyWith(color: colors.text),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'profile.guest_mode_subtitle'.tr(),
-                    style: context.textTheme.bodyMedium?.copyWith(color: colors.text2),
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: colors.text2,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   Row(
@@ -443,14 +494,14 @@ class ProfileScreen extends ConsumerWidget {
                   icon: themeMode == ThemeMode.light
                       ? Icons.light_mode_rounded
                       : themeMode == ThemeMode.dark
-                          ? Icons.dark_mode_rounded
-                          : Icons.brightness_auto_rounded,
+                      ? Icons.dark_mode_rounded
+                      : Icons.brightness_auto_rounded,
                   label: 'profile.toggle_dark_mode'.tr(),
                   value: themeMode == ThemeMode.light
                       ? 'profile.theme_light'.tr()
                       : themeMode == ThemeMode.dark
-                          ? 'profile.theme_dark'.tr()
-                          : 'profile.theme_system'.tr(),
+                      ? 'profile.theme_dark'.tr()
+                      : 'profile.theme_system'.tr(),
                   onTap: () => _showThemePicker(context, ref, themeMode),
                 ),
                 _ProfileTile(
@@ -544,10 +595,9 @@ class ProfileScreen extends ConsumerWidget {
             child: Center(
               child: Text(
                 'ARENA · v${AppInfo.version}'.toUpperCase(),
-                style: AppTextStyles.mono(9).copyWith(
-                  color: colors.text3,
-                  letterSpacing: 0.18 * 9,
-                ),
+                style: AppTextStyles.mono(
+                  9,
+                ).copyWith(color: colors.text3, letterSpacing: 0.18 * 9),
               ),
             ),
           ),
@@ -575,9 +625,10 @@ class _ArenaSectionLabel extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(22, 0, 22, 10),
       child: Text(
         label.toUpperCase(),
-        style: AppTextStyles.display(18, context).copyWith(
-          color: color ?? colors.text,
-        ),
+        style: AppTextStyles.display(
+          18,
+          context,
+        ).copyWith(color: color ?? colors.text),
       ),
     );
   }
@@ -591,7 +642,6 @@ class _ProfileTile {
     required this.label,
     required this.onTap,
     this.value,
-    this.trailing,
     this.isDestructive = false,
   });
 
@@ -599,7 +649,6 @@ class _ProfileTile {
   final String label;
   final VoidCallback onTap;
   final String? value;
-  final Widget? trailing;
   final bool isDestructive;
 }
 
@@ -681,22 +730,23 @@ class _ArenaTile extends StatelessWidget {
                 ),
               ),
             ),
-            // Trailing: custom widget OR value + chevron
-            if (data.trailing != null)
-              data.trailing!
-            else ...[
+            // Trailing: value + chevron
+            ...[
               if (data.value != null && data.value!.isNotEmpty) ...[
                 Text(
                   data.value!,
-                  style: AppTextStyles.mono(10).copyWith(
-                    color: colors.text3,
-                    letterSpacing: 0.1 * 10,
-                  ),
+                  style: AppTextStyles.mono(
+                    10,
+                  ).copyWith(color: colors.text3, letterSpacing: 0.1 * 10),
                 ),
                 const SizedBox(width: 4),
               ],
               if (!data.isDestructive)
-                Icon(Icons.chevron_right_rounded, size: 16, color: colors.text3),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 16,
+                  color: colors.text3,
+                ),
             ],
           ],
         ),
@@ -708,13 +758,17 @@ class _ArenaTile extends StatelessWidget {
 // ── Password confirm dialog content (logic unchanged) ─────────────────────────
 
 class _PasswordConfirmContent extends StatefulWidget {
-  const _PasswordConfirmContent({required this.controller, required this.errorNotifier});
+  const _PasswordConfirmContent({
+    required this.controller,
+    required this.errorNotifier,
+  });
 
   final TextEditingController controller;
   final ValueNotifier<String?> errorNotifier;
 
   @override
-  State<_PasswordConfirmContent> createState() => _PasswordConfirmContentState();
+  State<_PasswordConfirmContent> createState() =>
+      _PasswordConfirmContentState();
 }
 
 class _PasswordConfirmContentState extends State<_PasswordConfirmContent> {
@@ -743,7 +797,11 @@ class _PasswordConfirmContentState extends State<_PasswordConfirmContent> {
                   ? 'profile.delete_account_password_empty'.tr()
                   : null,
               suffixIcon: IconButton(
-                icon: Icon(_obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined),
+                icon: Icon(
+                  _obscure
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                ),
                 onPressed: () => setState(() => _obscure = !_obscure),
               ),
             ),

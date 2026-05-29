@@ -27,8 +27,9 @@ class VolleyballMatchCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.volleyball)
-          .select((map) => map[match.id] as VolleyballRealtimeData?),
+      sportRealtimeProvider(
+        SportType.volleyball,
+      ).select((map) => map[match.id] as VolleyballRealtimeData?),
     );
 
     final effectiveStatusId = rt?.statusId ?? match.statusId;
@@ -36,13 +37,20 @@ class VolleyballMatchCard extends ConsumerWidget {
     final effectiveAwaySets = rt?.awaySets ?? extractSetScores(match.scores, 1);
     final effectiveHomeScore = rt?.homeTotal.toString() ?? match.homeScore;
     final effectiveAwayScore = rt?.awayTotal.toString() ?? match.awayScore;
-    final statusLabel = volleyballStatusLabel(effectiveStatusId, match.statusDescription);
+    final statusLabel = volleyballStatusLabel(
+      effectiveStatusId,
+      match.statusDescription,
+    );
     final isLive = _liveStatuses.contains(effectiveStatusId);
     final isNotStarted = effectiveStatusId == 1;
 
     // Current set point scores
-    final homeCurrentSet = effectiveHomeSets.isNotEmpty ? effectiveHomeSets.last : null;
-    final awayCurrentSet = effectiveAwaySets.isNotEmpty ? effectiveAwaySets.last : null;
+    final homeCurrentSet = effectiveHomeSets.isNotEmpty
+        ? effectiveHomeSets.last
+        : null;
+    final awayCurrentSet = effectiveAwaySets.isNotEmpty
+        ? effectiveAwaySets.last
+        : null;
 
     return MatchCardShell(
       onTap: () => context.push(AppRoutes.volleyballMatchDetailPath(match.id)),
@@ -130,7 +138,9 @@ class _SetCountRow extends StatelessWidget {
         Expanded(
           child: Text(
             name,
-            style: AppTextStyles.mono(11).copyWith(color: context.appColors.text),
+            style: AppTextStyles.mono(
+              11,
+            ).copyWith(color: context.appColors.text),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

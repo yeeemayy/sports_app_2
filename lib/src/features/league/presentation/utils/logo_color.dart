@@ -52,7 +52,8 @@ mixin LogoColorMixin<T extends StatefulWidget> on State<T> {
         size: const Size(64, 64),
         maximumColorCount: 8,
       );
-      final color = palette.darkVibrantColor?.color ??
+      final color =
+          palette.darkVibrantColor?.color ??
           palette.vibrantColor?.color ??
           palette.darkMutedColor?.color ??
           palette.dominantColor?.color;

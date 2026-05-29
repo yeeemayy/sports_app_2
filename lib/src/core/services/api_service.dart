@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sports_app/src/core/config/env_config.dart';
@@ -62,7 +61,10 @@ ApiClient apiService(ApiServiceRef ref) {
       try {
         final response = await dio.post(
           '/auth/login',
-          data: {'telephone': credentials.telephone, 'password': credentials.password},
+          data: {
+            'telephone': credentials.telephone,
+            'password': credentials.password,
+          },
           options: Options(extra: {'_skipSessionRetry': true}),
         );
         final json = response.data as Map<String, dynamic>;

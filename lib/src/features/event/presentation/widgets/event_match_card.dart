@@ -34,16 +34,26 @@ class EventMatchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (match is FootballMatch) return FootballMatchCard(match: match as FootballMatch);
-    if (match is BasketballMatch) return BasketballMatchCard(match: match as BasketballMatch);
-    if (match is TennisMatch) return TennisMatchCard(match: match as TennisMatch);
-    if (match is BadmintonMatch) return BadmintonMatchCard(match: match as BadmintonMatch);
-    if (match is TableTennisMatch) return TableTennisMatchCard(match: match as TableTennisMatch);
-    if (match is BaseballMatch) return BaseballMatchCard(match: match as BaseballMatch);
-    if (match is VolleyballMatch) return VolleyballMatchCard(match: match as VolleyballMatch);
-    if (match is IceHockeyMatch) return IceHockeyMatchCard(match: match as IceHockeyMatch);
-    if (match is AmFootballMatch) return AmFootballMatchCard(match: match as AmFootballMatch);
-    if (match is CricketMatch) return CricketMatchCard(match: match as CricketMatch);
+    if (match is FootballMatch)
+      return FootballMatchCard(match: match as FootballMatch);
+    if (match is BasketballMatch)
+      return BasketballMatchCard(match: match as BasketballMatch);
+    if (match is TennisMatch)
+      return TennisMatchCard(match: match as TennisMatch);
+    if (match is BadmintonMatch)
+      return BadmintonMatchCard(match: match as BadmintonMatch);
+    if (match is TableTennisMatch)
+      return TableTennisMatchCard(match: match as TableTennisMatch);
+    if (match is BaseballMatch)
+      return BaseballMatchCard(match: match as BaseballMatch);
+    if (match is VolleyballMatch)
+      return VolleyballMatchCard(match: match as VolleyballMatch);
+    if (match is IceHockeyMatch)
+      return IceHockeyMatchCard(match: match as IceHockeyMatch);
+    if (match is AmFootballMatch)
+      return AmFootballMatchCard(match: match as AmFootballMatch);
+    if (match is CricketMatch)
+      return CricketMatchCard(match: match as CricketMatch);
     return _DefaultMatchCard(match: match);
   }
 }
@@ -58,11 +68,11 @@ class _DefaultMatchCard extends StatelessWidget {
     final isLive = match.statusId > 0 && match.statusId < 100;
     final statusLabel = isLive
         ? (match.statusDescription?.isNotEmpty == true
-            ? match.statusDescription!
-            : 'event.status.live'.tr())
+              ? match.statusDescription!
+              : 'event.status.live'.tr())
         : match.statusId == 0
-            ? match.matchTimeSim
-            : 'event.status.finished'.tr();
+        ? match.matchTimeSim
+        : 'event.status.finished'.tr();
 
     return Container(
       child: Column(
@@ -87,7 +97,9 @@ class _DefaultMatchCard extends StatelessWidget {
                 ),
                 Text(
                   match.matchTimeSim,
-                  style: context.textTheme.labelSmall?.copyWith(color: Colors.grey.shade500),
+                  style: context.textTheme.labelSmall?.copyWith(
+                    color: Colors.grey.shade500,
+                  ),
                 ),
               ],
             ),
@@ -107,7 +119,9 @@ class _DefaultMatchCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         match.homeName,
-                        style: context.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
+                        style: context.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,
@@ -141,7 +155,9 @@ class _DefaultMatchCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         match.awayName,
-                        style: context.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
+                        style: context.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,
@@ -158,4 +174,3 @@ class _DefaultMatchCard extends StatelessWidget {
     );
   }
 }
-

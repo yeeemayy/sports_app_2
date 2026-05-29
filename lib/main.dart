@@ -11,7 +11,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:sports_app/src/core/utils/app_info.dart';
 import 'package:sports_app/src/core/utils/app_locale.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sports_app/src/providers/theme_provider.dart';
 import 'package:sports_app/src/routes/app_router.dart';
@@ -30,7 +29,9 @@ void main() async {
 
   runApp(
     ProviderScope(
-      overrides: [sharedPreferencesProvider.overrideWithValue(sharedPreferences)],
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+      ],
       child: EasyLocalization(
         supportedLocales: const [Locale('zh', 'CN'), Locale('en', 'GB')],
         path: 'assets/translations',
@@ -53,7 +54,9 @@ class MyApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       builder: (context, child) => ResponsiveBreakpoints.builder(
         child: MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.noScaling),
           child: child!,
         ),
         breakpoints: [
@@ -63,7 +66,10 @@ class MyApp extends ConsumerWidget {
         ],
       ),
       title: 'Sports App',
-      localizationsDelegates: [CountryLocalizations.delegate, ...context.localizationDelegates],
+      localizationsDelegates: [
+        CountryLocalizations.delegate,
+        ...context.localizationDelegates,
+      ],
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       themeMode: themeMode,

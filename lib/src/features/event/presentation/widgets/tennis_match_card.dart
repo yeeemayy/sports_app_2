@@ -28,17 +28,23 @@ class TennisMatchCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.tennis)
-          .select((map) => map[match.id] as TennisRealtimeData?),
+      sportRealtimeProvider(
+        SportType.tennis,
+      ).select((map) => map[match.id] as TennisRealtimeData?),
     );
 
     final effectiveStatusId = rt?.statusId ?? match.statusId;
     final effectiveHomeSets = rt?.homeSets ?? extractSetScores(match.scores, 0);
     final effectiveAwaySets = rt?.awaySets ?? extractSetScores(match.scores, 1);
-    final effectiveHomeTotal = rt?.homeTotal ?? int.tryParse(match.homeScore) ?? 0;
-    final effectiveAwayTotal = rt?.awayTotal ?? int.tryParse(match.awayScore) ?? 0;
+    final effectiveHomeTotal =
+        rt?.homeTotal ?? int.tryParse(match.homeScore) ?? 0;
+    final effectiveAwayTotal =
+        rt?.awayTotal ?? int.tryParse(match.awayScore) ?? 0;
 
-    final statusLabel = tennisStatusLabel(effectiveStatusId, match.statusDescription);
+    final statusLabel = tennisStatusLabel(
+      effectiveStatusId,
+      match.statusDescription,
+    );
     final isLive = _liveStatuses.contains(effectiveStatusId);
     final isNotStarted = effectiveStatusId == 1;
     final setCount = effectiveHomeSets.length;
@@ -118,7 +124,9 @@ class _PlayerSetRow extends StatelessWidget {
         Expanded(
           child: Text(
             name,
-            style: AppTextStyles.mono(11).copyWith(color: context.appColors.text),
+            style: AppTextStyles.mono(
+              11,
+            ).copyWith(color: context.appColors.text),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -129,7 +137,8 @@ class _PlayerSetRow extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: List.generate(sets.length, (i) {
             final isActive = i == activeSetIndex;
-            final won = sets[i] > (i < opponentSets.length ? opponentSets[i] : 0);
+            final won =
+                sets[i] > (i < opponentSets.length ? opponentSets[i] : 0);
             return _SetBox(
               score: sets[i],
               isActive: isActive,
@@ -146,7 +155,9 @@ class _PlayerSetRow extends StatelessWidget {
               '$totalWon',
               textAlign: TextAlign.center,
               style: AppTextStyles.display(20, context).copyWith(
-                color: isLive ? context.appColors.accent : context.appColors.text,
+                color: isLive
+                    ? context.appColors.accent
+                    : context.appColors.text,
               ),
             ),
           ),
@@ -157,7 +168,10 @@ class _PlayerSetRow extends StatelessWidget {
             child: Text(
               '-',
               textAlign: TextAlign.center,
-              style: AppTextStyles.display(20, context).copyWith(color: context.appColors.text3),
+              style: AppTextStyles.display(
+                20,
+                context,
+              ).copyWith(color: context.appColors.text3),
             ),
           ),
         ],
@@ -186,7 +200,9 @@ class _SetBox extends StatelessWidget {
       height: 24,
       margin: const EdgeInsets.only(left: 3),
       decoration: BoxDecoration(
-        color: isActive ? context.appColors.accent.withValues(alpha: 0.12) : context.appColors.surface2,
+        color: isActive
+            ? context.appColors.accent.withValues(alpha: 0.12)
+            : context.appColors.surface2,
         borderRadius: BorderRadius.circular(5),
         border: Border.all(
           color: isActive ? context.appColors.accent : context.appColors.line,
@@ -197,7 +213,9 @@ class _SetBox extends StatelessWidget {
         child: Text(
           '$score',
           style: AppTextStyles.mono(10).copyWith(
-            color: isActive ? context.appColors.accent : (isWon ? context.appColors.text : context.appColors.text3),
+            color: isActive
+                ? context.appColors.accent
+                : (isWon ? context.appColors.text : context.appColors.text3),
           ),
         ),
       ),

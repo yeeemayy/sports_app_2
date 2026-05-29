@@ -81,7 +81,8 @@ class BasketballMatchEventsData {
     if (!timerRunning || timerUpdateTime == 0) return timerRemaining;
     final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     final elapsed = now - timerUpdateTime;
-    if (timerCountdown) return (timerRemaining - elapsed).clamp(0, timerRemaining);
+    if (timerCountdown)
+      return (timerRemaining - elapsed).clamp(0, timerRemaining);
     return timerRemaining + elapsed;
   }
 
@@ -96,8 +97,12 @@ class BasketballMatchEventsData {
 
   factory BasketballMatchEventsData.fromJson(Map<String, dynamic> json) {
     final score = json['score'] as List<dynamic>;
-    final homeScores = (score[3] as List<dynamic>).map((e) => (e as num).toInt()).toList();
-    final awayScores = (score[4] as List<dynamic>).map((e) => (e as num).toInt()).toList();
+    final homeScores = (score[3] as List<dynamic>)
+        .map((e) => (e as num).toInt())
+        .toList();
+    final awayScores = (score[4] as List<dynamic>)
+        .map((e) => (e as num).toInt())
+        .toList();
     final timer = json['timer'] as List<dynamic>?;
 
     // Regular quarters (Q1–Q4), excluding OT slot.
@@ -109,8 +114,14 @@ class BasketballMatchEventsData {
     final int homeOt;
     final int awayOt;
     if (otScores != null && otScores.length >= 2) {
-      homeOt = (otScores[0] as List<dynamic>).fold(0, (a, b) => a + (b as num).toInt());
-      awayOt = (otScores[1] as List<dynamic>).fold(0, (a, b) => a + (b as num).toInt());
+      homeOt = (otScores[0] as List<dynamic>).fold(
+        0,
+        (a, b) => a + (b as num).toInt(),
+      );
+      awayOt = (otScores[1] as List<dynamic>).fold(
+        0,
+        (a, b) => a + (b as num).toInt(),
+      );
     } else {
       homeOt = homeScores.length > 4 ? homeScores[4] : 0;
       awayOt = awayScores.length > 4 ? awayScores[4] : 0;

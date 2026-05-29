@@ -35,7 +35,8 @@ class MatchScoreDisplay extends StatelessWidget {
       );
     }
 
-    final scoreColor = color ?? (isLive ? context.appColors.accent : context.appColors.text);
+    final scoreColor =
+        color ?? (isLive ? context.appColors.accent : context.appColors.text);
     return RichText(
       text: TextSpan(
         style: context.textTheme.titleMedium?.copyWith(
@@ -44,7 +45,10 @@ class MatchScoreDisplay extends StatelessWidget {
         ),
         children: [
           TextSpan(text: homeScore),
-          TextSpan(text: ' - ', style: TextStyle(color: Colors.grey.shade400)),
+          TextSpan(
+            text: ' - ',
+            style: TextStyle(color: Colors.grey.shade400),
+          ),
           TextSpan(text: awayScore),
         ],
       ),

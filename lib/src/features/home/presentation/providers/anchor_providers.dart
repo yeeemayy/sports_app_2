@@ -6,6 +6,9 @@ import 'package:sports_app/src/features/home/domain/models/anchor_model.dart';
 part 'anchor_providers.g.dart';
 
 @riverpod
-Future<PaginatedResponse<AnchorModel>> anchorList(AnchorListRef ref, {int page = 1}) {
+Future<PaginatedResponse<AnchorModel>> anchorList(
+  AnchorListRef ref, {
+  int page = 1,
+}) {
   return ref.watch(anchorRepositoryProvider.notifier).getAnchors(page: page);
 }

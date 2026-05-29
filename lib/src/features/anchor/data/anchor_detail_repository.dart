@@ -1,7 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sports_app/src/core/config/env_config.dart';
 import 'package:sports_app/src/core/services/api_service.dart';
-import 'package:sports_app/src/core/utils/app_info.dart';
 import 'package:sports_app/src/features/anchor/domain/models/anchor_detail_model.dart';
 
 part 'anchor_detail_repository.g.dart';

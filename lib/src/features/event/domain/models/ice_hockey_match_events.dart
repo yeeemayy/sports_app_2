@@ -4,7 +4,11 @@ import 'package:flutter/foundation.dart';
 
 @immutable
 class IceHockeyStat {
-  const IceHockeyStat({required this.typeCode, required this.homeValue, required this.awayValue});
+  const IceHockeyStat({
+    required this.typeCode,
+    required this.homeValue,
+    required this.awayValue,
+  });
 
   final int typeCode;
   final double homeValue;
@@ -104,17 +108,18 @@ class IceHockeyIncident {
     return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
   }
 
-  factory IceHockeyIncident.fromJson(Map<String, dynamic> json) => IceHockeyIncident(
-    type: (json['type'] as num?)?.toInt() ?? 0,
-    extra: (json['extra'] as num?)?.toInt() ?? 0,
-    second: (json['second'] as num?)?.toInt() ?? 0,
-    position: (json['position'] as num?)?.toInt() ?? 0,
-    homeScore: (json['home_score'] as num?)?.toInt() ?? 0,
-    awayScore: (json['away_score'] as num?)?.toInt() ?? 0,
-    playerId: json['player_id'] as String?,
-    assists1Id: json['assists1_id'] as String?,
-    assists2Id: json['assists2_id'] as String?,
-  );
+  factory IceHockeyIncident.fromJson(Map<String, dynamic> json) =>
+      IceHockeyIncident(
+        type: (json['type'] as num?)?.toInt() ?? 0,
+        extra: (json['extra'] as num?)?.toInt() ?? 0,
+        second: (json['second'] as num?)?.toInt() ?? 0,
+        position: (json['position'] as num?)?.toInt() ?? 0,
+        homeScore: (json['home_score'] as num?)?.toInt() ?? 0,
+        awayScore: (json['away_score'] as num?)?.toInt() ?? 0,
+        playerId: json['player_id'] as String?,
+        assists1Id: json['assists1_id'] as String?,
+        assists2Id: json['assists2_id'] as String?,
+      );
 }
 
 // ─── Full events data ─────────────────────────────────────────────────────────

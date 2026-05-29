@@ -27,7 +27,11 @@ extension _CategoryX on _Category {
 // ─── Column definition ────────────────────────────────────────────────────────
 
 class _ColDef {
-  const _ColDef({required this.headerKey, required this.value, required this.sortNum});
+  const _ColDef({
+    required this.headerKey,
+    required this.value,
+    required this.sortNum,
+  });
   final String headerKey;
   final String Function(BasketballPlayerStat) value;
   final num Function(BasketballPlayerStat) sortNum;
@@ -143,21 +147,29 @@ int _shootingSort(BasketballPlayerStat a, BasketballPlayerStat b) {
 // ─── Tab widget ───────────────────────────────────────────────────────────────
 
 class BasketballTopPlayersTab extends ConsumerStatefulWidget {
-  const BasketballTopPlayersTab({super.key, required this.leagueId, required this.onPlayerTap});
+  const BasketballTopPlayersTab({
+    super.key,
+    required this.leagueId,
+    required this.onPlayerTap,
+  });
 
   final String leagueId;
   final ValueChanged<String> onPlayerTap;
 
   @override
-  ConsumerState<BasketballTopPlayersTab> createState() => _BasketballTopPlayersTabState();
+  ConsumerState<BasketballTopPlayersTab> createState() =>
+      _BasketballTopPlayersTabState();
 }
 
-class _BasketballTopPlayersTabState extends ConsumerState<BasketballTopPlayersTab> {
+class _BasketballTopPlayersTabState
+    extends ConsumerState<BasketballTopPlayersTab> {
   _Category _category = _Category.offense;
 
   @override
   Widget build(BuildContext context) {
-    final async = ref.watch(basketballPlayerStatsProvider(leagueId: widget.leagueId));
+    final async = ref.watch(
+      basketballPlayerStatsProvider(leagueId: widget.leagueId),
+    );
 
     return LeagueTabContent(
       async: async,
@@ -168,12 +180,17 @@ class _BasketballTopPlayersTabState extends ConsumerState<BasketballTopPlayersTa
           ..sort(
             sortIdx == -1
                 ? _shootingSort
-                : (a, b) => cols[sortIdx].sortNum(b).compareTo(cols[sortIdx].sortNum(a)),
+                : (a, b) => cols[sortIdx]
+                      .sortNum(b)
+                      .compareTo(cols[sortIdx].sortNum(a)),
           );
 
         return Column(
           children: [
-            _CategoryBar(selected: _category, onChanged: (c) => setState(() => _category = c)),
+            _CategoryBar(
+              selected: _category,
+              onChanged: (c) => setState(() => _category = c),
+            ),
             _HeaderRow(cols: cols),
             Expanded(
               child: ListView.builder(
@@ -210,7 +227,9 @@ class _CategoryBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: context.appColors.line, width: 0.5)),
+        border: Border(
+          bottom: BorderSide(color: context.appColors.line, width: 0.5),
+        ),
       ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -233,7 +252,11 @@ class _CategoryBar extends StatelessWidget {
 }
 
 class _CategoryChip extends StatelessWidget {
-  const _CategoryChip({required this.label, required this.selected, required this.onTap});
+  const _CategoryChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
   final String label;
   final bool selected;
@@ -246,7 +269,9 @@ class _CategoryChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: selected ? context.appColors.accent.withValues(alpha: 0.12) : Colors.transparent,
+          color: selected
+              ? context.appColors.accent.withValues(alpha: 0.12)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
             color: selected ? context.appColors.accent : context.appColors.line,
@@ -256,7 +281,9 @@ class _CategoryChip extends StatelessWidget {
         child: Text(
           label,
           style: AppTextStyles.mono(9).copyWith(
-            color: selected ? context.appColors.accent : context.appColors.text3,
+            color: selected
+                ? context.appColors.accent
+                : context.appColors.text3,
             fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
@@ -275,7 +302,9 @@ class _HeaderRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(_kPad, 7, _kPad, 7),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: context.appColors.line, width: 0.5)),
+        border: Border(
+          bottom: BorderSide(color: context.appColors.line, width: 0.5),
+        ),
       ),
       child: Row(
         children: [
@@ -283,7 +312,9 @@ class _HeaderRow extends StatelessWidget {
           Expanded(
             child: Text(
               'league.col.team'.tr(),
-              style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+              style: AppTextStyles.mono(
+                9,
+              ).copyWith(color: context.appColors.text3),
             ),
           ),
           for (final col in cols)
@@ -291,7 +322,9 @@ class _HeaderRow extends StatelessWidget {
               width: _kColW,
               child: Text(
                 col.headerKey.tr(),
-                style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+                style: AppTextStyles.mono(
+                  9,
+                ).copyWith(color: context.appColors.text3),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -302,7 +335,11 @@ class _HeaderRow extends StatelessWidget {
 }
 
 class _PlayerRow extends StatelessWidget {
-  const _PlayerRow({required this.player, required this.cols, required this.onTap});
+  const _PlayerRow({
+    required this.player,
+    required this.cols,
+    required this.onTap,
+  });
 
   final BasketballPlayerStat player;
   final List<_ColDef> cols;
@@ -316,7 +353,9 @@ class _PlayerRow extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.fromLTRB(_kPad, 11, _kPad, 11),
         decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: context.appColors.line, width: 0.5)),
+          border: Border(
+            bottom: BorderSide(color: context.appColors.line, width: 0.5),
+          ),
         ),
         child: Row(
           children: [
@@ -327,7 +366,9 @@ class _PlayerRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    context.localizedName(en: p?.name ?? '-', cn: p?.cnName).toUpperCase(),
+                    context
+                        .localizedName(en: p?.name ?? '-', cn: p?.cnName)
+                        .toUpperCase(),
                     style: AppTextStyles.display(
                       13,
                       context,
@@ -337,8 +378,12 @@ class _PlayerRow extends StatelessWidget {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    p?.position != null && p!.position!.isNotEmpty ? 'league.basketball_position.${p!.position}'.tr() : '-',
-                    style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+                    p?.position != null && p!.position!.isNotEmpty
+                        ? 'league.basketball_position.${p.position}'.tr()
+                        : '-',
+                    style: AppTextStyles.mono(
+                      9,
+                    ).copyWith(color: context.appColors.text3),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -350,7 +395,9 @@ class _PlayerRow extends StatelessWidget {
                 width: _kColW,
                 child: Text(
                   col.value(player),
-                  style: AppTextStyles.mono(12).copyWith(color: context.appColors.text2),
+                  style: AppTextStyles.mono(
+                    12,
+                  ).copyWith(color: context.appColors.text2),
                   textAlign: TextAlign.center,
                 ),
               ),

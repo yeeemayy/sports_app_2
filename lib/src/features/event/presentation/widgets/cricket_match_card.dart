@@ -23,19 +23,40 @@ class CricketMatchCard extends ConsumerWidget {
 
   final CricketMatch match;
 
-  static const _liveStatuses = {2, 3, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545};
+  static const _liveStatuses = {
+    2,
+    3,
+    532,
+    533,
+    534,
+    535,
+    536,
+    537,
+    538,
+    539,
+    540,
+    541,
+    542,
+    543,
+    544,
+    545,
+  };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final rt = ref.watch(
-      sportRealtimeProvider(SportType.cricket)
-          .select((map) => map[match.id] as CricketRealtimeData?),
+      sportRealtimeProvider(
+        SportType.cricket,
+      ).select((map) => map[match.id] as CricketRealtimeData?),
     );
 
     final effectiveStatusId = rt?.statusId ?? match.statusId;
     final effectiveHomeScore = rt?.homeScore.toString() ?? match.homeScore;
     final effectiveAwayScore = rt?.awayScore.toString() ?? match.awayScore;
-    final statusLabel = cricketStatusLabel(effectiveStatusId, match.statusDescription);
+    final statusLabel = cricketStatusLabel(
+      effectiveStatusId,
+      match.statusDescription,
+    );
     final isLive = _liveStatuses.contains(effectiveStatusId);
     final innings = rt?.innings ?? match.innings;
     final homeInnings = innings.where((i) => i.team == 1).lastOrNull;
@@ -77,7 +98,9 @@ class CricketMatchCard extends ConsumerWidget {
                     const SizedBox(height: 6),
                     Text(
                       match.homeName,
-                      style: AppTextStyles.mono(11).copyWith(color: context.appColors.text2),
+                      style: AppTextStyles.mono(
+                        11,
+                      ).copyWith(color: context.appColors.text2),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
@@ -95,28 +118,40 @@ class CricketMatchCard extends ConsumerWidget {
                     Text(
                       homeDisplay,
                       style: AppTextStyles.display(18, context).copyWith(
-                        color: isLive ? context.appColors.accent : context.appColors.text,
+                        color: isLive
+                            ? context.appColors.accent
+                            : context.appColors.text,
                       ),
                     ),
                     if (homeOvers != null)
                       Text(
                         '($homeOvers ov)',
-                        style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+                        style: AppTextStyles.mono(
+                          9,
+                        ).copyWith(color: context.appColors.text3),
                       ),
                     const SizedBox(height: 6),
-                    Divider(height: 1, thickness: 0.5, color: context.appColors.line),
+                    Divider(
+                      height: 1,
+                      thickness: 0.5,
+                      color: context.appColors.line,
+                    ),
                     const SizedBox(height: 6),
                     // Away innings score
                     Text(
                       awayDisplay,
                       style: AppTextStyles.display(18, context).copyWith(
-                        color: isLive ? context.appColors.accent : context.appColors.text,
+                        color: isLive
+                            ? context.appColors.accent
+                            : context.appColors.text,
                       ),
                     ),
                     if (awayOvers != null)
                       Text(
                         '($awayOvers ov)',
-                        style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+                        style: AppTextStyles.mono(
+                          9,
+                        ).copyWith(color: context.appColors.text3),
                       ),
                     const SizedBox(height: 8),
                     SportStatusBadge(label: statusLabel, isLive: isLive),
@@ -131,7 +166,9 @@ class CricketMatchCard extends ConsumerWidget {
                     const SizedBox(height: 6),
                     Text(
                       match.awayName,
-                      style: AppTextStyles.mono(11).copyWith(color: context.appColors.text2),
+                      style: AppTextStyles.mono(
+                        11,
+                      ).copyWith(color: context.appColors.text2),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,

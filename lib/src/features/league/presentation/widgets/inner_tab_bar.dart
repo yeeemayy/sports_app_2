@@ -63,8 +63,7 @@ class _InnerTab extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
-                color:
-                    active ? context.appColors.accent : Colors.transparent,
+                color: active ? context.appColors.accent : Colors.transparent,
                 width: 2,
               ),
             ),
@@ -72,9 +71,7 @@ class _InnerTab extends StatelessWidget {
           child: Text(
             label,
             style: AppTextStyles.display(12, context).copyWith(
-              color: active
-                  ? context.appColors.text
-                  : context.appColors.text3,
+              color: active ? context.appColors.text : context.appColors.text3,
               letterSpacing: 12 * 0.05,
             ),
           ),
