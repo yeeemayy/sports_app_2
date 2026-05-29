@@ -41,21 +41,28 @@ class LeagueDetailModel with _$LeagueDetailModel {
     required String name,
     @JsonKey(name: 'short_name') String? shortName,
     required String logo,
+
     /// Type: 1 = regular, 2 = cup
     int? type,
     @JsonKey(name: 'primary_color') String? primaryColor,
     @JsonKey(name: 'secondary_color') String? secondaryColor,
     @JsonKey(name: 'totalTeams') int? totalTeams,
     @JsonKey(name: 'totalPlayers') int? totalPlayers,
+
     /// Football-specific aggregate stats
     int? goals,
     int? assists,
     int? shots,
     @JsonKey(name: 'red_cards') int? redCards,
     @JsonKey(name: 'yellow_cards') int? yellowCards,
+    @JsonKey(name: 'yellow2red_cards') int? yellow2redCards,
+    int? fouls,
+
     /// Basketball-specific aggregate stats
     int? points,
     int? rebounds,
+    int? turnovers,
+    int? blocks,
     @JsonKey(name: 'cur_round') int? curRound,
     @JsonKey(name: 'round_count') int? roundCount,
     @JsonKey(name: 'cn_name') String? cnName,

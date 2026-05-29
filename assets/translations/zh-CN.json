@@ -855,6 +855,7 @@
     "comp_type_cup": "杯赛",
     "comp_type_friendly": "友谊赛",
     "tabs": {
+      "overview": "概览",
       "standings": "积分榜",
       "top_scorers": "射手榜",
       "top_players": "球员榜",
@@ -866,6 +867,35 @@
       "europa": "欧联",
       "relegation": "降级区"
     },
+    "standings_filter": {
+      "all": "全部",
+      "home": "主场",
+      "away": "客场"
+    },
+    "team_stat_filter": {
+      "goals": "进球",
+      "goals_against": "失球",
+      "shots_on_target": "射正",
+      "possession": "控球率",
+      "pass_acc": "传球精准",
+      "tackles": "铲球",
+      "corners": "角球",
+      "yellow_cards": "黄牌",
+      "key_passes": "关键传球",
+      "dribbles": "成功过人",
+      "interceptions": "拦截"
+    },
+    "player_stat_filter": {
+      "goals": "进球",
+      "assists": "助攻",
+      "shots": "射正",
+      "yellow_cards": "黄牌",
+      "rating": "评分",
+      "key_passes": "关键传球",
+      "dribbles": "成功过人",
+      "tackles": "铲球",
+      "saves": "扑救"
+    },
     "col": {
       "club": "球队",
       "team": "球队",
@@ -873,7 +903,7 @@
       "won": "胜",
       "draw": "平",
       "loss": "负",
-      "gd": "净胜",
+      "gd": "球数",
       "played": "场",
       "win_rate": "胜率",
       "game_back": "差距",
@@ -1014,10 +1044,81 @@
       "avg_ppg": "场均得分",
       "season": "赛季"
     },
+    "overview": {
+      "general": "概况",
+      "attack": "进攻",
+      "fouls_section": "犯规",
+      "goals": "进球数",
+      "assists": "助攻数",
+      "shots": "射门数",
+      "yellow_cards": "黄牌数",
+      "red_cards": "红牌数",
+      "yellow2red_cards": "第二黄牌",
+      "fouls": "犯规数",
+      "season_stats": "赛季数据",
+      "total_points": "总得分",
+      "total_rebounds": "总篮板",
+      "total_assists": "总助攻",
+      "total_blocks": "总盖帽",
+      "total_turnovers": "总失误"
+    },
     "season_picker": {
       "title": "赛季",
       "apply": "确认",
       "live": "进行中"
+    },
+    "basketball_player_stat_filter": {
+      "points": "得分",
+      "rebounds": "篮板",
+      "assists": "助攻",
+      "steals": "抢断",
+      "blocks": "盖帽",
+      "turnovers": "失误",
+      "fg_pct": "投篮%",
+      "three_pct": "三分%"
+    },
+    "basketball_team_stat_filter": {
+      "points": "得分",
+      "points_against": "失分",
+      "rebounds": "篮板",
+      "assists": "助攻",
+      "steals": "抢断",
+      "blocks": "盖帽",
+      "turnovers": "失误",
+      "fg_pct": "投篮%",
+      "three_pct": "三分%",
+      "ft_pct": "罚球%"
+    },
+    "basketball_stat_category": {
+      "offense": "进攻",
+      "shooting": "命中率",
+      "defense": "防守",
+      "other": "其它"
+    },
+    "basketball_col": {
+      "gp": "场次",
+      "pts": "得分",
+      "ast": "助攻",
+      "reb": "篮板",
+      "fg_pct": "投篮%",
+      "three_pct": "三分%",
+      "two_pct": "两分%",
+      "ft_pct": "罚球%",
+      "stl": "抢断",
+      "blk": "盖帽",
+      "tov": "失误",
+      "min": "时间",
+      "pf": "犯规",
+      "scope": "范围"
+    },
+    "basketball_position": {
+      "C": "中锋",
+      "SF": "小前锋",
+      "PF": "大前锋",
+      "SG": "得分后卫",
+      "PG": "控球后卫",
+      "F": "前锋",
+      "G": "后卫"
     }
   }
 }

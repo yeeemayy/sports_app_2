@@ -48,7 +48,7 @@ class StandingsTableHeader extends StatelessWidget {
                         color: context.appColors.text3,
                         letterSpacing: 8 * 0.1,
                       ),
-                      textAlign: i < 2 ? TextAlign.left : TextAlign.right,
+                      textAlign: i < 2 ? TextAlign.left : TextAlign.center,
                     ),
                   ),
         ],

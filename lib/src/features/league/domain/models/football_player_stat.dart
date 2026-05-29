@@ -40,10 +40,15 @@ class FootballPlayerStat with _$FootballPlayerStat {
     int? goals,
     int? assists,
     int? shots,
+    @JsonKey(name: 'shots_on_target') int? shotsOnTarget,
     @JsonKey(name: 'minutes_played') int? minutesPlayed,
     @JsonKey(name: 'red_cards') int? redCards,
     @JsonKey(name: 'yellow_cards') int? yellowCards,
     int? rating,
+    @JsonKey(name: 'key_passes') int? keyPasses,
+    @JsonKey(name: 'dribble_succ') int? dribbleSucc,
+    int? tackles,
+    int? saves,
   }) = _FootballPlayerStat;
 
   factory FootballPlayerStat.fromJson(Map<String, dynamic> json) =>

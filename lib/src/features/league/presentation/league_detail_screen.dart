@@ -6,7 +6,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/features/league/domain/league_sport.dart';
 import 'package:sports_app/src/features/league/presentation/league_detail/league_detail_header.dart';
-import 'package:sports_app/src/features/league/presentation/league_detail/squads/league_squads_tab.dart';
+import 'package:sports_app/src/features/league/presentation/league_detail/overview/league_overview_tab.dart';
 import 'package:sports_app/src/features/league/presentation/league_detail/standings/generic_standings_tab.dart';
 import 'package:sports_app/src/features/league/presentation/league_detail/standings/league_standings_tab.dart';
 import 'package:sports_app/src/features/league/presentation/league_detail/team_stats/league_team_stats_tab.dart';
@@ -18,11 +18,7 @@ import 'package:sports_app/src/routes/app_routes.dart';
 const _kHeroHeight = 160.0;
 
 class LeagueDetailScreen extends ConsumerStatefulWidget {
-  const LeagueDetailScreen({
-    super.key,
-    required this.sport,
-    required this.leagueId,
-  });
+  const LeagueDetailScreen({super.key, required this.sport, required this.leagueId});
 
   final LeagueSport sport;
   final String leagueId;
@@ -34,29 +30,24 @@ class LeagueDetailScreen extends ConsumerStatefulWidget {
 class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
   int _tabIndex = 0;
 
-  // Squads tab: selected team
-  String? _selectedSquadTeamId;
-  String? _selectedSquadTeamName;
-
   bool get _isFullSport =>
-      widget.sport == LeagueSport.football ||
-      widget.sport == LeagueSport.basketball;
+      widget.sport == LeagueSport.football || widget.sport == LeagueSport.basketball;
 
   List<String> get _tabs {
     if (_isFullSport) {
       return [
+        'league.tabs.overview'.tr(),
         'league.tabs.standings'.tr(),
         widget.sport == LeagueSport.football
             ? 'league.tabs.top_scorers'.tr()
             : 'league.tabs.top_players'.tr(),
         'league.tabs.team_stats'.tr(),
-        'league.tabs.squads'.tr(),
       ];
     }
     if (widget.sport.hasStandings) {
-      return ['league.tabs.standings'.tr()];
+      return ['league.tabs.overview'.tr(), 'league.tabs.standings'.tr()];
     }
-    return [];
+    return ['league.tabs.overview'.tr()];
   }
 
   void _navigateToTeam(String teamId) {
@@ -68,15 +59,11 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final detailAsync = switch (widget.sport) {
-      LeagueSport.football => ref.watch(
-        footballLeagueDetailProvider(leagueId: widget.leagueId),
-      ),
+      LeagueSport.football => ref.watch(footballLeagueDetailProvider(leagueId: widget.leagueId)),
       LeagueSport.basketball => ref.watch(
         basketballLeagueDetailProvider(leagueId: widget.leagueId),
       ),
-      final s => ref.watch(
-        sportLeagueDetailProvider(sport: s, leagueId: widget.leagueId),
-      ),
+      final s => ref.watch(sportLeagueDetailProvider(sport: s, leagueId: widget.leagueId)),
     };
 
     return Scaffold(
@@ -86,12 +73,7 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
         error: (e, _) => _buildError(),
         data: (detail) => Column(
           children: [
-            LeagueDetailHeader(
-              detail: detail,
-              sport: widget.sport,
-              onBack: () => context.pop(),
-            ),
-            LeagueDetailStatStrip(detail: detail, sport: widget.sport),
+            LeagueDetailHeader(detail: detail, sport: widget.sport, onBack: () => context.pop()),
             if (_tabs.isNotEmpty) ...[
               LeagueInnerTabBar(
                 tabs: _tabs,
@@ -105,6 +87,7 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
                       ? IndexedStack(
                           index: _tabIndex,
                           children: [
+                            LeagueOverviewTab(detail: detail, sport: widget.sport),
                             LeagueStandingsTab(
                               sport: widget.sport,
                               leagueId: widget.leagueId,
@@ -114,10 +97,7 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
                               sport: widget.sport,
                               leagueId: widget.leagueId,
                               onPlayerTap: (playerId) => context.push(
-                                AppRoutes.leaguePlayerPath(
-                                  widget.sport.apiPath,
-                                  playerId,
-                                ),
+                                AppRoutes.leaguePlayerPath(widget.sport.apiPath, playerId),
                               ),
                             ),
                             LeagueTeamStatsTab(
@@ -125,80 +105,73 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
                               leagueId: widget.leagueId,
                               onTeamTap: (teamId) => _navigateToTeam(teamId),
                             ),
-                            LeagueSquadsTab(
-                              sport: widget.sport,
-                              leagueId: widget.leagueId,
-                              selectedTeamId: _selectedSquadTeamId,
-                              selectedTeamName: _selectedSquadTeamName,
-                              onTeamSelected: (id, name) => setState(() {
-                                _selectedSquadTeamId = id;
-                                _selectedSquadTeamName = name;
-                              }),
-                              onPlayerTap: (playerId) => context.push(
-                                AppRoutes.leaguePlayerPath(
-                                  widget.sport.apiPath,
-                                  playerId,
-                                ),
-                              ),
-                            ),
                           ],
                         )
-                      : GenericStandingsTab(
-                          sport: widget.sport,
-                          leagueId: widget.leagueId,
-                          onTeamTap: (teamId, _) => _navigateToTeam(teamId),
+                      : IndexedStack(
+                          index: _tabIndex,
+                          children: [
+                            LeagueOverviewTab(detail: detail, sport: widget.sport),
+                            if (widget.sport.hasStandings)
+                              GenericStandingsTab(
+                                sport: widget.sport,
+                                leagueId: widget.leagueId,
+                                onTeamTap: (teamId, _) => _navigateToTeam(teamId),
+                              ),
+                          ],
                         ),
                 ),
               ),
-            ] else
-              Expanded(
-                child: SafeArea(
-                  top: false,
-                  child: Center(
-                    child: Text(
-                      'league.empty'.tr(),
-                      style: AppTextStyles.body(
-                        14,
-                      ).copyWith(color: context.appColors.text3),
-                    ),
-                  ),
-                ),
-              ),
+            ],
           ],
         ),
       ),
     );
   }
 
+  Widget _buildBackButton() {
+    return SafeArea(
+      bottom: false,
+      child: IconButton(
+        icon: const Icon(Icons.arrow_circle_left_outlined),
+        onPressed: () => context.pop(),
+      ),
+    );
+  }
+
   Widget _buildSkeleton() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildBackButton(),
         Skeletonizer(
           enabled: true,
-          child: Container(
-            height: _kHeroHeight + MediaQuery.of(context).padding.top,
-            color: context.appColors.surface2,
-          ),
+          child: Container(height: _kHeroHeight, color: context.appColors.surface2),
         ),
       ],
     );
   }
 
   Widget _buildError() {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.error_outline, color: context.appColors.text3, size: 48),
-          const SizedBox(height: 12),
-          Text(
-            'league.empty'.tr(),
-            style: AppTextStyles.body(
-              14,
-            ).copyWith(color: context.appColors.text3),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildBackButton(),
+        Expanded(
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.error_outline, color: context.appColors.text3, size: 48),
+                const SizedBox(height: 12),
+                Text(
+                  'league.empty'.tr(),
+                  style: AppTextStyles.body(14).copyWith(color: context.appColors.text3),
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

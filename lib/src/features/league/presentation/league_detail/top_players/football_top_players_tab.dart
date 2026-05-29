@@ -19,7 +19,50 @@ String _localizedPosition(String? position) {
   return 'league.player.position.$key'.tr();
 }
 
-class FootballTopPlayersTab extends ConsumerWidget {
+enum _PlayerStatType {
+  goals,
+  assists,
+  shots,
+  yellowCards,
+  rating,
+  keyPasses,
+  dribbles,
+  tackles,
+  saves,
+}
+
+extension _PlayerStatTypeX on _PlayerStatType {
+  String get labelKey => switch (this) {
+    _PlayerStatType.goals => 'league.player_stat_filter.goals',
+    _PlayerStatType.assists => 'league.player_stat_filter.assists',
+    _PlayerStatType.shots => 'league.player_stat_filter.shots',
+    _PlayerStatType.yellowCards => 'league.player_stat_filter.yellow_cards',
+    _PlayerStatType.rating => 'league.player_stat_filter.rating',
+    _PlayerStatType.keyPasses => 'league.player_stat_filter.key_passes',
+    _PlayerStatType.dribbles => 'league.player_stat_filter.dribbles',
+    _PlayerStatType.tackles => 'league.player_stat_filter.tackles',
+    _PlayerStatType.saves => 'league.player_stat_filter.saves',
+  };
+
+  num statValue(FootballPlayerStat p) => switch (this) {
+    _PlayerStatType.goals => p.goals ?? 0,
+    _PlayerStatType.assists => p.assists ?? 0,
+    _PlayerStatType.shots => p.shotsOnTarget ?? 0,
+    _PlayerStatType.yellowCards => p.yellowCards ?? 0,
+    _PlayerStatType.rating => p.rating ?? 0,
+    _PlayerStatType.keyPasses => p.keyPasses ?? 0,
+    _PlayerStatType.dribbles => p.dribbleSucc ?? 0,
+    _PlayerStatType.tackles => p.tackles ?? 0,
+    _PlayerStatType.saves => p.saves ?? 0,
+  };
+
+  String displayValue(FootballPlayerStat p) => switch (this) {
+    _PlayerStatType.rating => ((p.rating ?? 0) / 1000).toStringAsFixed(2),
+    _ => '${statValue(p).toInt()}',
+  };
+}
+
+class FootballTopPlayersTab extends ConsumerStatefulWidget {
   const FootballTopPlayersTab({
     super.key,
     required this.leagueId,
@@ -30,38 +73,137 @@ class FootballTopPlayersTab extends ConsumerWidget {
   final ValueChanged<String> onPlayerTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(footballPlayerStatsProvider(leagueId: leagueId));
+  ConsumerState<FootballTopPlayersTab> createState() =>
+      _FootballTopPlayersTabState();
+}
+
+class _FootballTopPlayersTabState extends ConsumerState<FootballTopPlayersTab> {
+  _PlayerStatType _statType = _PlayerStatType.goals;
+
+  @override
+  Widget build(BuildContext context) {
+    final async = ref.watch(footballPlayerStatsProvider(leagueId: widget.leagueId));
 
     return LeagueTabContent(
       async: async,
-      builder: (players) => ListView.builder(
-        padding: EdgeInsets.zero,
-        itemCount: players.length,
-        itemBuilder: (context, i) {
-          final p = players[i];
-          return _FootballPlayerRow(
-            rank: i + 1,
-            player: p,
-            onTap: () => onPlayerTap(p.player.id),
-          );
-        },
-      ),
+      builder: (players) {
+        final sorted = [...players]
+          ..sort((a, b) => _statType.statValue(b).compareTo(_statType.statValue(a)));
+
+        return Column(
+          children: [
+            _StatFilterBar(
+              selected: _statType,
+              onChanged: (t) => setState(() => _statType = t),
+            ),
+            Expanded(
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                itemCount: sorted.length,
+                itemBuilder: (context, i) {
+                  final p = sorted[i];
+                  return _FootballPlayerRow(
+                    rank: i + 1,
+                    player: p,
+                    statType: _statType,
+                    onTap: () => widget.onPlayerTap(p.player.id),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
 
 // ─── Private widgets ──────────────────────────────────────────────────────────
 
+class _StatFilterBar extends StatelessWidget {
+  const _StatFilterBar({required this.selected, required this.onChanged});
+
+  final _PlayerStatType selected;
+  final ValueChanged<_PlayerStatType> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: context.appColors.line, width: 0.5),
+        ),
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        child: Row(
+          children: [
+            for (int i = 0; i < _PlayerStatType.values.length; i++) ...[
+              if (i > 0) const SizedBox(width: 8),
+              _StatChip(
+                label: _PlayerStatType.values[i].labelKey.tr(),
+                selected: selected == _PlayerStatType.values[i],
+                onTap: () => onChanged(_PlayerStatType.values[i]),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatChip extends StatelessWidget {
+  const _StatChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: selected
+              ? context.appColors.accent.withValues(alpha: 0.12)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(
+            color: selected ? context.appColors.accent : context.appColors.line,
+            width: 0.8,
+          ),
+        ),
+        child: Text(
+          label,
+          style: AppTextStyles.mono(9).copyWith(
+            color: selected ? context.appColors.accent : context.appColors.text3,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _FootballPlayerRow extends StatelessWidget {
   const _FootballPlayerRow({
     required this.rank,
     required this.player,
+    required this.statType,
     required this.onTap,
   });
 
   final int rank;
   final FootballPlayerStat player;
+  final _PlayerStatType statType;
   final VoidCallback onTap;
 
   @override
@@ -117,7 +259,6 @@ class _FootballPlayerRow extends StatelessWidget {
                 ],
               ),
             ),
-            // Goals
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -127,40 +268,19 @@ class _FootballPlayerRow extends StatelessWidget {
                   textBaseline: TextBaseline.alphabetic,
                   children: [
                     Text(
-                      '${player.goals ?? 0}',
+                      statType.displayValue(player),
                       style: AppTextStyles.display(
                         22,
                         context,
                       ).copyWith(color: context.appColors.text),
                     ),
-                    const SizedBox(width: 3),
-                    Text(
-                      'league.player.goals'.tr(),
-                      style: AppTextStyles.mono(
-                        10,
-                      ).copyWith(color: context.appColors.text3),
-                    ),
                   ],
                 ),
-              ],
-            ),
-            const SizedBox(width: 12),
-            // Assists
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
                 Text(
-                  '${player.assists ?? 0}',
+                  statType.labelKey.tr(),
                   style: AppTextStyles.mono(
-                    12,
-                  ).copyWith(color: context.appColors.text2),
-                ),
-                Text(
-                  'league.player.assists'.tr(),
-                  style: AppTextStyles.mono(8).copyWith(
-                    color: context.appColors.text3,
-                    letterSpacing: 8 * 0.1,
-                  ),
+                    8,
+                  ).copyWith(color: context.appColors.text3),
                 ),
               ],
             ),

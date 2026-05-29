@@ -855,6 +855,7 @@
     "comp_type_cup": "CUP",
     "comp_type_friendly": "FRIENDLY",
     "tabs": {
+      "overview": "OVERVIEW",
       "standings": "STANDINGS",
       "top_scorers": "TOP SCORERS",
       "top_players": "TOP PLAYERS",
@@ -866,6 +867,35 @@
       "europa": "EUROPA",
       "relegation": "RELEGATION"
     },
+    "standings_filter": {
+      "all": "ALL",
+      "home": "HOME",
+      "away": "AWAY"
+    },
+    "team_stat_filter": {
+      "goals": "GOALS",
+      "goals_against": "GOALS AGAINST",
+      "shots_on_target": "SHOTS ON TARGET",
+      "possession": "POSSESSION",
+      "pass_acc": "PASS ACC%",
+      "tackles": "TACKLES",
+      "corners": "CORNERS",
+      "yellow_cards": "YELLOW CARDS",
+      "key_passes": "KEY PASSES",
+      "dribbles": "DRIBBLES WON",
+      "interceptions": "INTERCEPTIONS"
+    },
+    "player_stat_filter": {
+      "goals": "GOALS",
+      "assists": "ASSISTS",
+      "shots": "SHOTS ON TARGET",
+      "yellow_cards": "YELLOW CARDS",
+      "rating": "RATING",
+      "key_passes": "KEY PASSES",
+      "dribbles": "DRIBBLES WON",
+      "tackles": "TACKLES",
+      "saves": "SAVES"
+    },
     "col": {
       "club": "CLUB",
       "team": "TEAM",
@@ -873,7 +903,7 @@
       "won": "W",
       "draw": "D",
       "loss": "L",
-      "gd": "GD",
+      "gd": "Goal Diff",
       "played": "P",
       "win_rate": "WIN%",
       "game_back": "GB",
@@ -1014,10 +1044,81 @@
       "avg_ppg": "AVG PPG",
       "season": "SEASON"
     },
+    "overview": {
+      "general": "GENERAL",
+      "attack": "ATTACK",
+      "fouls_section": "FOULS",
+      "goals": "GOALS",
+      "assists": "ASSISTS",
+      "shots": "SHOTS",
+      "yellow_cards": "YELLOW CARDS",
+      "red_cards": "RED CARDS",
+      "yellow2red_cards": "2ND YELLOW",
+      "fouls": "FOULS",
+      "season_stats": "SEASON STATS",
+      "total_points": "TOTAL POINTS",
+      "total_rebounds": "TOTAL REBOUNDS",
+      "total_assists": "TOTAL ASSISTS",
+      "total_blocks": "TOTAL BLOCKS",
+      "total_turnovers": "TOTAL TURNOVERS"
+    },
     "season_picker": {
       "title": "SEASON",
       "apply": "APPLY",
       "live": "LIVE"
+    },
+    "basketball_player_stat_filter": {
+      "points": "POINTS",
+      "rebounds": "REBOUNDS",
+      "assists": "ASSISTS",
+      "steals": "STEALS",
+      "blocks": "BLOCKS",
+      "turnovers": "TURNOVERS",
+      "fg_pct": "FG%",
+      "three_pct": "3PT%"
+    },
+    "basketball_team_stat_filter": {
+      "points": "POINTS",
+      "points_against": "PTS AGAINST",
+      "rebounds": "REBOUNDS",
+      "assists": "ASSISTS",
+      "steals": "STEALS",
+      "blocks": "BLOCKS",
+      "turnovers": "TURNOVERS",
+      "fg_pct": "FG%",
+      "three_pct": "3PT%",
+      "ft_pct": "FT%"
+    },
+    "basketball_stat_category": {
+      "offense": "OFFENSE",
+      "shooting": "SHOOTING%",
+      "defense": "DEFENSE",
+      "other": "OTHER"
+    },
+    "basketball_col": {
+      "gp": "GP",
+      "pts": "PTS",
+      "ast": "AST",
+      "reb": "REB",
+      "fg_pct": "FG%",
+      "three_pct": "3P%",
+      "two_pct": "2P%",
+      "ft_pct": "FT%",
+      "stl": "STL",
+      "blk": "BLK",
+      "tov": "TOV",
+      "min": "MIN",
+      "pf": "PF",
+      "scope": "SCO"
+    },
+    "basketball_position": {
+      "C": "CENTER",
+      "SF": "SMALL FORWARD",
+      "PF": "POWER FORWARD",
+      "SG": "SHOOTING GUARD",
+      "PG": "POINT GUARD",
+      "F": "FORWARD",
+      "G": "GUARD"
     }
   }
 }

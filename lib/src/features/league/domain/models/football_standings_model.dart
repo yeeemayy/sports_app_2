@@ -33,6 +33,24 @@ class FootballStandingsRow with _$FootballStandingsRow {
     required int goals,
     @JsonKey(name: 'goals_against') required int goalsAgainst,
     @JsonKey(name: 'goal_diff') required int goalDiff,
+    // home stats
+    @JsonKey(name: 'home_points') int? homePoints,
+    @JsonKey(name: 'home_total') int? homeTotal,
+    @JsonKey(name: 'home_won') int? homeWon,
+    @JsonKey(name: 'home_draw') int? homeDraw,
+    @JsonKey(name: 'home_loss') int? homeLoss,
+    @JsonKey(name: 'home_goals') int? homeGoals,
+    @JsonKey(name: 'home_goals_against') int? homeGoalsAgainst,
+    @JsonKey(name: 'home_goal_diff') int? homeGoalDiff,
+    // away stats
+    @JsonKey(name: 'away_points') int? awayPoints,
+    @JsonKey(name: 'away_total') int? awayTotal,
+    @JsonKey(name: 'away_won') int? awayWon,
+    @JsonKey(name: 'away_draw') int? awayDraw,
+    @JsonKey(name: 'away_loss') int? awayLoss,
+    @JsonKey(name: 'away_goals') int? awayGoals,
+    @JsonKey(name: 'away_goals_against') int? awayGoalsAgainst,
+    @JsonKey(name: 'away_goal_diff') int? awayGoalDiff,
     @JsonKey(name: 'teamInfo') FootballStandingsTeamInfo? teamInfo,
   }) = _FootballStandingsRow;
 

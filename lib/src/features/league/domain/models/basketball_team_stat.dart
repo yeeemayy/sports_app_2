@@ -35,6 +35,9 @@ class BasketballTeamStat with _$BasketballTeamStat {
     int? turnovers,
     int? steals,
     int? blocks,
+    @JsonKey(name: 'points_against') int? pointsAgainst,
+    @JsonKey(name: 'total_fouls') int? totalFouls,
+    int? scope,
     BasketballStatTeamInfo? team,
   }) = _BasketballTeamStat;
 
