@@ -59,6 +59,12 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
       final s => ref.watch(sportBrowseItemsProvider(sport: s)),
     };
 
+    // ── Tennis parent leagues (Other Leagues section) ──
+    final AsyncValue<List<LeagueItem>> tennisParentAsync =
+        _sport == LeagueSport.tennis
+            ? ref.watch(tennisParentLeaguesProvider)
+            : const AsyncData([]);
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
@@ -257,6 +263,44 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
                 ),
               ),
             ),
+
+          // ── Tennis: Other Leagues section ───────────────────────────────
+          if (_sport == LeagueSport.tennis) ...[
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(_kPad, 0, _kPad, 14),
+                child: Text(
+                  'league.other_leagues'.tr(),
+                  style: AppTextStyles.display(20, context)
+                      .copyWith(color: context.appColors.text),
+                ),
+              ),
+            ),
+            tennisParentAsync.when(
+              loading: () => SliverToBoxAdapter(child: _CountriesShimmer()),
+              error: (_, _) =>
+                  const SliverToBoxAdapter(child: SizedBox.shrink()),
+              data: (leagues) => SliverPadding(
+                padding: const EdgeInsets.fromLTRB(_kPad, 0, _kPad, 0),
+                sliver: SliverGrid(
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    childAspectRatio: 3.2,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, i) => _TennisLeagueTile(
+                      league: leagues[i],
+                      sport: _sport,
+                    ),
+                    childCount: leagues.length,
+                  ),
+                ),
+              ),
+            ),
+          ],
 
           const SliverToBoxAdapter(child: SizedBox(height: 32)),
         ],
@@ -526,6 +570,52 @@ class _CountriesShimmer extends StatelessWidget {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Tennis Other League tile ─────────────────────────────────────────────────
+
+class _TennisLeagueTile extends StatelessWidget {
+  const _TennisLeagueTile({required this.league, required this.sport});
+
+  final LeagueItem league;
+  final LeagueSport sport;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.push(
+        AppRoutes.leagueDetailPath(sport.apiPath, league.id),
+        extra: league,
+      ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: context.appColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: context.appColors.line, width: 0.5),
+        ),
+        child: Row(
+          children: [
+            _LeagueLogo(logoUrl: league.logo, size: 24),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                context
+                    .localizedName(en: league.nameEn, cn: league.nameCn)
+                    .toUpperCase(),
+                style: AppTextStyles.display(13, context)
+                    .copyWith(color: context.appColors.text, height: 1),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded,
+                size: 14, color: context.appColors.text3),
+          ],
         ),
       ),
     );

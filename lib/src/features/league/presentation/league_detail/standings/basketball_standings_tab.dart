@@ -29,7 +29,8 @@ class BasketballStandingsTab extends ConsumerWidget {
       builder: (conferences) => SingleChildScrollView(
         child: Column(
           children: [
-            for (final entry in conferences.entries) ...[
+            for (final entry in (conferences.entries.toList()
+                  ..sort((a, b) => a.key.compareTo(b.key)))) ...[
               ConferenceHeader(name: entry.key),
               // Col headers
               Container(

@@ -61,22 +61,22 @@ List<_ColDef> _columnsFor(_Category cat) => switch (cat) {
   _Category.shooting => [
     _ColDef(
       headerKey: 'league.basketball_col.fg_pct',
-      value: (p) => '${p.fieldGoalsAccuracy ?? 0}%',
+      value: (p) => '${p.fieldGoalsAccuracy ?? 0}',
       sortNum: (p) => _pct(p.fieldGoalsAccuracy),
     ),
     _ColDef(
       headerKey: 'league.basketball_col.three_pct',
-      value: (p) => '${p.threePointsAccuracy ?? 0}%',
+      value: (p) => '${p.threePointsAccuracy ?? 0}',
       sortNum: (p) => _pct(p.threePointsAccuracy),
     ),
     _ColDef(
       headerKey: 'league.basketball_col.two_pct',
-      value: (p) => '${p.twoPointsAccuracy ?? 0}%',
+      value: (p) => '${p.twoPointsAccuracy ?? 0}',
       sortNum: (p) => _pct(p.twoPointsAccuracy),
     ),
     _ColDef(
       headerKey: 'league.basketball_col.ft_pct',
-      value: (p) => '${p.freeThrowsAccuracy ?? 0}%',
+      value: (p) => '${p.freeThrowsAccuracy ?? 0}',
       sortNum: (p) => _pct(p.freeThrowsAccuracy),
     ),
   ],
@@ -88,8 +88,8 @@ List<_ColDef> _columnsFor(_Category cat) => switch (cat) {
     ),
     _ColDef(
       headerKey: 'league.basketball_col.reb',
-      value: (p) => '${p.rebounds ?? 0}',
-      sortNum: (p) => p.rebounds ?? 0,
+      value: (p) => '${p.defensiveRebounds ?? 0}',
+      sortNum: (p) => p.defensiveRebounds ?? 0,
     ),
     _ColDef(
       headerKey: 'league.basketball_col.blk',
@@ -126,13 +126,19 @@ List<_ColDef> _columnsFor(_Category cat) => switch (cat) {
   ],
 };
 
-// Sort by the "headline" column of each category
+// Sort by the "headline" column of each category (shooting sorts by pts behind the scenes)
 int _primarySortIndex(_Category cat) => switch (cat) {
   _Category.offense => 1, // pts
-  _Category.shooting => 0, // fg%
+  _Category.shooting => -1, // use _shootingSort
   _Category.defense => 0, // stl
-  _Category.other => 0, // gp
+  _Category.other => 1, // gp
 };
+
+int _shootingSort(BasketballPlayerStat a, BasketballPlayerStat b) {
+  final cmp = (b.fieldGoalsScored ?? 0).compareTo(a.fieldGoalsScored ?? 0);
+  if (cmp != 0) return cmp;
+  return _pct(b.fieldGoalsAccuracy).compareTo(_pct(a.fieldGoalsAccuracy));
+}
 
 // ─── Tab widget ───────────────────────────────────────────────────────────────
 
@@ -159,7 +165,11 @@ class _BasketballTopPlayersTabState extends ConsumerState<BasketballTopPlayersTa
         final cols = _columnsFor(_category);
         final sortIdx = _primarySortIndex(_category);
         final sorted = [...players]
-          ..sort((a, b) => cols[sortIdx].sortNum(b).compareTo(cols[sortIdx].sortNum(a)));
+          ..sort(
+            sortIdx == -1
+                ? _shootingSort
+                : (a, b) => cols[sortIdx].sortNum(b).compareTo(cols[sortIdx].sortNum(a)),
+          );
 
         return Column(
           children: [
@@ -282,7 +292,7 @@ class _HeaderRow extends StatelessWidget {
               child: Text(
                 col.headerKey.tr(),
                 style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
-                textAlign: TextAlign.right,
+                textAlign: TextAlign.center,
               ),
             ),
         ],
@@ -327,7 +337,7 @@ class _PlayerRow extends StatelessWidget {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    p?.position != null ? 'league.basketball_position.${p!.position}'.tr() : '-',
+                    p?.position != null && p!.position!.isNotEmpty ? 'league.basketball_position.${p!.position}'.tr() : '-',
                     style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -341,7 +351,7 @@ class _PlayerRow extends StatelessWidget {
                 child: Text(
                   col.value(player),
                   style: AppTextStyles.mono(12).copyWith(color: context.appColors.text2),
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.center,
                 ),
               ),
           ],

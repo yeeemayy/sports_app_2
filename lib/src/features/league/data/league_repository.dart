@@ -12,6 +12,7 @@ import 'package:sports_app/src/features/league/domain/models/football_standings_
 import 'package:sports_app/src/features/league/domain/models/football_team_stat.dart';
 import 'package:sports_app/src/features/league/domain/models/generic_standings_model.dart';
 import 'package:sports_app/src/features/league/domain/models/league_detail_model.dart';
+import 'package:sports_app/src/features/league/domain/models/amfootball_lineup_player.dart';
 import 'package:sports_app/src/features/league/domain/models/league_item.dart';
 import 'package:sports_app/src/features/league/domain/models/simple_team_detail.dart';
 import 'package:sports_app/src/features/league/domain/models/squad_player.dart';
@@ -323,5 +324,35 @@ class LeagueRepository {
       data = res.data as Map<String, dynamic>;
     }
     return SimpleTeamDetail.fromJson(data);
+  }
+
+  /// Fetches American Football team lineup/roster.
+  Future<List<AmFootballLineupPlayer>> getAmFootballLineup(
+      String teamId) async {
+    final dio = _ref.read(sportsApiServiceProvider);
+    final res =
+        await dio.get('/amfootball/team/lineup/details/$teamId');
+    final list = res.data['data'] as List? ?? [];
+    return list
+        .map((j) =>
+            AmFootballLineupPlayer.fromJson(j as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Fetches the Tennis parent competition list for the "Other Leagues" section.
+  Future<List<LeagueItem>> getTennisParentLeagues() async {
+    final dio = _ref.read(sportsApiServiceProvider);
+    final res = await dio.get('/tennis/competition/parent/list');
+    final list = res.data['data'] as List? ?? [];
+    return list.map((j) {
+      final m = j as Map<String, dynamic>;
+      return LeagueItem(
+        id: (m['id'] as String?) ?? '',
+        nameEn: (m['name'] as String?) ?? '',
+        nameEnShort: null,
+        nameCn: m['name_cn'] as String?,
+        logo: (m['logo'] as String?) ?? '',
+      );
+    }).toList();
   }
 }

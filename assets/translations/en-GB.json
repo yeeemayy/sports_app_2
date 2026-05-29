@@ -838,6 +838,7 @@
     "all": "ALL →",
     "by_country": "BY COUNTRY",
     "by_category": "BY CATEGORY",
+    "other_leagues": "OTHER LEAGUES",
     "regions": "{n} REGIONS",
     "competitions": "{n} COMPETITIONS",
     "search_hint": "Search leagues, teams, players...",

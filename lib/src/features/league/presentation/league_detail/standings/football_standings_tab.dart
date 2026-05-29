@@ -72,7 +72,9 @@ class _FootballStandingsTabState extends ConsumerState<FootballStandingsTab> {
               ],
               colWidths: const [14, 22, 0, 24, 24, 24, 24, 56, 32],
             ),
-            for (final group in groups)
+            for (final group in (groups.toList()
+                  ..sort((a, b) =>
+                      (a.conference ?? '').compareTo(b.conference ?? ''))))
               for (int i = 0; i < group.rows.length; i++)
                 _FootballStandingsRow(
                   row: group.rows[i],

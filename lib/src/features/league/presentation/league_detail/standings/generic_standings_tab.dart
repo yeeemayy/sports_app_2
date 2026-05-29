@@ -25,6 +25,7 @@ class GenericStandingsTab extends ConsumerWidget {
   bool get _showDraws =>
       sport == LeagueSport.cricket || sport == LeagueSport.baseball;
   bool get _showHockeyOT => sport == LeagueSport.iceHockey;
+  bool get _showWinRate => sport == LeagueSport.baseball;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,7 +43,7 @@ class GenericStandingsTab extends ConsumerWidget {
         'league.col.ot_loss'.tr(),
       ],
       'league.col.loss'.tr(),
-      'league.col.pts'.tr(),
+      _showWinRate ? 'league.col.win_rate'.tr() : 'league.col.pts'.tr(),
     ];
 
     return LeagueTabContent(
@@ -83,7 +84,7 @@ class GenericStandingsTab extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  for (final h in headers.skip(2))
+                  for (final h in headers.skip(2).take(headers.length - 3))
                     SizedBox(
                       width: 32,
                       child: Text(
@@ -92,19 +93,32 @@ class GenericStandingsTab extends ConsumerWidget {
                           color: context.appColors.text3,
                           letterSpacing: 0.8,
                         ),
-                        textAlign: TextAlign.right,
+                        textAlign: TextAlign.center,
                       ),
                     ),
+                  SizedBox(
+                    width: _showWinRate ? 60 : 32,
+                    child: Text(
+                      headers.last,
+                      style: AppTextStyles.mono(8).copyWith(
+                        color: context.appColors.text3,
+                        letterSpacing: 0.8,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 ],
               ),
             ),
-            for (final entry in groups.entries) ...[
+            for (final entry in (groups.entries.toList()
+                  ..sort((a, b) => a.key.compareTo(b.key)))) ...[
               if (groups.length > 1) ConferenceHeader(name: entry.key),
               for (final row in entry.value.rows)
                 _GenericStandingsRow(
                   row: row,
                   showDraws: _showDraws,
                   showHockeyOT: _showHockeyOT,
+                  showWinRate: _showWinRate,
                   onTap: () => onTeamTap(
                     row.teamId,
                     context.localizedName(
@@ -128,12 +142,14 @@ class _GenericStandingsRow extends StatelessWidget {
     required this.row,
     required this.showDraws,
     required this.showHockeyOT,
+    required this.showWinRate,
     required this.onTap,
   });
 
   final GenericStandingsRow row;
   final bool showDraws;
   final bool showHockeyOT;
+  final bool showWinRate;
   final VoidCallback onTap;
 
   @override
@@ -203,19 +219,23 @@ class _GenericStandingsRow extends StatelessWidget {
                   style: AppTextStyles.mono(
                     10,
                   ).copyWith(color: context.appColors.text2),
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.center,
                 ),
               ),
-            // Points — highlighted
+            // Points / Win rate — highlighted
             SizedBox(
-              width: 32,
+              width: showWinRate ? 60 : 32,
               child: Text(
-                '${row.points ?? '-'}',
+                showWinRate
+                    ? (row.winRate != null
+                        ? row.winRate!.toStringAsFixed(3)
+                        : '-')
+                    : '${row.points ?? '-'}',
                 style: AppTextStyles.mono(12).copyWith(
                   color: context.appColors.text,
                   fontWeight: FontWeight.w600,
                 ),
-                textAlign: TextAlign.right,
+                textAlign: TextAlign.center,
               ),
             ),
           ],

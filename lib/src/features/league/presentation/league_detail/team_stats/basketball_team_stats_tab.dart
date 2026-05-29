@@ -9,7 +9,7 @@ import 'package:sports_app/src/features/league/presentation/league_detail/league
 import 'package:sports_app/src/features/league/presentation/providers/league_providers.dart';
 
 const _kPad = 16.0;
-const _kColW = 44.0;
+const _kColW = 50.0;
 
 // ─── Category enum ────────────────────────────────────────────────────────────
 
@@ -27,17 +27,13 @@ extension _CategoryX on _Category {
 // ─── Column definition ────────────────────────────────────────────────────────
 
 class _ColDef {
-  const _ColDef({
-    required this.headerKey,
-    required this.value,
-    required this.sortNum,
-  });
+  const _ColDef({required this.headerKey, required this.value, required this.sortNum});
   final String headerKey;
   final String Function(BasketballTeamStat) value;
   final num Function(BasketballTeamStat) sortNum;
 }
 
-int _pct(String? s) => int.tryParse(s ?? '') ?? 0;
+double _pct(String? s) => double.tryParse(s ?? '') ?? 0;
 
 List<_ColDef> _columnsFor(_Category cat) => switch (cat) {
   _Category.offense => [
@@ -65,22 +61,22 @@ List<_ColDef> _columnsFor(_Category cat) => switch (cat) {
   _Category.shooting => [
     _ColDef(
       headerKey: 'league.basketball_col.fg_pct',
-      value: (t) => '${t.fieldGoalsAccuracy ?? 0}%',
+      value: (t) => '${t.fieldGoalsAccuracy ?? 0}',
       sortNum: (t) => _pct(t.fieldGoalsAccuracy),
     ),
     _ColDef(
       headerKey: 'league.basketball_col.three_pct',
-      value: (t) => '${t.threePointersAccuracy ?? 0}%',
+      value: (t) => '${t.threePointersAccuracy ?? 0}',
       sortNum: (t) => _pct(t.threePointersAccuracy),
     ),
     _ColDef(
       headerKey: 'league.basketball_col.two_pct',
-      value: (t) => '${t.twoPointersAccuracy ?? 0}%',
+      value: (t) => '${t.twoPointersAccuracy ?? 0}',
       sortNum: (t) => _pct(t.twoPointersAccuracy),
     ),
     _ColDef(
       headerKey: 'league.basketball_col.ft_pct',
-      value: (t) => '${t.freeThrowsAccuracy ?? 0}%',
+      value: (t) => '${t.freeThrowsAccuracy ?? 0}',
       sortNum: (t) => _pct(t.freeThrowsAccuracy),
     ),
   ],
@@ -92,8 +88,8 @@ List<_ColDef> _columnsFor(_Category cat) => switch (cat) {
     ),
     _ColDef(
       headerKey: 'league.basketball_col.reb',
-      value: (t) => '${t.rebounds ?? 0}',
-      sortNum: (t) => t.rebounds ?? 0,
+      value: (t) => '${t.defensiveRebounds ?? 0}',
+      sortNum: (t) => t.defensiveRebounds ?? 0,
     ),
     _ColDef(
       headerKey: 'league.basketball_col.blk',
@@ -112,11 +108,7 @@ List<_ColDef> _columnsFor(_Category cat) => switch (cat) {
       value: (t) => '${t.matches ?? 0}',
       sortNum: (t) => t.matches ?? 0,
     ),
-    _ColDef(
-      headerKey: 'league.basketball_col.min',
-      value: (_) => '-',
-      sortNum: (_) => 0,
-    ),
+    _ColDef(headerKey: 'league.basketball_col.min', value: (_) => '-', sortNum: (_) => 0),
     _ColDef(
       headerKey: 'league.basketball_col.pf',
       value: (t) => '${t.totalFouls ?? 0}',
@@ -131,38 +123,30 @@ List<_ColDef> _columnsFor(_Category cat) => switch (cat) {
 };
 
 int _primarySortIndex(_Category cat) => switch (cat) {
-  _Category.offense => 1,  // pts
+  _Category.offense => 1, // pts
   _Category.shooting => 0, // fg%
-  _Category.defense => 0,  // stl
-  _Category.other => 0,    // gp
+  _Category.defense => 0, // stl
+  _Category.other => 0, // gp
 };
 
 // ─── Tab widget ───────────────────────────────────────────────────────────────
 
 class BasketballTeamStatsTab extends ConsumerStatefulWidget {
-  const BasketballTeamStatsTab({
-    super.key,
-    required this.leagueId,
-    required this.onTeamTap,
-  });
+  const BasketballTeamStatsTab({super.key, required this.leagueId, required this.onTeamTap});
 
   final String leagueId;
   final ValueChanged<String> onTeamTap;
 
   @override
-  ConsumerState<BasketballTeamStatsTab> createState() =>
-      _BasketballTeamStatsTabState();
+  ConsumerState<BasketballTeamStatsTab> createState() => _BasketballTeamStatsTabState();
 }
 
-class _BasketballTeamStatsTabState
-    extends ConsumerState<BasketballTeamStatsTab> {
+class _BasketballTeamStatsTabState extends ConsumerState<BasketballTeamStatsTab> {
   _Category _category = _Category.offense;
 
   @override
   Widget build(BuildContext context) {
-    final async = ref.watch(
-      basketballTeamStatsProvider(leagueId: widget.leagueId),
-    );
+    final async = ref.watch(basketballTeamStatsProvider(leagueId: widget.leagueId));
 
     return LeagueTabContent(
       async: async,
@@ -170,17 +154,11 @@ class _BasketballTeamStatsTabState
         final cols = _columnsFor(_category);
         final sortIdx = _primarySortIndex(_category);
         final sorted = [...teams]
-          ..sort(
-            (a, b) =>
-                cols[sortIdx].sortNum(b).compareTo(cols[sortIdx].sortNum(a)),
-          );
+          ..sort((a, b) => cols[sortIdx].sortNum(b).compareTo(cols[sortIdx].sortNum(a)));
 
         return Column(
           children: [
-            _CategoryBar(
-              selected: _category,
-              onChanged: (c) => setState(() => _category = c),
-            ),
+            _CategoryBar(selected: _category, onChanged: (c) => setState(() => _category = c)),
             _HeaderRow(cols: cols),
             Expanded(
               child: ListView.builder(
@@ -189,9 +167,7 @@ class _BasketballTeamStatsTabState
                 itemBuilder: (context, i) => _TeamRow(
                   team: sorted[i],
                   cols: cols,
-                  onTap: () => widget.onTeamTap(
-                    sorted[i].teamId ?? sorted[i].team?.id ?? '',
-                  ),
+                  onTap: () => widget.onTeamTap(sorted[i].teamId ?? sorted[i].team?.id ?? ''),
                 ),
               ),
             ),
@@ -214,9 +190,7 @@ class _CategoryBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: context.appColors.line, width: 0.5),
-        ),
+        border: Border(bottom: BorderSide(color: context.appColors.line, width: 0.5)),
       ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -239,11 +213,7 @@ class _CategoryBar extends StatelessWidget {
 }
 
 class _CategoryChip extends StatelessWidget {
-  const _CategoryChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
+  const _CategoryChip({required this.label, required this.selected, required this.onTap});
 
   final String label;
   final bool selected;
@@ -256,9 +226,7 @@ class _CategoryChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: selected
-              ? context.appColors.accent.withValues(alpha: 0.12)
-              : Colors.transparent,
+          color: selected ? context.appColors.accent.withValues(alpha: 0.12) : Colors.transparent,
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
             color: selected ? context.appColors.accent : context.appColors.line,
@@ -268,8 +236,7 @@ class _CategoryChip extends StatelessWidget {
         child: Text(
           label,
           style: AppTextStyles.mono(9).copyWith(
-            color:
-                selected ? context.appColors.accent : context.appColors.text3,
+            color: selected ? context.appColors.accent : context.appColors.text3,
             fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
@@ -288,9 +255,7 @@ class _HeaderRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(_kPad, 7, _kPad, 7),
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: context.appColors.line, width: 0.5),
-        ),
+        border: Border(bottom: BorderSide(color: context.appColors.line, width: 0.5)),
       ),
       child: Row(
         children: [
@@ -298,9 +263,7 @@ class _HeaderRow extends StatelessWidget {
           Expanded(
             child: Text(
               'league.col.team'.tr(),
-              style: AppTextStyles.mono(9).copyWith(
-                color: context.appColors.text3,
-              ),
+              style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
             ),
           ),
           for (final col in cols)
@@ -308,10 +271,8 @@ class _HeaderRow extends StatelessWidget {
               width: _kColW,
               child: Text(
                 col.headerKey.tr(),
-                style: AppTextStyles.mono(9).copyWith(
-                  color: context.appColors.text3,
-                ),
-                textAlign: TextAlign.right,
+                style: AppTextStyles.mono(9).copyWith(color: context.appColors.text3),
+                textAlign: TextAlign.center,
               ),
             ),
         ],
@@ -321,11 +282,7 @@ class _HeaderRow extends StatelessWidget {
 }
 
 class _TeamRow extends StatelessWidget {
-  const _TeamRow({
-    required this.team,
-    required this.cols,
-    required this.onTap,
-  });
+  const _TeamRow({required this.team, required this.cols, required this.onTap});
 
   final BasketballTeamStat team;
   final List<_ColDef> cols;
@@ -338,27 +295,16 @@ class _TeamRow extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.fromLTRB(_kPad, 11, _kPad, 11),
         decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(color: context.appColors.line, width: 0.5),
-          ),
+          border: Border(bottom: BorderSide(color: context.appColors.line, width: 0.5)),
         ),
         child: Row(
           children: [
-            LeagueTeamAvatar(
-              logoUrl: team.team?.logo,
-              size: 26,
-              circleFallback: false,
-            ),
+            LeagueTeamAvatar(logoUrl: team.team?.logo, size: 26, circleFallback: false),
             const SizedBox(width: 9),
             Expanded(
               child: Text(
-                context.localizedName(
-                  en: team.team?.name ?? '-',
-                  cn: team.team?.cnName,
-                ),
-                style: AppTextStyles.mono(12).copyWith(
-                  color: context.appColors.text,
-                ),
+                context.localizedName(en: team.team?.name ?? '-', cn: team.team?.cnName),
+                style: AppTextStyles.mono(12).copyWith(color: context.appColors.text),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -368,10 +314,8 @@ class _TeamRow extends StatelessWidget {
                 width: _kColW,
                 child: Text(
                   col.value(team),
-                  style: AppTextStyles.mono(12).copyWith(
-                    color: context.appColors.text2,
-                  ),
-                  textAlign: TextAlign.right,
+                  style: AppTextStyles.mono(12).copyWith(color: context.appColors.text2),
+                  textAlign: TextAlign.center,
                 ),
               ),
           ],

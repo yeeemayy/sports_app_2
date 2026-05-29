@@ -11,6 +11,7 @@ import 'package:sports_app/src/features/league/domain/models/football_player_sta
 import 'package:sports_app/src/features/league/domain/models/football_standings_model.dart';
 import 'package:sports_app/src/features/league/domain/models/football_team_stat.dart';
 import 'package:sports_app/src/features/league/domain/models/generic_standings_model.dart';
+import 'package:sports_app/src/features/league/domain/models/amfootball_lineup_player.dart';
 import 'package:sports_app/src/features/league/domain/models/league_detail_model.dart';
 import 'package:sports_app/src/features/league/domain/models/league_item.dart';
 import 'package:sports_app/src/features/league/domain/models/simple_team_detail.dart';
@@ -192,3 +193,14 @@ Future<SimpleTeamDetail> genericTeamDetail(
   required String teamId,
 }) =>
     ref.read(leagueRepositoryProvider).getGenericTeamDetail(sport, teamId);
+
+@riverpod
+Future<List<AmFootballLineupPlayer>> amFootballLineup(
+  AmFootballLineupRef ref, {
+  required String teamId,
+}) =>
+    ref.read(leagueRepositoryProvider).getAmFootballLineup(teamId);
+
+@riverpod
+Future<List<LeagueItem>> tennisParentLeagues(TennisParentLeaguesRef ref) =>
+    ref.read(leagueRepositoryProvider).getTennisParentLeagues();

@@ -45,13 +45,18 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
       ];
     }
     if (widget.sport.hasStandings) {
-      return ['league.tabs.overview'.tr(), 'league.tabs.standings'.tr()];
+      return ['league.tabs.standings'.tr()];
     }
-    return ['league.tabs.overview'.tr()];
+    return [];
   }
 
+  bool get _hasTeamDetail =>
+      widget.sport == LeagueSport.football ||
+      widget.sport == LeagueSport.basketball ||
+      widget.sport == LeagueSport.amFootball;
+
   void _navigateToTeam(String teamId) {
-    if (teamId.isNotEmpty) {
+    if (teamId.isNotEmpty && _hasTeamDetail) {
       context.push(AppRoutes.leagueTeamPath(widget.sport.apiPath, teamId));
     }
   }
@@ -75,11 +80,12 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
           children: [
             LeagueDetailHeader(detail: detail, sport: widget.sport, onBack: () => context.pop()),
             if (_tabs.isNotEmpty) ...[
-              LeagueInnerTabBar(
-                tabs: _tabs,
-                activeIndex: _tabIndex,
-                onTap: (i) => setState(() => _tabIndex = i),
-              ),
+              if (_tabs.length > 1)
+                LeagueInnerTabBar(
+                  tabs: _tabs,
+                  activeIndex: _tabIndex,
+                  onTap: (i) => setState(() => _tabIndex = i),
+                ),
               Expanded(
                 child: SafeArea(
                   top: false,
@@ -107,17 +113,10 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
                             ),
                           ],
                         )
-                      : IndexedStack(
-                          index: _tabIndex,
-                          children: [
-                            LeagueOverviewTab(detail: detail, sport: widget.sport),
-                            if (widget.sport.hasStandings)
-                              GenericStandingsTab(
-                                sport: widget.sport,
-                                leagueId: widget.leagueId,
-                                onTeamTap: (teamId, _) => _navigateToTeam(teamId),
-                              ),
-                          ],
+                      : GenericStandingsTab(
+                          sport: widget.sport,
+                          leagueId: widget.leagueId,
+                          onTeamTap: (teamId, _) => _navigateToTeam(teamId),
                         ),
                 ),
               ),

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/league/domain/league_sport.dart';
+import 'package:sports_app/src/features/league/domain/models/amfootball_lineup_player.dart';
 import 'package:sports_app/src/features/league/domain/models/squad_player.dart';
 import 'package:sports_app/src/features/league/domain/models/simple_team_detail.dart';
 import 'package:sports_app/src/features/league/domain/models/team_detail_model.dart';
@@ -25,6 +26,8 @@ class TeamDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (_isFullSport) {
       return _FullTeamDetail(sport: sport, teamId: teamId);
+    } else if (sport == LeagueSport.amFootball) {
+      return _AmFootballTeamDetail(teamId: teamId);
     } else {
       return _GenericTeamDetail(sport: sport, teamId: teamId);
     }
@@ -96,6 +99,146 @@ class _GenericTeamDetail extends ConsumerWidget {
       ),
     );
   }
+}
+
+// ─── AM Football team detail ─────────────────────────────────────────────────
+
+class _AmFootballTeamDetail extends ConsumerWidget {
+  const _AmFootballTeamDetail({required this.teamId});
+  final String teamId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final teamAsync = ref.watch(
+      genericTeamDetailProvider(sport: LeagueSport.amFootball, teamId: teamId),
+    );
+    final lineupAsync = ref.watch(amFootballLineupProvider(teamId: teamId));
+
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: teamAsync.when(
+        loading: () => const _TeamDetailSkeleton(),
+        error: (e, _) => Center(
+          child: Text(
+            'league.empty'.tr(),
+            style: AppTextStyles.body(14).copyWith(color: context.appColors.text3),
+          ),
+        ),
+        data: (team) => CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(child: _GenericTeamHero(team: team)),
+            SliverToBoxAdapter(
+              child: lineupAsync.when(
+                loading: () => const _SquadSkeleton(),
+                error: (_, _) => const SizedBox.shrink(),
+                data: (lineup) => lineup.isEmpty
+                    ? const SizedBox.shrink()
+                    : _AmFootballLineupSection(lineup: lineup),
+              ),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AmFootballLineupSection extends StatelessWidget {
+  const _AmFootballLineupSection({required this.lineup});
+  final List<AmFootballLineupPlayer> lineup;
+
+  static const _positionOrder = [
+    'QB', 'RB', 'WR', 'TE', 'OL',
+    'DL', 'DE', 'LB', 'CB', 'S', 'EDGE',
+    'P', 'PK', 'LS',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final grouped = <String, List<AmFootballLineupPlayer>>{};
+    for (final p in lineup) {
+      grouped.putIfAbsent(p.position.toUpperCase(), () => []).add(p);
+    }
+
+    final sections = <Widget>[];
+    final orderedPositions = [
+      ..._positionOrder.where(grouped.containsKey),
+      ...grouped.keys.where((k) => !_positionOrder.contains(k)),
+    ];
+
+    for (final pos in orderedPositions) {
+      final players = grouped[pos]!;
+      sections.add(_PositionHeader(position: pos));
+      for (final p in players) {
+        sections.add(_AmFootballPlayerRow(player: p));
+      }
+    }
+
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: sections);
+  }
+}
+
+class _AmFootballPlayerRow extends StatelessWidget {
+  const _AmFootballPlayerRow({required this.player});
+  final AmFootballLineupPlayer player;
+
+  @override
+  Widget build(BuildContext context) {
+    final name = player.playerInfo?.name;
+    final logo = player.playerInfo?.logo ?? '';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: context.appColors.line, width: 0.5)),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 32,
+            child: Text(
+              '#${player.jerseyNo}',
+              style: AppTextStyles.mono(10).copyWith(color: context.appColors.text3),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(width: 8),
+          ClipOval(
+            child: logo.isNotEmpty
+                ? CachedNetworkImage(
+                    imageUrl: logo,
+                    width: 34,
+                    height: 34,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => _playerPlaceholder(context),
+                  )
+                : _playerPlaceholder(context),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              name ?? '-',
+              style: AppTextStyles.display(13, context)
+                  .copyWith(color: context.appColors.text, height: 1.1),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _playerPlaceholder(BuildContext context) => Container(
+        width: 34,
+        height: 34,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: context.appColors.surface2,
+        ),
+        child: Icon(Icons.person_outline_rounded, size: 18, color: context.appColors.text3),
+      );
 }
 
 class _GenericTeamHero extends StatefulWidget {
