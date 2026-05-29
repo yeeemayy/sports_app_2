@@ -91,6 +91,7 @@ class _LeagueScreenState extends ConsumerState<LeagueScreen> {
                     ),
                     GestureDetector(
                       onTap: () => context.push(AppRoutes.leagueSearch),
+                      behavior: HitTestBehavior.opaque,
                       child: Container(
                         width: 42,
                         height: 42,
