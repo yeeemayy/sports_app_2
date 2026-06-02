@@ -490,6 +490,12 @@ class ProfileScreen extends ConsumerWidget {
                     label: 'profile.edit_button'.tr(),
                     onTap: () => context.push(AppRoutes.profileEditFull),
                   ),
+                if (isAuthenticated)
+                  _ProfileTile(
+                    icon: Icons.star_outline_rounded,
+                    label: 'favourites.profile_tile'.tr(),
+                    onTap: () => context.push(AppRoutes.profileFavourites),
+                  ),
                 _ProfileTile(
                   icon: themeMode == ThemeMode.light
                       ? Icons.light_mode_rounded

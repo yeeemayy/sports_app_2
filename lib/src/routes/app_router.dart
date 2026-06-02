@@ -35,6 +35,7 @@ import 'package:sports_app/src/features/news/presentation/news_category_screen.d
 import 'package:sports_app/src/features/news/presentation/news_detail_screen.dart';
 import 'package:sports_app/src/features/video/presentation/video_detail_screen.dart';
 import 'package:sports_app/src/features/news/presentation/news_screen.dart';
+import 'package:sports_app/src/features/favourites/presentation/favourites_screen.dart';
 import 'package:sports_app/src/features/profile/presentation/edit_profile_screen.dart';
 import 'package:sports_app/src/features/profile/presentation/profile_screen.dart';
 import 'package:sports_app/src/shared_widgets/web_view_screen.dart';
@@ -143,6 +144,11 @@ GoRouter appRouter(AppRouterRef ref) {
                     path: AppRoutes.profileEdit,
                     builder: (BuildContext context, GoRouterState state) =>
                         const EditProfileScreen(),
+                  ),
+                  GoRoute(
+                    parentNavigatorKey: rootNavigatorKey,
+                    path: 'favourites',
+                    builder: (context, state) => const FavouritesScreen(),
                   ),
                   GoRoute(
                     parentNavigatorKey: rootNavigatorKey,
@@ -343,6 +349,6 @@ GoRouter appRouter(AppRouterRef ref) {
 /// Bridges Riverpod auth state changes to GoRouter's Listenable-based refresh.
 class _AuthNotifierListenable extends ChangeNotifier {
   _AuthNotifierListenable(Ref ref) {
-    ref.listen(authNotifierProvider, (_, __) => notifyListeners());
+    ref.listen(authNotifierProvider, (_, _) => notifyListeners());
   }
 }

@@ -1,8 +1,11 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
+import 'package:sports_app/src/features/favourites/data/favourites_repository.dart';
+import 'package:sports_app/src/features/favourites/presentation/providers/favourites_providers.dart';
 import 'package:sports_app/src/features/league/domain/league_sport.dart';
 import 'package:sports_app/src/features/league/domain/models/league_detail_model.dart';
 import 'package:sports_app/src/features/league/presentation/utils/logo_color.dart';
@@ -11,7 +14,7 @@ const _kHeroHeight = 160.0;
 
 // ─── Hero banner ─────────────────────────────────────────────────────────────
 
-class LeagueDetailHeader extends StatefulWidget {
+class LeagueDetailHeader extends ConsumerStatefulWidget {
   const LeagueDetailHeader({
     super.key,
     required this.detail,
@@ -24,10 +27,10 @@ class LeagueDetailHeader extends StatefulWidget {
   final VoidCallback onBack;
 
   @override
-  State<LeagueDetailHeader> createState() => _LeagueDetailHeaderState();
+  ConsumerState<LeagueDetailHeader> createState() => _LeagueDetailHeaderState();
 }
 
-class _LeagueDetailHeaderState extends State<LeagueDetailHeader>
+class _LeagueDetailHeaderState extends ConsumerState<LeagueDetailHeader>
     with LogoColorMixin<LeagueDetailHeader> {
   static Color? _parseHex(String? hex) {
     if (hex == null || hex.isEmpty) return null;
@@ -108,6 +111,21 @@ class _LeagueDetailHeaderState extends State<LeagueDetailHeader>
               ),
             ),
           ),
+          // Favourite star button
+          if (ref.watch(firebaseUidProvider) case final uid?)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 12,
+              right: 16,
+              child: _LeagueFavButton(
+                uid: uid,
+                sport: widget.sport.apiPath,
+                leagueId: widget.detail.id,
+                name: widget.detail.name,
+                cnName: widget.detail.cnName,
+                logoUrl: widget.detail.logo,
+                repo: ref.read(favouritesRepositoryProvider),
+              ),
+            ),
           // Center content
           Positioned.fill(
             child: Column(
@@ -262,6 +280,61 @@ class _StatCell extends StatelessWidget {
             ).copyWith(color: context.appColors.text3, letterSpacing: 8 * 0.12),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─── League favourite star button ────────────────────────────────────────────
+
+class _LeagueFavButton extends ConsumerWidget {
+  const _LeagueFavButton({
+    required this.uid,
+    required this.sport,
+    required this.leagueId,
+    required this.name,
+    this.cnName,
+    this.logoUrl,
+    required this.repo,
+  });
+
+  final String uid;
+  final String sport;
+  final String leagueId;
+  final String name;
+  final String? cnName;
+  final String? logoUrl;
+  final FavouritesRepository repo;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isFavAsync = ref.watch(
+      isLeagueFavouritedProvider((uid: uid, sport: sport, leagueId: leagueId)),
+    );
+    final isFav = isFavAsync.valueOrNull ?? false;
+
+    return IconButton(
+      onPressed: () => repo.toggleLeague(
+        uid: uid,
+        sport: sport,
+        leagueId: leagueId,
+        name: name,
+        cnName: cnName,
+        logoUrl: logoUrl,
+      ),
+      icon: Icon(
+        isFav ? Icons.star_rounded : Icons.star_border_rounded,
+        color: isFav ? const Color(0xFFFFD60A) : Colors.white,
+      ),
+      iconSize: 24,
+      padding: EdgeInsets.zero,
+      style: IconButton.styleFrom(
+        backgroundColor: Colors.black.withValues(alpha: 0.3),
+        side: BorderSide(
+          color: Colors.white.withValues(alpha: 0.15),
+          width: 0.5,
+        ),
+        shape: const CircleBorder(),
       ),
     );
   }

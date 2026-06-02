@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
+import 'package:sports_app/src/features/favourites/data/favourites_repository.dart';
+import 'package:sports_app/src/features/favourites/presentation/providers/favourites_providers.dart';
 import 'package:sports_app/src/features/league/domain/league_sport.dart';
 import 'package:sports_app/src/features/league/domain/models/amfootball_lineup_player.dart';
 import 'package:sports_app/src/features/league/domain/models/squad_player.dart';
@@ -104,7 +106,7 @@ class _GenericTeamDetail extends ConsumerWidget {
         ),
         data: (team) => CustomScrollView(
           slivers: [
-            SliverToBoxAdapter(child: _GenericTeamHero(team: team)),
+            SliverToBoxAdapter(child: _GenericTeamHero(sport: sport, team: team)),
             const SliverToBoxAdapter(child: SizedBox(height: 40)),
           ],
         ),
@@ -140,7 +142,9 @@ class _AmFootballTeamDetail extends ConsumerWidget {
         ),
         data: (team) => CustomScrollView(
           slivers: [
-            SliverToBoxAdapter(child: _GenericTeamHero(team: team)),
+            SliverToBoxAdapter(
+              child: _GenericTeamHero(sport: LeagueSport.amFootball, team: team),
+            ),
             SliverToBoxAdapter(
               child: lineupAsync.when(
                 loading: () => const _SquadSkeleton(),
@@ -279,15 +283,16 @@ class _AmFootballPlayerRow extends StatelessWidget {
   );
 }
 
-class _GenericTeamHero extends StatefulWidget {
-  const _GenericTeamHero({required this.team});
+class _GenericTeamHero extends ConsumerStatefulWidget {
+  const _GenericTeamHero({required this.sport, required this.team});
+  final LeagueSport sport;
   final SimpleTeamDetail team;
 
   @override
-  State<_GenericTeamHero> createState() => _GenericTeamHeroState();
+  ConsumerState<_GenericTeamHero> createState() => _GenericTeamHeroState();
 }
 
-class _GenericTeamHeroState extends State<_GenericTeamHero>
+class _GenericTeamHeroState extends ConsumerState<_GenericTeamHero>
     with LogoColorMixin<_GenericTeamHero> {
   @override
   void initState() {
@@ -333,22 +338,38 @@ class _GenericTeamHeroState extends State<_GenericTeamHero>
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-              child: IconButton(
-                onPressed: () => context.pop(),
-                icon: const Icon(
-                  Icons.arrow_circle_left_outlined,
-                  color: Colors.white,
-                ),
-                iconSize: 24,
-                padding: EdgeInsets.zero,
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.white.withValues(alpha: 0.15),
-                  side: BorderSide(
-                    color: Colors.white.withValues(alpha: 0.3),
-                    width: 0.5,
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () => context.pop(),
+                    icon: const Icon(
+                      Icons.arrow_circle_left_outlined,
+                      color: Colors.white,
+                    ),
+                    iconSize: 24,
+                    padding: EdgeInsets.zero,
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.white.withValues(alpha: 0.15),
+                      side: BorderSide(
+                        color: Colors.white.withValues(alpha: 0.3),
+                        width: 0.5,
+                      ),
+                      shape: const CircleBorder(),
+                    ),
                   ),
-                  shape: const CircleBorder(),
-                ),
+                  const Spacer(),
+                  if (ref.watch(firebaseUidProvider) case final uid?)
+                    _FavStarButton(
+                      uid: uid,
+                      sport: widget.sport.apiPath,
+                      itemId: widget.team.id,
+                      name: widget.team.name,
+                      cnName: widget.team.cnName,
+                      logoUrl: widget.team.logo,
+                      isTeam: true,
+                      repo: ref.read(favouritesRepositoryProvider),
+                    ),
+                ],
               ),
             ),
           ),
@@ -435,7 +456,7 @@ class _TeamDetailBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomScrollView(
       slivers: [
-        _TeamHero(team: team),
+        _TeamHero(sport: sport, team: team),
         SliverToBoxAdapter(
           child: _TeamInfoStrip(team: team, sport: sport),
         ),
@@ -465,15 +486,17 @@ class _TeamDetailBody extends StatelessWidget {
 
 // ─── Hero ───────────────────────────────────────────────────────────────────
 
-class _TeamHero extends StatefulWidget {
-  const _TeamHero({required this.team});
+class _TeamHero extends ConsumerStatefulWidget {
+  const _TeamHero({required this.sport, required this.team});
+  final LeagueSport sport;
   final TeamDetailModel team;
 
   @override
-  State<_TeamHero> createState() => _TeamHeroState();
+  ConsumerState<_TeamHero> createState() => _TeamHeroState();
 }
 
-class _TeamHeroState extends State<_TeamHero> with LogoColorMixin<_TeamHero> {
+class _TeamHeroState extends ConsumerState<_TeamHero>
+    with LogoColorMixin<_TeamHero> {
   @override
   void initState() {
     super.initState();
@@ -490,6 +513,8 @@ class _TeamHeroState extends State<_TeamHero> with LogoColorMixin<_TeamHero> {
       en: widget.team.name,
       cn: widget.team.cnName,
     );
+
+    final uid = ref.watch(firebaseUidProvider);
 
     return SliverAppBar(
       expandedHeight: 170,
@@ -509,6 +534,19 @@ class _TeamHeroState extends State<_TeamHero> with LogoColorMixin<_TeamHero> {
           shape: const CircleBorder(),
         ),
       ),
+      actions: [
+        if (uid != null)
+          _FavStarButton(
+            uid: uid,
+            sport: widget.sport.apiPath,
+            itemId: widget.team.id,
+            name: widget.team.name,
+            cnName: widget.team.cnName,
+            logoUrl: widget.team.logo,
+            isTeam: true,
+            repo: ref.read(favouritesRepositoryProvider),
+          ),
+      ],
       flexibleSpace: FlexibleSpaceBar(
         collapseMode: CollapseMode.parallax,
         titlePadding: const EdgeInsetsDirectional.fromSTEB(56, 0, 16, 14),
@@ -731,8 +769,9 @@ class _SquadSection extends StatelessWidget {
     if (raw == null) return 'FWD';
     final u = raw.toUpperCase();
     if (sport == LeagueSport.football) {
-      if (u.contains('G') && (u.contains('K') || u.contains('GOAL')))
+      if (u.contains('G') && (u.contains('K') || u.contains('GOAL'))) {
         return 'GK';
+      }
       if (u.contains('D')) return 'DEF';
       if (u.contains('M')) return 'MID';
       return 'FWD';
@@ -1011,6 +1050,83 @@ class _TeamDetailSkeleton extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─── Shared favourite star button ────────────────────────────────────────────
+
+class _FavStarButton extends ConsumerWidget {
+  const _FavStarButton({
+    required this.uid,
+    required this.sport,
+    required this.itemId,
+    required this.name,
+    this.cnName,
+    this.logoUrl,
+    required this.isTeam,
+    required this.repo,
+  });
+
+  final String uid;
+  final String sport;
+  final String itemId;
+  final String name;
+  final String? cnName;
+  final String? logoUrl;
+  final bool isTeam;
+  final FavouritesRepository repo;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isFavAsync = isTeam
+        ? ref.watch(
+            isTeamFavouritedProvider((uid: uid, sport: sport, teamId: itemId)),
+          )
+        : ref.watch(
+            isLeagueFavouritedProvider(
+              (uid: uid, sport: sport, leagueId: itemId),
+            ),
+          );
+
+    final isFav = isFavAsync.valueOrNull ?? false;
+
+    return IconButton(
+      onPressed: () async {
+        if (isTeam) {
+          await repo.toggleTeam(
+            uid: uid,
+            sport: sport,
+            teamId: itemId,
+            name: name,
+            cnName: cnName,
+            logoUrl: logoUrl,
+          );
+        } else {
+          await repo.toggleLeague(
+            uid: uid,
+            sport: sport,
+            leagueId: itemId,
+            name: name,
+            cnName: cnName,
+            logoUrl: logoUrl,
+          );
+        }
+      },
+      icon: Icon(
+        isFav ? Icons.star_rounded : Icons.star_border_rounded,
+        color: isFav ? const Color(0xFFFFD60A) : Colors.white,
+      ),
+      iconSize: 24,
+      padding: EdgeInsets.zero,
+      style: IconButton.styleFrom(
+        backgroundColor: Colors.white.withValues(alpha: 0.15),
+        side: BorderSide(
+          color: Colors.white.withValues(alpha: 0.3),
+          width: 0.5,
+        ),
+        shape: const CircleBorder(),
+      ),
     );
   }
 }

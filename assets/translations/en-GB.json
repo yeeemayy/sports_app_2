@@ -1,4 +1,13 @@
 {
+  "favourites": {
+    "title_cn": "我的收藏",
+    "title_en": "My Favourites",
+    "profile_tile": "My Favourites",
+    "section_leagues": "LEAGUES",
+    "section_teams": "TEAMS",
+    "empty_leagues": "No saved leagues",
+    "empty_teams": "No saved teams"
+  },
   "anchor": {
     "list": {
       "title": "Live Rooms"

@@ -1,4 +1,13 @@
 {
+  "favourites": {
+    "title_cn": "我的收藏",
+    "title_en": "My Favourites",
+    "profile_tile": "我的收藏",
+    "section_leagues": "联赛",
+    "section_teams": "球队",
+    "empty_leagues": "暂无收藏联赛",
+    "empty_teams": "暂无收藏球队"
+  },
   "anchor": {
     "list": {
       "title": "主播直播间"
