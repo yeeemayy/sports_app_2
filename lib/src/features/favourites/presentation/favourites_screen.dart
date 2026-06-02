@@ -10,6 +10,7 @@ import 'package:sports_app/src/features/favourites/data/favourites_repository.da
 import 'package:sports_app/src/features/favourites/domain/favourite_entry.dart';
 import 'package:sports_app/src/features/favourites/presentation/providers/favourites_providers.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
+import 'package:sports_app/src/shared_widgets/custom_app_bar.dart';
 
 const _kStarColor = Color(0xFFFFD60A);
 
@@ -26,37 +27,10 @@ class FavouritesScreen extends ConsumerWidget {
     final colors = context.appColors;
 
     return Scaffold(
+      appBar: CustomAppBar(title: Text('favourites.title'.tr())),
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
-            pinned: true,
-            backgroundColor: colors.ink,
-            surfaceTintColor: Colors.transparent,
-            leading: IconButton(
-              onPressed: () => context.pop(),
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
-              color: colors.text,
-            ),
-            title: Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(
-                  'favourites.title_cn'.tr(),
-                  style: AppTextStyles.display(19, context)
-                      .copyWith(color: colors.text, letterSpacing: 0.5),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'favourites.title_en'.tr(),
-                  style: context.textTheme.bodyMedium
-                      ?.copyWith(color: colors.text2),
-                ),
-              ],
-            ),
-          ),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
@@ -67,9 +41,7 @@ class FavouritesScreen extends ConsumerWidget {
                 type: FavouriteType.league,
                 repo: ref.read(favouritesRepositoryProvider),
                 uid: uid,
-                onTap: (entry) => context.push(
-                  AppRoutes.leagueDetailPath(entry.sport, entry.id),
-                ),
+                onTap: (entry) => context.push(AppRoutes.leagueDetailPath(entry.sport, entry.id)),
               ),
             ),
           ),
@@ -83,9 +55,7 @@ class FavouritesScreen extends ConsumerWidget {
                 type: FavouriteType.team,
                 repo: ref.read(favouritesRepositoryProvider),
                 uid: uid,
-                onTap: (entry) => context.push(
-                  AppRoutes.leagueTeamPath(entry.sport, entry.id),
-                ),
+                onTap: (entry) => context.push(AppRoutes.leagueTeamPath(entry.sport, entry.id)),
               ),
             ),
           ),
@@ -127,10 +97,7 @@ class _Section extends StatelessWidget {
           padding: const EdgeInsets.only(left: 2, bottom: 10),
           child: Text(
             label,
-            style: AppTextStyles.mono(11).copyWith(
-              color: colors.text2,
-              letterSpacing: 11 * 0.14,
-            ),
+            style: AppTextStyles.mono(11).copyWith(color: colors.text2, letterSpacing: 11 * 0.14),
           ),
         ),
         Container(
@@ -179,9 +146,7 @@ class _Section extends StatelessWidget {
       child: Center(
         child: Text(
           emptyText,
-          style: context.textTheme.bodySmall?.copyWith(
-            color: context.appColors.text3,
-          ),
+          style: context.textTheme.bodySmall?.copyWith(color: context.appColors.text3),
         ),
       ),
     );
@@ -253,10 +218,7 @@ class _FavRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
-    final displayName = context.localizedName(
-      en: entry.name,
-      cn: entry.cnName,
-    );
+    final displayName = context.localizedName(en: entry.name, cn: entry.cnName);
     final sportLabel = 'league.sport.${entry.sport}'.tr();
 
     return InkWell(
@@ -313,10 +275,7 @@ class _Logo extends StatelessWidget {
       return Container(
         width: 32,
         height: 32,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: context.appColors.surface2,
-        ),
+        decoration: BoxDecoration(shape: BoxShape.circle, color: context.appColors.surface2),
         child: Icon(Icons.shield_outlined, size: 16, color: context.appColors.text3),
       );
     }
@@ -337,19 +296,13 @@ class _Logo extends StatelessWidget {
         child: Container(
           width: 32,
           height: 32,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: context.appColors.surface2,
-          ),
+          decoration: BoxDecoration(shape: BoxShape.circle, color: context.appColors.surface2),
         ),
       ),
       errorBuilder: (_, _, _) => Container(
         width: 32,
         height: 32,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: context.appColors.surface2,
-        ),
+        decoration: BoxDecoration(shape: BoxShape.circle, color: context.appColors.surface2),
         child: Icon(Icons.shield_outlined, size: 16, color: context.appColors.text3),
       ),
     );
@@ -373,10 +326,9 @@ class _SportTag extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: AppTextStyles.mono(10).copyWith(
-          color: context.appColors.accent,
-          letterSpacing: 10 * 0.1,
-        ),
+        style: AppTextStyles.mono(
+          10,
+        ).copyWith(color: context.appColors.accent, letterSpacing: 10 * 0.1),
       ),
     );
   }

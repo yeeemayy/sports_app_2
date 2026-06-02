@@ -16,6 +16,7 @@
     "filter_all": "All"
   },
   "favourites": {
+    "title": "My Favourites",
     "title_cn": "我的收藏",
     "title_en": "My Favourites",
     "profile_tile": "My Favourites",

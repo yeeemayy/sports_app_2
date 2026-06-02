@@ -7,10 +7,13 @@ class WatchlistService {
   Future<List<WatchlistEntry>> loadAll() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getStringList(_key) ?? [];
-    return raw
-        .map(WatchlistEntry.tryFromRaw)
-        .whereType<WatchlistEntry>()
-        .toList();
+    final all = raw.map(WatchlistEntry.tryFromRaw).whereType<WatchlistEntry>().toList();
+
+    final cutoff = DateTime.now().subtract(const Duration(hours: 24)).millisecondsSinceEpoch;
+    final pruned = all.where((e) => e.matchTimeMs > cutoff).toList();
+    if (pruned.length < all.length) await _save(pruned);
+
+    return pruned;
   }
 
   Future<void> add(WatchlistEntry entry) async {
