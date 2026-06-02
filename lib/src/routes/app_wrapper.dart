@@ -9,20 +9,22 @@ import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
 import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
 import 'package:sports_app/src/providers/nav_providers.dart';
+import 'package:sports_app/src/providers/theme_provider.dart';
 import 'package:sports_app/src/routes/app_routes.dart';
+import 'package:sports_app/src/shared_widgets/consent_dialog.dart';
 
-class AppWrapper extends ConsumerWidget {
+class AppWrapper extends ConsumerStatefulWidget {
   const AppWrapper({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
+  @override
+  ConsumerState<AppWrapper> createState() => _AppWrapperState();
+}
+
+class _AppWrapperState extends ConsumerState<AppWrapper> {
   static const _tabs = [
-    (
-      labelKey: 'nav.home',
-      icon: Icons.home_outlined,
-      activeIcon: Icons.home,
-      path: AppRoutes.home,
-    ),
+    (labelKey: 'nav.home', icon: Icons.home_outlined, activeIcon: Icons.home, path: AppRoutes.home),
     (
       labelKey: 'nav.live',
       icon: Icons.play_circle_outline,
@@ -49,37 +51,44 @@ class AppWrapper extends ConsumerWidget {
     ),
   ];
 
-  void _onTap(WidgetRef ref, BuildContext context, int index) {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final prefs = ref.read(sharedPreferencesProvider);
+      showConsentDialogIfNeeded(context, prefs);
+    });
+  }
+
+  void _onTap(int index) {
     ref.read(currentNavIndexProvider.notifier).state = index;
-    if (index <= 1 && index != navigationShell.currentIndex) {
+    if (index <= 1 && index != widget.navigationShell.currentIndex) {
       ref.invalidate(anchorListProvider);
       if (index == 0) {
         ref.invalidate(newsFirstPageProvider(context.localeCode));
       }
     }
     // index 2 = news
-    if (index == 2 && index != navigationShell.currentIndex) {
+    if (index == 2 && index != widget.navigationShell.currentIndex) {
       ref.read(newsSearchProvider.notifier).refresh();
     }
-    navigationShell.goBranch(
+    widget.navigationShell.goBranch(
       index,
-      initialLocation: index == navigationShell.currentIndex,
+      initialLocation: index == widget.navigationShell.currentIndex,
     );
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     context.locale;
-    final currentIndex = navigationShell.currentIndex;
+    final currentIndex = widget.navigationShell.currentIndex;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 80),
-            child: navigationShell,
-          ),
+          Padding(padding: const EdgeInsets.only(bottom: 80), child: widget.navigationShell),
           Positioned(
             bottom: 18,
             left: 14,
@@ -91,14 +100,9 @@ class AppWrapper extends ConsumerWidget {
                 child: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).scaffoldBackgroundColor.withValues(alpha: 0.72),
+                    color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.72),
                     borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                      color: Theme.of(context).dividerColor,
-                      width: 0.5,
-                    ),
+                    border: Border.all(color: Theme.of(context).dividerColor, width: 0.5),
                     boxShadow: const [
                       BoxShadow(
                         color: Color.fromRGBO(0, 0, 0, 0.5),
@@ -115,14 +119,11 @@ class AppWrapper extends ConsumerWidget {
                             child: _ActiveNavItem(
                               label: _tabs[i].labelKey.tr(),
                               icon: _tabs[i].activeIcon,
-                              onTap: () => _onTap(ref, context, i),
+                              onTap: () => _onTap(i),
                             ),
                           )
                         else
-                          _InactiveNavItem(
-                            icon: _tabs[i].icon,
-                            onTap: () => _onTap(ref, context, i),
-                          ),
+                          _InactiveNavItem(icon: _tabs[i].icon, onTap: () => _onTap(i)),
                     ],
                   ),
                 ),
@@ -136,11 +137,7 @@ class AppWrapper extends ConsumerWidget {
 }
 
 class _ActiveNavItem extends StatelessWidget {
-  const _ActiveNavItem({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
+  const _ActiveNavItem({required this.label, required this.icon, required this.onTap});
 
   final String label;
   final IconData icon;
@@ -160,11 +157,7 @@ class _ActiveNavItem extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              color: Theme.of(context).colorScheme.onPrimary,
-              size: 18,
-            ),
+            Icon(icon, color: Theme.of(context).colorScheme.onPrimary, size: 18),
             const SizedBox(width: 6),
             Text(
               label.toUpperCase(),
@@ -196,9 +189,7 @@ class _InactiveNavItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         child: Icon(
           icon,
-          color: Theme.of(
-            context,
-          ).colorScheme.onSurface.withValues(alpha: 0.62),
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.62),
           size: 18,
         ),
       ),

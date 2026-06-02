@@ -1137,5 +1137,15 @@
       "F": "前锋",
       "G": "后卫"
     }
+  },
+  "consent": {
+    "title": "用户协议与隐私政策",
+    "body_prefix": "欢迎使用ARENA！在您点击「同意并继续」之前，我们不会读取或收集您的设备标识（如Android ID，IMEI，MAC等）与个人信息。请您仔细阅读并同意以下条款：",
+    "privacy_policy_link": "隐私政策",
+    "conjunction": "与",
+    "user_agreement_link": "用户协议",
+    "body_suffix": "。我们将依法在所需范围内收集相关信息（详见《隐私政策》）。您可随时在个人主页→危险区域→注销账号中操作删除账号与相关数据。",
+    "agree": "同意并继续",
+    "disagree": "不同意"
   }
 }

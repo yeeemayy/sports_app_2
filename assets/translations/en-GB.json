@@ -849,22 +849,22 @@
     "recent": "RECENT",
     "clear": "CLEAR",
     "all_filter": "ALL",
-  "sport": {
-    "football": "FOOTBALL",
-    "basketball": "BASKETBALL",
-    "tennis": "TENNIS",
-    "cricket": "CRICKET",
-    "baseball": "BASEBALL",
-    "volleyball": "VOLLEYBALL",
-    "badminton": "BADMINTON",
-    "table_tennis": "TABLE TENNIS",
-    "ice_hockey": "ICE HOCKEY",
-    "am_football": "AM. FOOTBALL"
-  },
-  "filter": {
-    "leagues": "LEAGUES",
-    "countries": "COUNTRIES"
-  },
+    "sport": {
+      "football": "FOOTBALL",
+      "basketball": "BASKETBALL",
+      "tennis": "TENNIS",
+      "cricket": "CRICKET",
+      "baseball": "BASEBALL",
+      "volleyball": "VOLLEYBALL",
+      "badminton": "BADMINTON",
+      "table_tennis": "TABLE TENNIS",
+      "ice_hockey": "ICE HOCKEY",
+      "am_football": "AM. FOOTBALL"
+    },
+    "filter": {
+      "leagues": "LEAGUES",
+      "countries": "COUNTRIES"
+    },
     "type_team": "TEAM",
     "type_league": "LEAGUE",
     "type_player": "PLAYER",
@@ -1137,5 +1137,15 @@
       "F": "FORWARD",
       "G": "GUARD"
     }
+  },
+  "consent": {
+    "title": "Terms & Privacy Policy",
+    "body_prefix": "Welcome to ARENA! We will not read or collect your device identifiers (e.g. Android ID, IMEI, MAC) or personal information before you tap \"Agree & Continue\". Please read and agree to the following: ",
+    "privacy_policy_link": "Privacy Policy",
+    "conjunction": " and ",
+    "user_agreement_link": "User Agreement",
+    "body_suffix": ". We will collect relevant information within the required scope in accordance with applicable law (see Privacy Policy). You may delete your account and related data at any time via Profile → Danger Zone → Delete Account.",
+    "agree": "Agree & Continue",
+    "disagree": "Disagree"
   }
 }
