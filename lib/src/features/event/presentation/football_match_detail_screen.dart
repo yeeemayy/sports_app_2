@@ -15,26 +15,22 @@ import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_
 import 'package:sports_app/src/features/event/presentation/widgets/football_pitch_lineup.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
 import 'package:sports_app/src/features/prediction/presentation/widgets/fan_prediction_card.dart';
+import 'package:sports_app/src/features/watchlist/domain/watchlist_entry.dart';
+import 'package:sports_app/src/features/watchlist/presentation/watchlist_bell_button.dart';
 import 'package:sports_app/src/shared_widgets/arena_stat_bar.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
 class FootballMatchDetailScreen extends ConsumerStatefulWidget {
-  const FootballMatchDetailScreen({
-    super.key,
-    required this.matchId,
-    this.initialMatch,
-  });
+  const FootballMatchDetailScreen({super.key, required this.matchId, this.initialMatch});
 
   final String matchId;
   final FootballMatch? initialMatch;
 
   @override
-  ConsumerState<FootballMatchDetailScreen> createState() =>
-      _FootballMatchDetailScreenState();
+  ConsumerState<FootballMatchDetailScreen> createState() => _FootballMatchDetailScreenState();
 }
 
-class _FootballMatchDetailScreenState
-    extends SportDetailScaffoldState<FootballMatchDetailScreen> {
+class _FootballMatchDetailScreenState extends SportDetailScaffoldState<FootballMatchDetailScreen> {
   @override
   String get matchId => widget.matchId;
 
@@ -53,14 +49,7 @@ class _FootballMatchDetailScreenState
   @override
   (String?, int?) watchDetail() {
     final v =
-        ref
-                .watch(
-                  matchDetailProvider(
-                    sport: SportType.football,
-                    matchId: matchId,
-                  ),
-                )
-                .valueOrNull
+        ref.watch(matchDetailProvider(sport: SportType.football, matchId: matchId)).valueOrNull
             as FootballMatchDetail?;
     return (
       v?.leagueName ?? widget.initialMatch?.leagueName,
@@ -69,16 +58,13 @@ class _FootballMatchDetailScreenState
   }
 
   @override
-  Widget buildHeader(
-    BuildContext context, {
-    String? leagueName,
-    int? matchTimestamp,
-  }) => _MatchHeader(
-    matchId: matchId,
-    initialMatch: widget.initialMatch,
-    leagueName: leagueName,
-    matchTimestamp: matchTimestamp,
-  );
+  Widget buildHeader(BuildContext context, {String? leagueName, int? matchTimestamp}) =>
+      _MatchHeader(
+        matchId: matchId,
+        initialMatch: widget.initialMatch,
+        leagueName: leagueName,
+        matchTimestamp: matchTimestamp,
+      );
 
   @override
   List<Tab> buildTabs(BuildContext context) => [
@@ -112,16 +98,10 @@ class _MatchHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(
-      matchDetailProvider(sport: SportType.football, matchId: matchId),
-    );
-    final eventsAsync = ref.watch(
-      matchEventsProvider(sport: SportType.football, matchId: matchId),
-    );
+    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.football, matchId: matchId));
+    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
     final rt = ref.watch(
-      sportRealtimeProvider(
-        SportType.football,
-      ).select((map) => map[matchId] as MatchRealtimeData?),
+      sportRealtimeProvider(SportType.football).select((map) => map[matchId] as MatchRealtimeData?),
     );
 
     Widget? fallback;
@@ -129,16 +109,33 @@ class _MatchHeader extends ConsumerWidget {
       fallback = _HeaderFallback(match: initialMatch!, rt: rt);
     }
 
+    final detail = detailAsync.valueOrNull as FootballMatchDetail?;
+    final homeName = detail?.homeName ?? initialMatch?.homeName ?? '';
+    final awayName = detail?.awayName ?? initialMatch?.awayName ?? '';
+    final canWatchlist =
+        homeName.isNotEmpty && awayName.isNotEmpty && matchTimestamp != null && matchTimestamp! > 0;
+
+    final watchlistEntry = canWatchlist
+        ? WatchlistEntry(
+            matchId: matchId,
+            sport: 'football',
+            homeName: homeName,
+            awayName: awayName,
+            leagueName: leagueName ?? '',
+            matchTimeMs: matchTimestamp! * 1000,
+          )
+        : null;
+
     return SportDetailHeaderShell<FootballMatchDetail>(
       detailAsync: detailAsync,
       leagueName: leagueName,
       matchTimestamp: matchTimestamp,
       fallback: fallback,
+      actions: watchlistEntry != null ? [WatchlistBellButton(entry: watchlistEntry)] : null,
       builder: (detail) {
         final effKickoff = (rt != null && rt.kickoffTimestamp != 0)
             ? rt.kickoffTimestamp
-            : (eventsAsync.valueOrNull as FootballMatchEvents?)
-                  ?.kickoffTimestamp;
+            : (eventsAsync.valueOrNull as FootballMatchEvents?)?.kickoffTimestamp;
         return _HeaderContent(
           detail: detail,
           kickoffTimestamp: effKickoff,
@@ -214,10 +211,7 @@ class _HeaderContent extends StatelessWidget {
     final isNoScore = const {0, 1, 13}.contains(effStatusId);
 
     String? statusSubLabel;
-    if (effStatusId != 1 &&
-        effStatusId != 8 &&
-        effHomeHt != null &&
-        effAwayHt != null) {
+    if (effStatusId != 1 && effStatusId != 8 && effHomeHt != null && effAwayHt != null) {
       statusSubLabel = '${'event.football.ht'.tr()} $effHomeHt-$effAwayHt';
     }
 
@@ -293,10 +287,7 @@ class _ScoreRow extends StatelessWidget {
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.display(
-                      13,
-                      context,
-                    ).copyWith(color: colors.text),
+                    style: AppTextStyles.display(13, context).copyWith(color: colors.text),
                   ),
                 ],
               ),
@@ -307,10 +298,7 @@ class _ScoreRow extends StatelessWidget {
               child: Column(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: statusColor,
                       borderRadius: BorderRadius.circular(6),
@@ -333,29 +321,24 @@ class _ScoreRow extends StatelessWidget {
                     children: [
                       Text(
                         homeScore,
-                        style: AppTextStyles.display(56, context).copyWith(
-                          color: statusColor == colors.live
-                              ? colors.accent
-                              : statusColor,
-                        ),
+                        style: AppTextStyles.display(
+                          56,
+                          context,
+                        ).copyWith(color: statusColor == colors.live ? colors.accent : statusColor),
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 6),
                         child: Text(
                           ':',
-                          style: AppTextStyles.display(
-                            28,
-                            context,
-                          ).copyWith(color: colors.text3),
+                          style: AppTextStyles.display(28, context).copyWith(color: colors.text3),
                         ),
                       ),
                       Text(
                         awayScore,
-                        style: AppTextStyles.display(56, context).copyWith(
-                          color: statusColor == colors.live
-                              ? colors.accent
-                              : statusColor,
-                        ),
+                        style: AppTextStyles.display(
+                          56,
+                          context,
+                        ).copyWith(color: statusColor == colors.live ? colors.accent : statusColor),
                       ),
                     ],
                   ),
@@ -374,10 +357,7 @@ class _ScoreRow extends StatelessWidget {
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.display(
-                      13,
-                      context,
-                    ).copyWith(color: colors.text),
+                    style: AppTextStyles.display(13, context).copyWith(color: colors.text),
                   ),
                 ],
               ),
@@ -389,9 +369,7 @@ class _ScoreRow extends StatelessWidget {
             padding: const EdgeInsets.only(top: 4),
             child: Text(
               statusSubLabel!.toUpperCase(),
-              style: AppTextStyles.mono(
-                9,
-              ).copyWith(color: colors.text3, letterSpacing: 0.14 * 9),
+              style: AppTextStyles.mono(9).copyWith(color: colors.text3, letterSpacing: 0.14 * 9),
               textAlign: TextAlign.center,
             ),
           ),
@@ -411,8 +389,7 @@ class _EnvRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = <(IconData, String)>[
       // if (env.weather != null) (Icons.wb_sunny_outlined, 'event.football.environment.weather.${env.weather}'.tr()),
-      if (env.temperature != null)
-        (Icons.thermostat_outlined, env.temperature!),
+      if (env.temperature != null) (Icons.thermostat_outlined, env.temperature!),
       if (env.humidity != null) (Icons.water_drop_outlined, env.humidity!),
       if (env.wind != null) (Icons.air_outlined, env.wind!),
       if (env.pressure != null) (Icons.speed_outlined, env.pressure!),
@@ -432,10 +409,7 @@ class _EnvRow extends StatelessWidget {
               children: [
                 Icon(icon, size: 10, color: colors.text3),
                 const SizedBox(width: 3),
-                Text(
-                  label,
-                  style: AppTextStyles.mono(9).copyWith(color: colors.text3),
-                ),
+                Text(label, style: AppTextStyles.mono(9).copyWith(color: colors.text3)),
               ],
             ),
         ],
@@ -452,27 +426,13 @@ class _StatsTab extends ConsumerWidget {
   final String matchId;
   final FootballMatch? initialMatch;
 
-  static const _minimalTypeCodes = [
-    '2',
-    '3',
-    '4',
-    '8',
-    '21',
-    '22',
-    '23',
-    '24',
-    '25',
-  ];
+  static const _minimalTypeCodes = ['2', '3', '4', '8', '21', '22', '23', '24', '25'];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.appColors;
-    final eventsAsync = ref.watch(
-      matchEventsProvider(sport: SportType.football, matchId: matchId),
-    );
-    final detailAsync = ref.watch(
-      matchDetailProvider(sport: SportType.football, matchId: matchId),
-    );
+    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
+    final detailAsync = ref.watch(matchDetailProvider(sport: SportType.football, matchId: matchId));
 
     final detail = detailAsync.valueOrNull as FootballMatchDetail?;
     final effStatusId = detail?.statusId ?? initialMatch?.statusId ?? 1;
@@ -482,21 +442,14 @@ class _StatsTab extends ConsumerWidget {
     final awayName = detail?.awayName ?? initialMatch?.awayName ?? '';
 
     return eventsAsync.when(
-      loading: () =>
-          Center(child: CircularProgressIndicator(color: colors.accent)),
+      loading: () => Center(child: CircularProgressIndicator(color: colors.accent)),
       error: (_, __) => Center(
-        child: Text(
-          'event.error.load_failed'.tr(),
-          style: TextStyle(color: colors.text3),
-        ),
+        child: Text('event.error.load_failed'.tr(), style: TextStyle(color: colors.text3)),
       ),
       data: (obj) {
         final events = obj as FootballMatchEvents?;
         final apiStats =
-            events?.stats
-                .where((s) => s.label != null && s.label!.isNotEmpty)
-                .toList() ??
-            [];
+            events?.stats.where((s) => s.label != null && s.label!.isNotEmpty).toList() ?? [];
         final apiByLabel = {for (final s in apiStats) s.label!: s};
 
         final displayStats = _minimalTypeCodes.map((code) {
@@ -525,18 +478,12 @@ class _StatsTab extends ConsumerWidget {
                   children: [
                     Text(
                       'event.football.detail.stats'.tr().toUpperCase(),
-                      style: AppTextStyles.display(
-                        18,
-                        context,
-                      ).copyWith(color: colors.text),
+                      style: AppTextStyles.display(18, context).copyWith(color: colors.text),
                     ),
                   ],
                 ),
               ),
-              ...displayStats.map(
-                (s) =>
-                    ArenaStatBar(label: s.label!, home: s.home, away: s.away),
-              ),
+              ...displayStats.map((s) => ArenaStatBar(label: s.label!, home: s.home, away: s.away)),
             ],
           ],
         );
@@ -554,14 +501,10 @@ class _EventsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final eventsAsync = ref.watch(
-      matchEventsProvider(sport: SportType.football, matchId: matchId),
-    );
+    final eventsAsync = ref.watch(matchEventsProvider(sport: SportType.football, matchId: matchId));
 
     return eventsAsync.when(
-      loading: () => const Center(
-        child: CircularProgressIndicator(color: Color(0xFFFF3C00)),
-      ),
+      loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFFFF3C00))),
       error: (e, st) {
         debugPrint('$e\n$st');
         return Center(
@@ -604,8 +547,7 @@ class _IncidentTimeline extends StatelessWidget {
         final incident = reversed[index];
 
         if (incident.type == 11) return _HalfTimeSeparator();
-        if (_phaseTypes.contains(incident.type))
-          return _PhaseMarker(incident: incident);
+        if (_phaseTypes.contains(incident.type)) return _PhaseMarker(incident: incident);
 
         final isHome = incident.position == 1;
         final isFirst = index == 0;
@@ -623,12 +565,8 @@ class _IncidentTimeline extends StatelessWidget {
           ),
           beforeLineStyle: LineStyle(color: Colors.grey.shade300, thickness: 1),
           afterLineStyle: LineStyle(color: Colors.grey.shade300, thickness: 1),
-          startChild: isHome
-              ? _IncidentCell(incident: incident, isHome: true)
-              : null,
-          endChild: !isHome
-              ? _IncidentCell(incident: incident, isHome: false)
-              : null,
+          startChild: isHome ? _IncidentCell(incident: incident, isHome: true) : null,
+          endChild: !isHome ? _IncidentCell(incident: incident, isHome: false) : null,
         );
       },
     );
@@ -644,18 +582,11 @@ class _TimeIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.appColors;
     return Container(
-      decoration: BoxDecoration(
-        color: colors.surface2,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: BoxDecoration(color: colors.surface2, borderRadius: BorderRadius.circular(12)),
       alignment: Alignment.center,
       child: Text(
         "$time'",
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: colors.text3,
-        ),
+        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: colors.text3),
       ),
     );
   }
@@ -698,11 +629,7 @@ class _PhaseMarker extends StatelessWidget {
       child: Center(
         child: Text(
           'event.football.detail.incident_type.${incident.type}'.tr(),
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey.shade500,
-          ),
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: Colors.grey.shade500),
         ),
       ),
     );
@@ -727,11 +654,7 @@ class _IncidentCell extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Flexible(
-                  child: _IncidentText(
-                    text: name,
-                    incident: incident,
-                    align: TextAlign.end,
-                  ),
+                  child: _IncidentText(text: name, incident: incident, align: TextAlign.end),
                 ),
                 const SizedBox(width: 6),
                 icon,
@@ -742,11 +665,7 @@ class _IncidentCell extends StatelessWidget {
                 icon,
                 const SizedBox(width: 6),
                 Flexible(
-                  child: _IncidentText(
-                    text: name,
-                    incident: incident,
-                    align: TextAlign.start,
-                  ),
+                  child: _IncidentText(text: name, incident: incident, align: TextAlign.start),
                 ),
               ],
             ),
@@ -794,10 +713,7 @@ class _IncidentCell extends StatelessWidget {
 
   Widget _incidentIcon(int type) {
     final color = _incidentColors[type] ?? Colors.grey;
-    return _IncidentBadge(
-      label: 'event.football.detail.incident_type.$type'.tr(),
-      color: color,
-    );
+    return _IncidentBadge(label: 'event.football.detail.incident_type.$type'.tr(), color: color);
   }
 }
 
@@ -818,22 +734,14 @@ class _IncidentBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          fontSize: 9,
-          fontWeight: FontWeight.w700,
-          color: color,
-        ),
+        style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: color),
       ),
     );
   }
 }
 
 class _IncidentText extends StatelessWidget {
-  const _IncidentText({
-    required this.text,
-    required this.incident,
-    required this.align,
-  });
+  const _IncidentText({required this.text, required this.incident, required this.align});
 
   final String text;
   final MatchIncident incident;
@@ -881,8 +789,7 @@ class _LineupsTab extends ConsumerStatefulWidget {
   ConsumerState<_LineupsTab> createState() => _LineupsTabState();
 }
 
-class _LineupsTabState extends ConsumerState<_LineupsTab>
-    with SingleTickerProviderStateMixin {
+class _LineupsTabState extends ConsumerState<_LineupsTab> with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
   @override
@@ -900,18 +807,12 @@ class _LineupsTabState extends ConsumerState<_LineupsTab>
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
-    final lineupsAsync = ref.watch(
-      footballMatchLineupsProvider(matchId: widget.matchId),
-    );
+    final lineupsAsync = ref.watch(footballMatchLineupsProvider(matchId: widget.matchId));
 
     return lineupsAsync.when(
-      loading: () =>
-          Center(child: CircularProgressIndicator(color: colors.accent)),
+      loading: () => Center(child: CircularProgressIndicator(color: colors.accent)),
       error: (_, __) => Center(
-        child: Text(
-          'event.error.load_failed'.tr(),
-          style: TextStyle(color: colors.text3),
-        ),
+        child: Text('event.error.load_failed'.tr(), style: TextStyle(color: colors.text3)),
       ),
       data: (lineups) {
         if (lineups == null || (lineups.home.isEmpty && lineups.away.isEmpty)) {
@@ -925,20 +826,13 @@ class _LineupsTabState extends ConsumerState<_LineupsTab>
 
         final detail =
             ref
-                    .watch(
-                      matchDetailProvider(
-                        sport: SportType.football,
-                        matchId: widget.matchId,
-                      ),
-                    )
+                    .watch(matchDetailProvider(sport: SportType.football, matchId: widget.matchId))
                     .valueOrNull
                 as FootballMatchDetail?;
         final homeIcon = detail?.homeInfo.logo ?? widget.initialMatch?.homeLogo;
         final awayIcon = detail?.awayInfo.logo ?? widget.initialMatch?.awayLogo;
-        final homeName =
-            detail?.homeName ?? widget.initialMatch?.homeName ?? 'Home';
-        final awayName =
-            detail?.awayName ?? widget.initialMatch?.awayName ?? 'Away';
+        final homeName = detail?.homeName ?? widget.initialMatch?.homeName ?? 'Home';
+        final awayName = detail?.awayName ?? widget.initialMatch?.awayName ?? 'Away';
 
         final homeStarters = lineups.home.where((p) => p.first == 1).toList();
         final awayStarters = lineups.away.where((p) => p.first == 1).toList();
@@ -1020,10 +914,7 @@ class _TeamTab extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (logo != null) ...[
-            SportLogo(url: logo!, size: 18),
-            const SizedBox(width: 6),
-          ],
+          if (logo != null) ...[SportLogo(url: logo!, size: 18), const SizedBox(width: 6)],
           Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
         ],
       ),
@@ -1050,8 +941,7 @@ class _TeamLineupList extends StatelessWidget {
             colors: colors,
             context: context,
           ),
-          for (final p in starters)
-            _LineupPlayerRow(player: p, colors: colors, context: context),
+          for (final p in starters) _LineupPlayerRow(player: p, colors: colors, context: context),
         ],
         if (subs.isNotEmpty) ...[
           _SectionLabel(
@@ -1059,8 +949,7 @@ class _TeamLineupList extends StatelessWidget {
             colors: colors,
             context: context,
           ),
-          for (final p in subs)
-            _LineupPlayerRow(player: p, colors: colors, context: context),
+          for (final p in subs) _LineupPlayerRow(player: p, colors: colors, context: context),
         ],
       ],
     );
@@ -1068,11 +957,7 @@ class _TeamLineupList extends StatelessWidget {
 }
 
 class _SectionLabel extends StatelessWidget {
-  const _SectionLabel({
-    required this.label,
-    required this.colors,
-    required this.context,
-  });
+  const _SectionLabel({required this.label, required this.colors, required this.context});
 
   final String label;
   final AppColors colors;
@@ -1086,20 +971,14 @@ class _SectionLabel extends StatelessWidget {
       color: colors.surface,
       child: Text(
         label.toUpperCase(),
-        style: AppTextStyles.mono(
-          10,
-        ).copyWith(color: colors.text3, letterSpacing: 0.14 * 10),
+        style: AppTextStyles.mono(10).copyWith(color: colors.text3, letterSpacing: 0.14 * 10),
       ),
     );
   }
 }
 
 class _LineupPlayerRow extends StatelessWidget {
-  const _LineupPlayerRow({
-    required this.player,
-    required this.colors,
-    required this.context,
-  });
+  const _LineupPlayerRow({required this.player, required this.colors, required this.context});
 
   final LineupPlayer player;
   final AppColors colors;
@@ -1141,10 +1020,7 @@ class _LineupPlayerRow extends StatelessWidget {
             ),
           ),
           if (player.position.isNotEmpty)
-            Text(
-              player.position,
-              style: AppTextStyles.mono(10).copyWith(color: colors.text3),
-            ),
+            Text(player.position, style: AppTextStyles.mono(10).copyWith(color: colors.text3)),
         ],
       ),
     );

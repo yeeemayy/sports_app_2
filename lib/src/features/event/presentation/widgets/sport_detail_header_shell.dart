@@ -18,6 +18,7 @@ class SportDetailHeaderShell<T> extends StatelessWidget {
     this.matchTimestamp,
     this.skeletonHeight = 80.0,
     this.fallback,
+    this.actions,
   });
 
   final AsyncValue<dynamic> detailAsync;
@@ -26,6 +27,9 @@ class SportDetailHeaderShell<T> extends StatelessWidget {
   final int? matchTimestamp;
   final double skeletonHeight;
   final Widget? fallback;
+
+  /// Optional widgets placed in the right side of the nav bar.
+  final List<Widget>? actions;
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +73,7 @@ class SportDetailHeaderShell<T> extends StatelessWidget {
                 _ArenaNavBar(
                   leagueName: leagueName,
                   matchTimestamp: matchTimestamp,
+                  actions: actions,
                 ),
 
                 // Sport-specific score content
@@ -91,10 +96,11 @@ class SportDetailHeaderShell<T> extends StatelessWidget {
 }
 
 class _ArenaNavBar extends StatelessWidget {
-  const _ArenaNavBar({this.leagueName, this.matchTimestamp});
+  const _ArenaNavBar({this.leagueName, this.matchTimestamp, this.actions});
 
   final String? leagueName;
   final int? matchTimestamp;
+  final List<Widget>? actions;
 
   @override
   Widget build(BuildContext context) {
@@ -156,8 +162,11 @@ class _ArenaNavBar extends StatelessWidget {
             ),
           ),
 
-          // Placeholder to balance back button
-          const SizedBox(width: 36),
+          // Right-side actions or balancing spacer
+          if (actions != null && actions!.isNotEmpty)
+            Row(mainAxisSize: MainAxisSize.min, children: actions!)
+          else
+            const SizedBox(width: 36),
         ],
       ),
     );

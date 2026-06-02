@@ -36,6 +36,7 @@ import 'package:sports_app/src/features/news/presentation/news_detail_screen.dar
 import 'package:sports_app/src/features/video/presentation/video_detail_screen.dart';
 import 'package:sports_app/src/features/news/presentation/news_screen.dart';
 import 'package:sports_app/src/features/favourites/presentation/favourites_screen.dart';
+import 'package:sports_app/src/features/watchlist/presentation/watchlist_screen.dart';
 import 'package:sports_app/src/features/profile/presentation/edit_profile_screen.dart';
 import 'package:sports_app/src/features/profile/presentation/profile_screen.dart';
 import 'package:sports_app/src/shared_widgets/web_view_screen.dart';
@@ -149,6 +150,11 @@ GoRouter appRouter(AppRouterRef ref) {
                     parentNavigatorKey: rootNavigatorKey,
                     path: 'favourites',
                     builder: (context, state) => const FavouritesScreen(),
+                  ),
+                  GoRoute(
+                    parentNavigatorKey: rootNavigatorKey,
+                    path: 'watchlist',
+                    builder: (context, state) => const WatchlistScreen(),
                   ),
                   GoRoute(
                     parentNavigatorKey: rootNavigatorKey,

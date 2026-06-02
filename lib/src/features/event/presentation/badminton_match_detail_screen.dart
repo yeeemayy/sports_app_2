@@ -11,6 +11,8 @@ import 'package:sports_app/src/features/event/presentation/providers/event_provi
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_header_shell.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
+import 'package:sports_app/src/features/watchlist/domain/watchlist_entry.dart';
+import 'package:sports_app/src/features/watchlist/presentation/watchlist_bell_button.dart';
 import 'package:sports_app/src/shared_widgets/arena_stat_bar.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 
@@ -101,11 +103,28 @@ class _BadmintonMatchHeader extends ConsumerWidget {
       ).select((map) => map[matchId] as BadmintonRealtimeData?),
     );
 
+    final detail = detailAsync.valueOrNull as BadmintonMatchDetail?;
+    final homeName = detail?.homeName ?? '';
+    final awayName = detail?.awayName ?? '';
+    final canWatchlist =
+        homeName.isNotEmpty && awayName.isNotEmpty && matchTimestamp != null && matchTimestamp! > 0;
+    final watchlistEntry = canWatchlist
+        ? WatchlistEntry(
+            matchId: matchId,
+            sport: 'badminton',
+            homeName: homeName,
+            awayName: awayName,
+            leagueName: leagueName ?? '',
+            matchTimeMs: matchTimestamp! * 1000,
+          )
+        : null;
+
     return SportDetailHeaderShell<BadmintonMatchDetail>(
       detailAsync: detailAsync,
       leagueName: leagueName,
       matchTimestamp: matchTimestamp,
       skeletonHeight: 80,
+      actions: watchlistEntry != null ? [WatchlistBellButton(entry: watchlistEntry)] : null,
       builder: (detail) => _BadmintonHeaderContent(
         detail: detail,
         rt: rt,

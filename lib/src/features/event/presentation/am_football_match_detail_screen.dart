@@ -11,6 +11,8 @@ import 'package:sports_app/src/features/event/presentation/providers/event_provi
 import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_header_shell.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
+import 'package:sports_app/src/features/watchlist/domain/watchlist_entry.dart';
+import 'package:sports_app/src/features/watchlist/presentation/watchlist_bell_button.dart';
 import 'package:sports_app/src/shared_widgets/arena_stat_bar.dart';
 import 'package:sports_app/src/shared_widgets/sport_logo.dart';
 import 'package:timeline_tile/timeline_tile.dart';
@@ -101,11 +103,28 @@ class _AmFootballMatchHeader extends ConsumerWidget {
       ).select((map) => map[matchId] as AmFootballRealtimeData?),
     );
 
+    final detail = detailAsync.valueOrNull as AmFootballMatchDetail?;
+    final homeName = detail?.homeName ?? '';
+    final awayName = detail?.awayName ?? '';
+    final canWatchlist =
+        homeName.isNotEmpty && awayName.isNotEmpty && matchTimestamp != null && matchTimestamp! > 0;
+    final watchlistEntry = canWatchlist
+        ? WatchlistEntry(
+            matchId: matchId,
+            sport: 'amfootball',
+            homeName: homeName,
+            awayName: awayName,
+            leagueName: leagueName ?? '',
+            matchTimeMs: matchTimestamp! * 1000,
+          )
+        : null;
+
     return SportDetailHeaderShell<AmFootballMatchDetail>(
       detailAsync: detailAsync,
       skeletonHeight: 80,
       leagueName: leagueName,
       matchTimestamp: matchTimestamp,
+      actions: watchlistEntry != null ? [WatchlistBellButton(entry: watchlistEntry)] : null,
       builder: (detail) => _AmFootballHeaderContent(detail: detail, rt: rt),
     );
   }

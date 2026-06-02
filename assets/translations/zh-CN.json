@@ -1,4 +1,20 @@
 {
+  "watchlist": {
+    "title": "赛事提醒",
+    "profile_tile": "赛事提醒",
+    "upcoming": "场即将开始",
+    "empty_title": "暂无提醒",
+    "empty_subtitle": "在赛事页面添加提醒",
+    "load_error": "加载提醒失败",
+    "fifteen_min_before": "开始前15分钟",
+    "chip_starting_now": "即将开始",
+    "chip_starts_in": "还有 {time}",
+    "remove_confirm_title": "删除提醒",
+    "remove_confirm_body": "确定删除此赛事的提醒吗？",
+    "remove_confirm_button": "删除",
+    "remove_cancel_button": "取消",
+    "filter_all": "全部"
+  },
   "favourites": {
     "title_cn": "我的收藏",
     "title_en": "My Favourites",

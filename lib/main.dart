@@ -12,6 +12,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:sports_app/src/core/utils/app_info.dart';
 import 'package:sports_app/src/core/utils/app_locale.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sports_app/src/features/watchlist/data/notification_service.dart';
 import 'package:sports_app/src/providers/theme_provider.dart';
 import 'package:sports_app/src/routes/app_router.dart';
 
@@ -25,6 +26,8 @@ void main() async {
   }
   await EasyLocalization.ensureInitialized();
   await AppInfo.init();
+  await NotificationService().init();
+  await NotificationService().requestPermissions();
   final sharedPreferences = await SharedPreferences.getInstance();
 
   runApp(

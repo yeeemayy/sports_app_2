@@ -497,6 +497,11 @@ class ProfileScreen extends ConsumerWidget {
                     onTap: () => context.push(AppRoutes.profileFavourites),
                   ),
                 _ProfileTile(
+                  icon: Icons.notifications_outlined,
+                  label: 'watchlist.profile_tile'.tr(),
+                  onTap: () => context.push(AppRoutes.profileWatchlist),
+                ),
+                _ProfileTile(
                   icon: themeMode == ThemeMode.light
                       ? Icons.light_mode_rounded
                       : themeMode == ThemeMode.dark

@@ -1,4 +1,20 @@
 {
+  "watchlist": {
+    "title": "Match Reminders",
+    "profile_tile": "Match Reminders",
+    "upcoming": "Upcoming",
+    "empty_title": "No reminders set",
+    "empty_subtitle": "Add reminders from a match page",
+    "load_error": "Failed to load reminders",
+    "fifteen_min_before": "15 min before",
+    "chip_starting_now": "Starting now",
+    "chip_starts_in": "Starts in {time}",
+    "remove_confirm_title": "Remove Reminder",
+    "remove_confirm_body": "Remove the reminder for this match?",
+    "remove_confirm_button": "Remove",
+    "remove_cancel_button": "Cancel",
+    "filter_all": "All"
+  },
   "favourites": {
     "title_cn": "我的收藏",
     "title_en": "My Favourites",

@@ -28,6 +28,7 @@ abstract final class AppRoutes {
   static const profileEdit = 'edit';
   static const profileEditFull = '/profile/edit';
   static const profileFavourites = '/profile/favourites';
+  static const profileWatchlist = '/profile/watchlist';
   static const privacyPolicy = '/profile/privacy-policy';
   static const userAgreement = '/profile/user-agreement';
 
