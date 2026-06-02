@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
     <application
-        android:label="球帝体育-足球世界杯球迷必备直播神器"
+        android:label="AA体育"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
