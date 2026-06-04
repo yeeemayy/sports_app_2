@@ -132,7 +132,19 @@
       "no_live_subtitle": "先看看别的吧",
       "live_badge": "直播中",
       "followers": "{} 粉丝"
-    }
+    },
+    "your_matches": "我的赛事",
+    "fav_teams": "关注球队",
+    "for_you_news": "为您推荐",
+    "reason": {
+      "watchlist": "已设提醒",
+      "favourite_team": "关注球队"
+    },
+    "empty_hub_title": "建立您的赛事中心",
+    "empty_hub_body": "关注球队或在赛事上点击提醒按钮，以个性化此页面。",
+    "empty_hub_browse_leagues": "浏览联赛",
+    "empty_hub_view_live": "查看赛事",
+    "empty_hub_search": "搜索球队"
   },
   "video": {
     "load_error": "加载视频失败",

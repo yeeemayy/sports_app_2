@@ -132,7 +132,19 @@
       "no_live_subtitle": "Check out something else",
       "live_badge": "Live",
       "followers": "{} Followers"
-    }
+    },
+    "your_matches": "Your Matches",
+    "fav_teams": "Favourite Teams",
+    "for_you_news": "For You",
+    "reason": {
+      "watchlist": "Reminder Set",
+      "favourite_team": "Favourite Team"
+    },
+    "empty_hub_title": "Build Your Match Hub",
+    "empty_hub_body": "Follow teams or tap the bell on matches to personalise this page.",
+    "empty_hub_browse_leagues": "Browse Leagues",
+    "empty_hub_view_live": "View Matches",
+    "empty_hub_search": "Search Teams"
   },
   "video": {
     "load_error": "Failed to load video",

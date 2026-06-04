@@ -93,38 +93,40 @@ class _AppWrapperState extends ConsumerState<AppWrapper> {
             bottom: 18,
             left: 14,
             right: 14,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.72),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: Theme.of(context).dividerColor, width: 0.5),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color.fromRGBO(0, 0, 0, 0.5),
-                        blurRadius: 40,
-                        offset: Offset(0, 12),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      for (int i = 0; i < _tabs.length; i++)
-                        if (currentIndex == i)
-                          Expanded(
-                            child: _ActiveNavItem(
-                              label: _tabs[i].labelKey.tr(),
-                              icon: _tabs[i].activeIcon,
-                              onTap: () => _onTap(i),
-                            ),
-                          )
-                        else
-                          _InactiveNavItem(icon: _tabs[i].icon, onTap: () => _onTap(i)),
-                    ],
+            child: SafeArea(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.72),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: Theme.of(context).dividerColor, width: 0.5),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color.fromRGBO(0, 0, 0, 0.5),
+                          blurRadius: 40,
+                          offset: Offset(0, 12),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        for (int i = 0; i < _tabs.length; i++)
+                          if (currentIndex == i)
+                            Expanded(
+                              child: _ActiveNavItem(
+                                label: _tabs[i].labelKey.tr(),
+                                icon: _tabs[i].activeIcon,
+                                onTap: () => _onTap(i),
+                              ),
+                            )
+                          else
+                            _InactiveNavItem(icon: _tabs[i].icon, onTap: () => _onTap(i)),
+                      ],
+                    ),
                   ),
                 ),
               ),
