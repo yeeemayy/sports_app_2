@@ -1,0 +1,198 @@
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
+import 'package:sports_app/src/features/event/domain/ice_hockey_status.dart';
+import 'package:sports_app/src/features/event/domain/models/ice_hockey_match_detail.dart';
+import 'package:sports_app/src/features/event/domain/models/ice_hockey_realtime_data.dart';
+import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
+import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
+import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_header_shell.dart';
+import 'package:sports_app/src/features/watchlist/domain/watchlist_entry.dart';
+import 'package:sports_app/src/features/watchlist/presentation/watchlist_bell_button.dart';
+import 'package:sports_app/src/shared_widgets/sport_logo.dart';
+
+class IceHockeyMatchHeader extends ConsumerWidget {
+  const IceHockeyMatchHeader({
+    super.key,
+    required this.matchId,
+    this.leagueName,
+    this.matchTimestamp,
+  });
+
+  final String matchId;
+  final String? leagueName;
+  final int? matchTimestamp;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final detailAsync = ref.watch(
+      matchDetailProvider(sport: SportType.iceHockey, matchId: matchId),
+    );
+    final rt = ref.watch(
+      sportRealtimeProvider(
+        SportType.iceHockey,
+      ).select((map) => map[matchId] as IceHockeyRealtimeData?),
+    );
+
+    final detail = detailAsync.valueOrNull as IceHockeyMatchDetail?;
+    final homeName = detail?.homeName ?? '';
+    final awayName = detail?.awayName ?? '';
+    final canWatchlist =
+        homeName.isNotEmpty && awayName.isNotEmpty && matchTimestamp != null && matchTimestamp! > 0;
+    final watchlistEntry = canWatchlist
+        ? WatchlistEntry(
+            matchId: matchId,
+            sport: 'hockey',
+            homeName: homeName,
+            awayName: awayName,
+            leagueName: leagueName ?? '',
+            matchTimeMs: matchTimestamp! * 1000,
+          )
+        : null;
+
+    return SportDetailHeaderShell<IceHockeyMatchDetail>(
+      detailAsync: detailAsync,
+      skeletonHeight: 80,
+      leagueName: leagueName,
+      matchTimestamp: matchTimestamp,
+      actions: watchlistEntry != null ? [WatchlistBellButton(entry: watchlistEntry)] : null,
+      builder: (detail) => _IceHockeyHeaderContent(detail: detail, rt: rt),
+    );
+  }
+}
+
+class _IceHockeyHeaderContent extends StatelessWidget {
+  const _IceHockeyHeaderContent({required this.detail, this.rt});
+
+  final IceHockeyMatchDetail detail;
+  final IceHockeyRealtimeData? rt;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final effStatusId = rt?.statusId ?? detail.statusId;
+    final homeScore = rt?.homeScore.toString() ?? detail.homeScore;
+    final awayScore = rt?.awayScore.toString() ?? detail.awayScore;
+
+    final isNotStarted = effStatusId == 1;
+    const liveStatuses = {30, 331, 31, 332, 32, 6, 10, 8, 13};
+    final isLive = liveStatuses.contains(effStatusId);
+    final statusLabel = iceHockeyStatusLabel(
+      effStatusId,
+      detail.statusDescription,
+    );
+    final pillColor = isLive ? colors.live : colors.text2;
+    final scoreColor = isLive ? colors.accent : colors.text;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          flex: 2,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SportLogo(url: detail.homeInfo.logo, size: 48),
+              const SizedBox(height: 6),
+              Text(
+                detail.homeName,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.body(
+                  12,
+                ).copyWith(fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 3,
+                ),
+                decoration: BoxDecoration(
+                  color: pillColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  statusLabel.isNotEmpty ? statusLabel : 'common.unknown'.tr(),
+                  style: AppTextStyles.mono(
+                    10,
+                  ).copyWith(color: scoreColor, fontWeight: FontWeight.w700),
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (isNotStarted)
+                Text(
+                  '–',
+                  style: AppTextStyles.display(
+                    22,
+                    context,
+                  ).copyWith(color: context.appColors.text3),
+                )
+              else
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      homeScore,
+                      style: AppTextStyles.display(
+                        48,
+                        context,
+                      ).copyWith(color: scoreColor),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        '–',
+                        style: AppTextStyles.display(
+                          32,
+                          context,
+                        ).copyWith(color: colors.text3),
+                      ),
+                    ),
+                    Text(
+                      awayScore,
+                      style: AppTextStyles.display(
+                        48,
+                        context,
+                      ).copyWith(color: scoreColor),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+        Expanded(
+          flex: 2,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SportLogo(url: detail.awayInfo.logo, size: 48),
+              const SizedBox(height: 6),
+              Text(
+                detail.awayName,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.body(
+                  12,
+                ).copyWith(fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
