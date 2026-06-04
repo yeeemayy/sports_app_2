@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 
 /// Shows the match status as a blinking live-minute label, period label, or static text.
@@ -71,7 +72,7 @@ class _MatchStatusBadgeState extends State<MatchStatusBadge> {
     final style = context.textTheme.labelSmall?.copyWith(
       color: MatchStatusBadge.blinkingStatuses.contains(widget.statusId)
           ? widget.liveColor
-          : (widget.staticColor ?? Colors.grey.shade600),
+          : (widget.staticColor ?? context.appColors.text3),
       fontWeight: FontWeight.w600,
     );
 

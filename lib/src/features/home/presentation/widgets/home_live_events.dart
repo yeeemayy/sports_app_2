@@ -1,6 +1,7 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/shared_widgets/avatar.dart';
 
@@ -14,16 +15,14 @@ class HomeLiveEvents extends StatelessWidget {
       width: 300,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade400),
+        border: Border.all(color: context.appColors.placeholder),
       ),
       child: Column(
         spacing: 6,
         children: [
           Text(
             '中国台湾UBA大专篮球联赛',
-            style: context.textTheme.labelMedium?.copyWith(
-              color: Colors.grey.shade500,
-            ),
+            style: context.textTheme.labelMedium?.copyWith(color: context.appColors.text3),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -43,14 +42,12 @@ class HomeLiveEvents extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             spacing: 6,
             children: [
-              _buildContestee('黎明技术学院'),
+              _buildContestee(context, '黎明技术学院'),
               Text(
                 '55-58',
-                style: context.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: context.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
               ),
-              _buildContestee('虎尾科技大学'),
+              _buildContestee(context, '虎尾科技大学'),
             ],
           ),
           AnchorAvatar(size: 35),
@@ -59,26 +56,24 @@ class HomeLiveEvents extends StatelessWidget {
     );
   }
 
-  Widget _buildContestee(String contesteeName) => Column(
+  Widget _buildContestee(BuildContext context, String contesteeName) => Column(
     children: [
       Container(
         height: 45,
         width: 45,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(width: 3, color: Colors.grey.shade300),
+          border: Border.all(width: 3, color: context.appColors.placeholder),
         ),
         child: ClipOval(
           child: CachedNetworkImage(
-            imageUrl:
-                'https://placehold.co/400x400/FFFFFF/898989.png?text=Image',
+            imageUrl: 'https://placehold.co/400x400/FFFFFF/898989.png?text=Image',
             fit: BoxFit.cover,
             placeholder: (context, url) => Skeletonizer(
               enabled: true,
-              child: const ColoredBox(color: Colors.grey),
+              child: ColoredBox(color: context.appColors.shimmerBase),
             ),
-            errorWidget: (context, url, error) =>
-                ColoredBox(color: Colors.grey.shade200),
+            errorWidget: (context, url, error) => ColoredBox(color: context.appColors.placeholder),
           ),
         ),
       ),

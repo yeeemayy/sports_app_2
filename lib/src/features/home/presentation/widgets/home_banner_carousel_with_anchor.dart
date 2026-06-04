@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -20,11 +22,26 @@ class HomeBannerCarousel extends ConsumerStatefulWidget {
 class _HomeBannerCarouselState extends ConsumerState<HomeBannerCarousel> {
   final _controller = PageController();
   int _currentPage = 0;
+  Timer? _autoScrollTimer;
 
   @override
   void dispose() {
+    _autoScrollTimer?.cancel();
     _controller.dispose();
     super.dispose();
+  }
+
+  void _startAutoScroll(int itemCount) {
+    _autoScrollTimer?.cancel();
+    _autoScrollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (!_controller.hasClients) return;
+      final next = (_currentPage + 1) % itemCount;
+      _controller.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+    });
   }
 
   @override
@@ -36,13 +53,15 @@ class _HomeBannerCarouselState extends ConsumerState<HomeBannerCarousel> {
     final articles = newsAsync.valueOrNull ?? [];
 
     final int itemCount = (bannerUrl != null ? 1 : 0) + articles.length;
-    if (itemCount == 0) {
-      return _shimmerPlaceholder();
+    if (itemCount == 0) return _shimmerPlaceholder();
+
+    if (_autoScrollTimer == null || !_autoScrollTimer!.isActive) {
+      _startAutoScroll(itemCount);
     }
 
     return Column(
       children: [
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         SizedBox(
           height: 200,
           child: PageView.builder(
@@ -90,7 +109,7 @@ class _HomeBannerCarouselState extends ConsumerState<HomeBannerCarousel> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: url.isEmpty
-            ? const ColoredBox(color: Color(0xFFE0E0E0))
+            ? ColoredBox(color: context.appColors.placeholder)
             : GestureDetector(
                 onTap: onTap,
                 child: Stack(
@@ -100,12 +119,12 @@ class _HomeBannerCarouselState extends ConsumerState<HomeBannerCarousel> {
                       imageUrl: url,
                       width: double.maxFinite,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) => Skeletonizer(
+                      placeholder: (ctx, _) => Skeletonizer(
                         enabled: true,
-                        child: const ColoredBox(color: Colors.grey),
+                        child: ColoredBox(color: context.appColors.shimmerBase),
                       ),
-                      errorBuilder: (context, url, error) =>
-                          const ColoredBox(color: Color(0xFFE0E0E0)),
+                      errorBuilder: (ctx, _, __) =>
+                          ColoredBox(color: context.appColors.placeholder),
                     ),
                     if (title != null || subtitle != null)
                       Positioned(
@@ -157,7 +176,7 @@ class _HomeBannerCarouselState extends ConsumerState<HomeBannerCarousel> {
                                   ],
                                 ),
                               ),
-                              Icon(
+                              const Icon(
                                 Icons.keyboard_arrow_right,
                                 color: Colors.white,
                               ),
@@ -179,9 +198,9 @@ class _HomeBannerCarouselState extends ConsumerState<HomeBannerCarousel> {
         borderRadius: BorderRadius.circular(8),
         child: Skeletonizer(
           enabled: true,
-          child: const SizedBox(
+          child: SizedBox(
             height: 180,
-            child: ColoredBox(color: Colors.grey),
+            child: ColoredBox(color: context.appColors.shimmerBase),
           ),
         ),
       ),
@@ -207,7 +226,9 @@ class _PageDots extends StatelessWidget {
           width: active ? 16 : 6,
           height: 6,
           decoration: BoxDecoration(
-            color: active ? context.appColors.accent : Colors.grey.shade300,
+            color: active
+                ? context.appColors.accent
+                : context.appColors.placeholder,
             borderRadius: BorderRadius.circular(3),
           ),
         );

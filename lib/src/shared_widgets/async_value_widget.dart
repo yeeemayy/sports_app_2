@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 
 /// Generic wrapper for [AsyncValue] that provides consistent loading/error/data rendering.
 ///
@@ -30,7 +31,7 @@ class AsyncValueWidget<T> extends StatelessWidget {
           Center(
             child: Text(
               err.toString(),
-              style: TextStyle(color: Colors.grey.shade500),
+              style: TextStyle(color: context.appColors.text3),
               textAlign: TextAlign.center,
             ),
           ),

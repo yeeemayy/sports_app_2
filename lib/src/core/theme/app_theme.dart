@@ -22,6 +22,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.inningHeaderBg,
     required this.inningAwayRowBg,
     required this.inningHomeRowBg,
+    required this.placeholder,
   });
 
   final Color ink;
@@ -43,6 +44,8 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color inningHeaderBg;
   final Color inningAwayRowBg;
   final Color inningHomeRowBg;
+  /// Neutral placeholder background and light border colour (replaces `Colors.grey.shade200/300`).
+  final Color placeholder;
 
   static const AppColors dark = AppColors(
     ink: Color(0xFF0E0E0E),
@@ -64,6 +67,7 @@ class AppColors extends ThemeExtension<AppColors> {
     inningHeaderBg: Color(0xFF232323),
     inningAwayRowBg: Color(0xFF2D1F1A),
     inningHomeRowBg: Color(0xFF1A2435),
+    placeholder: Color(0xFF2C2C2C),
   );
 
   static const AppColors light = AppColors(
@@ -86,6 +90,7 @@ class AppColors extends ThemeExtension<AppColors> {
     inningHeaderBg: Color(0xFFECECEC),
     inningAwayRowBg: Color(0xFFFFF0ED),
     inningHomeRowBg: Color(0xFFEEF2FB),
+    placeholder: Color(0xFFE0E0E0),
   );
 
   @override
@@ -109,6 +114,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? inningHeaderBg,
     Color? inningAwayRowBg,
     Color? inningHomeRowBg,
+    Color? placeholder,
   }) => AppColors(
     ink: ink ?? this.ink,
     ink2: ink2 ?? this.ink2,
@@ -129,6 +135,7 @@ class AppColors extends ThemeExtension<AppColors> {
     inningHeaderBg: inningHeaderBg ?? this.inningHeaderBg,
     inningAwayRowBg: inningAwayRowBg ?? this.inningAwayRowBg,
     inningHomeRowBg: inningHomeRowBg ?? this.inningHomeRowBg,
+    placeholder: placeholder ?? this.placeholder,
   );
 
   @override
@@ -158,6 +165,7 @@ class AppColors extends ThemeExtension<AppColors> {
       inningHeaderBg: Color.lerp(inningHeaderBg, other.inningHeaderBg, t)!,
       inningAwayRowBg: Color.lerp(inningAwayRowBg, other.inningAwayRowBg, t)!,
       inningHomeRowBg: Color.lerp(inningHomeRowBg, other.inningHomeRowBg, t)!,
+      placeholder: Color.lerp(placeholder, other.placeholder, t)!,
     );
   }
 }

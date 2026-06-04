@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 
 class HomeSectionTitle extends StatelessWidget {
@@ -43,14 +44,14 @@ class HomeSectionTitle extends StatelessWidget {
                     Text(
                       subtitle!,
                       style: context.textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade500,
+                        color: context.appColors.text3,
                       ),
                     ),
                 ],
               ),
             ),
             if (onPressed != null)
-              Icon(Icons.chevron_right, color: Colors.grey.shade400),
+              Icon(Icons.chevron_right, color: context.appColors.text3),
           ],
         ),
       ),
