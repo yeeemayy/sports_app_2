@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/event_home_header.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/event_recommended_content.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/event_sport_filter.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/event_sport_tab_content.dart';
 import 'package:sports_app/src/providers/nav_providers.dart';
 
@@ -57,6 +58,11 @@ class _EventScreenState extends ConsumerState<EventScreen>
     return Column(
       children: [
         EventHomeHeader(selectedFilter: _selectedFilter),
+        EventSportDropdownBar(
+          sports: _sports,
+          selectedFilter: _selectedFilter,
+          onSelectFilter: _selectFilter,
+        ),
         Expanded(
           child: Stack(
             children: [
@@ -72,9 +78,6 @@ class _EventScreenState extends ConsumerState<EventScreen>
                         tabIndex: i,
                         tabController: _tabController,
                         resetTrigger: _resetTrigger,
-                        sports: _sports,
-                        selectedFilter: _selectedFilter,
-                        onSelectFilter: _selectFilter,
                       ),
                   ],
                 ),
@@ -82,9 +85,6 @@ class _EventScreenState extends ConsumerState<EventScreen>
               if (_selectedFilter == _kRecommended)
                 EventRecommendedContent(
                   onSeeAllLive: () => _selectFilter(SportType.football.apiPath),
-                  sports: _sports,
-                  selectedFilter: _selectedFilter,
-                  onSelectFilter: _selectFilter,
                 ),
             ],
           ),

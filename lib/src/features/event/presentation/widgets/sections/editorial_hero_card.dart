@@ -63,17 +63,17 @@ class EditorialHeroCard extends StatelessWidget {
                               ? article.description.toUpperCase()
                               : '',
                           style: AppTextStyles.mono(9).copyWith(
-                            color: context.appColors.accentEcho,
+                            color: Colors.grey,
                             letterSpacing: 9 * 0.1,
                           ),
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 10),
                         Text(
                           article.title.toUpperCase(),
                           style: AppTextStyles.display(
-                            38,
+                            28,
                             context,
                           ).copyWith(color: Colors.white, height: 0.9),
                           maxLines: 3,

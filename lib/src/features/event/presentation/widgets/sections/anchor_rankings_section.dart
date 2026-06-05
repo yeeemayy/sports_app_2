@@ -19,11 +19,13 @@ class AnchorRankingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return anchorsAsync.when(
-      skipLoadingOnReload: true,
-      loading: () => _shimmer(context),
-      error: (_, _) => const SizedBox.shrink(),
-      data: (page) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 250),
+      child: anchorsAsync.when(
+        skipLoadingOnReload: true,
+        loading: () => _shimmer(context),
+        error: (_, _) => const SizedBox.shrink(),
+        data: (page) {
         final anchors = page.data.take(6).toList();
         if (anchors.isEmpty) return const SizedBox.shrink();
         return Column(
@@ -71,6 +73,7 @@ class AnchorRankingsSection extends StatelessWidget {
           ],
         );
       },
+    ),
     );
   }
 

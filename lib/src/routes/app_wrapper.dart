@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
 import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
@@ -83,116 +84,59 @@ class _AppWrapperState extends ConsumerState<AppWrapper> {
   Widget build(BuildContext context) {
     context.locale;
     final currentIndex = widget.navigationShell.currentIndex;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Stack(
-        children: [
-          Padding(padding: const EdgeInsets.only(bottom: 80), child: widget.navigationShell),
-          Positioned(
-            bottom: 18,
-            left: 14,
-            right: 14,
-            child: SafeArea(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.72),
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: Theme.of(context).dividerColor, width: 0.5),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color.fromRGBO(0, 0, 0, 0.5),
-                          blurRadius: 40,
-                          offset: Offset(0, 12),
-                        ),
-                      ],
+      body: widget.navigationShell,
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 0, 14, 18),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.72),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: Theme.of(context).dividerColor, width: 0.5),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color.fromRGBO(0, 0, 0, 0.5),
+                      blurRadius: 40,
+                      offset: Offset(0, 12),
                     ),
-                    child: Row(
-                      children: [
-                        for (int i = 0; i < _tabs.length; i++)
-                          if (currentIndex == i)
-                            Expanded(
-                              child: _ActiveNavItem(
-                                label: _tabs[i].labelKey.tr(),
-                                icon: _tabs[i].activeIcon,
-                                onTap: () => _onTap(i),
-                              ),
-                            )
-                          else
-                            _InactiveNavItem(icon: _tabs[i].icon, onTap: () => _onTap(i)),
-                      ],
-                    ),
+                  ],
+                ),
+                child: GNav(
+                  selectedIndex: currentIndex,
+                  onTabChange: _onTap,
+                  gap: 6,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  tabBorderRadius: 999,
+                  iconSize: 18,
+                  color: colorScheme.onSurface.withValues(alpha: 0.62),
+                  activeColor: colorScheme.onPrimary,
+                  tabBackgroundColor: colorScheme.primary,
+                  textStyle: AppTextStyles.display(12, context).copyWith(
+                    letterSpacing: 12 * 0.08,
+                    height: 1.2,
                   ),
+                  tabs: [
+                    for (final tab in _tabs)
+                      GButton(
+                        iconActiveColor: Colors.white,
+                        textColor: Colors.white,
+                        icon: tab.icon,
+                        text: tab.labelKey.tr().toUpperCase(),
+                      ),
+                  ],
                 ),
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ActiveNavItem extends StatelessWidget {
-  const _ActiveNavItem({required this.label, required this.icon, required this.onTap});
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary,
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: Theme.of(context).colorScheme.onPrimary, size: 18),
-            const SizedBox(width: 6),
-            Text(
-              label.toUpperCase(),
-              style: AppTextStyles.display(12, context).copyWith(
-                color: Theme.of(context).colorScheme.onPrimary,
-                letterSpacing: 12 * 0.08,
-                height: 1.2,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _InactiveNavItem extends StatelessWidget {
-  const _InactiveNavItem({required this.icon, required this.onTap});
-
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        child: Icon(
-          icon,
-          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.62),
-          size: 18,
         ),
       ),
     );

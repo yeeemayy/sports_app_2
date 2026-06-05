@@ -20,18 +20,12 @@ class EventSportTabContent extends ConsumerStatefulWidget {
     required this.tabIndex,
     required this.tabController,
     required this.resetTrigger,
-    required this.sports,
-    required this.selectedFilter,
-    required this.onSelectFilter,
   });
 
   final SportType sport;
   final int tabIndex;
   final TabController tabController;
   final ValueNotifier<int> resetTrigger;
-  final List<SportType> sports;
-  final String selectedFilter;
-  final ValueChanged<String> onSelectFilter;
 
   @override
   ConsumerState<EventSportTabContent> createState() =>
@@ -219,10 +213,7 @@ class _EventSportTabContentState extends ConsumerState<EventSportTabContent>
 
     return Column(
       children: [
-        EventSportAndStatusBar(
-          sports: widget.sports,
-          selectedFilter: widget.selectedFilter,
-          onSelectFilter: widget.onSelectFilter,
+        EventStatusBar(
           selected: _matchStatus,
           onSelected: (status) {
             setState(() {
@@ -404,8 +395,8 @@ class EventDateSelectorBar extends StatelessWidget {
                         weekdayLabel,
                         style: AppTextStyles.mono(10).copyWith(
                           color: isSelected
-                              ? context.appColors.ink
-                              : context.appColors.text3,
+                              ? Colors.white
+                              : context.appColors.text2,
                           fontWeight: isSelected ? FontWeight.w600 : null,
                         ),
                       ),
@@ -413,8 +404,8 @@ class EventDateSelectorBar extends StatelessWidget {
                         dayLabel,
                         style: AppTextStyles.display(12, context).copyWith(
                           color: isSelected
-                              ? context.appColors.ink
-                              : context.appColors.text,
+                              ? Colors.white
+                              : context.appColors.text2,
                           fontWeight: isSelected ? FontWeight.w600 : null,
                         ),
                       ),

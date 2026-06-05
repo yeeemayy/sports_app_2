@@ -31,65 +31,80 @@ class LiveNowSection extends StatelessWidget {
     final raw = liveAsync.valueOrNull?.matches ?? [];
     final matches = _sortByFavourites(raw, favTeamNames);
 
-    if (liveAsync.isLoading && matches.isEmpty) return _shimmer(context);
-    if (matches.isEmpty) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(_kHPad, 16, _kHPad, 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                'home.live_now'.tr().toUpperCase(),
-                style: AppTextStyles.display(
-                  22,
-                  context,
-                ).copyWith(color: context.appColors.text),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                '${matches.length}',
-                style: AppTextStyles.mono(
-                  10,
-                ).copyWith(color: context.appColors.text3),
-              ),
-              const Spacer(),
-              GestureDetector(
-                onTap: onSeeAll,
-                child: Text(
-                  'home.see_all'.tr(),
-                  style: AppTextStyles.mono(10).copyWith(
-                    color: context.appColors.text3,
-                    letterSpacing: 10 * 0.14,
+    Widget content;
+    if (liveAsync.isLoading && matches.isEmpty) {
+      content = _shimmer(context);
+    } else if (matches.isEmpty) {
+      content = const SizedBox.shrink();
+    } else {
+      content = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(_kHPad, 16, _kHPad, 12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  'home.live_now'.tr().toUpperCase(),
+                  style: AppTextStyles.display(
+                    22,
+                    context,
+                  ).copyWith(color: context.appColors.text),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  '${matches.length}',
+                  style: AppTextStyles.mono(
+                    10,
+                  ).copyWith(color: context.appColors.text3),
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: onSeeAll,
+                  child: Text(
+                    'home.see_all'.tr(),
+                    style: AppTextStyles.mono(10).copyWith(
+                      color: context.appColors.text3,
+                      letterSpacing: 10 * 0.14,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        SizedBox(
-          height: 118,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.fromLTRB(_kHPad, 0, _kHPad, 0),
-            itemCount: matches.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 12),
-            itemBuilder: (context, i) {
-              final m = matches[i];
-              final isFav = favTeamNames.any((n) => n.isNotEmpty && (
-                m.homeName.toLowerCase().contains(n) ||
-                m.awayName.toLowerCase().contains(n)
-              ));
-              return _LiveMatchCard(match: m, sport: SportType.football, isFavourite: isFav);
-            },
+          SizedBox(
+            height: 118,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.fromLTRB(_kHPad, 0, _kHPad, 0),
+              itemCount: matches.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
+              itemBuilder: (context, i) {
+                final m = matches[i];
+                final isFav = favTeamNames.any(
+                  (n) =>
+                      n.isNotEmpty &&
+                      (m.homeName.toLowerCase().contains(n) ||
+                          m.awayName.toLowerCase().contains(n)),
+                );
+                return _LiveMatchCard(
+                  match: m,
+                  sport: SportType.football,
+                  isFavourite: isFav,
+                );
+              },
+            ),
           ),
-        ),
-        const SizedBox(height: 22),
-      ],
+          const SizedBox(height: 22),
+        ],
+      );
+    }
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 250),
+      child: content,
     );
   }
 
