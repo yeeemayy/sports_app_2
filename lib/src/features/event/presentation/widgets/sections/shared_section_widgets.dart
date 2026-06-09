@@ -63,7 +63,7 @@ class _LivePulseBadgeState extends State<LivePulseBadge>
         final base = hasApostrophe ? text.substring(0, text.length - 1) : text;
         final apostropheOpacity = _blinkCtrl.value < 0.5 ? 1.0 : 0.0;
         final baseStyle = AppTextStyles.mono(9).copyWith(
-          color: context.appColors.ink,
+          color: Colors.white,
           letterSpacing: 9 * 0.12,
           fontWeight: FontWeight.w700,
         );
@@ -82,7 +82,7 @@ class _LivePulseBadgeState extends State<LivePulseBadge>
                 width: 7,
                 height: 7,
                 decoration: BoxDecoration(
-                  color: context.appColors.ink.withValues(
+                  color: Colors.white.withValues(
                     alpha: 0.4 + 0.6 * _anim.value,
                   ),
                   shape: BoxShape.circle,
@@ -98,7 +98,7 @@ class _LivePulseBadgeState extends State<LivePulseBadge>
                           TextSpan(
                             text: "'",
                             style: baseStyle.copyWith(
-                              color: context.appColors.ink.withValues(
+                              color: Colors.white.withValues(
                                 alpha: apostropheOpacity,
                               ),
                             ),

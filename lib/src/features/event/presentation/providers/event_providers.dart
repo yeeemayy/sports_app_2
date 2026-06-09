@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sports_app/src/core/pagination/paginated_state.dart';
 import 'package:sports_app/src/features/event/data/event_repository.dart';
 import 'package:sports_app/src/features/event/domain/models/basketball_team_squad.dart';
 import 'package:sports_app/src/features/event/domain/models/football_lineup.dart';
@@ -7,30 +8,33 @@ import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
 
 part 'event_providers.g.dart';
 
-class PaginatedMatchResult {
+class PaginatedMatchResult extends PaginatedState<SportMatch> {
   const PaginatedMatchResult({
-    required this.matches,
-    required this.currentPage,
-    required this.totalPage,
-    this.isLoadingMore = false,
-  });
+    required List<SportMatch> matches,
+    required int currentPage,
+    required int lastPage,
+    bool isLoadingMore = false,
+  }) : super(
+    items: matches,
+    currentPage: currentPage,
+    lastPage: lastPage,
+    isLoadingMore: isLoadingMore,
+    isLoading: false,
+  );
 
-  final List<SportMatch> matches;
-  final int currentPage;
-  final int totalPage;
-  final bool isLoadingMore;
-
-  bool get hasMore => currentPage < totalPage;
-
+  @override
   PaginatedMatchResult copyWith({
-    List<SportMatch>? matches,
+    List<SportMatch>? items,
     int? currentPage,
-    int? totalPage,
+    int? lastPage,
     bool? isLoadingMore,
+    bool? isLoading,
+    Object? error,
+    bool clearError = false,
   }) => PaginatedMatchResult(
-    matches: matches ?? this.matches,
+    matches: items ?? this.items,
     currentPage: currentPage ?? this.currentPage,
-    totalPage: totalPage ?? this.totalPage,
+    lastPage: lastPage ?? this.lastPage,
     isLoadingMore: isLoadingMore ?? this.isLoadingMore,
   );
 }
@@ -57,7 +61,7 @@ class SportMatchesPaginated extends _$SportMatchesPaginated {
     return PaginatedMatchResult(
       matches: result.matches.where((m) => m.statusId != 0).toList(),
       currentPage: 1,
-      totalPage: result.totalPage,
+      lastPage: result.totalPage,
     );
   }
 
@@ -85,11 +89,11 @@ class SportMatchesPaginated extends _$SportMatchesPaginated {
       state = AsyncData(
         PaginatedMatchResult(
           matches: [
-            ...current.matches,
+            ...current.items,
             ...result.matches.where((m) => m.statusId != 0),
           ],
           currentPage: nextPage,
-          totalPage: result.totalPage,
+          lastPage: result.totalPage,
         ),
       );
     } catch (_) {

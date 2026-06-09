@@ -38,3 +38,7 @@ String _key(int statusId) {
       return '';
   }
 }
+
+const volleyballLiveStatuses = {432, 434, 436, 438, 440};
+
+bool volleyballIsLive(int statusId) => volleyballLiveStatuses.contains(statusId);

@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sports_app/src/core/pagination/paginated_state.dart';
 import 'package:sports_app/src/features/news/data/news_repository.dart';
 import 'package:sports_app/src/features/news/domain/models/news_article.dart';
 import 'package:sports_app/src/features/news/domain/models/news_detail.dart';
@@ -9,27 +10,19 @@ part 'news_providers.g.dart';
 // Shared paginated state
 // ---------------------------------------------------------------------------
 
-class NewsPaginatedState {
+class NewsPaginatedState extends PaginatedState<NewsArticle> {
   const NewsPaginatedState({
-    this.articles = const [],
-    this.currentPage = 0,
-    this.lastPage = 1,
-    this.isLoadingMore = false,
-    this.isLoading = true,
-    this.error,
+    super.items = const [],
+    super.currentPage = 0,
+    super.lastPage = 1,
+    super.isLoadingMore = false,
+    super.isLoading = true,
+    super.error,
   });
 
-  final List<NewsArticle> articles;
-  final int currentPage;
-  final int lastPage;
-  final bool isLoadingMore;
-  final bool isLoading;
-  final Object? error;
-
-  bool get hasMore => currentPage < lastPage;
-
+  @override
   NewsPaginatedState copyWith({
-    List<NewsArticle>? articles,
+    List<NewsArticle>? items,
     int? currentPage,
     int? lastPage,
     bool? isLoadingMore,
@@ -38,7 +31,7 @@ class NewsPaginatedState {
     bool clearError = false,
   }) {
     return NewsPaginatedState(
-      articles: articles ?? this.articles,
+      items: items ?? this.items,
       currentPage: currentPage ?? this.currentPage,
       lastPage: lastPage ?? this.lastPage,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
@@ -93,9 +86,9 @@ class NewsPaginated extends _$NewsPaginated {
           .getNewsList(locale: _locale, page: page);
       final articles = replace
           ? response.list
-          : [...state.articles, ...response.list];
+          : [...state.items, ...response.list];
       state = state.copyWith(
-        articles: articles,
+        items: articles,
         currentPage: response.meta.currentPage,
         lastPage: response.meta.lastPage,
         isLoading: false,
@@ -147,9 +140,9 @@ class NewsSearch extends _$NewsSearch {
           .searchNews(locale: _locale, keywords: _keywords, page: page);
       final articles = replace
           ? response.data
-          : [...state.articles, ...response.data];
+          : [...state.items, ...response.data];
       state = state.copyWith(
-        articles: articles,
+        items: articles,
         currentPage: response.currentPage,
         lastPage: response.lastPage,
         isLoading: false,

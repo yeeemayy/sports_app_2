@@ -50,10 +50,8 @@ class LabeledField extends StatelessWidget {
       children: [
         Text(
           label.toUpperCase(),
-          style: AppTextStyles.mono(10).copyWith(
-            color: Theme.of(
-              context,
-            ).colorScheme.onSurface.withValues(alpha: 0.36),
+          style: AppTextStyles.mono(12).copyWith(
+            color: context.appColors.text2,
             letterSpacing: 1.5,
           ),
         ),
@@ -99,7 +97,7 @@ class PrimaryCtaButton extends StatelessWidget {
                     width: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: scheme.onPrimary,
+                      color: Colors.white,
                     ),
                   )
                 : Text(
@@ -107,13 +105,13 @@ class PrimaryCtaButton extends StatelessWidget {
                     style: AppTextStyles.display(
                       18,
                       context,
-                    ).copyWith(color: scheme.onPrimary, height: 1),
+                    ).copyWith(color: Colors.white, height: 1),
                   ),
             Container(
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: scheme.onPrimary,
+                color: Colors.white,
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.arrow_forward, color: scheme.primary, size: 18),

@@ -48,3 +48,7 @@ String _key(int statusId) {
       return '';
   }
 }
+
+const amFootballLiveStatuses = {44, 45, 46, 47, 10};
+
+bool amFootballIsLive(int statusId) => amFootballLiveStatuses.contains(statusId);

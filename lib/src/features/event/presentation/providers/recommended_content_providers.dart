@@ -92,7 +92,7 @@ RecommendedContentViewModel recommendedContentViewModel(
               sportMatchesPaginatedProvider(sport: sportType, matchStatus: 'upcoming'),
             )
             .valueOrNull
-            ?.matches ??
+            ?.items ??
         [];
     for (final m in upcoming) {
       if (watchlistedIds.contains(m.id)) continue;

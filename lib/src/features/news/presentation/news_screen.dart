@@ -138,7 +138,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
     final state = ref.watch(newsSearchProvider);
     final colors = context.appColors;
 
-    if (state.error != null && state.articles.isEmpty) {
+    if (state.error != null && state.items.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           context.showErrorDialog(
@@ -159,7 +159,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
       );
     }
 
-    if (state.articles.isEmpty) {
+    if (state.items.isEmpty) {
       return Center(
         child: Text(
           'news.no_results'.tr(),
@@ -174,11 +174,11 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
       child: ListView.separated(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: state.articles.length + (state.isLoadingMore ? 1 : 0),
+        itemCount: state.items.length + (state.isLoadingMore ? 1 : 0),
         separatorBuilder: (_, _) =>
             Divider(height: 1, indent: 22, endIndent: 22, color: colors.line),
         itemBuilder: (context, index) {
-          if (index == state.articles.length) {
+          if (index == state.items.length) {
             return Padding(
               padding: const EdgeInsets.all(16),
               child: Center(
@@ -186,7 +186,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
               ),
             );
           }
-          final article = state.articles[index];
+          final article = state.items[index];
           return NewsCard(
             article: article,
             categoryLabel: _searchKeyword,

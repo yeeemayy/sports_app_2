@@ -62,3 +62,7 @@ String _badmintonStatusKey(int statusId) {
       return '';
   }
 }
+
+const badmintonLiveStatuses = {3, 51, 52, 53, 54, 55};
+
+bool badmintonIsLive(int statusId) => badmintonLiveStatuses.contains(statusId);

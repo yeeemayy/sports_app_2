@@ -109,8 +109,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
     await Navigator.of(context).push(
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (_) =>
-            AnchorVideoFullscreenPage(controller: _videoController!),
+        builder: (_) => AnchorVideoFullscreenPage(controller: _videoController!),
       ),
     );
     if (mounted && wasPlaying && _videoController != null) {
@@ -145,15 +144,26 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
   Widget build(BuildContext context) {
     ref.listen(anchorDetailProvider(widget.anchorId), (_, next) {
       next.whenData((detail) {
-        if (_videoController == null &&
-            detail.m3u8Url != null &&
-            detail.m3u8Url!.isNotEmpty) {
+        if (_videoController == null && detail.m3u8Url != null && detail.m3u8Url!.isNotEmpty) {
           _initVideoPlayer(detail.m3u8Url!);
         }
       });
     });
 
     final detailAsync = ref.watch(anchorDetailProvider(widget.anchorId));
+
+    // If the widget was recreated (e.g. after login redirect) the listener
+    // above won't fire because the provider value hasn't changed. Catch that
+    // case by eagerly kicking off init when we already have data.
+    detailAsync.whenData((detail) {
+      if (_videoController == null && detail.m3u8Url != null && detail.m3u8Url!.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _videoController == null) {
+            _initVideoPlayer(detail.m3u8Url!);
+          }
+        });
+      }
+    });
     final bannerAsync = ref.watch(bannerProvider);
 
     return Scaffold(
@@ -208,31 +218,18 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
 
             // ── Layer 3: API loading ──
             if (detailAsync.isLoading)
-              Center(
-                child: CircularProgressIndicator(
-                  color: colors.text,
-                  strokeWidth: 2,
-                ),
-              ),
+              Center(child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)),
 
             // ── Layer 4: Video controller init spinner ──
             if (_videoController != null && !_videoInitialized && !_videoError)
-              const Center(
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
-                ),
-              ),
+              const Center(child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)),
 
             // ── Layer 5: Buffering ──
             if (_videoInitialized && _isBuffering)
               Container(
                 color: Colors.black38,
                 child: const Center(
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
+                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                 ),
               ),
 
@@ -246,10 +243,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
                     children: [
                       Text(
                         'anchor.detail.video.error'.tr(),
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 13,
-                        ),
+                        style: const TextStyle(color: Colors.white70, fontSize: 13),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 12),
@@ -265,8 +259,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
             // ── Layer 7: Offline ──
             if (detailAsync.valueOrNull != null &&
                 !_videoError &&
-                (detailAsync.valueOrNull!.isLive == 0 ||
-                    detailAsync.valueOrNull!.m3u8Url == null))
+                (detailAsync.valueOrNull!.isLive == 0 || detailAsync.valueOrNull!.m3u8Url == null))
               Container(
                 color: Colors.black54,
                 child: Center(
@@ -298,7 +291,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
                         _videoController?.value.isPlaying == true
                             ? Icons.pause_rounded
                             : Icons.play_arrow_rounded,
-                        color: colors.text,
+                        color: Colors.white,
                         size: 26,
                       ),
                     ),
@@ -316,11 +309,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
                 children: [
                   _FrostedIconButton(
                     onTap: () => context.pop(),
-                    child: Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      color: colors.text,
-                      size: 18,
-                    ),
+                    child: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 18),
                   ),
                   Spacer(),
                   if (detailAsync.valueOrNull?.isLive == 1) ...[
@@ -346,11 +335,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
                     onTap: _openFullscreen,
                     size: 34,
                     borderRadius: 8,
-                    child: Icon(
-                      Icons.fullscreen_rounded,
-                      color: colors.text,
-                      size: 18,
-                    ),
+                    child: Icon(Icons.fullscreen_rounded, color: Colors.white, size: 18),
                   ),
                 ),
               ),
@@ -381,17 +366,12 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
         ),
       );
     }
-    return CachedNetworkImage(
-      imageUrl: detail.cover,
+    return Image.network(
+      detail.cover,
       fit: BoxFit.cover,
       width: double.infinity,
       height: double.infinity,
-      placeholder: (context, url) => Skeletonizer(
-        enabled: true,
-        child: ColoredBox(color: context.appColors.ink2),
-      ),
-      errorBuilder: (context, url, error) =>
-          ColoredBox(color: context.appColors.ink2),
+      errorBuilder: (context, url, error) => ColoredBox(color: context.appColors.ink2),
     );
   }
 
@@ -406,9 +386,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
       loading: () => Center(
         child: Text(
           'anchor.detail.loading'.tr(),
-          style: AppTextStyles.mono(
-            11,
-          ).copyWith(color: colors.text3, letterSpacing: 1.4),
+          style: AppTextStyles.mono(11).copyWith(color: colors.text3, letterSpacing: 1.4),
         ),
       ),
       error: (_, _) => Center(
@@ -460,11 +438,9 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
             ),
             child: Text(
               'anchor.detail.info.notice_banner_label'.tr().toUpperCase(),
-              style: AppTextStyles.mono(9).copyWith(
-                color: const Color(0xFF0E0E0E),
-                letterSpacing: 1.4,
-                height: 1,
-              ),
+              style: AppTextStyles.mono(
+                9,
+              ).copyWith(color: Colors.white, letterSpacing: 1.4, height: 1),
             ),
           ),
           const SizedBox(width: 10),
@@ -499,9 +475,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
           height: 56,
           decoration: BoxDecoration(
             color: colors.surface,
-            border: Border.symmetric(
-              horizontal: BorderSide(color: colors.line, width: 0.5),
-            ),
+            border: Border.symmetric(horizontal: BorderSide(color: colors.line, width: 0.5)),
           ),
           child: Row(
             children: [
@@ -516,11 +490,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
                   ),
                 Expanded(
                   child: Center(
-                    child: _RefAppButton(
-                      icon: apps[i].icon,
-                      name: apps[i].name!,
-                      url: apps[i].url,
-                    ),
+                    child: _RefAppButton(icon: apps[i].icon, name: apps[i].name!, url: apps[i].url),
                   ),
                 ),
               ],
@@ -548,26 +518,14 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
           insets: EdgeInsets.zero,
         ),
         indicatorSize: TabBarIndicatorSize.label,
-        labelStyle: AppTextStyles.display(
-          16,
-          context,
-        ).copyWith(letterSpacing: 0.08 * 16),
-        unselectedLabelStyle: AppTextStyles.display(
-          16,
-          context,
-        ).copyWith(letterSpacing: 0.08 * 16),
+        labelStyle: AppTextStyles.display(16, context).copyWith(letterSpacing: 0.08 * 16),
+        unselectedLabelStyle: AppTextStyles.display(16, context).copyWith(letterSpacing: 0.08 * 16),
         labelColor: colors.text,
         unselectedLabelColor: colors.text3,
         dividerColor: Colors.transparent,
         tabs: [
-          Tab(
-            height: 44,
-            child: Text('anchor.detail.tab.chats'.tr().toUpperCase()),
-          ),
-          Tab(
-            height: 44,
-            child: Text('anchor.detail.tab.info'.tr().toUpperCase()),
-          ),
+          Tab(height: 44, child: Text('anchor.detail.tab.chats'.tr().toUpperCase())),
+          Tab(height: 44, child: Text('anchor.detail.tab.info'.tr().toUpperCase())),
         ],
       ),
     );
@@ -592,12 +550,9 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
                 child: CachedNetworkImage(
                   imageUrl: detail.avatarUrl,
                   fit: BoxFit.cover,
-                  placeholder: (context, url) => Skeletonizer(
-                    enabled: true,
-                    child: ColoredBox(color: colors.surface2),
-                  ),
-                  errorBuilder: (context, url, error) =>
-                      ColoredBox(color: colors.surface2),
+                  placeholder: (context, url) =>
+                      Skeletonizer(enabled: true, child: ColoredBox(color: colors.surface2)),
+                  errorBuilder: (context, url, error) => ColoredBox(color: colors.surface2),
                 ),
               ),
             ),
@@ -608,25 +563,16 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
                 children: [
                   Text(
                     detail.nickname,
-                    style: AppTextStyles.display(
-                      18,
-                      context,
-                    ).copyWith(color: colors.text),
+                    style: AppTextStyles.display(18, context).copyWith(color: colors.text),
                   ),
                   const SizedBox(height: 3),
                   Row(
                     children: [
-                      Icon(
-                        Icons.local_fire_department_rounded,
-                        color: colors.accentEcho,
-                        size: 13,
-                      ),
+                      Icon(Icons.local_fire_department_rounded, color: colors.accentEcho, size: 13),
                       const SizedBox(width: 4),
                       Text(
                         '${detail.collect}',
-                        style: AppTextStyles.mono(
-                          11,
-                        ).copyWith(color: colors.text2),
+                        style: AppTextStyles.mono(11).copyWith(color: colors.text2),
                       ),
                     ],
                   ),
@@ -641,10 +587,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
         const SizedBox(height: 18),
         _InfoRow(label: 'anchor.detail.info.title'.tr(), value: detail.title),
         const SizedBox(height: 16),
-        _InfoRow(
-          label: 'anchor.detail.info.followers'.tr(),
-          value: '${detail.collect}',
-        ),
+        _InfoRow(label: 'anchor.detail.info.followers'.tr(), value: '${detail.collect}'),
       ],
     );
   }
@@ -694,18 +637,15 @@ class _LivePulseBadge extends StatefulWidget {
   State<_LivePulseBadge> createState() => _LivePulseBadgeState();
 }
 
-class _LivePulseBadgeState extends State<_LivePulseBadge>
-    with SingleTickerProviderStateMixin {
+class _LivePulseBadgeState extends State<_LivePulseBadge> with SingleTickerProviderStateMixin {
   late final AnimationController _anim;
   late final Animation<double> _scale;
 
   @override
   void initState() {
     super.initState();
-    _anim = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1400),
-    )..repeat(reverse: true);
+    _anim = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))
+      ..repeat(reverse: true);
     _scale = Tween<double>(
       begin: 1.0,
       end: 0.7,
@@ -723,10 +663,7 @@ class _LivePulseBadgeState extends State<_LivePulseBadge>
     final colors = context.appColors;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-      decoration: BoxDecoration(
-        color: colors.live,
-        borderRadius: BorderRadius.circular(6),
-      ),
+      decoration: BoxDecoration(color: colors.live, borderRadius: BorderRadius.circular(6)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -735,20 +672,16 @@ class _LivePulseBadgeState extends State<_LivePulseBadge>
             child: Container(
               width: 6,
               height: 6,
-              decoration: const BoxDecoration(
-                color: Color(0xFF0E0E0E),
-                shape: BoxShape.circle,
-              ),
+              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
             ),
           ),
           const SizedBox(width: 5),
           Text(
             'anchor.detail.live'.tr(),
-            style: AppTextStyles.display(10, context).copyWith(
-              color: const Color(0xFF0E0E0E),
-              letterSpacing: 0.12 * 10,
-              height: 1,
-            ),
+            style: AppTextStyles.display(
+              10,
+              context,
+            ).copyWith(color: Colors.white, letterSpacing: 0.12 * 10, height: 1),
           ),
         ],
       ),
@@ -782,12 +715,9 @@ class _FollowerChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.person_outline_outlined, color: colors.text, size: 11),
+          Icon(Icons.person_outline_outlined, color: Colors.white, size: 11),
           const SizedBox(width: 4),
-          Text(
-            _format(count),
-            style: AppTextStyles.mono(11).copyWith(color: colors.text),
-          ),
+          Text(_format(count), style: AppTextStyles.mono(11).copyWith(color: Colors.white)),
         ],
       ),
     );
@@ -818,12 +748,9 @@ class _AnchorVideoStrip extends StatelessWidget {
             child: CachedNetworkImage(
               imageUrl: detail.avatarUrl,
               fit: BoxFit.cover,
-              placeholder: (context, url) => Skeletonizer(
-                enabled: true,
-                child: ColoredBox(color: colors.surface2),
-              ),
-              errorBuilder: (context, url, error) =>
-                  ColoredBox(color: colors.surface2),
+              placeholder: (context, url) =>
+                  Skeletonizer(enabled: true, child: ColoredBox(color: colors.surface2)),
+              errorBuilder: (context, url, error) => ColoredBox(color: colors.surface2),
             ),
           ),
         ),
@@ -834,36 +761,16 @@ class _AnchorVideoStrip extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                children: [
-                  Flexible(
-                    child: Text(
-                      detail.nickname.toUpperCase(),
-                      style: AppTextStyles.display(
-                        17,
-                        context,
-                      ).copyWith(color: colors.text),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Container(
-                    width: 5,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: colors.accent,
-                    ),
-                  ),
-                ],
+              Text(
+                detail.nickname.toUpperCase(),
+                style: AppTextStyles.display(17, context).copyWith(color: Colors.white),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 3),
               Text(
                 detail.title.toUpperCase(),
-                style: AppTextStyles.mono(
-                  10,
-                ).copyWith(color: colors.text2, letterSpacing: 1.4),
+                style: AppTextStyles.mono(10).copyWith(color: Colors.grey.shade300, letterSpacing: 1.4),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -881,26 +788,18 @@ class _RefAppButton extends StatelessWidget {
   final String icon;
   final String name;
   final String url;
-  const _RefAppButton({
-    required this.icon,
-    required this.name,
-    required this.url,
-  });
+  const _RefAppButton({required this.icon, required this.name, required this.url});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () =>
-          launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+      onTap: () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           CachedNetworkImage(imageUrl: icon, height: 35),
           const SizedBox(width: 10),
-          Text(
-            name,
-            style: context.textTheme.bodyMedium?.copyWith(color: Colors.white),
-          ),
+          Text(name, style: context.textTheme.bodyMedium?.copyWith(color: Colors.white)),
         ],
       ),
     );
@@ -923,15 +822,10 @@ class _InfoRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: AppTextStyles.mono(
-            10,
-          ).copyWith(color: colors.text3, letterSpacing: 1.6),
+          style: AppTextStyles.mono(10).copyWith(color: colors.text3, letterSpacing: 1.6),
         ),
         const SizedBox(height: 5),
-        Text(
-          value,
-          style: context.textTheme.bodyMedium?.copyWith(color: colors.text),
-        ),
+        Text(value, style: context.textTheme.bodyMedium?.copyWith(color: colors.text)),
       ],
     );
   }

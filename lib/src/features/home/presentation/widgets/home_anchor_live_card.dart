@@ -40,11 +40,9 @@ class HomeAnchorLiveCard extends StatelessWidget {
           children: [
             // Background cover image
             if (hasCover)
-              CachedNetworkImage(
-                imageUrl: anchor!.cover,
+              Image.network(
+                anchor!.cover,
                 fit: BoxFit.cover,
-                placeholder: (_, _) =>
-                    Container(color: context.appColors.surface2),
                 errorBuilder: (_, _, _) =>
                     Container(color: context.appColors.surface2),
               )
@@ -93,35 +91,35 @@ class HomeAnchorLiveCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 7,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.45),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.person_outline_outlined,
-                          size: 12,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(width: 3),
-                        Text(
-                          _formatCount(anchor?.collect ?? 0),
-                          style: AppTextStyles.display(
-                            11,
-                            context,
-                          ).copyWith(color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ),
+                  // const Spacer(),
+                  // Container(
+                  //   padding: const EdgeInsets.symmetric(
+                  //     horizontal: 7,
+                  //     vertical: 3,
+                  //   ),
+                  //   decoration: BoxDecoration(
+                  //     color: Colors.black.withValues(alpha: 0.45),
+                  //     borderRadius: BorderRadius.circular(20),
+                  //   ),
+                  //   child: Row(
+                  //     mainAxisSize: MainAxisSize.min,
+                  //     children: [
+                  //       const Icon(
+                  //         Icons.person_outline_outlined,
+                  //         size: 12,
+                  //         color: Colors.white,
+                  //       ),
+                  //       const SizedBox(width: 3),
+                  //       Text(
+                  //         _formatCount(anchor?.collect ?? 0),
+                  //         style: AppTextStyles.display(
+                  //           11,
+                  //           context,
+                  //         ).copyWith(color: Colors.white),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
                 ],
               ),
             ),
@@ -207,7 +205,7 @@ class _LoadingCard extends StatelessWidget {
       enabled: true,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: Container(color: Colors.grey.shade300),
+        child: Container(color: context.appColors.surface),
       ),
     );
   }

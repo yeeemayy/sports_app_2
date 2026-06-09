@@ -134,7 +134,7 @@ class TrendingNewsCard extends StatelessWidget {
                         child: Text(
                           category,
                           style: AppTextStyles.display(10, context).copyWith(
-                            color: context.appColors.ink,
+                            color: Colors.white,
                             letterSpacing: 10 * 0.08,
                           ),
                         ),

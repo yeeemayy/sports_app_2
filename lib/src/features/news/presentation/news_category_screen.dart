@@ -35,7 +35,7 @@ class _NewsCategoryScreenState extends ConsumerState<NewsCategoryScreen> {
     _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref
-          .read(newsCategoryPaginatedProvider(widget.keyword).notifier)
+          .read(newsCategoryNotifierProvider(widget.keyword).notifier)
           .init(context.localeCode);
     });
   }
@@ -50,21 +50,21 @@ class _NewsCategoryScreenState extends ConsumerState<NewsCategoryScreen> {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 300) {
       ref
-          .read(newsCategoryPaginatedProvider(widget.keyword).notifier)
+          .read(newsCategoryNotifierProvider(widget.keyword).notifier)
           .loadMore();
     }
   }
 
   Future<void> _onRefresh() => ref
-      .read(newsCategoryPaginatedProvider(widget.keyword).notifier)
+      .read(newsCategoryNotifierProvider(widget.keyword).notifier)
       .refresh();
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(newsCategoryPaginatedProvider(widget.keyword));
+    final state = ref.watch(newsCategoryNotifierProvider(widget.keyword));
     final colors = context.appColors;
 
-    if (state.error != null && state.articles.isEmpty) {
+    if (state.error != null && state.items.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           context.showErrorDialog(
@@ -131,7 +131,7 @@ class _NewsCategoryScreenState extends ConsumerState<NewsCategoryScreen> {
       );
     }
 
-    if (state.articles.isEmpty) {
+    if (state.items.isEmpty) {
       return Center(
         child: Text(
           'news.no_results'.tr(),
@@ -143,11 +143,11 @@ class _NewsCategoryScreenState extends ConsumerState<NewsCategoryScreen> {
     return ListView.separated(
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
-      itemCount: state.articles.length + (state.isLoadingMore ? 1 : 0),
+      itemCount: state.items.length + (state.isLoadingMore ? 1 : 0),
       separatorBuilder: (_, __) =>
           Divider(height: 1, indent: 22, endIndent: 22, color: colors.line),
       itemBuilder: (context, index) {
-        if (index == state.articles.length) {
+        if (index == state.items.length) {
           return Padding(
             padding: const EdgeInsets.all(16),
             child: Center(
@@ -155,7 +155,7 @@ class _NewsCategoryScreenState extends ConsumerState<NewsCategoryScreen> {
             ),
           );
         }
-        final article = state.articles[index];
+        final article = state.items[index];
         return NewsCard(
           article: article,
           categoryLabel: widget.title,

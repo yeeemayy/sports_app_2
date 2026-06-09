@@ -41,33 +41,36 @@ class _AnchorScreenState extends ConsumerState<AnchorScreen> {
                   skipLoadingOnRefresh: false,
                   loading: () =>
                       HomeAnchorLiveGrid(padding: EdgeInsets.all(16)),
-                  error: (err, stack) => Center(
-                    child: SizedBox(
-                      height: MediaQuery.of(context).size.height * .7,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.wifi_off_rounded,
-                            size: 48,
-                            color: Colors.grey.shade400,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'home.error.load_failed'.tr(),
-                            style: TextStyle(color: Colors.grey.shade500),
-                          ),
-                          const SizedBox(height: 16),
-                          TextButton(
-                            onPressed: () =>
-                                ref.refresh(anchorListProvider().future),
-                            child: Text('common.retry'.tr()),
-                          ),
-                        ],
+                  error: (err, stack) {
+                    print(stack);
+                    return Center(
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height * .7,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.wifi_off_rounded,
+                              size: 48,
+                              color: Colors.grey.shade400,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'home.error.load_failed'.tr(),
+                              style: TextStyle(color: Colors.grey.shade500),
+                            ),
+                            const SizedBox(height: 16),
+                            TextButton(
+                              onPressed: () =>
+                                  ref.refresh(anchorListProvider().future),
+                              child: Text('common.retry'.tr()),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                   data: (page) => page.data.isNotEmpty
                       ? HomeAnchorLiveGrid(
                           anchors: page.data,

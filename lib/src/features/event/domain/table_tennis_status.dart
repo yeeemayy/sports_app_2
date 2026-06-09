@@ -70,3 +70,7 @@ String _tableTennisStatusKey(int statusId) {
       return '';
   }
 }
+
+const tableTennisLiveStatuses = {3, 51, 52, 53, 54, 55, 472, 473};
+
+bool tableTennisIsLive(int statusId) => tableTennisLiveStatuses.contains(statusId);

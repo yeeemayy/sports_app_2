@@ -88,7 +88,7 @@ class _EventSportTabContentState extends ConsumerState<EventSportTabContent>
   void _reRegisterRealtimeIds() {
     final result = ref.read(_paginatedProvider).valueOrNull;
     if (result == null) return;
-    _setRealtimeWatchedIds(result.matches.map((m) => m.id).toList());
+    _setRealtimeWatchedIds(result.items.map((m) => m.id).toList());
   }
 
   void _onScroll() {
@@ -112,7 +112,7 @@ class _EventSportTabContentState extends ConsumerState<EventSportTabContent>
     Map<String, int> prevStatusIds,
     Map<String, int> currStatusIds,
   ) {
-    final matches = matchesAsync.valueOrNull?.matches;
+    final matches = matchesAsync.valueOrNull?.items;
     if (matches == null || currStatusIds.isEmpty) return;
     final matchIds = matches.map((m) => m.id).toSet();
     final hasNewId = currStatusIds.keys.any(
@@ -187,7 +187,7 @@ class _EventSportTabContentState extends ConsumerState<EventSportTabContent>
                 (list) => PaginatedMatchResult(
                   matches: list,
                   currentPage: 1,
-                  totalPage: 1,
+                  lastPage: 1,
                 ),
               )
         : ref.watch(_paginatedProvider);
@@ -279,7 +279,7 @@ class _EventSportTabContentState extends ConsumerState<EventSportTabContent>
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (!mounted || !_isActiveTab) return;
                     _setRealtimeWatchedIds(
-                      result.matches.map((m) => m.id).toList(),
+                      result.items.map((m) => m.id).toList(),
                     );
                   });
                 }
@@ -287,7 +287,7 @@ class _EventSportTabContentState extends ConsumerState<EventSportTabContent>
                   controller: _scrollController,
                   physics: const AlwaysScrollableScrollPhysics(),
                   slivers: [
-                    if (result.matches.isEmpty)
+                    if (result.items.isEmpty)
                       SliverFillRemaining(
                         child: Center(
                           child: Text(
@@ -302,7 +302,7 @@ class _EventSportTabContentState extends ConsumerState<EventSportTabContent>
                       SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
-                            if (index == result.matches.length) {
+                            if (index == result.items.length) {
                               return const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 16),
                                 child: Center(
@@ -310,10 +310,10 @@ class _EventSportTabContentState extends ConsumerState<EventSportTabContent>
                                 ),
                               );
                             }
-                            return EventMatchCard(match: result.matches[index]);
+                            return EventMatchCard(match: result.items[index]);
                           },
                           childCount:
-                              result.matches.length +
+                              result.items.length +
                               (result.isLoadingMore ? 1 : 0),
                         ),
                       ),

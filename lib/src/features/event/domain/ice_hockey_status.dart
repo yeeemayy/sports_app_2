@@ -50,3 +50,7 @@ String _key(int statusId) {
       return '';
   }
 }
+
+const iceHockeyLiveStatuses = {30, 331, 31, 332, 32, 6, 10, 8, 13};
+
+bool iceHockeyIsLive(int statusId) => iceHockeyLiveStatuses.contains(statusId);

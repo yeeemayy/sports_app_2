@@ -54,3 +54,7 @@ String _tennisStatusKey(int statusId) {
       return '';
   }
 }
+
+const tennisLiveStatuses = {3, 51, 52, 53, 54, 55};
+
+bool tennisIsLive(int statusId) => tennisLiveStatuses.contains(statusId);

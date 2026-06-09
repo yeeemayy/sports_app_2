@@ -42,7 +42,7 @@ class AnchorAvatar extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 6),
             label: Text(
               'anchor.detail.live'.tr(),
-              style: TextStyle(fontSize: 12 * (size / 60)),
+              style: TextStyle(fontSize: 12 * (size / 60), color: Colors.white),
             ),
             backgroundColor: context.appColors.accent,
           ),

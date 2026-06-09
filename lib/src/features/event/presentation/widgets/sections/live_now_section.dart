@@ -28,7 +28,7 @@ class LiveNowSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final raw = liveAsync.valueOrNull?.matches ?? [];
+    final raw = liveAsync.valueOrNull?.items ?? [];
     final matches = _sortByFavourites(raw, favTeamNames);
 
     Widget content;
@@ -244,7 +244,11 @@ class _LiveMatchCard extends StatelessWidget {
                       style: AppTextStyles.display(
                         22,
                         context,
-                      ).copyWith(color: context.appColors.text),
+                      ).copyWith(
+                        color: homeScore > awayScore
+                            ? context.appColors.accent
+                            : context.appColors.text,
+                      ),
                     ),
                   ],
                 ),

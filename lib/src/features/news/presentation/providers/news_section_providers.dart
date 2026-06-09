@@ -1,7 +1,9 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sports_app/src/features/news/data/news_repository.dart';
 import 'package:sports_app/src/features/news/domain/models/news_article.dart';
 import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
+
+part 'news_section_providers.g.dart';
 
 // ---------------------------------------------------------------------------
 // Section preview — up to 5 articles for the main screen sections
@@ -20,12 +22,7 @@ final newsSectionPreviewProvider = FutureProvider.autoDispose
       } else {
         final response = await ref
             .read(newsRepositoryProvider.notifier)
-            .searchNews(
-              locale: key.locale,
-              keywords: key.keywords,
-              page: 1,
-              perPage: 6,
-            );
+            .searchNews(locale: key.locale, keywords: key.keywords, page: 1, perPage: 6);
         return response.data;
       }
     });
@@ -35,13 +32,16 @@ final newsSectionPreviewProvider = FutureProvider.autoDispose
 // Keyed by keyword; empty keyword uses getNewsList.
 // ---------------------------------------------------------------------------
 
-class NewsCategoryNotifier extends StateNotifier<NewsPaginatedState> {
-  NewsCategoryNotifier(this._ref, this._keyword)
-    : super(const NewsPaginatedState());
-
-  final Ref _ref;
-  final String _keyword;
+@riverpod
+class NewsCategoryNotifier extends _$NewsCategoryNotifier {
+  late String _keyword;
   String _locale = 'en';
+
+  @override
+  NewsPaginatedState build(String keyword) {
+    _keyword = keyword;
+    return const NewsPaginatedState();
+  }
 
   Future<void> init(String locale) async {
     _locale = locale;
@@ -60,12 +60,12 @@ class NewsCategoryNotifier extends StateNotifier<NewsPaginatedState> {
     if (replace) state = state.copyWith(isLoading: true, clearError: true);
     try {
       if (_keyword.isEmpty) {
-        final res = await _ref
+        final res = await ref
             .read(newsRepositoryProvider.notifier)
             .getNewsList(locale: _locale, page: page);
-        final articles = replace ? res.list : [...state.articles, ...res.list];
+        final articles = replace ? res.list : [...state.items, ...res.list];
         state = state.copyWith(
-          articles: articles,
+          items: articles,
           currentPage: res.meta.currentPage,
           lastPage: res.meta.lastPage,
           isLoading: false,
@@ -73,12 +73,12 @@ class NewsCategoryNotifier extends StateNotifier<NewsPaginatedState> {
           clearError: true,
         );
       } else {
-        final res = await _ref
+        final res = await ref
             .read(newsRepositoryProvider.notifier)
             .searchNews(locale: _locale, keywords: _keyword, page: page);
-        final articles = replace ? res.data : [...state.articles, ...res.data];
+        final articles = replace ? res.data : [...state.items, ...res.data];
         state = state.copyWith(
-          articles: articles,
+          items: articles,
           currentPage: res.currentPage,
           lastPage: res.lastPage,
           isLoading: false,
@@ -91,8 +91,3 @@ class NewsCategoryNotifier extends StateNotifier<NewsPaginatedState> {
     }
   }
 }
-
-final newsCategoryPaginatedProvider = StateNotifierProvider.autoDispose
-    .family<NewsCategoryNotifier, NewsPaginatedState, String>(
-      (ref, keyword) => NewsCategoryNotifier(ref, keyword),
-    );

@@ -385,7 +385,7 @@ class ProfileScreen extends ConsumerWidget {
                                     child: const Icon(
                                       Icons.camera_alt_outlined,
                                       size: 14,
-                                      color: Colors.black,
+                                      color: Colors.white,
                                     ),
                                   ),
                                 ),
@@ -605,7 +605,7 @@ class ProfileScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(vertical: 28),
             child: Center(
               child: Text(
-                'ARENA · v${AppInfo.version}'.toUpperCase(),
+                'AA体育 · v${AppInfo.version}'.toUpperCase(),
                 style: AppTextStyles.mono(
                   9,
                 ).copyWith(color: colors.text3, letterSpacing: 0.18 * 9),

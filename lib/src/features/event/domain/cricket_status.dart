@@ -60,3 +60,7 @@ String _key(int statusId) {
       return '';
   }
 }
+
+const cricketLiveStatuses = {2, 3, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545};
+
+bool cricketIsLive(int statusId) => cricketLiveStatuses.contains(statusId);

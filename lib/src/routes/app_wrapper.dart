@@ -118,17 +118,17 @@ class _AppWrapperState extends ConsumerState<AppWrapper> {
                   tabBorderRadius: 999,
                   iconSize: 18,
                   color: colorScheme.onSurface.withValues(alpha: 0.62),
-                  activeColor: colorScheme.onPrimary,
+                  activeColor: Colors.white,
                   tabBackgroundColor: colorScheme.primary,
                   textStyle: AppTextStyles.display(12, context).copyWith(
                     letterSpacing: 12 * 0.08,
                     height: 1.2,
+                    color: Colors.white
                   ),
                   tabs: [
                     for (final tab in _tabs)
                       GButton(
                         iconActiveColor: Colors.white,
-                        textColor: Colors.white,
                         icon: tab.icon,
                         text: tab.labelKey.tr().toUpperCase(),
                       ),

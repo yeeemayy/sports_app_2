@@ -176,7 +176,7 @@ class _AnchorRankingItem extends StatelessWidget {
                           child: Text(
                             'home.anchor.live_badge'.tr(),
                             style: AppTextStyles.display(12, context).copyWith(
-                              color: context.appColors.ink,
+                              color: Colors.white,
                               letterSpacing: 12 * 0.04,
                             ),
                           ),
