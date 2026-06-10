@@ -126,19 +126,13 @@ class SectionChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0x800E0E0E),
+        color: context.appColors.accent,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: accent
-              ? context.appColors.accent
-              : context.appColors.lineStrong,
-          width: 0.5,
-        ),
       ),
       child: Text(
         label,
         style: AppTextStyles.mono(10).copyWith(
-          color: accent ? context.appColors.accent : context.appColors.text2,
+          color: Colors.white,
           letterSpacing: 10 * 0.14,
         ),
       ),

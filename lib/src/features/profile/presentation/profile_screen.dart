@@ -605,7 +605,7 @@ class ProfileScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(vertical: 28),
             child: Center(
               child: Text(
-                'AA体育 · v${AppInfo.version}'.toUpperCase(),
+                '胜好体育 · v${AppInfo.version}'.toUpperCase(),
                 style: AppTextStyles.mono(
                   9,
                 ).copyWith(color: colors.text3, letterSpacing: 0.18 * 9),

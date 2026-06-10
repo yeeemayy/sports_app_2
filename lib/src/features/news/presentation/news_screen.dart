@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sports_app/src/core/theme/app_theme.dart';
 import 'package:sports_app/src/extensions/context_extensions.dart';
+import 'package:sports_app/src/features/event/presentation/widgets/sections/shared_section_widgets.dart';
 import 'package:sports_app/src/features/news/domain/models/news_article.dart';
 import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
 import 'package:sports_app/src/features/news/presentation/providers/news_section_providers.dart';
@@ -53,9 +54,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
       if (_searchKeyword.isNotEmpty) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          ref
-              .read(newsSearchProvider.notifier)
-              .search(_searchKeyword, newLocale);
+          ref.read(newsSearchProvider.notifier).search(_searchKeyword, newLocale);
         });
       }
     }
@@ -70,8 +69,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
 
   void _onScroll() {
     if (_searchKeyword.isEmpty) return;
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 300) {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 300) {
       ref.read(newsSearchProvider.notifier).loadMore();
     }
   }
@@ -85,9 +83,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
 
   Future<void> _onRefresh() async {
     if (_searchKeyword.isNotEmpty) {
-      await ref
-          .read(newsSearchProvider.notifier)
-          .search(_searchKeyword, _locale);
+      await ref.read(newsSearchProvider.notifier).search(_searchKeyword, _locale);
     }
   }
 
@@ -105,27 +101,19 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
             padding: const EdgeInsets.fromLTRB(22, 12, 22, 0),
             child: Text(
               'news.header'.tr().toUpperCase(),
-              style: AppTextStyles.display(
-                46,
-                context,
-              ).copyWith(color: colors.text),
+              style: AppTextStyles.display(46, context).copyWith(color: colors.text),
             ),
           ),
           const SizedBox(height: 14),
           // ── Search bar ──
           Padding(
             padding: const EdgeInsets.fromLTRB(22, 0, 22, 0),
-            child: NewsSearchBar(
-              onSearch: _onSearch,
-              controller: _searchController,
-            ),
+            child: NewsSearchBar(onSearch: _onSearch, controller: _searchController),
           ),
           const SizedBox(height: 8),
           // ── Body ──
           Expanded(
-            child: _searchKeyword.isNotEmpty
-                ? _buildSearchResults()
-                : _buildSectionsLayout(colors),
+            child: _searchKeyword.isNotEmpty ? _buildSearchResults() : _buildSectionsLayout(colors),
           ),
         ],
       ),
@@ -141,10 +129,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
     if (state.error != null && state.items.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          context.showErrorDialog(
-            title: 'news.load_error'.tr(),
-            error: state.error!,
-          );
+          context.showErrorDialog(title: 'news.load_error'.tr(), error: state.error!);
         }
       });
     }
@@ -161,10 +146,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
 
     if (state.items.isEmpty) {
       return Center(
-        child: Text(
-          'news.no_results'.tr(),
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
+        child: Text('news.no_results'.tr(), style: Theme.of(context).textTheme.bodyMedium),
       );
     }
 
@@ -181,9 +163,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
           if (index == state.items.length) {
             return Padding(
               padding: const EdgeInsets.all(16),
-              child: Center(
-                child: CircularProgressIndicator(color: colors.accent),
-              ),
+              child: Center(child: CircularProgressIndicator(color: colors.accent)),
             );
           }
           final article = state.items[index];
@@ -208,15 +188,11 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
 
     final latestAsync = ref.watch(newsSectionPreviewProvider(latestKey));
     final footballAsync = ref.watch(newsSectionPreviewProvider(footballKey));
-    final basketballAsync = ref.watch(
-      newsSectionPreviewProvider(basketballKey),
-    );
+    final basketballAsync = ref.watch(newsSectionPreviewProvider(basketballKey));
     final esportsAsync = ref.watch(newsSectionPreviewProvider(esportsKey));
 
     final carouselLoading =
-        footballAsync.isLoading ||
-        basketballAsync.isLoading ||
-        esportsAsync.isLoading;
+        footballAsync.isLoading || basketballAsync.isLoading || esportsAsync.isLoading;
     final carouselArticles = <NewsArticle>[
       ...footballAsync.valueOrNull?.take(2).toList() ?? [],
       ...basketballAsync.valueOrNull?.take(2).toList() ?? [],
@@ -251,8 +227,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
           latestAsync.when(
             loading: () => _sectionSkeleton(colors),
             error: (_, _) => const SizedBox.shrink(),
-            data: (articles) =>
-                _buildSectionArticles(articles.take(4).toList(), colors),
+            data: (articles) => _buildSectionArticles(articles.take(4).toList(), colors),
           ),
           const SizedBox(height: 22),
           // ── Football section ──
@@ -260,10 +235,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
             title: 'news.tab.football'.tr(),
             onMore: () => context.push(
               AppRoutes.newsCategoryList,
-              extra: (
-                title: 'news.tab.football'.tr(),
-                keyword: _footballKeyword,
-              ),
+              extra: (title: 'news.tab.football'.tr(), keyword: _footballKeyword),
             ),
           ),
           _SportSection(
@@ -279,10 +251,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
             title: 'news.tab.basketball'.tr(),
             onMore: () => context.push(
               AppRoutes.newsCategoryList,
-              extra: (
-                title: 'news.tab.basketball'.tr(),
-                keyword: _basketballKeyword,
-              ),
+              extra: (title: 'news.tab.basketball'.tr(), keyword: _basketballKeyword),
             ),
           ),
           _SportSection(
@@ -321,8 +290,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
           children: [
             NewsCard(
               article: articles[i],
-              onTap: () =>
-                  context.push(AppRoutes.newsDetailPath(articles[i].id)),
+              onTap: () => context.push(AppRoutes.newsDetailPath(articles[i].id)),
             ),
             if (i < articles.length - 1)
               Divider(height: 1, indent: 22, endIndent: 22, color: colors.line),
@@ -338,8 +306,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
         return Column(
           children: [
             const NewsCard.loading(),
-            if (i < 3)
-              Divider(height: 1, indent: 22, endIndent: 22, color: colors.line),
+            if (i < 3) Divider(height: 1, indent: 22, endIndent: 22, color: colors.line),
           ],
         );
       }),
@@ -385,8 +352,7 @@ class _SportSection extends ConsumerWidget {
       (i) => Column(
         children: [
           const NewsCard.loading(),
-          if (i < 3)
-            Divider(height: 1, indent: 22, endIndent: 22, color: colors.line),
+          if (i < 3) Divider(height: 1, indent: 22, endIndent: 22, color: colors.line),
         ],
       ),
     ),
@@ -423,25 +389,24 @@ class _SportSection extends ConsumerWidget {
     ),
   );
 
-  Widget _buildGrid(BuildContext context, List<NewsArticle> items) =>
-      GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          childAspectRatio: 1,
-        ),
-        itemCount: items.length,
-        itemBuilder: (context, i) => NewsCard(
-          grid: true,
-          article: items[i],
-          categoryLabel: sectionLabel,
-          onTap: () => context.push(AppRoutes.newsDetailPath(items[i].id)),
-        ),
-      );
+  Widget _buildGrid(BuildContext context, List<NewsArticle> items) => GridView.builder(
+    shrinkWrap: true,
+    physics: const NeverScrollableScrollPhysics(),
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 2,
+      crossAxisSpacing: 10,
+      mainAxisSpacing: 10,
+      childAspectRatio: 1,
+    ),
+    itemCount: items.length,
+    itemBuilder: (context, i) => NewsCard(
+      grid: true,
+      article: items[i],
+      categoryLabel: sectionLabel,
+      onTap: () => context.push(AppRoutes.newsDetailPath(items[i].id)),
+    ),
+  );
 }
 
 // ── Section header row ────────────────────────────────────────────────────────
@@ -464,18 +429,13 @@ class _SectionHeader extends StatelessWidget {
         children: [
           Text(
             title.toUpperCase(),
-            style: AppTextStyles.display(
-              22,
-              context,
-            ).copyWith(color: colors.text),
+            style: AppTextStyles.display(22, context).copyWith(color: colors.text),
           ),
           GestureDetector(
             onTap: onMore,
             child: Text(
               'news.more'.tr(),
-              style: AppTextStyles.mono(
-                10,
-              ).copyWith(color: colors.text3, letterSpacing: 0.14 * 10),
+              style: AppTextStyles.mono(10).copyWith(color: colors.text3, letterSpacing: 0.14 * 10),
             ),
           ),
         ],
@@ -540,8 +500,7 @@ class _FeaturedCarouselState extends State<_FeaturedCarousel> {
                 controller: _pageController,
                 itemCount: widget.articles.length,
                 onPageChanged: (i) => setState(() => _currentPage = i),
-                itemBuilder: (_, i) =>
-                    _FeaturedSlide(article: widget.articles[i]),
+                itemBuilder: (_, i) => _FeaturedSlide(article: widget.articles[i]),
               ),
               // dot indicators
               Positioned(
@@ -591,10 +550,7 @@ class _FeaturedSlide extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 stops: const [0.3, 1.0],
-                colors: [
-                  Colors.transparent,
-                  const Color(0xFF0E0E0E).withValues(alpha: 0.95),
-                ],
+                colors: [Colors.transparent, const Color(0xFF0E0E0E).withValues(alpha: 0.95)],
               ),
             ),
           ),
@@ -602,45 +558,23 @@ class _FeaturedSlide extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 9,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colors.accent.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: colors.accent, width: 0.5),
-                  ),
-                  child: Text(
-                    '● ${'news.featured'.tr()}',
-                    style: AppTextStyles.mono(
-                      9,
-                    ).copyWith(color: colors.accent, letterSpacing: 1.2),
-                  ),
+                Text(
+                  article.title,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.display(
+                    28,
+                    context,
+                  ).copyWith(color: Colors.white, height: 1.0),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      article.title,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.display(
-                        28,
-                        context,
-                      ).copyWith(color: Colors.white, height: 1.0),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '● ${_timeAgo(article.createdAt)}',
-                      style: AppTextStyles.mono(
-                        9,
-                      ).copyWith(color: Colors.white54, letterSpacing: 1.08),
-                    ),
-                  ],
+                const SizedBox(height: 8),
+                Text(
+                  '● ${_timeAgo(article.createdAt)}',
+                  style: AppTextStyles.mono(
+                    9,
+                  ).copyWith(color: Colors.white54, letterSpacing: 1.08),
                 ),
               ],
             ),
@@ -703,10 +637,7 @@ class _FeaturedSkeleton extends StatelessWidget {
         enabled: true,
         child: Container(
           height: 260,
-          decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: BorderRadius.circular(16),
-          ),
+          decoration: BoxDecoration(color: colors.surface, borderRadius: BorderRadius.circular(16)),
         ),
       ),
     );

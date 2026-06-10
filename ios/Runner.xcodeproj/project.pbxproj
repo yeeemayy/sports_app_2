@@ -502,7 +502,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 5BL8RMHW5W;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "球帝体育-足球世界杯球迷必备直播神器";
+				INFOPLIST_KEY_CFBundleDisplayName = "胜好体育";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -699,7 +699,7 @@
 				ENABLE_BITCODE = NO;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "i386 arm64";
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "球帝体育-足球世界杯球迷必备直播神器";
+				INFOPLIST_KEY_CFBundleDisplayName = "胜好体育";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -736,7 +736,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 5BL8RMHW5W;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "球帝体育-足球世界杯球迷必备直播神器";
+				INFOPLIST_KEY_CFBundleDisplayName = "胜好体育";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
