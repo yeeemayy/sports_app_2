@@ -191,7 +191,7 @@ class _TeamColumn extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (yellowCards > 0)
-                _CardDot(count: yellowCards, color: context.appColors.live),
+                _CardDot(count: yellowCards, color: Colors.orange),
               if (redCards > 0)
                 _CardDot(count: redCards, color: context.appColors.danger),
             ],

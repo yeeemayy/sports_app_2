@@ -114,6 +114,14 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
     final options = RCIMIWEngineOptions.create();
     _engine = await RCIMIWEngine.create(tokenData.appKey, options);
 
+    _engine!.onRemoteMessageRecalled = (RCIMIWMessage? recalled) {
+      if (!mounted || recalled?.messageUId == null) return;
+      setState(() {
+        _messages.removeWhere((m) => m.messageUId == recalled!.messageUId);
+        _bufferedMessages.removeWhere((m) => m.messageUId == recalled!.messageUId);
+      });
+    };
+
     _engine!.onMessageReceived =
         (RCIMIWMessage? message, int? left, bool? offline, bool? hasPackage) {
           if (!mounted || message == null) return;
@@ -129,6 +137,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
             senderName: senderName,
             senderId: message.senderUserId ?? '',
             text: text,
+            messageUId: message.messageUId,
             isOwn: message.senderUserId == _myId,
           );
 
@@ -259,18 +268,24 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
       userInfo.userId = _myId ?? '';
       userInfo.name = name;
       msg.userInfo = userInfo;
-      await _engine!.sendMessage(msg);
+      final chatMsg = _ChatMessage(
+        senderName: name,
+        senderId: _myId ?? '',
+        text: text,
+        isOwn: true,
+      );
+      await _engine!.sendMessage(
+        msg,
+        callback: RCIMIWSendMessageCallback(
+          onMessageSent: (int? code, RCIMIWMessage? sent) {
+            if (mounted && code == 0 && sent?.messageUId != null) {
+              setState(() => chatMsg.messageUId = sent!.messageUId);
+            }
+          },
+        ),
+      );
 
-      // Append locally — RongCloud does not echo messages back to sender.
-      // If history is still loading, park the message in _pendingEntryMsg so
-      // _flushHistory() appends it after all offline messages. Otherwise append directly.
       if (mounted) {
-        final chatMsg = _ChatMessage(
-          senderName: name,
-          senderId: _myId ?? '',
-          text: text,
-          isOwn: true,
-        );
         if (_initialSyncDone) {
           setState(() => _messages.add(chatMsg));
           _scrollToBottom();
@@ -289,19 +304,6 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
       return;
     _inputController.clear();
 
-    // Optimistic local append
-    setState(() {
-      _messages.add(
-        _ChatMessage(
-          senderName: _myName ?? _myId ?? '',
-          senderId: _myId ?? '',
-          text: text,
-          isOwn: true,
-        ),
-      );
-    });
-    _scrollToBottom();
-
     final msg = await _engine!.createTextMessage(
       RCIMIWConversationType.chatroom,
       _roomCid!,
@@ -309,12 +311,29 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
       text,
     );
     if (msg != null) {
-      // Attach sender info so recipients can display the name.
+      final chatMsg = _ChatMessage(
+        senderName: _myName ?? _myId ?? '',
+        senderId: _myId ?? '',
+        text: text,
+        isOwn: true,
+      );
+      setState(() => _messages.add(chatMsg));
+      _scrollToBottom();
+
       final userInfo = RCIMIWUserInfo.create();
       userInfo.userId = _myId ?? '';
       userInfo.name = _myName ?? '';
       msg.userInfo = userInfo;
-      await _engine!.sendMessage(msg);
+      await _engine!.sendMessage(
+        msg,
+        callback: RCIMIWSendMessageCallback(
+          onMessageSent: (int? code, RCIMIWMessage? sent) {
+            if (mounted && code == 0 && sent?.messageUId != null) {
+              setState(() => chatMsg.messageUId = sent!.messageUId);
+            }
+          },
+        ),
+      );
     }
   }
 
@@ -533,15 +552,17 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
 }
 
 class _ChatMessage {
-  const _ChatMessage({
+  _ChatMessage({
     required this.senderName,
     required this.senderId,
     required this.text,
+    this.messageUId,
     this.isOwn = false,
   });
 
   final String senderName;
   final String senderId;
   final String text;
+  String? messageUId;
   final bool isOwn;
 }

@@ -1,12 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:go_router/go_router.dart';
 import 'package:sports_app/src/features/home/domain/models/anchor_model.dart';
 import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
-import 'package:sports_app/src/features/home/presentation/widgets/home_anchor_live_card.dart';
-import 'package:sports_app/src/routes/app_routes.dart';
+import 'package:sports_app/src/features/home/presentation/widgets/home_anchor_live_grid.dart';
 
 class AnchorListScreen extends ConsumerStatefulWidget {
   const AnchorListScreen({super.key});
@@ -22,8 +19,6 @@ class _AnchorListScreenState extends ConsumerState<AnchorListScreen> {
   int _lastPage = 1;
   bool _initialized = false;
   bool _isLoadingMore = false;
-
-  static double _aspectRatio(int index) => index.isEven ? 0.62 : 0.80;
 
   @override
   void initState() {
@@ -85,31 +80,24 @@ class _AnchorListScreenState extends ConsumerState<AnchorListScreen> {
   @override
   Widget build(BuildContext context) {
     final firstPageAsync = ref.watch(anchorListProvider());
-    final crossAxisCount = MediaQuery.sizeOf(context).width >= 600 ? 3 : 2;
 
     return Scaffold(
       appBar: AppBar(title: Text('anchor.list.title'.tr())),
-      body: firstPageAsync.when(
-        loading: () => MasonryGridView.count(
-          padding: const EdgeInsets.all(16),
-          crossAxisCount: crossAxisCount,
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          itemCount: 6,
-          itemBuilder: (context, i) => AspectRatio(
-            aspectRatio: _aspectRatio(i),
-            child: const HomeAnchorLiveCard.loading(),
-          ),
-        ),
-        error: (err, _) => RefreshIndicator(
-          onRefresh: _refresh,
-          child: ListView(
-            children: [
-              SizedBox(
-                height: MediaQuery.sizeOf(context).height * 0.5,
-                child: Center(
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: SafeArea(
+            child: firstPageAsync.when(
+              skipLoadingOnRefresh: false,
+              loading: () => HomeAnchorLiveGrid(padding: EdgeInsets.all(16)),
+              error: (err, stack) => Center(
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * .7,
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
                         Icons.wifi_off_rounded,
@@ -130,46 +118,34 @@ class _AnchorListScreenState extends ConsumerState<AnchorListScreen> {
                   ),
                 ),
               ),
-            ],
-          ),
-        ),
-        data: (page) {
-          if (!_initialized) {
-            _initialized = true;
-            _anchors
-              ..clear()
-              ..addAll(page.data);
-            _lastPage = page.lastPage;
-          }
-
-          return RefreshIndicator(
-            onRefresh: _refresh,
-            child: MasonryGridView.count(
-              controller: _scrollController,
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-              crossAxisCount: crossAxisCount,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              itemCount: _anchors.length + (_isLoadingMore ? 2 : 0),
-              itemBuilder: (context, index) {
-                if (index >= _anchors.length) {
-                  return AspectRatio(
-                    aspectRatio: _aspectRatio(index),
-                    child: const HomeAnchorLiveCard.loading(),
-                  );
+              data: (page) {
+                if (!_initialized) {
+                  _initialized = true;
+                  _anchors
+                    ..clear()
+                    ..addAll(page.data);
+                  _lastPage = page.lastPage;
                 }
-                final anchor = _anchors[index];
-                return AspectRatio(
-                  aspectRatio: _aspectRatio(index),
-                  child: HomeAnchorLiveCard(
-                    anchor: anchor,
-                    onTap: () => context.push(AppRoutes.anchorPath(anchor.id)),
-                  ),
+
+                return Column(
+                  children: [
+                    HomeAnchorLiveGrid(
+                      anchors: _anchors,
+                      padding: const EdgeInsets.all(16),
+                    ),
+                    if (_isLoadingMore)
+                      const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: CircularProgressIndicator(),
+                      )
+                    else
+                      const SizedBox(height: 32),
+                  ],
                 );
               },
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }

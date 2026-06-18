@@ -34,7 +34,7 @@ class TrendingNewsGrid extends StatelessWidget {
               ),
               const Spacer(),
               GestureDetector(
-                onTap: () => context.push(AppRoutes.news),
+                onTap: () => context.go(AppRoutes.news),
                 child: Text(
                   'home.see_all'.tr(),
                   style: AppTextStyles.mono(10).copyWith(

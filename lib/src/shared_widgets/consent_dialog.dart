@@ -34,7 +34,31 @@ Future<void> showConsentDialogIfNeeded(BuildContext context, SharedPreferences p
           minimumSize: const Size(0, 48),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         ),
-        onPressed: () => exit(0),
+        onPressed: () {
+          showCustomStatusDialog(
+            context: context,
+            dialogType: DialogType.custom,
+            overrideIcon: Icons.warning_amber_rounded,
+            overrideIconBackgroundColor: context.appColors.accent,
+            title: 'consent.exit_warning_title'.tr(),
+            description: 'consent.exit_warning_body'.tr(),
+            buttonText: 'consent.go_back'.tr(),
+            onButtonPressed: () => Navigator.of(context).pop(),
+            secondaryButton: SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(0, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                onPressed: () => exit(0),
+                child: Text('consent.confirm_exit'.tr()),
+              ),
+            ),
+          );
+        },
         child: Text('consent.disagree'.tr()),
       ),
     ),

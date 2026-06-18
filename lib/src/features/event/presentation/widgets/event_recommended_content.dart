@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -9,12 +8,8 @@ import 'package:sports_app/src/features/event/presentation/providers/event_provi
 import 'package:sports_app/src/features/event/presentation/providers/recommended_content_providers.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sections/anchor_rankings_section.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sections/editorial_hero_card.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/sections/empty_personalization_prompt.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/sections/fav_team_upcoming_section.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/sections/for_you_news_section.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sections/live_now_section.dart';
 import 'package:sports_app/src/features/event/presentation/widgets/sections/trending_news_section.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/sections/your_matches_section.dart';
 import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
 import 'package:sports_app/src/features/news/domain/models/news_article.dart';
 import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';

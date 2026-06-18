@@ -18,12 +18,20 @@
 	<string>sports_app</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
-    <key>CFBundleVersion</key> <string>$(CURRENT_PROJECT_VERSION)</string>
-    <key>CFBundleShortVersionString</key> <string>$(MARKETING_VERSION)</string>
-    <key>CFBundleSignature</key>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>$(CFBundleDisplayName) 需要访问您的相机以拍摄头像</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>$(CFBundleDisplayName) 需要访问您的相机以拍摄头像</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>$(CFBundleDisplayName) 需要访问您的相册以选择头像</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -64,11 +72,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>$(CFBundleDisplayName) 需要访问您的相册以选择头像</string>
-    <key>NSCameraUsageDescription</key>
-    <string>$(CFBundleDisplayName) 需要访问您的相机以拍摄头像</string>
-    <key>NSMicrophoneUsageDescription</key>
-    <string>$(CFBundleDisplayName) 需要访问您的相机以拍摄头像</string>
 </dict>
 </plist>

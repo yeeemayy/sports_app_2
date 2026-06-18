@@ -1178,12 +1178,16 @@
   },
   "consent": {
     "title": "Terms & Privacy Policy",
-    "body_prefix": "Welcome to ARENA! We will not read or collect your device identifiers (e.g. Android ID, IMEI, MAC) or personal information before you tap \"Agree & Continue\". Please read and agree to the following: ",
+    "body_prefix": "Welcome to 胜好体育! We will not read or collect your device identifiers (e.g. Android ID, IMEI, MAC) or personal information before you tap \"Agree & Continue\". Please read and agree to the following: ",
     "privacy_policy_link": "Privacy Policy",
     "conjunction": " and ",
     "user_agreement_link": "User Agreement",
     "body_suffix": ". We will collect relevant information within the required scope in accordance with applicable law (see Privacy Policy). You may delete your account and related data at any time via Profile → Danger Zone → Delete Account.",
     "agree": "Agree & Continue",
-    "disagree": "Disagree"
+    "disagree": "Disagree",
+    "exit_warning_title": "Notice",
+    "exit_warning_body": "If you do not agree to the Terms & Privacy Policy, you will not be able to use this app and it will close.",
+    "go_back": "Go Back",
+    "confirm_exit": "Exit App"
   }
 }
