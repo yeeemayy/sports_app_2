@@ -13,7 +13,7 @@ import 'package:sports_app/src/shared_widgets/custom_status_dialog.dart';
 const _kConsentKey = 'consent_accepted';
 
 Future<void> showConsentDialogIfNeeded(BuildContext context, SharedPreferences prefs) async {
-  if (prefs.getBool(_kConsentKey) == true) return;
+  if (Platform.isIOS || prefs.getBool(_kConsentKey) == true) return;
 
   await showCustomStatusDialog(
     context: context,
