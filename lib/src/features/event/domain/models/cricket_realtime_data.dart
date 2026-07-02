@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:sports_app/src/features/event/domain/models/cricket_match_detail.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_realtime_data.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/cricket_match_detail.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_realtime_data.dart';
 
 @immutable
 class CricketRealtimeData implements SportRealtimeData {

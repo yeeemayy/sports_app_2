@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:sports_app/src/features/favourites/domain/favourite_entry.dart';
+import 'package:shenghaotiyu/src/features/favourites/domain/favourite_entry.dart';
 
 class FavouritesRepository {
   FavouritesRepository(this._firestore);

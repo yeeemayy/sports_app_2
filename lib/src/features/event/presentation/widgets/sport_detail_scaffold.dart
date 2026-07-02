@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
-import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
-import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_type.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/providers/event_providers.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/providers/realtime_providers.dart';
 
 /// Base state for all sport detail screens.
 abstract class SportDetailScaffoldState<T extends ConsumerStatefulWidget>

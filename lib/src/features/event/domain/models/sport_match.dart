@@ -1,15 +1,15 @@
-import 'package:sports_app/src/core/utils/app_locale.dart';
-import 'package:sports_app/src/features/event/domain/models/am_football_match.dart';
-import 'package:sports_app/src/features/event/domain/models/badminton_match.dart';
-import 'package:sports_app/src/features/event/domain/models/baseball_match.dart';
-import 'package:sports_app/src/features/event/domain/models/basketball_match.dart';
-import 'package:sports_app/src/features/event/domain/models/cricket_match.dart';
-import 'package:sports_app/src/features/event/domain/models/football_match.dart';
-import 'package:sports_app/src/features/event/domain/models/ice_hockey_match.dart';
-import 'package:sports_app/src/features/event/domain/models/table_tennis_match.dart';
-import 'package:sports_app/src/features/event/domain/models/tennis_match.dart';
-import 'package:sports_app/src/features/event/domain/models/volleyball_match.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
+import 'package:shenghaotiyu/src/core/utils/app_locale.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/am_football_match.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/badminton_match.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/baseball_match.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/basketball_match.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/cricket_match.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/football_match.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/ice_hockey_match.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/table_tennis_match.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/tennis_match.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/volleyball_match.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_type.dart';
 
 abstract class SportMatch {
   String get id;

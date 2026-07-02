@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
 
 class MatchCardShell extends StatelessWidget {
   const MatchCardShell({super.key, required this.onTap, required this.child});

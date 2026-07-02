@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_match.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_match.dart';
 
 @immutable
 class FootballTeamDetailInfo {

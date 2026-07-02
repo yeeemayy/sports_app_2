@@ -1,8 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/features/league/domain/league_sport.dart';
-import 'package:sports_app/src/features/league/domain/models/league_detail_model.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/features/league/domain/league_sport.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/league_detail_model.dart';
 
 class LeagueOverviewTab extends StatelessWidget {
   const LeagueOverviewTab({

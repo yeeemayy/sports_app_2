@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/favourites/data/favourites_repository.dart';
-import 'package:sports_app/src/features/favourites/domain/favourite_entry.dart';
-import 'package:sports_app/src/features/favourites/presentation/providers/favourites_providers.dart';
-import 'package:sports_app/src/routes/app_routes.dart';
-import 'package:sports_app/src/shared_widgets/custom_app_bar.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
+import 'package:shenghaotiyu/src/features/favourites/data/favourites_repository.dart';
+import 'package:shenghaotiyu/src/features/favourites/domain/favourite_entry.dart';
+import 'package:shenghaotiyu/src/features/favourites/presentation/providers/favourites_providers.dart';
+import 'package:shenghaotiyu/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/shared_widgets/custom_app_bar.dart';
 
 const _kStarColor = Color(0xFFFFD60A);
 

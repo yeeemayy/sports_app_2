@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:sports_app/src/core/models/paginated_response.dart';
-import 'package:sports_app/src/features/home/data/anchor_repository.dart';
-import 'package:sports_app/src/features/home/domain/models/anchor_model.dart';
+import 'package:shenghaotiyu/src/core/models/paginated_response.dart';
+import 'package:shenghaotiyu/src/features/home/data/anchor_repository.dart';
+import 'package:shenghaotiyu/src/features/home/domain/models/anchor_model.dart';
 
 part 'anchor_providers.g.dart';
 

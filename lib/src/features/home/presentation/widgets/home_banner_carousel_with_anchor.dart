@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/home/presentation/providers/banner_providers.dart';
-import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
-import 'package:sports_app/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
+import 'package:shenghaotiyu/src/features/home/presentation/providers/banner_providers.dart';
+import 'package:shenghaotiyu/src/features/news/presentation/providers/news_providers.dart';
+import 'package:shenghaotiyu/src/routes/app_routes.dart';
 
 class HomeBannerCarousel extends ConsumerStatefulWidget {
   const HomeBannerCarousel({super.key});

@@ -1,6 +1,6 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
 
 /// Circular team-logo avatar.
 ///

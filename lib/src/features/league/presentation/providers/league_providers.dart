@@ -1,22 +1,22 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:sports_app/src/features/league/data/league_repository.dart';
-import 'package:sports_app/src/features/league/domain/league_sport.dart';
-import 'package:sports_app/src/features/league/domain/models/basketball_player_stat.dart';
-import 'package:sports_app/src/features/league/domain/models/basketball_standings_model.dart';
-import 'package:sports_app/src/features/league/domain/models/basketball_team_stat.dart';
-import 'package:sports_app/src/features/league/domain/models/country_league_item.dart';
-import 'package:sports_app/src/features/league/domain/models/country_model.dart';
-import 'package:sports_app/src/features/league/domain/models/football_player_detail.dart';
-import 'package:sports_app/src/features/league/domain/models/football_player_stat.dart';
-import 'package:sports_app/src/features/league/domain/models/football_standings_model.dart';
-import 'package:sports_app/src/features/league/domain/models/football_team_stat.dart';
-import 'package:sports_app/src/features/league/domain/models/generic_standings_model.dart';
-import 'package:sports_app/src/features/league/domain/models/amfootball_lineup_player.dart';
-import 'package:sports_app/src/features/league/domain/models/league_detail_model.dart';
-import 'package:sports_app/src/features/league/domain/models/league_item.dart';
-import 'package:sports_app/src/features/league/domain/models/simple_team_detail.dart';
-import 'package:sports_app/src/features/league/domain/models/squad_player.dart';
-import 'package:sports_app/src/features/league/domain/models/team_detail_model.dart';
+import 'package:shenghaotiyu/src/features/league/data/league_repository.dart';
+import 'package:shenghaotiyu/src/features/league/domain/league_sport.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/basketball_player_stat.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/basketball_standings_model.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/basketball_team_stat.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/country_league_item.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/country_model.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/football_player_detail.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/football_player_stat.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/football_standings_model.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/football_team_stat.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/generic_standings_model.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/amfootball_lineup_player.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/league_detail_model.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/league_item.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/simple_team_detail.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/squad_player.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/team_detail_model.dart';
 
 part 'league_providers.g.dart';
 
@@ -162,18 +162,18 @@ Future<LeagueDetailModel> sportLeagueDetail(
     ref.read(leagueRepositoryProvider).getGenericLeagueDetail(sport, leagueId);
 
 @riverpod
-Future<Map<String, GenericStandingsGroup>> genericStandings(
-  GenericStandingsRef ref, {
+Future<Map<String, StandingsGroup>> leagueStandings(
+  LeagueStandingsRef ref, {
   required LeagueSport sport,
   required String leagueId,
-}) => ref.read(leagueRepositoryProvider).getGenericStandings(sport, leagueId);
+}) => ref.read(leagueRepositoryProvider).getLeagueStandings(sport, leagueId);
 
 @riverpod
-Future<SimpleTeamDetail> genericTeamDetail(
-  GenericTeamDetailRef ref, {
+Future<SimpleTeamDetail> sportTeamDetail(
+  SportTeamDetailRef ref, {
   required LeagueSport sport,
   required String teamId,
-}) => ref.read(leagueRepositoryProvider).getGenericTeamDetail(sport, teamId);
+}) => ref.read(leagueRepositoryProvider).getSportTeamDetail(sport, teamId);
 
 @riverpod
 Future<List<AmFootballLineupPlayer>> amFootballLineup(

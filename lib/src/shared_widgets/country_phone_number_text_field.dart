@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:sports_app/src/shared_widgets/custom_text_field.dart';
+import 'package:shenghaotiyu/src/shared_widgets/custom_text_field.dart';
 
 class CountryPhoneNumberTextField extends StatefulWidget {
   final TextEditingController textEditingController;

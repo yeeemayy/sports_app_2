@@ -3,26 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/features/league/domain/league_sport.dart';
-import 'package:sports_app/src/features/league/presentation/league_detail/league_detail_header.dart';
-import 'package:sports_app/src/features/league/presentation/league_detail/overview/league_overview_tab.dart';
-import 'package:sports_app/src/features/league/presentation/league_detail/standings/generic_standings_tab.dart';
-import 'package:sports_app/src/features/league/presentation/league_detail/standings/league_standings_tab.dart';
-import 'package:sports_app/src/features/league/presentation/league_detail/team_stats/league_team_stats_tab.dart';
-import 'package:sports_app/src/features/league/presentation/league_detail/top_players/league_top_players_tab.dart';
-import 'package:sports_app/src/features/league/presentation/providers/league_providers.dart';
-import 'package:sports_app/src/features/league/presentation/widgets/inner_tab_bar.dart';
-import 'package:sports_app/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/features/league/domain/league_sport.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/league_detail/league_detail_header.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/league_detail/overview/league_overview_tab.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/league_detail/standings/league_standings_tab.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/league_detail/team_stats/league_team_stats_tab.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/league_detail/top_players/league_top_players_tab.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/providers/league_providers.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/widgets/inner_tab_bar.dart';
+import 'package:shenghaotiyu/src/routes/app_routes.dart';
 
 const _kHeroHeight = 160.0;
 
 class LeagueDetailScreen extends ConsumerStatefulWidget {
-  const LeagueDetailScreen({
-    super.key,
-    required this.sport,
-    required this.leagueId,
-  });
+  const LeagueDetailScreen({super.key, required this.sport, required this.leagueId});
 
   final LeagueSport sport;
   final String leagueId;
@@ -35,8 +30,7 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
   int _tabIndex = 0;
 
   bool get _isFullSport =>
-      widget.sport == LeagueSport.football ||
-      widget.sport == LeagueSport.basketball;
+      widget.sport == LeagueSport.football || widget.sport == LeagueSport.basketball;
 
   List<String> get _tabs {
     if (_isFullSport) {
@@ -69,29 +63,23 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final detailAsync = switch (widget.sport) {
-      LeagueSport.football => ref.watch(
-        footballLeagueDetailProvider(leagueId: widget.leagueId),
-      ),
+      LeagueSport.football => ref.watch(footballLeagueDetailProvider(leagueId: widget.leagueId)),
       LeagueSport.basketball => ref.watch(
         basketballLeagueDetailProvider(leagueId: widget.leagueId),
       ),
-      final s => ref.watch(
-        sportLeagueDetailProvider(sport: s, leagueId: widget.leagueId),
-      ),
+      final s => ref.watch(sportLeagueDetailProvider(sport: s, leagueId: widget.leagueId)),
     };
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: detailAsync.when(
         loading: () => _buildSkeleton(),
-        error: (e, _) => _buildError(),
+        error: (e, st) {
+          return _buildError();
+        },
         data: (detail) => Column(
           children: [
-            LeagueDetailHeader(
-              detail: detail,
-              sport: widget.sport,
-              onBack: () => context.pop(),
-            ),
+            LeagueDetailHeader(detail: detail, sport: widget.sport, onBack: () => context.pop()),
             if (_tabs.isNotEmpty) ...[
               if (_tabs.length > 1)
                 LeagueInnerTabBar(
@@ -106,10 +94,7 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
                       ? IndexedStack(
                           index: _tabIndex,
                           children: [
-                            LeagueOverviewTab(
-                              detail: detail,
-                              sport: widget.sport,
-                            ),
+                            LeagueOverviewTab(detail: detail, sport: widget.sport),
                             LeagueStandingsTab(
                               sport: widget.sport,
                               leagueId: widget.leagueId,
@@ -119,10 +104,7 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
                               sport: widget.sport,
                               leagueId: widget.leagueId,
                               onPlayerTap: (playerId) => context.push(
-                                AppRoutes.leaguePlayerPath(
-                                  widget.sport.apiPath,
-                                  playerId,
-                                ),
+                                AppRoutes.leaguePlayerPath(widget.sport.apiPath, playerId),
                               ),
                             ),
                             LeagueTeamStatsTab(
@@ -132,7 +114,7 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
                             ),
                           ],
                         )
-                      : GenericStandingsTab(
+                      : LeagueStandingsTab(
                           sport: widget.sport,
                           leagueId: widget.leagueId,
                           onTeamTap: (teamId, _) => _navigateToTeam(teamId),
@@ -163,10 +145,7 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
         _buildBackButton(),
         Skeletonizer(
           enabled: true,
-          child: Container(
-            height: _kHeroHeight,
-            color: context.appColors.surface2,
-          ),
+          child: Container(height: _kHeroHeight, color: context.appColors.surface2),
         ),
       ],
     );
@@ -182,17 +161,11 @@ class _LeagueDetailScreenState extends ConsumerState<LeagueDetailScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.error_outline,
-                  color: context.appColors.text3,
-                  size: 48,
-                ),
+                Icon(Icons.error_outline, color: context.appColors.text3, size: 48),
                 const SizedBox(height: 12),
                 Text(
                   'league.empty'.tr(),
-                  style: AppTextStyles.body(
-                    14,
-                  ).copyWith(color: context.appColors.text3),
+                  style: AppTextStyles.body(14).copyWith(color: context.appColors.text3),
                 ),
               ],
             ),

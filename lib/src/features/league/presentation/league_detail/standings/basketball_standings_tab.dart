@@ -1,13 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/league/domain/models/basketball_standings_model.dart';
-import 'package:sports_app/src/features/league/presentation/league_detail/league_entity_avatar.dart';
-import 'package:sports_app/src/features/league/presentation/league_detail/league_tab_content.dart';
-import 'package:sports_app/src/features/league/presentation/league_detail/standings/standings_shared.dart';
-import 'package:sports_app/src/features/league/presentation/providers/league_providers.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/basketball_standings_model.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/league_detail/league_entity_avatar.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/league_detail/league_tab_content.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/league_detail/standings/standings_shared.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/providers/league_providers.dart';
 
 class BasketballStandingsTab extends ConsumerWidget {
   const BasketballStandingsTab({

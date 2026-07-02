@@ -1,13 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_match.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/sections/shared_section_widgets.dart';
-import 'package:sports_app/src/features/watchlist/domain/watchlist_entry.dart';
-import 'package:sports_app/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_match.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_type.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/sections/shared_section_widgets.dart';
+import 'package:shenghaotiyu/src/features/watchlist/domain/watchlist_entry.dart';
+import 'package:shenghaotiyu/src/routes/app_routes.dart';
 
 const _kHPad = 22.0;
 

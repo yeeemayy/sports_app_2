@@ -3,13 +3,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
-import 'package:sports_app/src/features/watchlist/domain/watchlist_entry.dart';
-import 'package:sports_app/src/features/watchlist/presentation/providers/watchlist_notifier.dart';
-import 'package:sports_app/src/routes/app_routes.dart';
-import 'package:sports_app/src/shared_widgets/custom_app_bar.dart';
-import 'package:sports_app/src/shared_widgets/custom_status_dialog.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_type.dart';
+import 'package:shenghaotiyu/src/features/watchlist/domain/watchlist_entry.dart';
+import 'package:shenghaotiyu/src/features/watchlist/presentation/providers/watchlist_notifier.dart';
+import 'package:shenghaotiyu/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/shared_widgets/custom_app_bar.dart';
+import 'package:shenghaotiyu/src/shared_widgets/custom_status_dialog.dart';
 
 // Semantic accent for upcoming match chip — always green regardless of theme.
 const _kCountdownAccent = Color(0xFF34D17F);

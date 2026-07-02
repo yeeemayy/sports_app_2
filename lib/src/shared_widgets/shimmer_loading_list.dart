@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
 
 /// A scrollable list of skeleton-animated placeholder cards.
 class ShimmerLoadingList extends StatelessWidget {

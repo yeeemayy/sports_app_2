@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
 
 /// Handoff-style stat comparison row: home value | label | away value
 /// with a split progress bar beneath.

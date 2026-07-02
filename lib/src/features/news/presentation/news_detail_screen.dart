@@ -2,13 +2,13 @@ import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/news/domain/models/news_detail.dart';
-import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
+import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
+import 'package:shenghaotiyu/src/features/news/domain/models/news_detail.dart';
+import 'package:shenghaotiyu/src/features/news/presentation/providers/news_providers.dart';
 
 class NewsDetailScreen extends ConsumerWidget {
   const NewsDetailScreen({super.key, required this.newsId});

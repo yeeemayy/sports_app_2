@@ -1,17 +1,17 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:sports_app/src/core/models/paginated_response.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_match.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
-import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
-import 'package:sports_app/src/features/favourites/domain/favourite_entry.dart';
-import 'package:sports_app/src/features/favourites/presentation/providers/favourites_providers.dart';
-import 'package:sports_app/src/features/home/domain/models/anchor_model.dart';
-import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
-import 'package:sports_app/src/features/news/domain/models/news_article.dart';
-import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
-import 'package:sports_app/src/features/prediction/presentation/providers/prediction_providers.dart';
-import 'package:sports_app/src/features/watchlist/domain/watchlist_entry.dart';
-import 'package:sports_app/src/features/watchlist/presentation/providers/watchlist_notifier.dart';
+import 'package:shenghaotiyu/src/core/models/paginated_response.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_match.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_type.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/providers/event_providers.dart';
+import 'package:shenghaotiyu/src/features/favourites/domain/favourite_entry.dart';
+import 'package:shenghaotiyu/src/features/favourites/presentation/providers/favourites_providers.dart';
+import 'package:shenghaotiyu/src/features/home/domain/models/anchor_model.dart';
+import 'package:shenghaotiyu/src/features/home/presentation/providers/anchor_providers.dart';
+import 'package:shenghaotiyu/src/features/news/domain/models/news_article.dart';
+import 'package:shenghaotiyu/src/features/news/presentation/providers/news_providers.dart';
+import 'package:shenghaotiyu/src/features/prediction/presentation/providers/prediction_providers.dart';
+import 'package:shenghaotiyu/src/features/watchlist/domain/watchlist_entry.dart';
+import 'package:shenghaotiyu/src/features/watchlist/presentation/providers/watchlist_notifier.dart';
 
 part 'recommended_content_providers.g.dart';
 

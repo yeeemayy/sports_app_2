@@ -3,18 +3,18 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/favourites/data/favourites_repository.dart';
-import 'package:sports_app/src/features/favourites/presentation/providers/favourites_providers.dart';
-import 'package:sports_app/src/features/league/domain/league_sport.dart';
-import 'package:sports_app/src/features/league/domain/models/amfootball_lineup_player.dart';
-import 'package:sports_app/src/features/league/domain/models/squad_player.dart';
-import 'package:sports_app/src/features/league/domain/models/simple_team_detail.dart';
-import 'package:sports_app/src/features/league/domain/models/team_detail_model.dart';
-import 'package:sports_app/src/features/league/presentation/providers/league_providers.dart';
-import 'package:sports_app/src/features/league/presentation/utils/logo_color.dart';
-import 'package:sports_app/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
+import 'package:shenghaotiyu/src/features/favourites/data/favourites_repository.dart';
+import 'package:shenghaotiyu/src/features/favourites/presentation/providers/favourites_providers.dart';
+import 'package:shenghaotiyu/src/features/league/domain/league_sport.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/amfootball_lineup_player.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/squad_player.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/simple_team_detail.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/team_detail_model.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/providers/league_providers.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/utils/logo_color.dart';
+import 'package:shenghaotiyu/src/routes/app_routes.dart';
 
 class TeamDetailScreen extends ConsumerWidget {
   const TeamDetailScreen({
@@ -36,7 +36,7 @@ class TeamDetailScreen extends ConsumerWidget {
     } else if (sport == LeagueSport.amFootball) {
       return _AmFootballTeamDetail(teamId: teamId);
     } else {
-      return _GenericTeamDetail(sport: sport, teamId: teamId);
+      return _TeamDetailContent(sport: sport, teamId: teamId);
     }
   }
 }
@@ -78,10 +78,10 @@ class _FullTeamDetail extends ConsumerWidget {
   }
 }
 
-// ─── Generic detail (Tennis, Cricket, Baseball, etc.) ───────────────────────
+// ─── Multi-sport detail (Tennis, Cricket, Baseball, etc.) ───────────────────
 
-class _GenericTeamDetail extends ConsumerWidget {
-  const _GenericTeamDetail({required this.sport, required this.teamId});
+class _TeamDetailContent extends ConsumerWidget {
+  const _TeamDetailContent({required this.sport, required this.teamId});
 
   final LeagueSport sport;
   final String teamId;
@@ -89,7 +89,7 @@ class _GenericTeamDetail extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(
-      genericTeamDetailProvider(sport: sport, teamId: teamId),
+      sportTeamDetailProvider(sport: sport, teamId: teamId),
     );
 
     return Scaffold(
@@ -106,7 +106,7 @@ class _GenericTeamDetail extends ConsumerWidget {
         ),
         data: (team) => CustomScrollView(
           slivers: [
-            SliverToBoxAdapter(child: _GenericTeamHero(sport: sport, team: team)),
+            SliverToBoxAdapter(child: _TeamHeroHeader(sport: sport, team: team)),
             const SliverToBoxAdapter(child: SizedBox(height: 40)),
           ],
         ),
@@ -124,7 +124,7 @@ class _AmFootballTeamDetail extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final teamAsync = ref.watch(
-      genericTeamDetailProvider(sport: LeagueSport.amFootball, teamId: teamId),
+      sportTeamDetailProvider(sport: LeagueSport.amFootball, teamId: teamId),
     );
     final lineupAsync = ref.watch(amFootballLineupProvider(teamId: teamId));
 
@@ -143,7 +143,7 @@ class _AmFootballTeamDetail extends ConsumerWidget {
         data: (team) => CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
-              child: _GenericTeamHero(sport: LeagueSport.amFootball, team: team),
+              child: _TeamHeroHeader(sport: LeagueSport.amFootball, team: team),
             ),
             SliverToBoxAdapter(
               child: lineupAsync.when(
@@ -283,17 +283,17 @@ class _AmFootballPlayerRow extends StatelessWidget {
   );
 }
 
-class _GenericTeamHero extends ConsumerStatefulWidget {
-  const _GenericTeamHero({required this.sport, required this.team});
+class _TeamHeroHeader extends ConsumerStatefulWidget {
+  const _TeamHeroHeader({required this.sport, required this.team});
   final LeagueSport sport;
   final SimpleTeamDetail team;
 
   @override
-  ConsumerState<_GenericTeamHero> createState() => _GenericTeamHeroState();
+  ConsumerState<_TeamHeroHeader> createState() => _TeamHeroHeaderState();
 }
 
-class _GenericTeamHeroState extends ConsumerState<_GenericTeamHero>
-    with LogoColorMixin<_GenericTeamHero> {
+class _TeamHeroHeaderState extends ConsumerState<_TeamHeroHeader>
+    with LogoColorMixin<_TeamHeroHeader> {
   @override
   void initState() {
     super.initState();

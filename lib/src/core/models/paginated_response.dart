@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_annotation_target
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:sports_app/src/core/utils/parse_utils.dart';
+import 'package:shenghaotiyu/src/core/utils/parse_utils.dart';
 
 part 'paginated_response.freezed.dart';
 part 'paginated_response.g.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sports_app/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/routes/app_routes.dart';
 
 void main() {
   test('league route helpers build expected paths', () {

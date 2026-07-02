@@ -1,13 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/league/domain/league_sport.dart';
-import 'package:sports_app/src/features/league/presentation/league_detail/league_entity_avatar.dart';
-import 'package:sports_app/src/features/league/presentation/league_detail/league_tab_content.dart';
-import 'package:sports_app/src/features/league/presentation/league_detail/squads/squad_list.dart';
-import 'package:sports_app/src/features/league/presentation/providers/league_providers.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
+import 'package:shenghaotiyu/src/features/league/domain/league_sport.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/league_detail/league_entity_avatar.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/league_detail/league_tab_content.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/league_detail/squads/squad_list.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/providers/league_providers.dart';
 
 const _kPad = 16.0;
 

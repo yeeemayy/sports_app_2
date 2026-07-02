@@ -3,16 +3,16 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:sports_app/src/core/config/env_config.dart';
-import 'package:sports_app/src/core/services/api_client.dart';
-import 'package:sports_app/src/core/services/token_holder_service.dart';
-import 'package:sports_app/src/core/utils/logger_interceptor.dart';
-import 'package:sports_app/src/core/utils/session_expired_interceptor.dart';
-import 'package:sports_app/src/features/auth/data/auth_storage_service.dart';
-import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
-import 'package:sports_app/src/routes/app_router.dart';
-import 'package:sports_app/src/routes/app_routes.dart';
-import 'package:sports_app/src/shared_widgets/custom_status_dialog.dart';
+import 'package:shenghaotiyu/src/core/config/env_config.dart';
+import 'package:shenghaotiyu/src/core/services/api_client.dart';
+import 'package:shenghaotiyu/src/core/services/token_holder_service.dart';
+import 'package:shenghaotiyu/src/core/utils/logger_interceptor.dart';
+import 'package:shenghaotiyu/src/core/utils/session_expired_interceptor.dart';
+import 'package:shenghaotiyu/src/features/auth/data/auth_storage_service.dart';
+import 'package:shenghaotiyu/src/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:shenghaotiyu/src/routes/app_router.dart';
+import 'package:shenghaotiyu/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/shared_widgets/custom_status_dialog.dart';
 
 part 'api_service.g.dart';
 

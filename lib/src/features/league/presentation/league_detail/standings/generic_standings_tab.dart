@@ -1,17 +1,17 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/league/domain/league_sport.dart';
-import 'package:sports_app/src/features/league/domain/models/generic_standings_model.dart';
-import 'package:sports_app/src/features/league/presentation/league_detail/league_entity_avatar.dart';
-import 'package:sports_app/src/features/league/presentation/league_detail/league_tab_content.dart';
-import 'package:sports_app/src/features/league/presentation/league_detail/standings/standings_shared.dart';
-import 'package:sports_app/src/features/league/presentation/providers/league_providers.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
+import 'package:shenghaotiyu/src/features/league/domain/league_sport.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/generic_standings_model.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/league_detail/league_entity_avatar.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/league_detail/league_tab_content.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/league_detail/standings/standings_shared.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/providers/league_providers.dart';
 
-class GenericStandingsTab extends ConsumerWidget {
-  const GenericStandingsTab({
+class DefaultStandingsTab extends ConsumerWidget {
+  const DefaultStandingsTab({
     super.key,
     required this.sport,
     required this.leagueId,
@@ -30,7 +30,7 @@ class GenericStandingsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(
-      genericStandingsProvider(sport: sport, leagueId: leagueId),
+      leagueStandingsProvider(sport: sport, leagueId: leagueId),
     );
 
     final headers = <String>[
@@ -115,7 +115,7 @@ class GenericStandingsTab extends ConsumerWidget {
                   ..sort((a, b) => a.key.compareTo(b.key)))) ...[
               if (groups.length > 1) ConferenceHeader(name: entry.key),
               for (final row in entry.value.rows)
-                _GenericStandingsRow(
+                _StandingsRow(
                   row: row,
                   showDraws: _showDraws,
                   showHockeyOT: _showHockeyOT,
@@ -138,8 +138,8 @@ class GenericStandingsTab extends ConsumerWidget {
 
 // ─── Private widgets ──────────────────────────────────────────────────────────
 
-class _GenericStandingsRow extends StatelessWidget {
-  const _GenericStandingsRow({
+class _StandingsRow extends StatelessWidget {
+  const _StandingsRow({
     required this.row,
     required this.showDraws,
     required this.showHockeyOT,
@@ -147,7 +147,7 @@ class _GenericStandingsRow extends StatelessWidget {
     required this.onTap,
   });
 
-  final GenericStandingsRow row;
+  final StandingsRow row;
   final bool showDraws;
   final bool showHockeyOT;
   final bool showWinRate;

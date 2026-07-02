@@ -1,5 +1,5 @@
-name: sports_app
-description: "A new Flutter project."
+name: shenghaotiyu
+description: "胜好体育 — Sports club app."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -56,15 +56,14 @@ dependencies:
   crypto: ^3.0.6
 
   # Secure token persistence
-  flutter_secure_storage: ^9.2.4
+  flutter_secure_storage: ^10.3.1
 
   # Preferences persistence
   shared_preferences: ^2.3.5
 
   # Firebase
-  firebase_core: ^3.13.0
-  firebase_auth: ^5.5.2
-  cloud_firestore: ^5.6.0
+  firebase_core: ^4.11.0
+  cloud_firestore: ^6.6.0
 
   # HTML rendering
   flutter_html: ^3.0.0
@@ -82,11 +81,11 @@ dependencies:
   image_picker: ^1.2.1
   rongcloud_im_wrapper_plugin: ^5.32.10
   responsive_framework: ^1.5.1
-  fluttertoast: ^9.0.0
+  fluttertoast: ^9.1.0
 #  flutter_staggered_grid_view: ^0.7.0
   palette_generator: ^0.3.3+7
-  flutter_local_notifications: ^18.0.0
-  timezone: ^0.10.0
+  flutter_local_notifications: ^22.0.1
+  timezone: ^0.11.1
   google_nav_bar: ^5.0.7
 
 dev_dependencies:

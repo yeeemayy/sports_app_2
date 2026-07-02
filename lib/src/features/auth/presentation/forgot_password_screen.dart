@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/auth/data/auth_repository.dart';
-import 'package:sports_app/src/features/auth/presentation/auth_form_helpers.dart';
-import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
-import 'package:sports_app/src/features/auth/presentation/providers/otp_timer_notifier.dart';
-import 'package:sports_app/src/routes/app_routes.dart';
-import 'package:sports_app/src/shared_widgets/custom_app_bar.dart';
-import 'package:sports_app/src/shared_widgets/custom_status_dialog.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
+import 'package:shenghaotiyu/src/features/auth/data/auth_repository.dart';
+import 'package:shenghaotiyu/src/features/auth/presentation/auth_form_helpers.dart';
+import 'package:shenghaotiyu/src/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:shenghaotiyu/src/features/auth/presentation/providers/otp_timer_notifier.dart';
+import 'package:shenghaotiyu/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/shared_widgets/custom_app_bar.dart';
+import 'package:shenghaotiyu/src/shared_widgets/custom_status_dialog.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -157,7 +157,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset('assets/images/image_04.jpg', fit: BoxFit.cover),
+          Image.asset('assets/images/shty_bg_recovery.jpg', fit: BoxFit.cover),
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(

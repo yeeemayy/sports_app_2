@@ -1,17 +1,17 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
-import 'package:sports_app/src/features/event/domain/sport_config.dart';
-import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
-import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/event_match_card.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/event_sport_filter.dart';
-import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
-import 'package:sports_app/src/providers/nav_providers.dart';
-import 'package:sports_app/src/shared_widgets/shimmer_loading_list.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_type.dart';
+import 'package:shenghaotiyu/src/features/event/domain/sport_config.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/providers/event_providers.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/event_match_card.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/event_sport_filter.dart';
+import 'package:shenghaotiyu/src/features/news/presentation/providers/news_providers.dart';
+import 'package:shenghaotiyu/src/providers/nav_providers.dart';
+import 'package:shenghaotiyu/src/shared_widgets/shimmer_loading_list.dart';
 
 class EventSportTabContent extends ConsumerStatefulWidget {
   const EventSportTabContent({

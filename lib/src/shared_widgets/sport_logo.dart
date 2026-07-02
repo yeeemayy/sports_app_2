@@ -1,7 +1,7 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:sports_app/src/shared_widgets/avatar.dart';
+import 'package:shenghaotiyu/src/shared_widgets/avatar.dart';
 
 /// Team or player logo with a shimmer placeholder and [AvatarFallback].
 ///

@@ -1,8 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:sports_app/src/core/services/token_holder_service.dart';
-import 'package:sports_app/src/features/auth/data/auth_repository.dart';
-import 'package:sports_app/src/features/auth/data/auth_storage_service.dart';
-import 'package:sports_app/src/features/auth/domain/models/user_model.dart';
+import 'package:shenghaotiyu/src/core/services/token_holder_service.dart';
+import 'package:shenghaotiyu/src/features/auth/data/auth_repository.dart';
+import 'package:shenghaotiyu/src/features/auth/data/auth_storage_service.dart';
+import 'package:shenghaotiyu/src/features/auth/domain/models/user_model.dart';
 
 part 'auth_notifier.g.dart';
 

@@ -1,9 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
-import 'package:sports_app/src/features/home/presentation/widgets/home_anchor_live_grid.dart';
+import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
+import 'package:shenghaotiyu/src/features/home/presentation/providers/anchor_providers.dart';
+import 'package:shenghaotiyu/src/features/home/presentation/widgets/home_anchor_live_grid.dart';
 
 class AnchorScreen extends ConsumerStatefulWidget {
   const AnchorScreen({super.key});

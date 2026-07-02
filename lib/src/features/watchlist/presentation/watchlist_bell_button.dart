@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/features/watchlist/domain/watchlist_entry.dart';
-import 'package:sports_app/src/features/watchlist/presentation/providers/watchlist_notifier.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/features/watchlist/domain/watchlist_entry.dart';
+import 'package:shenghaotiyu/src/features/watchlist/presentation/providers/watchlist_notifier.dart';
 
 class WatchlistBellButton extends ConsumerWidget {
   const WatchlistBellButton({super.key, required this.entry});

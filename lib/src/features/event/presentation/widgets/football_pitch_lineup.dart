@@ -2,9 +2,9 @@ import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/features/event/domain/models/football_lineup.dart';
-import 'package:sports_app/src/shared_widgets/sport_logo.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/football_lineup.dart';
+import 'package:shenghaotiyu/src/shared_widgets/sport_logo.dart';
 
 const _homeColor = Color(0xFFFF3C00);
 const _awayColor = Color(0xFF29B6F6);

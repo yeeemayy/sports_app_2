@@ -1,13 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sports_app/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/routes/app_routes.dart';
 import 'package:rongcloud_im_wrapper_plugin/rongcloud_im_wrapper_plugin.dart';
-import 'package:sports_app/src/features/anchor/domain/models/im_token_model.dart';
-import 'package:sports_app/src/features/anchor/presentation/providers/im_token_providers.dart';
-import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:shenghaotiyu/src/features/anchor/domain/models/im_token_model.dart';
+import 'package:shenghaotiyu/src/features/anchor/presentation/providers/im_token_providers.dart';
+import 'package:shenghaotiyu/src/features/auth/presentation/providers/auth_notifier.dart';
 
 class AnchorChatsTab extends ConsumerStatefulWidget {
   const AnchorChatsTab({super.key, required this.anchorId});

@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_match.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_match.dart';
 
 part 'badminton_match.freezed.dart';
 part 'badminton_match.g.dart';

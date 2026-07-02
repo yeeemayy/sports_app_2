@@ -1,20 +1,20 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:sports_app/src/core/utils/app_info.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/auth/data/auth_storage_service.dart';
-import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
-import 'package:sports_app/src/providers/theme_provider.dart';
-import 'package:sports_app/src/routes/app_router.dart';
-import 'package:sports_app/src/routes/app_routes.dart';
-import 'package:sports_app/src/shared_widgets/avatar.dart';
-import 'package:sports_app/src/shared_widgets/custom_status_dialog.dart';
-import 'package:sports_app/src/shared_widgets/custom_text_field.dart';
+import 'package:shenghaotiyu/src/core/utils/app_info.dart';
+import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
+import 'package:shenghaotiyu/src/features/auth/data/auth_storage_service.dart';
+import 'package:shenghaotiyu/src/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:shenghaotiyu/src/providers/theme_provider.dart';
+import 'package:shenghaotiyu/src/routes/app_router.dart';
+import 'package:shenghaotiyu/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/shared_widgets/avatar.dart';
+import 'package:shenghaotiyu/src/shared_widgets/custom_status_dialog.dart';
+import 'package:shenghaotiyu/src/shared_widgets/custom_text_field.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -297,7 +297,7 @@ class ProfileScreen extends ConsumerWidget {
                       children: [
                         // Stadium tunnel photo
                         Image.asset(
-                          'assets/images/image_03.jpeg',
+                          'assets/images/shty_bg_profile.jpeg',
                           fit: BoxFit.cover,
                         ),
                         // Gradient overlay: subtle dark at top → solid ink at bottom

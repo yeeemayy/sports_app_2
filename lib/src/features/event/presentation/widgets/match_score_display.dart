@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
 
 /// Shared score display for match cards that show a plain `home – away` score.
 ///

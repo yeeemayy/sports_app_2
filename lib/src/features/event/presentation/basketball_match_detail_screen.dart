@@ -1,18 +1,18 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/features/event/domain/models/basketball_match_detail.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
-import 'package:sports_app/src/features/event/domain/models/basketball_match_events.dart';
-import 'package:sports_app/src/features/event/domain/models/basketball_realtime_data.dart';
-import 'package:sports_app/src/features/event/domain/models/basketball_team_squad.dart';
-import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
-import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/headers/basketball_match_header.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
-import 'package:sports_app/src/shared_widgets/arena_stat_bar.dart';
-import 'package:sports_app/src/shared_widgets/sport_logo.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/basketball_match_detail.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_type.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/basketball_match_events.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/basketball_realtime_data.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/basketball_team_squad.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/providers/event_providers.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/headers/basketball_match_header.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
+import 'package:shenghaotiyu/src/shared_widgets/arena_stat_bar.dart';
+import 'package:shenghaotiyu/src/shared_widgets/sport_logo.dart';
 
 class BasketballMatchDetailScreen extends ConsumerStatefulWidget {
   const BasketballMatchDetailScreen({super.key, required this.matchId});

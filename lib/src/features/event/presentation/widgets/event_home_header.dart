@@ -1,9 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_type.dart';
 
 const _kRecommended = 'recommended';
 
@@ -13,13 +13,13 @@ class EventHomeHeader extends ConsumerWidget {
   final String selectedFilter;
 
   String get _heroAsset {
-    if (selectedFilter == _kRecommended) return 'assets/images/image_01.jpeg';
+    if (selectedFilter == _kRecommended) return 'assets/images/shty_bg_main.jpeg';
     try {
       return SportType.values
           .firstWhere((s) => s.apiPath == selectedFilter)
           .heroAsset;
     } catch (_) {
-      return 'assets/images/image_01.jpeg';
+      return 'assets/images/shty_bg_main.jpeg';
     }
   }
 

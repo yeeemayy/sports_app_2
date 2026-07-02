@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/shared_widgets/sport_logo.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/shared_widgets/sport_logo.dart';
 
 class MatchCardHeader extends StatelessWidget {
   const MatchCardHeader({

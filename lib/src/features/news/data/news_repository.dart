@@ -1,9 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:sports_app/src/core/config/env_config.dart';
-import 'package:sports_app/src/core/services/api_service.dart';
-import 'package:sports_app/src/features/news/domain/models/news_detail.dart';
-import 'package:sports_app/src/features/news/domain/models/news_list_response.dart';
-import 'package:sports_app/src/features/news/domain/models/news_search_response.dart';
+import 'package:shenghaotiyu/src/core/config/env_config.dart';
+import 'package:shenghaotiyu/src/core/services/api_service.dart';
+import 'package:shenghaotiyu/src/features/news/domain/models/news_detail.dart';
+import 'package:shenghaotiyu/src/features/news/domain/models/news_list_response.dart';
+import 'package:shenghaotiyu/src/features/news/domain/models/news_search_response.dart';
 
 part 'news_repository.g.dart';
 

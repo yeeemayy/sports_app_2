@@ -1,5 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sports_app/src/features/watchlist/domain/watchlist_entry.dart';
+import 'package:shenghaotiyu/src/features/watchlist/domain/watchlist_entry.dart';
 
 class WatchlistService {
   static const _key = 'watchlist_entries';

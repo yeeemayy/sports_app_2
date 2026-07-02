@@ -2,13 +2,13 @@ import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/favourites/data/favourites_repository.dart';
-import 'package:sports_app/src/features/favourites/presentation/providers/favourites_providers.dart';
-import 'package:sports_app/src/features/league/domain/league_sport.dart';
-import 'package:sports_app/src/features/league/domain/models/league_detail_model.dart';
-import 'package:sports_app/src/features/league/presentation/utils/logo_color.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
+import 'package:shenghaotiyu/src/features/favourites/data/favourites_repository.dart';
+import 'package:shenghaotiyu/src/features/favourites/presentation/providers/favourites_providers.dart';
+import 'package:shenghaotiyu/src/features/league/domain/league_sport.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/league_detail_model.dart';
+import 'package:shenghaotiyu/src/features/league/presentation/utils/logo_color.dart';
 
 const _kHeroHeight = 160.0;
 

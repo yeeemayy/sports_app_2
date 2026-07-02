@@ -5,9 +5,9 @@ import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:sports_app/src/core/config/env_config.dart';
-import 'package:sports_app/src/core/utils/logger_interceptor.dart';
-import 'package:sports_app/src/core/utils/session_expired_interceptor.dart';
+import 'package:shenghaotiyu/src/core/config/env_config.dart';
+import 'package:shenghaotiyu/src/core/utils/logger_interceptor.dart';
+import 'package:shenghaotiyu/src/core/utils/session_expired_interceptor.dart';
 
 typedef ApiClientException = DioException;
 typedef ApiClientResponse<T> = Response<T>;

@@ -6,15 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/sections/shared_section_widgets.dart';
-import 'package:sports_app/src/features/news/domain/models/news_article.dart';
-import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
-import 'package:sports_app/src/features/news/presentation/providers/news_section_providers.dart';
-import 'package:sports_app/src/features/news/presentation/widgets/news_card.dart';
-import 'package:sports_app/src/features/news/presentation/widgets/news_search_bar.dart';
-import 'package:sports_app/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/sections/shared_section_widgets.dart';
+import 'package:shenghaotiyu/src/features/news/domain/models/news_article.dart';
+import 'package:shenghaotiyu/src/features/news/presentation/providers/news_providers.dart';
+import 'package:shenghaotiyu/src/features/news/presentation/providers/news_section_providers.dart';
+import 'package:shenghaotiyu/src/features/news/presentation/widgets/news_card.dart';
+import 'package:shenghaotiyu/src/features/news/presentation/widgets/news_search_bar.dart';
+import 'package:shenghaotiyu/src/routes/app_routes.dart';
 
 class NewsScreen extends ConsumerStatefulWidget {
   const NewsScreen({super.key});

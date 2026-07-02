@@ -1,5 +1,5 @@
-import 'package:sports_app/src/features/league/domain/league_sport.dart';
-import 'package:sports_app/src/features/league/domain/models/squad_player.dart';
+import 'package:shenghaotiyu/src/features/league/domain/league_sport.dart';
+import 'package:shenghaotiyu/src/features/league/domain/models/squad_player.dart';
 
 /// Groups and sorts [players] into position buckets for display.
 ///

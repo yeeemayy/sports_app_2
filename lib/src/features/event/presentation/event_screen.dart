@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/event_home_header.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/event_recommended_content.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/event_sport_filter.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/event_sport_tab_content.dart';
-import 'package:sports_app/src/providers/nav_providers.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_type.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/event_home_header.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/event_recommended_content.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/event_sport_filter.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/event_sport_tab_content.dart';
+import 'package:shenghaotiyu/src/providers/nav_providers.dart';
 
 const _kRecommended = 'recommended';
 

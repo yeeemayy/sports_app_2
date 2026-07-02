@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:sports_app/src/features/news/data/news_repository.dart';
-import 'package:sports_app/src/features/news/domain/models/news_article.dart';
-import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
+import 'package:shenghaotiyu/src/features/news/data/news_repository.dart';
+import 'package:shenghaotiyu/src/features/news/domain/models/news_article.dart';
+import 'package:shenghaotiyu/src/features/news/presentation/providers/news_providers.dart';
 
 part 'news_section_providers.g.dart';
 

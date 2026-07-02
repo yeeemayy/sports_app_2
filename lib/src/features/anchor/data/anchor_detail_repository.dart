@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:sports_app/src/core/config/env_config.dart';
-import 'package:sports_app/src/core/services/api_service.dart';
-import 'package:sports_app/src/features/anchor/domain/models/anchor_detail_model.dart';
+import 'package:shenghaotiyu/src/core/config/env_config.dart';
+import 'package:shenghaotiyu/src/core/services/api_service.dart';
+import 'package:shenghaotiyu/src/features/anchor/domain/models/anchor_detail_model.dart';
 
 part 'anchor_detail_repository.g.dart';
 

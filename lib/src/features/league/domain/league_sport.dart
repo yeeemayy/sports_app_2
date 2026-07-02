@@ -1,4 +1,4 @@
-import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_type.dart';
 
 enum LeagueSport {
   football,

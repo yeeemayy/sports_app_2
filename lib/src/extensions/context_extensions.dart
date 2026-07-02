@@ -1,10 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sports_app/src/core/exceptions/app_exception.dart';
-import 'package:sports_app/src/core/services/api_client.dart';
-import 'package:sports_app/src/routes/app_router.dart';
-import 'package:sports_app/src/shared_widgets/custom_status_dialog.dart';
+import 'package:shenghaotiyu/src/core/exceptions/app_exception.dart';
+import 'package:shenghaotiyu/src/core/services/api_client.dart';
+import 'package:shenghaotiyu/src/routes/app_router.dart';
+import 'package:shenghaotiyu/src/shared_widgets/custom_status_dialog.dart';
 
 extension ContextTheme on BuildContext {
   TextTheme get textTheme => Theme.of(this).textTheme;

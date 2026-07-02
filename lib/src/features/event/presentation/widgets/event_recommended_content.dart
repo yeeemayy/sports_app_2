@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
-import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
-import 'package:sports_app/src/features/event/presentation/providers/recommended_content_providers.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/sections/anchor_rankings_section.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/sections/editorial_hero_card.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/sections/live_now_section.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/sections/trending_news_section.dart';
-import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
-import 'package:sports_app/src/features/news/domain/models/news_article.dart';
-import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
-import 'package:sports_app/src/features/watchlist/presentation/providers/watchlist_notifier.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_type.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/providers/event_providers.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/providers/recommended_content_providers.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/sections/anchor_rankings_section.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/sections/editorial_hero_card.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/sections/live_now_section.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/sections/trending_news_section.dart';
+import 'package:shenghaotiyu/src/features/home/presentation/providers/anchor_providers.dart';
+import 'package:shenghaotiyu/src/features/news/domain/models/news_article.dart';
+import 'package:shenghaotiyu/src/features/news/presentation/providers/news_providers.dart';
+import 'package:shenghaotiyu/src/features/watchlist/presentation/providers/watchlist_notifier.dart';
 
 const _kHPad = 22.0;
 

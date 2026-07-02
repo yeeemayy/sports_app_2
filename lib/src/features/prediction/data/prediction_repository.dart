@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:sports_app/src/features/prediction/domain/prediction_model.dart';
+import 'package:shenghaotiyu/src/features/prediction/domain/prediction_model.dart';
 
 class PredictionRepository {
   PredictionRepository(this._firestore);

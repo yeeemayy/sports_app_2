@@ -3,10 +3,10 @@ import 'dart:async';
 // ignore_for_file: invalid_use_of_internal_member
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:sports_app/src/features/event/data/event_repository.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_realtime_data.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
-import 'package:sports_app/src/features/event/domain/sport_config.dart';
+import 'package:shenghaotiyu/src/features/event/data/event_repository.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_realtime_data.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_type.dart';
+import 'package:shenghaotiyu/src/features/event/domain/sport_config.dart';
 
 part 'realtime_providers.g.dart';
 

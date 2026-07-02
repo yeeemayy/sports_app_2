@@ -1,17 +1,17 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/features/event/domain/baseball_status.dart';
-import 'package:sports_app/src/features/event/domain/models/baseball_match_detail.dart';
-import 'package:sports_app/src/features/event/domain/models/baseball_realtime_data.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
-import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
-import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_header_shell.dart';
-import 'package:sports_app/src/features/watchlist/domain/watchlist_entry.dart';
-import 'package:sports_app/src/features/watchlist/presentation/watchlist_bell_button.dart';
-import 'package:sports_app/src/shared_widgets/sport_logo.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/features/event/domain/baseball_status.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/baseball_match_detail.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/baseball_realtime_data.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_type.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/providers/event_providers.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/sport_detail_header_shell.dart';
+import 'package:shenghaotiyu/src/features/watchlist/domain/watchlist_entry.dart';
+import 'package:shenghaotiyu/src/features/watchlist/presentation/watchlist_bell_button.dart';
+import 'package:shenghaotiyu/src/shared_widgets/sport_logo.dart';
 
 class BaseballMatchHeader extends ConsumerWidget {
   const BaseballMatchHeader({

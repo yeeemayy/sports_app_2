@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
 
 /// Score display for set-based sports (tennis, badminton, table tennis).
 ///

@@ -4,11 +4,11 @@ import 'dart:math' as math;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/anchor/presentation/anchor_video_fullscreen_page.dart';
-import 'package:sports_app/src/features/home/presentation/widgets/home_section_title.dart';
-import 'package:sports_app/src/features/video/presentation/providers/video_providers.dart';
-import 'package:sports_app/src/features/video/presentation/widgets/home_video_list.dart';
+import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
+import 'package:shenghaotiyu/src/features/anchor/presentation/anchor_video_fullscreen_page.dart';
+import 'package:shenghaotiyu/src/features/home/presentation/widgets/home_section_title.dart';
+import 'package:shenghaotiyu/src/features/video/presentation/providers/video_providers.dart';
+import 'package:shenghaotiyu/src/features/video/presentation/widgets/home_video_list.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoDetailScreen extends ConsumerStatefulWidget {

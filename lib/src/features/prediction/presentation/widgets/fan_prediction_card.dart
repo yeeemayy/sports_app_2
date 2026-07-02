@@ -1,10 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/features/auth/presentation/providers/auth_notifier.dart';
-import 'package:sports_app/src/features/prediction/domain/prediction_model.dart';
-import 'package:sports_app/src/features/prediction/presentation/providers/prediction_providers.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:shenghaotiyu/src/features/prediction/domain/prediction_model.dart';
+import 'package:shenghaotiyu/src/features/prediction/presentation/providers/prediction_providers.dart';
 
 /// Fan prediction voting card for Football and Basketball detail screens.
 ///

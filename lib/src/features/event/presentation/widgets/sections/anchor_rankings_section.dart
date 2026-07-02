@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:sports_app/src/core/models/paginated_response.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
-import 'package:sports_app/src/features/home/domain/models/anchor_model.dart';
-import 'package:sports_app/src/features/home/presentation/widgets/home_anchor_live_card.dart';
-import 'package:sports_app/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/core/models/paginated_response.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/features/home/domain/models/anchor_model.dart';
+import 'package:shenghaotiyu/src/features/home/presentation/widgets/home_anchor_live_card.dart';
+import 'package:shenghaotiyu/src/routes/app_routes.dart';
 
 const _kHPad = 22.0;
 const _kGap = 10.0;

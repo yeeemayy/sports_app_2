@@ -2,14 +2,14 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sports_app/src/extensions/context_extensions.dart';
-import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
-import 'package:sports_app/src/features/home/presentation/providers/banner_providers.dart';
-import 'package:sports_app/src/features/home/presentation/widgets/home_section_title.dart';
-import 'package:sports_app/src/features/home/presentation/widgets/home_anchor_live_grid.dart';
-import 'package:sports_app/src/features/news/presentation/providers/news_providers.dart';
-import 'package:sports_app/src/features/video/presentation/widgets/home_video_list.dart';
-import 'package:sports_app/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
+import 'package:shenghaotiyu/src/features/home/presentation/providers/anchor_providers.dart';
+import 'package:shenghaotiyu/src/features/home/presentation/providers/banner_providers.dart';
+import 'package:shenghaotiyu/src/features/home/presentation/widgets/home_section_title.dart';
+import 'package:shenghaotiyu/src/features/home/presentation/widgets/home_anchor_live_grid.dart';
+import 'package:shenghaotiyu/src/features/news/presentation/providers/news_providers.dart';
+import 'package:shenghaotiyu/src/features/video/presentation/widgets/home_video_list.dart';
+import 'package:shenghaotiyu/src/routes/app_routes.dart';
 
 class HomeTabOthers extends ConsumerWidget {
   const HomeTabOthers({super.key});

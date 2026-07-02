@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sports_app/src/features/event/domain/badminton_status.dart';
-import 'package:sports_app/src/features/event/domain/models/badminton_match.dart';
-import 'package:sports_app/src/features/event/domain/models/badminton_realtime_data.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
-import 'package:sports_app/src/features/event/domain/set_score_utils.dart';
-import 'package:sports_app/src/features/event/presentation/providers/realtime_providers.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/match_card_header.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/match_card_shell.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/sport_status_badge.dart';
-import 'package:sports_app/src/routes/app_routes.dart';
-import 'package:sports_app/src/shared_widgets/sport_logo.dart';
+import 'package:shenghaotiyu/src/features/event/domain/badminton_status.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/badminton_match.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/badminton_realtime_data.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_type.dart';
+import 'package:shenghaotiyu/src/features/event/domain/set_score_utils.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/providers/realtime_providers.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/match_card_header.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/match_card_shell.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/sport_status_badge.dart';
+import 'package:shenghaotiyu/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/shared_widgets/sport_logo.dart';
 
 // Design: "RALLY" — two player rows with set-win dot indicators and current game score.
 // [logo · name] [●●○ dots] ··· [current set score Anton 26]

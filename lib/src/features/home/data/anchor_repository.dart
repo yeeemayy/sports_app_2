@@ -1,10 +1,10 @@
 import 'dart:developer';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:sports_app/src/core/config/env_config.dart';
-import 'package:sports_app/src/core/models/paginated_response.dart';
-import 'package:sports_app/src/core/services/api_service.dart';
-import 'package:sports_app/src/features/home/domain/models/anchor_model.dart';
+import 'package:shenghaotiyu/src/core/config/env_config.dart';
+import 'package:shenghaotiyu/src/core/models/paginated_response.dart';
+import 'package:shenghaotiyu/src/core/services/api_service.dart';
+import 'package:shenghaotiyu/src/features/home/domain/models/anchor_model.dart';
 
 part 'anchor_repository.g.dart';
 

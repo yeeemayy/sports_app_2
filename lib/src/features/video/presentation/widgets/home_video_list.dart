@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sports_app/src/features/video/domain/models/video_model.dart';
-import 'package:sports_app/src/features/video/presentation/providers/video_providers.dart';
-import 'package:sports_app/src/features/video/presentation/widgets/home_video_card.dart';
-import 'package:sports_app/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/features/video/domain/models/video_model.dart';
+import 'package:shenghaotiyu/src/features/video/presentation/providers/video_providers.dart';
+import 'package:shenghaotiyu/src/features/video/presentation/widgets/home_video_card.dart';
+import 'package:shenghaotiyu/src/routes/app_routes.dart';
 
 class HomeVideoList extends ConsumerWidget {
   const HomeVideoList({

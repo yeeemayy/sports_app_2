@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:sports_app/src/core/exceptions/app_exception.dart';
-import 'package:sports_app/src/core/services/api_service.dart';
-import 'package:sports_app/src/features/auth/domain/models/user_model.dart';
+import 'package:shenghaotiyu/src/core/exceptions/app_exception.dart';
+import 'package:shenghaotiyu/src/core/services/api_service.dart';
+import 'package:shenghaotiyu/src/features/auth/domain/models/user_model.dart';
 
 part 'auth_repository.g.dart';
 

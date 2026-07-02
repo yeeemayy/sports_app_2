@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_annotation_target
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:sports_app/src/core/config/env_config.dart';
+import 'package:shenghaotiyu/src/core/config/env_config.dart';
 
 part 'user_model.freezed.dart';
 part 'user_model.g.dart';

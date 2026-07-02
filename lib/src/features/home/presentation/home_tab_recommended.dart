@@ -3,12 +3,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:sports_app/src/features/home/presentation/providers/anchor_providers.dart';
-import 'package:sports_app/src/features/home/presentation/providers/banner_providers.dart';
-import 'package:sports_app/src/features/home/presentation/widgets/home_live_events.dart';
-import 'package:sports_app/src/features/home/presentation/widgets/home_section_title.dart';
-import 'package:sports_app/src/features/home/presentation/widgets/home_anchor_live_grid.dart';
-import 'package:sports_app/src/shared_widgets/avatar.dart';
+import 'package:shenghaotiyu/src/features/home/presentation/providers/anchor_providers.dart';
+import 'package:shenghaotiyu/src/features/home/presentation/providers/banner_providers.dart';
+import 'package:shenghaotiyu/src/features/home/presentation/widgets/home_live_events.dart';
+import 'package:shenghaotiyu/src/features/home/presentation/widgets/home_section_title.dart';
+import 'package:shenghaotiyu/src/features/home/presentation/widgets/home_anchor_live_grid.dart';
+import 'package:shenghaotiyu/src/shared_widgets/avatar.dart';
 
 class HomeTabRecommended extends ConsumerWidget {
   const HomeTabRecommended({super.key});

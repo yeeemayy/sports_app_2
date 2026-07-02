@@ -1,5 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:sports_app/src/features/watchlist/domain/watchlist_entry.dart';
+import 'package:shenghaotiyu/src/features/watchlist/domain/watchlist_entry.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -24,7 +24,7 @@ class NotificationService {
     );
 
     await _plugin.initialize(
-      const InitializationSettings(android: android, iOS: ios),
+      settings: const InitializationSettings(android: android, iOS: ios),
     );
   }
 
@@ -60,23 +60,21 @@ class NotificationService {
     );
 
     await _plugin.zonedSchedule(
-      _notifId(entry.matchId),
-      '${entry.homeName} vs ${entry.awayName}',
-      'Starting in 15 minutes',
-      scheduledDate,
-      const NotificationDetails(
+      id: _notifId(entry.matchId),
+      title: '${entry.homeName} vs ${entry.awayName}',
+      body: 'Starting in 15 minutes',
+      scheduledDate: scheduledDate,
+      notificationDetails: const NotificationDetails(
         android: androidDetails,
         iOS: DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
       payload: entry.matchId,
     );
   }
 
   Future<void> cancelMatchReminder(String matchId) async {
-    await _plugin.cancel(_notifId(matchId));
+    await _plugin.cancel(id: _notifId(matchId));
   }
 
   int _notifId(String matchId) => matchId.hashCode.abs() % 100000;

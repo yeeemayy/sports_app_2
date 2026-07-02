@@ -1,20 +1,20 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/features/event/domain/models/football_lineup.dart';
-import 'package:sports_app/src/features/event/domain/models/football_match.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
-import 'package:sports_app/src/features/event/domain/models/football_match_detail.dart';
-import 'package:sports_app/src/features/event/domain/models/football_match_events.dart';
-import 'package:sports_app/src/features/event/presentation/providers/event_providers.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/headers/football_match_header.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/football_pitch_lineup.dart';
-import 'package:sports_app/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
-import 'package:sports_app/src/features/prediction/presentation/widgets/fan_prediction_card.dart';
-import 'package:sports_app/src/shared_widgets/arena_stat_bar.dart';
-import 'package:sports_app/src/shared_widgets/sport_logo.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/football_lineup.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/football_match.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_type.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/football_match_detail.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/football_match_events.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/providers/event_providers.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/headers/football_match_header.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/football_pitch_lineup.dart';
+import 'package:shenghaotiyu/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
+import 'package:shenghaotiyu/src/features/prediction/presentation/widgets/fan_prediction_card.dart';
+import 'package:shenghaotiyu/src/shared_widgets/arena_stat_bar.dart';
+import 'package:shenghaotiyu/src/shared_widgets/sport_logo.dart';
 
 class FootballMatchDetailScreen extends ConsumerStatefulWidget {
   const FootballMatchDetailScreen({super.key, required this.matchId, this.initialMatch});

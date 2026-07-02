@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/features/watchlist/data/notification_service.dart';
-import 'package:sports_app/src/features/watchlist/data/watchlist_service.dart';
-import 'package:sports_app/src/features/watchlist/domain/watchlist_entry.dart';
+import 'package:shenghaotiyu/src/features/watchlist/data/notification_service.dart';
+import 'package:shenghaotiyu/src/features/watchlist/data/watchlist_service.dart';
+import 'package:shenghaotiyu/src/features/watchlist/domain/watchlist_entry.dart';
 
 final watchlistServiceProvider = Provider<WatchlistService>(
   (_) => WatchlistService(),

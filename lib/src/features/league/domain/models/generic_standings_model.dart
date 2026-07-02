@@ -3,9 +3,9 @@
 ///
 /// Key challenge: the API may return `teamInfo` as either a Map or an empty
 /// List `[]` when the participant has no registered info.  We handle this with
-/// [GenericStandingsTeamInfo.fromJsonOrNull].
+/// [StandingsTeamInfo.fromJsonOrNull].
 
-class GenericStandingsTeamInfo {
+class StandingsTeamInfo {
   final String id;
   final String name;
   final String? shortName;
@@ -13,7 +13,7 @@ class GenericStandingsTeamInfo {
   final String logo;
   final String? cnName;
 
-  const GenericStandingsTeamInfo({
+  const StandingsTeamInfo({
     required this.id,
     required this.name,
     this.shortName,
@@ -23,9 +23,9 @@ class GenericStandingsTeamInfo {
   });
 
   /// Returns null when [json] is not a Map (e.g. it is an empty List `[]`).
-  static GenericStandingsTeamInfo? fromJsonOrNull(dynamic json) {
+  static StandingsTeamInfo? fromJsonOrNull(dynamic json) {
     if (json is! Map<String, dynamic>) return null;
-    return GenericStandingsTeamInfo(
+    return StandingsTeamInfo(
       id: (json['id'] as String?) ?? '',
       name: (json['name'] as String?) ?? '',
       shortName: json['short_name'] as String?,
@@ -36,7 +36,7 @@ class GenericStandingsTeamInfo {
   }
 }
 
-class GenericStandingsRow {
+class StandingsRow {
   final String teamId;
   final int position;
 
@@ -59,9 +59,9 @@ class GenericStandingsRow {
   final int? shootoutWin;
   final int? shootoutLoss;
 
-  final GenericStandingsTeamInfo? teamInfo;
+  final StandingsTeamInfo? teamInfo;
 
-  const GenericStandingsRow({
+  const StandingsRow({
     required this.teamId,
     required this.position,
     this.wins,
@@ -79,14 +79,14 @@ class GenericStandingsRow {
     this.teamInfo,
   });
 
-  factory GenericStandingsRow.fromJson(Map<String, dynamic> json) {
+  factory StandingsRow.fromJson(Map<String, dynamic> json) {
     int? _int(String key) {
       final v = json[key];
       if (v == null) return null;
       return (v as num).toInt();
     }
 
-    return GenericStandingsRow(
+    return StandingsRow(
       teamId: (json['team_id'] as String?) ?? '',
       position: ((json['position'] as num?)?.toInt()) ?? 0,
       wins: _int('win') ?? _int('won'),
@@ -103,32 +103,32 @@ class GenericStandingsRow {
       overtimeLoss: _int('overtime_loss'),
       shootoutWin: _int('shootout_win'),
       shootoutLoss: _int('shootout_loss'),
-      teamInfo: GenericStandingsTeamInfo.fromJsonOrNull(json['teamInfo']),
+      teamInfo: StandingsTeamInfo.fromJsonOrNull(json['teamInfo']),
     );
   }
 }
 
-class GenericStandingsGroup {
+class StandingsGroup {
   final String id;
   final String name;
   final String? stageId;
-  final List<GenericStandingsRow> rows;
+  final List<StandingsRow> rows;
 
-  const GenericStandingsGroup({
+  const StandingsGroup({
     required this.id,
     required this.name,
     this.stageId,
     required this.rows,
   });
 
-  factory GenericStandingsGroup.fromJson(Map<String, dynamic> json) {
+  factory StandingsGroup.fromJson(Map<String, dynamic> json) {
     final rawRows = (json['rows'] as List?) ?? [];
-    return GenericStandingsGroup(
+    return StandingsGroup(
       id: (json['id'] as String?) ?? '',
       name: (json['name'] as String?) ?? '',
       stageId: json['stage_id'] as String?,
       rows: rawRows
-          .map((r) => GenericStandingsRow.fromJson(r as Map<String, dynamic>))
+          .map((r) => StandingsRow.fromJson(r as Map<String, dynamic>))
           .toList(),
     );
   }

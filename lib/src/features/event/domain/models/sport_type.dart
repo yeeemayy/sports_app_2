@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:sports_app/src/features/event/domain/am_football_status.dart';
-import 'package:sports_app/src/features/event/domain/badminton_status.dart';
-import 'package:sports_app/src/features/event/domain/baseball_status.dart';
-import 'package:sports_app/src/features/event/domain/basketball_status.dart';
-import 'package:sports_app/src/features/event/domain/cricket_status.dart';
-import 'package:sports_app/src/features/event/domain/football_status.dart';
-import 'package:sports_app/src/features/event/domain/ice_hockey_status.dart';
-import 'package:sports_app/src/features/event/domain/table_tennis_status.dart';
-import 'package:sports_app/src/features/event/domain/tennis_status.dart';
-import 'package:sports_app/src/features/event/domain/volleyball_status.dart';
+import 'package:shenghaotiyu/src/features/event/domain/am_football_status.dart';
+import 'package:shenghaotiyu/src/features/event/domain/badminton_status.dart';
+import 'package:shenghaotiyu/src/features/event/domain/baseball_status.dart';
+import 'package:shenghaotiyu/src/features/event/domain/basketball_status.dart';
+import 'package:shenghaotiyu/src/features/event/domain/cricket_status.dart';
+import 'package:shenghaotiyu/src/features/event/domain/football_status.dart';
+import 'package:shenghaotiyu/src/features/event/domain/ice_hockey_status.dart';
+import 'package:shenghaotiyu/src/features/event/domain/table_tennis_status.dart';
+import 'package:shenghaotiyu/src/features/event/domain/tennis_status.dart';
+import 'package:shenghaotiyu/src/features/event/domain/volleyball_status.dart';
 
 enum SportType {
   football('football', 'footballMatchList', 'event.sport.football'),

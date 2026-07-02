@@ -1,6 +1,8 @@
 // ignore_for_file: invalid_annotation_target
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'package:shenghaotiyu/src/core/utils/json_converters.dart';
+
 part 'league_detail_model.freezed.dart';
 part 'league_detail_model.g.dart';
 
@@ -46,7 +48,12 @@ class LeagueDetailModel with _$LeagueDetailModel {
     int? type,
     @JsonKey(name: 'primary_color') String? primaryColor,
     @JsonKey(name: 'secondary_color') String? secondaryColor,
-    @JsonKey(name: 'totalTeams') int? totalTeams,
+    @JsonKey(
+      name: 'totalTeams',
+      fromJson: nullableIntFromJson,
+      toJson: nullableIntToJson,
+    )
+    int? totalTeams,
     @JsonKey(name: 'totalPlayers') int? totalPlayers,
 
     /// Football-specific aggregate stats

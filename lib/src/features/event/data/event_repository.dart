@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:sports_app/src/core/services/api_service.dart'
+import 'package:shenghaotiyu/src/core/services/api_service.dart'
     show sportsApiServiceProvider;
-import 'package:sports_app/src/features/event/domain/models/basketball_team_squad.dart';
-import 'package:sports_app/src/features/event/domain/models/football_lineup.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_match.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_realtime_data.dart';
-import 'package:sports_app/src/features/event/domain/models/sport_type.dart';
-import 'package:sports_app/src/features/event/domain/sport_config.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/basketball_team_squad.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/football_lineup.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_match.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_realtime_data.dart';
+import 'package:shenghaotiyu/src/features/event/domain/models/sport_type.dart';
+import 'package:shenghaotiyu/src/features/event/domain/sport_config.dart';
 
 part 'event_repository.g.dart';
 

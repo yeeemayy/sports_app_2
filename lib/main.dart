@@ -1,29 +1,25 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:sports_app/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:sports_app/src/core/utils/app_info.dart';
-import 'package:sports_app/src/core/utils/app_locale.dart';
+import 'package:shenghaotiyu/src/core/utils/app_info.dart';
+import 'package:shenghaotiyu/src/core/utils/app_locale.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sports_app/src/features/watchlist/data/notification_service.dart';
-import 'package:sports_app/src/providers/theme_provider.dart';
-import 'package:sports_app/src/routes/app_router.dart';
+import 'package:shenghaotiyu/src/features/watchlist/data/notification_service.dart';
+import 'package:shenghaotiyu/src/providers/theme_provider.dart';
+import 'package:shenghaotiyu/src/routes/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await dotenv.load(fileName: '.env');
   await Firebase.initializeApp();
-  if (FirebaseAuth.instance.currentUser == null) {
-    await FirebaseAuth.instance.signInAnonymously();
-  }
   await EasyLocalization.ensureInitialized();
   await AppInfo.init();
   await NotificationService().init();
@@ -40,14 +36,14 @@ void main() async {
         path: 'assets/translations',
         fallbackLocale: const Locale('zh', 'CN'),
         startLocale: const Locale('zh', 'CN'),
-        child: const MyApp(),
+        child: const ShenghaoSportsApp(),
       ),
     ),
   );
 }
 
-class MyApp extends ConsumerWidget {
-  const MyApp({super.key});
+class ShenghaoSportsApp extends ConsumerWidget {
+  const ShenghaoSportsApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -68,7 +64,7 @@ class MyApp extends ConsumerWidget {
           Breakpoint(start: 1200, end: double.infinity, name: DESKTOP),
         ],
       ),
-      title: 'Sports App',
+      title: '胜好体育',
       localizationsDelegates: [
         CountryLocalizations.delegate,
         ...context.localizationDelegates,

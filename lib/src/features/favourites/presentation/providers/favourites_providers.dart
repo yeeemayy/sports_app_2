@@ -1,10 +1,10 @@
-export 'package:sports_app/src/features/prediction/presentation/providers/prediction_providers.dart'
+export 'package:shenghaotiyu/src/features/prediction/presentation/providers/prediction_providers.dart'
     show firebaseUidProvider;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sports_app/src/features/favourites/data/favourites_repository.dart';
-import 'package:sports_app/src/features/favourites/domain/favourite_entry.dart';
+import 'package:shenghaotiyu/src/features/favourites/data/favourites_repository.dart';
+import 'package:shenghaotiyu/src/features/favourites/domain/favourite_entry.dart';
 
 final favouritesRepositoryProvider = Provider<FavouritesRepository>(
   (ref) => FavouritesRepository(FirebaseFirestore.instance),

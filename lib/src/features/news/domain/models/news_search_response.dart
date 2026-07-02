@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:sports_app/src/features/news/domain/models/news_article.dart';
+import 'package:shenghaotiyu/src/features/news/domain/models/news_article.dart';
 
 part 'news_search_response.freezed.dart';
 part 'news_search_response.g.dart';
