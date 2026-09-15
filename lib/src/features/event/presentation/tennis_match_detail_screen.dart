@@ -12,7 +12,7 @@ import 'package:shenghaotiyu/src/features/event/presentation/providers/event_pro
 import 'package:shenghaotiyu/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:shenghaotiyu/src/features/event/presentation/widgets/headers/tennis_match_header.dart';
 import 'package:shenghaotiyu/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
-import 'package:shenghaotiyu/src/shared_widgets/arena_stat_bar.dart';
+import 'package:shenghaotiyu/src/shared_widgets/stat_bar.dart';
 import 'package:shenghaotiyu/src/shared_widgets/sport_logo.dart';
 
 class TennisMatchDetailScreen extends ConsumerStatefulWidget {
@@ -655,7 +655,7 @@ class _StatsList extends StatelessWidget {
         final label = stat.labelKey.isNotEmpty
             ? stat.labelKey.tr()
             : '${stat.typeCode}';
-        return ArenaStatBar(label: label, home: home, away: away);
+        return StatBar(label: label, home: home, away: away);
       },
     );
   }

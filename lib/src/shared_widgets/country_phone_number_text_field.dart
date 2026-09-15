@@ -79,7 +79,7 @@ class _CountryPhoneNumberTextFieldState
       //       borderRadius: BorderRadius.all(Radius.circular(30)),
       //     ),
       //     focusedBorder: const OutlineInputBorder(
-      //       borderSide: BorderSide(color: ArenaColors.accent),
+      //       borderSide: BorderSide(color: AppColors.light.accent),
       //       borderRadius: BorderRadius.all(Radius.circular(30)),
       //     ),
       //   ),

@@ -371,15 +371,49 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
 
     return Column(
       children: [
-        _buildStatusBanner(),
-        Expanded(child: _buildMessageList()),
-        _buildBottomBar(context, isLoggedIn: isLoggedIn),
+        _ChatStatusBanner(
+          connecting: _connecting,
+          initialSyncDone: _initialSyncDone,
+          connectError: _connectError,
+          onRetry: _retryConnect,
+        ),
+        Expanded(
+          child: _ChatMessageList(
+            scrollController: _scrollController,
+            messages: _messages,
+            initialSyncDone: _initialSyncDone,
+            connected: _connected,
+          ),
+        ),
+        _ChatInputBar(
+          isLoggedIn: isLoggedIn,
+          connected: _connected,
+          inputController: _inputController,
+          onSend: _sendMessage,
+          loginPath:
+              '${AppRoutes.login}?returnPath=${Uri.encodeComponent(AppRoutes.anchorPath(widget.anchorId))}',
+        ),
       ],
     );
   }
+}
 
-  Widget _buildStatusBanner() {
-    if (_connecting || !_initialSyncDone) {
+class _ChatStatusBanner extends StatelessWidget {
+  const _ChatStatusBanner({
+    required this.connecting,
+    required this.initialSyncDone,
+    required this.connectError,
+    required this.onRetry,
+  });
+
+  final bool connecting;
+  final bool initialSyncDone;
+  final bool connectError;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    if (connecting || !initialSyncDone) {
       return Container(
         width: double.infinity,
         color: context.appColors.lineStrong,
@@ -391,7 +425,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
         ),
       );
     }
-    if (_connectError) {
+    if (connectError) {
       return Container(
         width: double.infinity,
         color: Colors.red.shade50,
@@ -404,7 +438,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
               style: TextStyle(fontSize: 12, color: Colors.red.shade700),
             ),
             TextButton(
-              onPressed: _retryConnect,
+              onPressed: onRetry,
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 minimumSize: Size.zero,
@@ -421,9 +455,24 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
     }
     return const SizedBox.shrink();
   }
+}
 
-  Widget _buildMessageList() {
-    if (_initialSyncDone && _messages.isEmpty && _connected) {
+class _ChatMessageList extends StatelessWidget {
+  const _ChatMessageList({
+    required this.scrollController,
+    required this.messages,
+    required this.initialSyncDone,
+    required this.connected,
+  });
+
+  final ScrollController scrollController;
+  final List<_ChatMessage> messages;
+  final bool initialSyncDone;
+  final bool connected;
+
+  @override
+  Widget build(BuildContext context) {
+    if (initialSyncDone && messages.isEmpty && connected) {
       return Center(
         child: Text(
           'anchor.detail.chats.empty'.tr(),
@@ -432,43 +481,66 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
       );
     }
     return ListView.builder(
-      controller: _scrollController,
+      controller: scrollController,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      itemCount: _messages.length,
-      itemBuilder: (context, index) {
-        final msg = _messages[index];
-        return Container(
-          padding: const EdgeInsets.symmetric(vertical: 3),
-          child: RichText(
-            text: TextSpan(
-              style: DefaultTextStyle.of(context).style.copyWith(fontSize: 13),
-              children: [
-                TextSpan(
-                  text: '${msg.senderName}: ',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: msg.isOwn ? context.appColors.accent : Colors.green,
-                  ),
-                ),
-                TextSpan(text: msg.text),
-              ],
-            ),
-          ),
-        );
-      },
+      itemCount: messages.length,
+      itemBuilder: (context, index) => _ChatMessageTile(message: messages[index]),
     );
   }
+}
 
-  Widget _buildBottomBar(BuildContext context, {required bool isLoggedIn}) {
+class _ChatMessageTile extends StatelessWidget {
+  const _ChatMessageTile({required this.message});
+
+  final _ChatMessage message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: RichText(
+        text: TextSpan(
+          style: DefaultTextStyle.of(context).style.copyWith(fontSize: 13),
+          children: [
+            TextSpan(
+              text: '${message.senderName}: ',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: message.isOwn ? context.appColors.accent : Colors.green,
+              ),
+            ),
+            TextSpan(text: message.text),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ChatInputBar extends StatelessWidget {
+  const _ChatInputBar({
+    required this.isLoggedIn,
+    required this.connected,
+    required this.inputController,
+    required this.onSend,
+    required this.loginPath,
+  });
+
+  final bool isLoggedIn;
+  final bool connected;
+  final TextEditingController inputController;
+  final VoidCallback onSend;
+  final String loginPath;
+
+  @override
+  Widget build(BuildContext context) {
     if (!isLoggedIn) {
       return Container(
         decoration: BoxDecoration(
           border: Border(top: BorderSide(color: context.appColors.lineStrong)),
         ),
         child: TextButton.icon(
-          onPressed: () => context.push(
-            '${AppRoutes.login}?returnPath=${Uri.encodeComponent(AppRoutes.anchorPath(widget.anchorId))}',
-          ),
+          onPressed: () => context.push(loginPath),
           icon: const Icon(Icons.lock_outline, size: 16),
           label: Text.rich(
             TextSpan(
@@ -498,19 +570,16 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
         children: [
           Expanded(
             child: TextField(
-              controller: _inputController,
-              enabled: _connected,
+              controller: inputController,
+              enabled: connected,
               textInputAction: TextInputAction.send,
-              onSubmitted: (_) => _sendMessage(),
-              style: TextStyle(fontSize: 13),
+              onSubmitted: (_) => onSend(),
+              style: const TextStyle(fontSize: 13),
               decoration: InputDecoration(
                 hintText: 'anchor.detail.chats.input.hint'.tr(),
                 hintStyle: const TextStyle(fontSize: 13),
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
                   borderSide: BorderSide(color: context.appColors.lineStrong),
@@ -528,7 +597,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
           ),
           const SizedBox(width: 8),
           TextButton(
-            onPressed: _connected ? _sendMessage : null,
+            onPressed: connected ? onSend : null,
             style: TextButton.styleFrom(
               backgroundColor: context.appColors.accent,
               foregroundColor: Colors.white,
@@ -536,14 +605,9 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             ),
-            child: Text(
-              'anchor.detail.chats.send'.tr(),
-              style: const TextStyle(fontSize: 13),
-            ),
+            child: Text('anchor.detail.chats.send'.tr(), style: const TextStyle(fontSize: 13)),
           ),
         ],
       ),

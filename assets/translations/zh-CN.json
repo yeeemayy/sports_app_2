@@ -185,8 +185,11 @@
     "privacy_policy": "隐私政策",
     "terms_of_use": "用户协议",
     "section_settings": "设置",
+    "section_library": "我的内容",
+    "section_preferences": "偏好设置",
     "section_legal": "法律",
     "section_danger_zone": "危险区",
+    "section_account": "账户",
     "logout": "退出登录",
     "logout_confirm_title": "退出登录",
     "logout_confirm_message": "确定要退出登录吗？",
@@ -868,7 +871,24 @@
     "draw": "平局",
     "locked": "● 赛事已结束 · 预测已关闭",
     "login_required": "登录后参与预测",
-    "vote_to_see": "投票后查看其他人的预测"
+    "vote_to_see": "投票后查看其他人的预测",
+    "streak": "{n}连胜",
+    "league": {
+      "profile_tile": "预测联赛",
+      "title": "预测联赛",
+      "points": "积分",
+      "streak": "当前连胜",
+      "best_streak": "最佳连胜",
+      "accuracy": "命中率",
+      "record": "命中 {correct} / {total} 场",
+      "login_required_title": "登录后查看战绩",
+      "login_required_subtitle": "登录后即可参与预测并累积积分",
+      "load_error": "加载失败，请稍后重试",
+      "empty_title": "还没有预测记录",
+      "empty_subtitle": "去比赛详情页参与一次预测吧",
+      "redemption_history": "积分兑换记录",
+      "redemption_points": "-{points} 积分"
+    }
   },
   "league": {
     "title": "联赛",
@@ -1189,5 +1209,18 @@
     "exit_warning_body": "如果您不同意用户协议与隐私政策，将无法使用本应用，应用将会关闭。",
     "go_back": "返回",
     "confirm_exit": "确认退出"
+  },
+  "launch": {
+    "brand_title": "胜好推荐",
+    "tagline": "为你精选今日热门赛事、新闻与预测排行榜",
+    "hot_matches": "今日热门赛事",
+    "leaderboard": "预测排行榜",
+    "news": "体育新闻",
+    "enter_app": "进入胜好体育",
+    "tabs": {
+      "best_streak": "最佳连胜",
+      "streak": "连胜",
+      "correct": "准确次数"
+    }
   }
 }

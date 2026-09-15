@@ -9,7 +9,7 @@ import 'package:shenghaotiyu/src/features/event/presentation/providers/event_pro
 import 'package:shenghaotiyu/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:shenghaotiyu/src/features/event/presentation/widgets/headers/cricket_match_header.dart';
 import 'package:shenghaotiyu/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
-import 'package:shenghaotiyu/src/shared_widgets/arena_stat_bar.dart';
+import 'package:shenghaotiyu/src/shared_widgets/stat_bar.dart';
 import 'package:shenghaotiyu/src/shared_widgets/sport_logo.dart';
 
 class CricketMatchDetailScreen extends ConsumerStatefulWidget {
@@ -425,14 +425,14 @@ class _StatsTab extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: 12),
       children: [
         if (battingRows.isNotEmpty)
-          _ArenaStatSection(
+          _StatSection(
             title: 'event.cricket.detail.batting_comparison'.tr(),
             rows: battingRows,
           ),
         if (battingRows.isNotEmpty && bowlingRows.isNotEmpty)
           const SizedBox(height: 12),
         if (bowlingRows.isNotEmpty)
-          _ArenaStatSection(
+          _StatSection(
             title: 'event.cricket.detail.bowling_comparison'.tr(),
             rows: bowlingRows,
           ),
@@ -441,8 +441,8 @@ class _StatsTab extends ConsumerWidget {
   }
 }
 
-class _ArenaStatSection extends StatelessWidget {
-  const _ArenaStatSection({required this.title, required this.rows});
+class _StatSection extends StatelessWidget {
+  const _StatSection({required this.title, required this.rows});
 
   final String title;
   final List<(String, int, int)> rows;
@@ -477,7 +477,7 @@ class _ArenaStatSection extends StatelessWidget {
           ),
         ),
         ...rows.map(
-          (r) => ArenaStatBar(label: r.$1.tr(), home: r.$2, away: r.$3),
+          (r) => StatBar(label: r.$1.tr(), home: r.$2, away: r.$3),
         ),
         const SizedBox(height: 4),
       ],

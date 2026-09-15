@@ -13,7 +13,7 @@ import 'package:shenghaotiyu/src/features/event/presentation/widgets/headers/foo
 import 'package:shenghaotiyu/src/features/event/presentation/widgets/football_pitch_lineup.dart';
 import 'package:shenghaotiyu/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
 import 'package:shenghaotiyu/src/features/prediction/presentation/widgets/fan_prediction_card.dart';
-import 'package:shenghaotiyu/src/shared_widgets/arena_stat_bar.dart';
+import 'package:shenghaotiyu/src/shared_widgets/stat_bar.dart';
 import 'package:shenghaotiyu/src/shared_widgets/sport_logo.dart';
 
 class FootballMatchDetailScreen extends ConsumerStatefulWidget {
@@ -129,6 +129,8 @@ class _StatsTab extends ConsumerWidget {
               awayName: awayName,
               hasDraw: true,
               isMatchEnded: isEnded,
+              finalHomeScore: isEnded ? int.tryParse(detail?.homeScore ?? '') : null,
+              finalAwayScore: isEnded ? int.tryParse(detail?.awayScore ?? '') : null,
             ),
             if (displayStats.isNotEmpty) ...[
               Padding(
@@ -142,7 +144,7 @@ class _StatsTab extends ConsumerWidget {
                   ],
                 ),
               ),
-              ...displayStats.map((s) => ArenaStatBar(label: s.label!, home: s.home, away: s.away)),
+              ...displayStats.map((s) => StatBar(label: s.label!, home: s.home, away: s.away)),
             ],
           ],
         );

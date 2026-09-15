@@ -1,9 +1,12 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shenghaotiyu/src/core/remote_config_provider.dart';
 import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,6 +23,25 @@ void main() async {
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await dotenv.load(fileName: '.env');
   await Firebase.initializeApp();
+  if (FirebaseAuth.instance.currentUser == null) {
+    // Required so Firestore rules requiring `request.auth != null`
+    // (predictions, favourites, prediction league) can authorize requests —
+    // unrelated to our own backend's UserModel.uid.
+    await FirebaseAuth.instance.signInAnonymously();
+  }
+  final remoteConfig = FirebaseRemoteConfig.instance;
+  await remoteConfig.setConfigSettings(
+    RemoteConfigSettings(
+      fetchTimeout: const Duration(seconds: 10),
+      minimumFetchInterval: Duration.zero,
+    ),
+  );
+  await remoteConfig.setDefaults({'prediction_system_enabled': true, 'prediction_redemptions': '[]'});
+  try {
+    await remoteConfig.fetchAndActivate();
+  } catch (_) {
+    // ponytail: offline/first-launch fetch failure — falls back to defaults above.
+  }
   await EasyLocalization.ensureInitialized();
   await AppInfo.init();
   await NotificationService().init();
@@ -30,6 +52,7 @@ void main() async {
     ProviderScope(
       overrides: [
         sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+        remoteConfigProvider.overrideWithValue(remoteConfig),
       ],
       child: EasyLocalization(
         supportedLocales: const [Locale('zh', 'CN'), Locale('en', 'GB')],

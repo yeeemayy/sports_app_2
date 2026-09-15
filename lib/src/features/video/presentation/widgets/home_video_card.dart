@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:shenghaotiyu/src/features/video/domain/models/video_model.dart';
 
+/// A "poster" style card: the title is overlaid on the thumbnail behind a
+/// bottom gradient scrim, rather than sitting in a separate row below it.
 class HomeVideoCard extends StatelessWidget {
   const HomeVideoCard({super.key, required this.video, required this.onTap})
     : _loading = false;
@@ -16,94 +18,133 @@ class HomeVideoCard extends StatelessWidget {
   final VoidCallback? onTap;
   final bool _loading;
 
+  static const _cornerRadius = 10.0;
+
   @override
   Widget build(BuildContext context) {
-    if (_loading) return const _VideoCardSkeleton();
-
-    final hasThumbnail = video!.thumbnailPath.isNotEmpty;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  if (hasThumbnail)
-                    CachedNetworkImage(
-                      imageUrl: video!.thumbnailPath,
-                      fit: BoxFit.cover,
-                      placeholder: (context, _) => Skeletonizer(
-                        enabled: true,
-                        child: const ColoredBox(color: Colors.grey),
-                      ),
-                      errorBuilder: (context, e, s) =>
-                          const ColoredBox(color: Color(0xFF333333)),
-                    )
-                  else
-                    const ColoredBox(color: Color(0xFF333333)),
-                  const Center(
-                    child: Icon(
-                      Icons.play_circle_outline,
-                      color: Colors.white70,
-                      size: 32,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            video!.title,
-            style: Theme.of(context).textTheme.bodyMedium,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(_cornerRadius),
+      child: AspectRatio(
+        aspectRatio: 16 / 9,
+        child: _loading
+            ? const _CardSkeleton()
+            : GestureDetector(onTap: onTap, child: _CardContent(video: video!)),
       ),
     );
   }
 }
 
-class _VideoCardSkeleton extends StatelessWidget {
-  const _VideoCardSkeleton();
+class _CardContent extends StatelessWidget {
+  const _CardContent({required this.video});
+
+  final VideoModel video;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasThumbnail = video.thumbnailPath.isNotEmpty;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        hasThumbnail
+            ? CachedNetworkImage(
+                imageUrl: video.thumbnailPath,
+                fit: BoxFit.cover,
+                placeholder: (context, _) => Skeletonizer(
+                  enabled: true,
+                  child: const ColoredBox(color: Colors.grey),
+                ),
+                errorBuilder: (context, e, s) => const _Placeholder(),
+              )
+            : const _Placeholder(),
+        const _PlayGlyph(),
+        _TitleScrim(title: video.title),
+      ],
+    );
+  }
+}
+
+class _Placeholder extends StatelessWidget {
+  const _Placeholder();
+
+  @override
+  Widget build(BuildContext context) => const ColoredBox(color: Color(0xFF333333));
+}
+
+class _PlayGlyph extends StatelessWidget {
+  const _PlayGlyph();
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.center,
+      child: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.35),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(Icons.play_arrow, color: Colors.white, size: 22),
+      ),
+    );
+  }
+}
+
+class _TitleScrim extends StatelessWidget {
+  const _TitleScrim({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(8, 18, 8, 6),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.transparent, Colors.black.withValues(alpha: 0.75)],
+          ),
+        ),
+        child: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
+}
+
+class _CardSkeleton extends StatelessWidget {
+  const _CardSkeleton();
 
   @override
   Widget build(BuildContext context) {
     return Skeletonizer(
       enabled: true,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
+        fit: StackFit.expand,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: AspectRatio(
-              aspectRatio: 16 / 9,
-              child: ColoredBox(color: Colors.grey.shade300),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Container(
-            height: 12,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
-          const SizedBox(height: 6),
-          FractionallySizedBox(
-            widthFactor: 0.65,
-            child: Container(
-              height: 12,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(4),
+          ColoredBox(color: Colors.grey.shade300),
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Container(
+                width: 90,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade400,
+                  borderRadius: BorderRadius.circular(4),
+                ),
               ),
             ),
           ),

@@ -11,7 +11,7 @@ import 'package:shenghaotiyu/src/features/event/presentation/providers/event_pro
 import 'package:shenghaotiyu/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:shenghaotiyu/src/features/event/presentation/widgets/headers/basketball_match_header.dart';
 import 'package:shenghaotiyu/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
-import 'package:shenghaotiyu/src/shared_widgets/arena_stat_bar.dart';
+import 'package:shenghaotiyu/src/shared_widgets/stat_bar.dart';
 import 'package:shenghaotiyu/src/shared_widgets/sport_logo.dart';
 
 class BasketballMatchDetailScreen extends ConsumerStatefulWidget {
@@ -235,7 +235,7 @@ class _OverviewContent extends StatelessWidget {
           final label = s.labelKey.isNotEmpty
               ? s.labelKey.tr()
               : '${s.typeCode}';
-          return ArenaStatBar(label: label, home: h, away: a);
+          return StatBar(label: label, home: h, away: a);
         }),
       ],
     );

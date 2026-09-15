@@ -11,7 +11,9 @@ import 'package:shenghaotiyu/src/features/prediction/presentation/providers/pred
 /// [hasDraw] — true for football (home/draw/away), false for basketball (home/away).
 /// [homeName] / [awayName] — short team names shown on the vote bars.
 /// [isMatchEnded] — when true the card is read-only (voting locked).
-class FanPredictionCard extends ConsumerWidget {
+/// [finalHomeScore] / [finalAwayScore] — final score once [isMatchEnded] is
+/// true; used to score the user's pick for the prediction league exactly once.
+class FanPredictionCard extends ConsumerStatefulWidget {
   const FanPredictionCard({
     super.key,
     required this.matchId,
@@ -19,6 +21,8 @@ class FanPredictionCard extends ConsumerWidget {
     required this.awayName,
     this.hasDraw = true,
     this.isMatchEnded = false,
+    this.finalHomeScore,
+    this.finalAwayScore,
   });
 
   final String matchId;
@@ -26,9 +30,50 @@ class FanPredictionCard extends ConsumerWidget {
   final String awayName;
   final bool hasDraw;
   final bool isMatchEnded;
+  final int? finalHomeScore;
+  final int? finalAwayScore;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FanPredictionCard> createState() => _FanPredictionCardState();
+}
+
+class _FanPredictionCardState extends ConsumerState<FanPredictionCard> {
+  bool _resolveAttempted = false;
+
+  void _maybeResolve(String? firebaseUid, PredictionPick? userPick) {
+    if (_resolveAttempted ||
+        !widget.isMatchEnded ||
+        firebaseUid == null ||
+        userPick == null ||
+        widget.finalHomeScore == null ||
+        widget.finalAwayScore == null) {
+      return;
+    }
+    _resolveAttempted = true;
+
+    final actualResult = widget.finalHomeScore! > widget.finalAwayScore!
+        ? PredictionPick.home
+        : widget.finalHomeScore! < widget.finalAwayScore!
+        ? PredictionPick.away
+        : PredictionPick.draw;
+
+    ref
+        .read(predictionRepositoryProvider)
+        .resolveIfNeeded(
+          uid: firebaseUid,
+          matchId: widget.matchId,
+          actualResult: actualResult,
+        );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final matchId = widget.matchId;
+    final homeName = widget.homeName;
+    final awayName = widget.awayName;
+    final hasDraw = widget.hasDraw;
+    final isMatchEnded = widget.isMatchEnded;
+
     final colors = context.appColors;
     final firebaseUid = ref.watch(firebaseUidProvider);
     final isLoggedIn = ref.watch(authNotifierProvider).valueOrNull?.user != null;
@@ -43,6 +88,14 @@ class FanPredictionCard extends ConsumerWidget {
 
     final options = _buildOptions(homeName, awayName);
     final hasVoted = userPick != null;
+
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _maybeResolve(firebaseUid, userPick),
+    );
+
+    final stats = firebaseUid != null
+        ? ref.watch(predictionStatsProvider(firebaseUid)).valueOrNull
+        : null;
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 18, 16, 0),
@@ -92,9 +145,18 @@ class FanPredictionCard extends ConsumerWidget {
                 hasVoted: hasVoted,
                 canVote: canVote,
                 onTap: canVote
-                    ? () => ref
-                          .read(predictionRepositoryProvider)
-                          .vote(matchId: matchId, uid: firebaseUid, pick: opt.pick)
+                    ? () => ref.read(predictionRepositoryProvider).vote(
+                        matchId: matchId,
+                        uid: firebaseUid,
+                        pick: opt.pick,
+                        nickname:
+                            ref
+                                .read(authNotifierProvider)
+                                .valueOrNull
+                                ?.user
+                                ?.nickname ??
+                            '',
+                      )
                     : null,
                 colors: colors,
                 context: context,

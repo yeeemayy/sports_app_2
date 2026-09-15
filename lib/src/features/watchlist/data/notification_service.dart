@@ -10,7 +10,7 @@ class NotificationService {
 
   final _plugin = FlutterLocalNotificationsPlugin();
 
-  static const _channelId = 'arena_match_reminders';
+  static const _channelId = 'match_reminders';
   static const _channelName = 'Match Reminders';
 
   Future<void> init() async {

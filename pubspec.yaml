@@ -63,6 +63,8 @@ dependencies:
 
   # Firebase
   firebase_core: ^4.11.0
+  firebase_auth: ^6.3.0
+  firebase_remote_config: ^6.0.1
   cloud_firestore: ^6.6.0
 
   # HTML rendering

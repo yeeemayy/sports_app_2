@@ -1,9 +1,11 @@
 abstract final class AppRoutes {
+  // Cold-launch screen (shown once per app process, before the shell)
+  static const launch = '/start';
+
   // Shell branches
   static const home = '/home';
   static const anchor = '/anchor';
   static const news = '/news';
-  static const data = '/data';
   static const league = '/league';
   static const profile = '/profile';
 
@@ -29,6 +31,7 @@ abstract final class AppRoutes {
   static const profileEditFull = '/profile/edit';
   static const profileFavourites = '/profile/favourites';
   static const profileWatchlist = '/profile/watchlist';
+  static const profilePredictionLeague = '/profile/prediction-league';
   static const privacyPolicy = '/profile/privacy-policy';
   static const userAgreement = '/profile/user-agreement';
 

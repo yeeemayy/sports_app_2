@@ -113,9 +113,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authNotifierProvider).value?.user;
-    final avatarUrl = user?.avatarUrl;
     final colors = context.appColors;
-    final topPadding = MediaQuery.paddingOf(context).top;
 
     return Scaffold(
       backgroundColor: colors.ink,
@@ -123,174 +121,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         key: _formKey,
         child: CustomScrollView(
           slivers: [
-            // ── Arena-style header ───────────────────────────────────────────
             SliverToBoxAdapter(
-              child: SizedBox(
-                height: topPadding + 160,
-                child: Stack(
-                  children: [
-                    // Gradient background
-                    Positioned.fill(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [colors.surface2, colors.ink],
-                          ),
-                        ),
-                        child: Stack(
-                          children: [
-                            // Accent glow
-                            Positioned(
-                              top: -50,
-                              right: -50,
-                              child: Container(
-                                width: 200,
-                                height: 200,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: RadialGradient(
-                                    colors: [
-                                      colors.accent.withValues(alpha: 0.18),
-                                      Colors.transparent,
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // Back button + title
-                    Positioned(
-                      top: topPadding + 8,
-                      left: 12,
-                      right: 12,
-                      child: Row(
-                        children: [
-                          // Back button
-                          GestureDetector(
-                            onTap: () => context.pop(),
-                            child: Container(
-                              width: 38,
-                              height: 38,
-                              decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.5),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: colors.lineStrong,
-                                  width: 0.5,
-                                ),
-                              ),
-                              child: Icon(
-                                Icons.arrow_back_ios_new_rounded,
-                                color: colors.text,
-                                size: 16,
-                              ),
-                            ),
-                          ),
-                          // Title
-                          Expanded(
-                            child: Center(
-                              child: Text(
-                                'profile.edit_title'.tr().toUpperCase(),
-                                style: AppTextStyles.display(
-                                  18,
-                                  context,
-                                ).copyWith(color: colors.text),
-                              ),
-                            ),
-                          ),
-                          // Balance spacer
-                          const SizedBox(width: 38),
-                        ],
-                      ),
-                    ),
-
-                    // Avatar centred at the bottom of the header
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Center(
-                        child: GestureDetector(
-                          onTap: _pickImage,
-                          child: SizedBox(
-                            width: 100,
-                            height: 100,
-                            child: Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(3),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: colors.ink,
-                                  ),
-                                  child: ClipOval(
-                                    child: _pickedImage != null
-                                        ? Image.file(
-                                            File(_pickedImage!.path),
-                                            width: 94,
-                                            height: 94,
-                                            fit: BoxFit.cover,
-                                          )
-                                        : (avatarUrl != null &&
-                                                  avatarUrl.isNotEmpty
-                                              ? CachedNetworkImage(
-                                                  imageUrl: avatarUrl,
-                                                  width: 94,
-                                                  height: 94,
-                                                  fit: BoxFit.cover,
-                                                  placeholder: (context, url) =>
-                                                      Skeletonizer(
-                                                        enabled: true,
-                                                        child: const ColoredBox(
-                                                          color: Colors.white,
-                                                        ),
-                                                      ),
-                                                  errorBuilder:
-                                                      (context, url, error) =>
-                                                          AvatarFallback(
-                                                            size: 94,
-                                                          ),
-                                                )
-                                              : AvatarFallback(size: 94)),
-                                  ),
-                                ),
-                                // Camera badge
-                                Positioned(
-                                  bottom: 2,
-                                  right: 2,
-                                  child: Container(
-                                    width: 30,
-                                    height: 30,
-                                    decoration: BoxDecoration(
-                                      color: colors.accent,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: colors.ink,
-                                        width: 2.5,
-                                      ),
-                                    ),
-                                    child: const Icon(
-                                      Icons.camera_alt_rounded,
-                                      size: 14,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              child: _EditProfileHeader(
+                avatarUrl: user?.avatarUrl,
+                pickedImage: _pickedImage,
+                onAvatarTap: _pickImage,
               ),
             ),
 
@@ -351,6 +186,193 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     ),
                   ),
                 ]),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Header: gradient banner + back/title row + overlapping avatar ───────────────
+
+class _EditProfileHeader extends StatelessWidget {
+  const _EditProfileHeader({
+    required this.avatarUrl,
+    required this.pickedImage,
+    required this.onAvatarTap,
+  });
+
+  final String? avatarUrl;
+  final XFile? pickedImage;
+  final VoidCallback onAvatarTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final topPadding = MediaQuery.paddingOf(context).top;
+
+    return SizedBox(
+      height: topPadding + 160,
+      child: Stack(
+        children: [
+          Positioned.fill(child: _HeaderBackdrop(colors: colors)),
+          Positioned(
+            top: topPadding + 8,
+            left: 12,
+            right: 12,
+            child: _HeaderBar(title: 'profile.edit_title'.tr(), colors: colors),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: _EditableAvatar(
+                avatarUrl: avatarUrl,
+                pickedImage: pickedImage,
+                onTap: onAvatarTap,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeaderBackdrop extends StatelessWidget {
+  const _HeaderBackdrop({required this.colors});
+
+  final AppColors colors;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [colors.surface2, colors.ink],
+        ),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: -50,
+            right: -50,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [colors.accent.withValues(alpha: 0.18), Colors.transparent],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeaderBar extends StatelessWidget {
+  const _HeaderBar({required this.title, required this.colors});
+
+  final String title;
+  final AppColors colors;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        GestureDetector(
+          onTap: () => context.pop(),
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.5),
+              shape: BoxShape.circle,
+              border: Border.all(color: colors.lineStrong, width: 0.5),
+            ),
+            child: Icon(Icons.arrow_back_ios_new_rounded, color: colors.text, size: 16),
+          ),
+        ),
+        Expanded(
+          child: Center(
+            child: Text(
+              title.toUpperCase(),
+              style: AppTextStyles.display(18, context).copyWith(color: colors.text),
+            ),
+          ),
+        ),
+        const SizedBox(width: 38),
+      ],
+    );
+  }
+}
+
+class _EditableAvatar extends StatelessWidget {
+  const _EditableAvatar({
+    required this.avatarUrl,
+    required this.pickedImage,
+    required this.onTap,
+  });
+
+  final String? avatarUrl;
+  final XFile? pickedImage;
+  final VoidCallback onTap;
+
+  Widget _content() {
+    if (pickedImage != null) {
+      return Image.file(File(pickedImage!.path), width: 94, height: 94, fit: BoxFit.cover);
+    }
+    if (avatarUrl != null && avatarUrl!.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: avatarUrl!,
+        width: 94,
+        height: 94,
+        fit: BoxFit.cover,
+        placeholder: (context, url) =>
+            Skeletonizer(enabled: true, child: const ColoredBox(color: Colors.white)),
+        errorBuilder: (context, url, error) => AvatarFallback(size: 94),
+      );
+    }
+    return AvatarFallback(size: 94);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    return GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        width: 100,
+        height: 100,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(shape: BoxShape.circle, color: colors.ink),
+              child: ClipOval(child: _content()),
+            ),
+            Positioned(
+              bottom: 2,
+              right: 2,
+              child: Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: colors.accent,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: colors.ink, width: 2.5),
+                ),
+                child: const Icon(Icons.camera_alt_rounded, size: 14, color: Colors.white),
               ),
             ),
           ],

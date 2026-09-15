@@ -23,3 +23,7 @@ final userVoteProvider =
           .watch(predictionRepositoryProvider)
           .userVoteStream(args.matchId, args.uid),
     );
+
+final predictionStatsProvider = StreamProvider.family<PredictionStats, String>(
+  (ref, uid) => ref.watch(predictionRepositoryProvider).statsStream(uid),
+);

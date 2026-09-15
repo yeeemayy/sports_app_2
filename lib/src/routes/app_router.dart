@@ -20,6 +20,7 @@ import 'package:shenghaotiyu/src/features/auth/presentation/login_screen.dart';
 import 'package:shenghaotiyu/src/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:shenghaotiyu/src/features/auth/presentation/register_screen.dart';
 import 'package:shenghaotiyu/src/features/event/presentation/event_screen.dart';
+import 'package:shenghaotiyu/src/features/launch/presentation/launch_screen.dart';
 import 'package:shenghaotiyu/src/features/league/domain/league_sport.dart';
 import 'package:shenghaotiyu/src/features/league/domain/models/country_model.dart';
 import 'package:shenghaotiyu/src/features/league/domain/models/squad_player.dart';
@@ -37,6 +38,8 @@ import 'package:shenghaotiyu/src/features/video/presentation/video_detail_screen
 import 'package:shenghaotiyu/src/features/news/presentation/news_screen.dart';
 import 'package:shenghaotiyu/src/features/favourites/presentation/favourites_screen.dart';
 import 'package:shenghaotiyu/src/features/watchlist/presentation/watchlist_screen.dart';
+import 'package:shenghaotiyu/src/features/prediction/presentation/prediction_league_screen.dart';
+import 'package:shenghaotiyu/src/core/remote_config_provider.dart';
 import 'package:shenghaotiyu/src/features/profile/presentation/edit_profile_screen.dart';
 import 'package:shenghaotiyu/src/features/profile/presentation/profile_screen.dart';
 import 'package:shenghaotiyu/src/shared_widgets/web_view_screen.dart';
@@ -54,9 +57,11 @@ final rootNavigatorKey = GlobalKey<NavigatorState>();
 GoRouter appRouter(AppRouterRef ref) {
   final authNotifier = _AuthNotifierListenable(ref);
 
+  final predictionSystemEnabled = ref.read(predictionSystemEnabledProvider);
+
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: AppRoutes.home,
+    initialLocation: predictionSystemEnabled ? AppRoutes.launch : AppRoutes.home,
     refreshListenable: authNotifier,
     redirect: (context, state) {
       final authAsync = ref.read(authNotifierProvider);
@@ -69,6 +74,11 @@ GoRouter appRouter(AppRouterRef ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: AppRoutes.launch,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const LaunchScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder:
             (
@@ -158,9 +168,14 @@ GoRouter appRouter(AppRouterRef ref) {
                   ),
                   GoRoute(
                     parentNavigatorKey: rootNavigatorKey,
+                    path: 'prediction-league',
+                    builder: (context, state) => const PredictionLeagueScreen(),
+                  ),
+                  GoRoute(
+                    parentNavigatorKey: rootNavigatorKey,
                     path: 'privacy-policy',
                     builder: (context, state) => WebViewScreen(
-                      url: 'https://qdty.gsport.day/privacy-policy.html',
+                      url: 'https://shenghao-ym.gsport.day/privacy-policy.html',
                       title: state.extra as String? ?? '',
                     ),
                   ),
@@ -168,7 +183,7 @@ GoRouter appRouter(AppRouterRef ref) {
                     parentNavigatorKey: rootNavigatorKey,
                     path: 'user-agreement',
                     builder: (context, state) => WebViewScreen(
-                      url: 'https://qdty.gsport.day/user-agreement.html',
+                      url: 'https://shenghao-ym.gsport.day/user-agreement.html',
                       title: state.extra as String? ?? '',
                     ),
                   ),

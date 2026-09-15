@@ -20,72 +20,83 @@ class HomeVideoList extends ConsumerWidget {
   final int page;
   final void Function(VideoModel video)? onVideoTap;
 
+  void _openVideo(BuildContext context, VideoModel video, int lastPage) {
+    if (onVideoTap != null) {
+      onVideoTap!(video);
+      return;
+    }
+    context.push(
+      AppRoutes.videoDetailPath(video.id, currentPage: page, lastPage: lastPage),
+    );
+  }
+
+  Widget _buildMessage(String message) => Padding(
+    padding: const EdgeInsets.all(24),
+    child: Center(child: Text(message)),
+  );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final videosAsync = ref.watch(
       videoListProvider(locale: locale, page: page),
     );
 
-    return videosAsync.when(
-      loading: () => _VideoGrid(
-        itemCount: 6,
-        itemBuilder: (_, index) => const HomeVideoCard.loading(),
-      ),
-      error: (err, stack) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Center(child: Text('home.error.load_failed'.tr())),
-      ),
-      data: (response) {
-        if (response.list.isEmpty) {
-          return Padding(
-            padding: const EdgeInsets.all(24),
-            child: Center(child: Text('home.error.load_failed'.tr())),
-          );
-        }
-        return _VideoGrid(
-          itemCount: response.list.length,
-          itemBuilder: (context, index) {
-            final video = response.list[index];
-            return HomeVideoCard(
-              video: video,
-              onTap: onVideoTap != null
-                  ? () => onVideoTap!(video)
-                  : () => context.push(
-                      AppRoutes.videoDetailPath(
-                        video.id,
-                        currentPage: page,
-                        lastPage: response.meta.lastPage,
-                      ),
-                    ),
-            );
-          },
-        );
-      },
+    if (videosAsync.isLoading) {
+      return _VideoGrid.placeholder(count: 6);
+    }
+    if (videosAsync.hasError) {
+      return _buildMessage('home.error.load_failed'.tr());
+    }
+
+    final response = videosAsync.requireValue;
+    if (response.list.isEmpty) {
+      return _buildMessage('home.error.load_failed'.tr());
+    }
+
+    return _VideoGrid(
+      videos: response.list,
+      onTap: (video) => _openVideo(context, video, response.meta.lastPage),
     );
   }
 }
 
 class _VideoGrid extends StatelessWidget {
-  const _VideoGrid({required this.itemCount, required this.itemBuilder});
+  const _VideoGrid({required List<VideoModel> videos, required this.onTap})
+    : _videos = videos,
+      _placeholderCount = 0;
 
-  final int itemCount;
-  final IndexedWidgetBuilder itemBuilder;
+  const _VideoGrid.placeholder({required int count})
+    : _videos = const [],
+      _placeholderCount = count,
+      onTap = null;
+
+  final List<VideoModel> _videos;
+  final int _placeholderCount;
+  final void Function(VideoModel video)? onTap;
+
+  static const _spacing = 10.0;
 
   @override
   Widget build(BuildContext context) {
-    final isTablet = ResponsiveBreakpoints.of(context).largerThan(MOBILE);
+    final columns = ResponsiveBreakpoints.of(context).largerThan(MOBILE) ? 3 : 2;
+    final count = _placeholderCount > 0 ? _placeholderCount : _videos.length;
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: isTablet ? 3 : 2,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 1.2,
+        crossAxisCount: columns,
+        crossAxisSpacing: _spacing,
+        mainAxisSpacing: _spacing,
+        childAspectRatio: 16 / 9,
       ),
-      itemCount: itemCount,
-      itemBuilder: itemBuilder,
+      itemCount: count,
+      itemBuilder: (context, index) {
+        if (_placeholderCount > 0) return const HomeVideoCard.loading();
+        final video = _videos[index];
+        return HomeVideoCard(video: video, onTap: () => onTap!(video));
+      },
     );
   }
 }

@@ -10,7 +10,7 @@ import 'package:shenghaotiyu/src/features/event/presentation/providers/event_pro
 import 'package:shenghaotiyu/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:shenghaotiyu/src/features/event/presentation/widgets/headers/volleyball_match_header.dart';
 import 'package:shenghaotiyu/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
-import 'package:shenghaotiyu/src/shared_widgets/arena_stat_bar.dart';
+import 'package:shenghaotiyu/src/shared_widgets/stat_bar.dart';
 import 'package:shenghaotiyu/src/shared_widgets/sport_logo.dart';
 
 class VolleyballMatchDetailScreen extends ConsumerStatefulWidget {
@@ -437,7 +437,7 @@ class _StatsTabState extends ConsumerState<_StatsTab> {
                         final label = stat.labelKey.isNotEmpty
                             ? stat.labelKey.tr()
                             : '${stat.typeCode}';
-                        return ArenaStatBar(
+                        return StatBar(
                           label: label,
                           home: home,
                           away: away,

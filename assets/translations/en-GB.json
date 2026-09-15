@@ -185,8 +185,11 @@
     "privacy_policy": "Privacy Policy",
     "terms_of_use": "Terms of Use",
     "section_settings": "Settings",
+    "section_library": "Library",
+    "section_preferences": "Preferences",
     "section_legal": "Legal",
     "section_danger_zone": "Danger Zone",
+    "section_account": "Account",
     "logout": "Log Out",
     "logout_confirm_title": "Log Out",
     "logout_confirm_message": "Are you sure you want to log out?",
@@ -806,7 +809,7 @@
       "hero_title": "SIGN BACK IN.",
       "welcome_back": "● Welcome back",
       "subtitle": "Pick up where you left off.",
-      "cta": "ENTER THE ARENA"
+      "cta": "SIGN IN"
     },
     "register": {
       "title": "Register",
@@ -819,7 +822,7 @@
       "success_title": "Registration Successful",
       "success_description": "Your account has been created.",
       "login_now": "Log In Now",
-      "hero_title": "JOIN THE ARENA.",
+      "hero_title": "JOIN 胜好体育.",
       "cta": "CREATE ACCOUNT"
     },
     "forgot": {
@@ -868,7 +871,24 @@
     "draw": "DRAW",
     "locked": "● MATCH ENDED · VOTING CLOSED",
     "login_required": "LOGIN TO PREDICT",
-    "vote_to_see": "VOTE TO SEE OTHER PEOPLE'S PICKS"
+    "vote_to_see": "VOTE TO SEE OTHER PEOPLE'S PICKS",
+    "streak": "{n} STREAK",
+    "league": {
+      "profile_tile": "Prediction League",
+      "title": "Prediction League",
+      "points": "Points",
+      "streak": "Current streak",
+      "best_streak": "Best streak",
+      "accuracy": "Accuracy",
+      "record": "{correct} / {total} correct",
+      "login_required_title": "Login to see your record",
+      "login_required_subtitle": "Log in to make predictions and earn points",
+      "load_error": "Couldn't load your stats, try again later",
+      "empty_title": "No predictions yet",
+      "empty_subtitle": "Make a pick on any match detail page to get started",
+      "redemption_history": "Redemption History",
+      "redemption_points": "-{points} pts"
+    }
   },
   "league": {
     "title": "LEAGUES",
@@ -1189,5 +1209,18 @@
     "exit_warning_body": "If you do not agree to the Terms & Privacy Policy, you will not be able to use this app and it will close.",
     "go_back": "Go Back",
     "confirm_exit": "Exit App"
+  },
+  "launch": {
+    "brand_title": "Shenghao Picks",
+    "tagline": "Today's hot matches, news, and the prediction leaderboard, curated for you",
+    "hot_matches": "Hot Matches Today",
+    "leaderboard": "Prediction Leaderboard",
+    "news": "Sports News",
+    "enter_app": "Enter the App",
+    "tabs": {
+      "best_streak": "Best Streak",
+      "streak": "Streak",
+      "correct": "Correct Picks"
+    }
   }
 }

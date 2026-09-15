@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
 
-/// Arena-styled gradient header shell used by every sport detail screen.
+/// Gradient header shell used by every sport detail screen.
 ///
 /// Provides the dark gradient background, the top navigation bar (back +
 /// league info), a subtle accent glow, and a content slot [builder] for the
@@ -70,7 +70,7 @@ class SportDetailHeaderShell<T> extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Nav bar
-                _ArenaNavBar(
+                _MatchNavBar(
                   leagueName: leagueName,
                   matchTimestamp: matchTimestamp,
                   actions: actions,
@@ -95,8 +95,8 @@ class SportDetailHeaderShell<T> extends StatelessWidget {
   }
 }
 
-class _ArenaNavBar extends StatelessWidget {
-  const _ArenaNavBar({this.leagueName, this.matchTimestamp, this.actions});
+class _MatchNavBar extends StatelessWidget {
+  const _MatchNavBar({this.leagueName, this.matchTimestamp, this.actions});
 
   final String? leagueName;
   final int? matchTimestamp;

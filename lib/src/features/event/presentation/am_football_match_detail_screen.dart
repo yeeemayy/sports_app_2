@@ -10,7 +10,7 @@ import 'package:shenghaotiyu/src/features/event/presentation/providers/event_pro
 import 'package:shenghaotiyu/src/features/event/presentation/providers/realtime_providers.dart';
 import 'package:shenghaotiyu/src/features/event/presentation/widgets/headers/am_football_match_header.dart';
 import 'package:shenghaotiyu/src/features/event/presentation/widgets/sport_detail_scaffold.dart';
-import 'package:shenghaotiyu/src/shared_widgets/arena_stat_bar.dart';
+import 'package:shenghaotiyu/src/shared_widgets/stat_bar.dart';
 import 'package:shenghaotiyu/src/shared_widgets/sport_logo.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
@@ -399,7 +399,7 @@ class _StatsTab extends ConsumerWidget {
           itemCount: allStats.length,
           itemBuilder: (context, i) {
             final s = allStats[i];
-            return ArenaStatBar(
+            return StatBar(
               label: s.labelKey.isNotEmpty ? s.labelKey.tr() : '${s.typeCode}',
               home: s.homeValue,
               away: s.awayValue,

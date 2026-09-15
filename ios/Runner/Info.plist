@@ -6,6 +6,11 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>zh-Hans</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>zh-Hans</string>
+		<string>en-GB</string>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>胜好体育</string>
 	<key>CFBundleExecutable</key>

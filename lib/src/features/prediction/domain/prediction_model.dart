@@ -29,3 +29,39 @@ class PredictionTally {
     'awayVotes': awayVotes,
   };
 }
+
+/// A user's aggregate prediction-league record, stored at
+/// `users/{uid}/predictionStats/summary`.
+class PredictionStats {
+  const PredictionStats({
+    this.points = 0,
+    this.streak = 0,
+    this.bestStreak = 0,
+    this.correct = 0,
+    this.total = 0,
+  });
+
+  final int points;
+  final int streak;
+  final int bestStreak;
+  final int correct;
+  final int total;
+
+  double get accuracy => total == 0 ? 0 : correct / total;
+
+  factory PredictionStats.fromMap(Map<String, dynamic> map) => PredictionStats(
+    points: (map['points'] as num?)?.toInt() ?? 0,
+    streak: (map['streak'] as num?)?.toInt() ?? 0,
+    bestStreak: (map['bestStreak'] as num?)?.toInt() ?? 0,
+    correct: (map['correct'] as num?)?.toInt() ?? 0,
+    total: (map['total'] as num?)?.toInt() ?? 0,
+  );
+
+  Map<String, dynamic> toMap() => {
+    'points': points,
+    'streak': streak,
+    'bestStreak': bestStreak,
+    'correct': correct,
+    'total': total,
+  };
+}

@@ -18,6 +18,102 @@ import 'package:shenghaotiyu/src/features/anchor/presentation/anchor_chats_tab.d
 import 'package:shenghaotiyu/src/features/anchor/presentation/anchor_video_fullscreen_page.dart';
 import 'package:shenghaotiyu/src/features/anchor/presentation/providers/anchor_detail_providers.dart';
 
+/// Owns the live-stream player's lifecycle and surface state, kept separate
+/// from [_AnchorDetailScreenState] so the screen widget only deals with
+/// composing UI, not player bookkeeping.
+class _StreamPlaybackController extends ChangeNotifier {
+  VideoPlayerController? _controller;
+  String? _currentUrl;
+  bool initialized = false;
+  bool hasError = false;
+  bool buffering = false;
+  bool controlsVisible = false;
+  Timer? _hideTimer;
+
+  VideoPlayerController? get controller => _controller;
+  bool get isPlaying => _controller?.value.isPlaying ?? false;
+
+  Future<void> start(String url) async {
+    if (_controller != null) return;
+    _currentUrl = url;
+    hasError = false;
+    final controller = VideoPlayerController.networkUrl(Uri.parse(url));
+    _controller = controller;
+    controller.addListener(_onTick);
+    try {
+      await controller.initialize();
+      initialized = true;
+      controller.play();
+      notifyListeners();
+    } catch (_) {
+      hasError = true;
+      notifyListeners();
+    }
+  }
+
+  void _onTick() {
+    final controller = _controller;
+    if (controller == null) return;
+    var changed = false;
+    if (controller.value.isBuffering != buffering) {
+      buffering = controller.value.isBuffering;
+      changed = true;
+    }
+    if (controller.value.hasError && !hasError) {
+      hasError = true;
+      changed = true;
+    }
+    if (changed) notifyListeners();
+  }
+
+  void toggleControlsVisible() {
+    controlsVisible = !controlsVisible;
+    notifyListeners();
+    if (controlsVisible) _scheduleAutoHide();
+  }
+
+  void togglePlayback() {
+    final controller = _controller;
+    if (controller == null || !initialized) return;
+    controller.value.isPlaying ? controller.pause() : controller.play();
+    controlsVisible = true;
+    notifyListeners();
+    _scheduleAutoHide();
+  }
+
+  void _scheduleAutoHide() {
+    _hideTimer?.cancel();
+    _hideTimer = Timer(const Duration(seconds: 3), () {
+      controlsVisible = false;
+      notifyListeners();
+    });
+  }
+
+  Future<void> retry() async {
+    final url = _currentUrl;
+    await _teardownController();
+    if (url != null) await start(url);
+  }
+
+  Future<void> _teardownController() async {
+    _controller?.removeListener(_onTick);
+    await _controller?.dispose();
+    _controller = null;
+    initialized = false;
+    hasError = false;
+    buffering = false;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _hideTimer?.cancel();
+    _controller?.removeListener(_onTick);
+    _controller?.dispose();
+    super.dispose();
+  }
+}
+
 class AnchorDetailScreen extends ConsumerStatefulWidget {
   const AnchorDetailScreen({super.key, required this.anchorId});
 
@@ -29,141 +125,58 @@ class AnchorDetailScreen extends ConsumerStatefulWidget {
 
 class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
     with TickerProviderStateMixin {
-  VideoPlayerController? _videoController;
+  final _playback = _StreamPlaybackController();
   late final TabController _tabController;
-  bool _videoInitialized = false;
-  bool _videoError = false;
-  bool _isBuffering = false;
-  String? _currentM3u8Url;
-  bool _showControls = false;
-  Timer? _controlsTimer;
 
   @override
   void initState() {
     super.initState();
-    _onVideoTap();
+    _playback.addListener(_onPlaybackChanged);
     _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.invalidate(bannerProvider);
     });
   }
 
-  Future<void> _initVideoPlayer(String m3u8Url) async {
-    if (_videoController != null) return;
-    _currentM3u8Url = m3u8Url;
-    if (mounted) setState(() => _videoError = false);
-    _videoController = VideoPlayerController.networkUrl(Uri.parse(m3u8Url));
-    _videoController!.addListener(_onVideoUpdate);
-    try {
-      await _videoController!.initialize();
-      if (mounted) {
-        setState(() => _videoInitialized = true);
-        _videoController!.play();
-      }
-    } catch (_) {
-      if (mounted) setState(() => _videoError = true);
-    }
+  void _onPlaybackChanged() {
+    if (mounted) setState(() {});
   }
 
-  void _onVideoUpdate() {
-    if (!mounted) return;
-    final controller = _videoController;
-    if (controller == null) return;
-
-    final buffering = controller.value.isBuffering;
-    if (buffering != _isBuffering) {
-      setState(() => _isBuffering = buffering);
-    }
-
-    if (controller.value.hasError && !_videoError) {
-      setState(() => _videoError = true);
-    }
+  Future<void> _openFullscreen() async {
+    final controller = _playback.controller;
+    if (controller == null || !_playback.initialized) return;
+    final wasPlaying = controller.value.isPlaying;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => AnchorVideoFullscreenPage(controller: controller),
+      ),
+    );
+    if (mounted && wasPlaying) controller.play();
   }
 
-  void _onVideoTap() {
-    setState(() => _showControls = !_showControls);
-    if (_showControls) {
-      _controlsTimer?.cancel();
-      _controlsTimer = Timer(const Duration(seconds: 3), () {
-        if (mounted) setState(() => _showControls = false);
+  void _ensureStreamStarted(AnchorDetailModel detail) {
+    final url = detail.m3u8Url;
+    if (_playback.controller == null && url != null && url.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _playback.controller == null) _playback.start(url);
       });
     }
   }
 
-  void _togglePlayPause() {
-    final controller = _videoController;
-    if (controller == null || !_videoInitialized) return;
-    setState(() {
-      if (controller.value.isPlaying) {
-        controller.pause();
-      } else {
-        controller.play();
-      }
-    });
-    _onVideoTap();
-  }
-
-  Future<void> _openFullscreen() async {
-    if (_videoController == null || !_videoInitialized) return;
-    final wasPlaying = _videoController!.value.isPlaying;
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (_) => AnchorVideoFullscreenPage(controller: _videoController!),
-      ),
-    );
-    if (mounted && wasPlaying && _videoController != null) {
-      _videoController!.play();
-    }
-  }
-
-  Future<void> _retryVideo() async {
-    final url = _currentM3u8Url;
-    if (url == null) return;
-    _videoController?.removeListener(_onVideoUpdate);
-    await _videoController?.dispose();
-    _videoController = null;
-    setState(() {
-      _videoInitialized = false;
-      _videoError = false;
-      _isBuffering = false;
-    });
-    await _initVideoPlayer(url);
-  }
-
   @override
   void dispose() {
-    _controlsTimer?.cancel();
-    _videoController?.removeListener(_onVideoUpdate);
-    _videoController?.dispose();
+    _playback
+      ..removeListener(_onPlaybackChanged)
+      ..dispose();
     _tabController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(anchorDetailProvider(widget.anchorId), (_, next) {
-      next.whenData((detail) {
-        if (_videoController == null && detail.m3u8Url != null && detail.m3u8Url!.isNotEmpty) {
-          _initVideoPlayer(detail.m3u8Url!);
-        }
-      });
-    });
-
     final detailAsync = ref.watch(anchorDetailProvider(widget.anchorId));
-
-    // If the widget was recreated (e.g. after login redirect) the listener
-    // above won't fire because the provider value hasn't changed. Catch that
-    // case by eagerly kicking off init when we already have data.
-    detailAsync.whenData((detail) {
-      if (_videoController == null && detail.m3u8Url != null && detail.m3u8Url!.isNotEmpty) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && _videoController == null) {
-            _initVideoPlayer(detail.m3u8Url!);
-          }
-        });
-      }
-    });
+    detailAsync.whenData(_ensureStreamStarted);
     final bannerAsync = ref.watch(bannerProvider);
 
     return Scaffold(
@@ -171,7 +184,11 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
       body: SafeArea(
         child: Column(
           children: [
-            _buildVideoSection(detailAsync),
+            _StreamSurface(
+              detailAsync: detailAsync,
+              playback: _playback,
+              onFullscreen: _openFullscreen,
+            ),
             Expanded(child: _buildBelowSection(detailAsync, bannerAsync)),
           ],
         ),
@@ -179,203 +196,7 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
     );
   }
 
-  // ─── Video section ──────────────────────────────────────────────────────────
-
-  Widget _buildVideoSection(AsyncValue<AnchorDetailModel> detailAsync) {
-    final colors = context.appColors;
-    final videoHeight = MediaQuery.sizeOf(context).width * 9 / 16;
-
-    return GestureDetector(
-      onTap: _onVideoTap,
-      child: SizedBox(
-        height: videoHeight,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // ── Layer 1: Raw video / cover image ──
-            detailAsync.when(
-              loading: () => ColoredBox(color: colors.ink2),
-              error: (_, _) => ColoredBox(color: colors.ink2),
-              data: (detail) => _buildVideoBackground(detail),
-            ),
-
-            // ── Layer 2: Gradient overlay ──
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0x66000000), // 40% black
-                    Colors.transparent,
-                    Colors.transparent,
-                    Color(0xEB000000), // 92% black
-                  ],
-                  stops: [0.0, 0.3, 0.6, 1.0],
-                ),
-              ),
-            ),
-
-            // ── Layer 3: API loading ──
-            if (detailAsync.isLoading)
-              Center(child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)),
-
-            // ── Layer 4: Video controller init spinner ──
-            if (_videoController != null && !_videoInitialized && !_videoError)
-              const Center(child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)),
-
-            // ── Layer 5: Buffering ──
-            if (_videoInitialized && _isBuffering)
-              Container(
-                color: Colors.black38,
-                child: const Center(
-                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                ),
-              ),
-
-            // ── Layer 6: Video error ──
-            if (_videoError)
-              Container(
-                color: Colors.black54,
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'anchor.detail.video.error'.tr(),
-                        style: const TextStyle(color: Colors.white70, fontSize: 13),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 12),
-                      TextButton(
-                        onPressed: _retryVideo,
-                        child: Text('anchor.detail.video.retry'.tr()),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-            // ── Layer 7: Offline ──
-            if (detailAsync.valueOrNull != null &&
-                !_videoError &&
-                (detailAsync.valueOrNull!.isLive == 0 || detailAsync.valueOrNull!.m3u8Url == null))
-              Container(
-                color: Colors.black54,
-                child: Center(
-                  child: Text(
-                    'anchor.detail.offline'.tr(),
-                    style: const TextStyle(color: Colors.white60, fontSize: 14),
-                  ),
-                ),
-              ),
-
-            // ── Layer 8: Controls (play/pause) — animated ──
-            AnimatedOpacity(
-              opacity: _showControls ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 300),
-              child: IgnorePointer(
-                ignoring: !_showControls,
-                child: Center(
-                  child: GestureDetector(
-                    onTap: _togglePlayPause,
-                    child: Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.5),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: colors.lineStrong),
-                      ),
-                      child: Icon(
-                        _videoController?.value.isPlaying == true
-                            ? Icons.pause_rounded
-                            : Icons.play_arrow_rounded,
-                        color: Colors.white,
-                        size: 26,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            // ── Layer 9: Top bar — back button + live badge + follower chip ──
-            Positioned(
-              top: 8,
-              left: 8,
-              right: 16,
-              child: Row(
-                children: [
-                  _FrostedIconButton(
-                    onTap: () => context.pop(),
-                    child: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 18),
-                  ),
-                  Spacer(),
-                  if (detailAsync.valueOrNull?.isLive == 1) ...[
-                    const SizedBox(width: 10),
-                    const _LivePulseBadge(),
-                    const SizedBox(width: 8),
-                    _FollowerChip(count: detailAsync.valueOrNull!.collect),
-                  ],
-                ],
-              ),
-            ),
-
-            // ── Layer 11: Fullscreen button (top-right) — animated ──
-            Positioned(
-              bottom: 16,
-              right: 16,
-              child: AnimatedOpacity(
-                opacity: _showControls ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 300),
-                child: IgnorePointer(
-                  ignoring: !_showControls,
-                  child: _FrostedIconButton(
-                    onTap: _openFullscreen,
-                    size: 34,
-                    borderRadius: 8,
-                    child: Icon(Icons.fullscreen_rounded, color: Colors.white, size: 18),
-                  ),
-                ),
-              ),
-            ),
-
-            // ── Layer 12: Anchor strip (bottom overlay) ──
-            if (detailAsync.valueOrNull != null)
-              Positioned(
-                bottom: 16,
-                left: 16,
-                right: 16,
-                child: _AnchorVideoStrip(detail: detailAsync.valueOrNull!),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVideoBackground(AnchorDetailModel detail) {
-    if (_videoInitialized && _videoController != null) {
-      return FittedBox(
-        fit: BoxFit.cover,
-        child: SizedBox(
-          width: _videoController!.value.size.width,
-          height: _videoController!.value.size.height,
-          child: VideoPlayer(_videoController!),
-        ),
-      );
-    }
-    return Image.network(
-      detail.cover,
-      fit: BoxFit.cover,
-      width: double.infinity,
-      height: double.infinity,
-      errorBuilder: (context, url, error) => ColoredBox(color: context.appColors.ink2),
-    );
-  }
-
-  // ─── Below-video section ────────────────────────────────────────────────────
+  // ─── Below-stream section ───────────────────────────────────────────────
 
   Widget _buildBelowSection(
     AsyncValue<AnchorDetailModel> detailAsync,
@@ -397,15 +218,15 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
       ),
       data: (detail) => Column(
         children: [
-          if (detail.notice.isNotEmpty) _buildNoticeBanner(detail.notice),
-          _buildRefAppBanner(bannerAsync),
           _buildTabBar(),
+          if (detail.notice.isNotEmpty) _NoticeBanner(notice: detail.notice),
+          _RefAppBanner(bannerAsync: bannerAsync),
           Expanded(
             child: TabBarView(
               controller: _tabController,
               children: [
                 AnchorChatsTab(anchorId: widget.anchorId),
-                _buildInfoTab(detail),
+                _InfoTab(detail: detail),
               ],
             ),
           ),
@@ -414,8 +235,234 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
     );
   }
 
-  /// Arena-themed notice bar: accent label pill on the left, scrolling text on the right.
-  Widget _buildNoticeBanner(String notice) {
+  Widget _buildTabBar() {
+    final colors = context.appColors;
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: colors.line, width: 0.5)),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        isScrollable: true,
+        tabAlignment: TabAlignment.center,
+        labelPadding: const EdgeInsets.symmetric(horizontal: 12),
+        indicator: UnderlineTabIndicator(
+          borderSide: BorderSide(color: colors.accent, width: 2),
+          insets: EdgeInsets.zero,
+        ),
+        indicatorSize: TabBarIndicatorSize.label,
+        labelStyle: AppTextStyles.display(16, context).copyWith(letterSpacing: 0.08 * 16),
+        unselectedLabelStyle: AppTextStyles.display(16, context).copyWith(letterSpacing: 0.08 * 16),
+        labelColor: colors.text,
+        unselectedLabelColor: colors.text3,
+        dividerColor: Colors.transparent,
+        tabs: [
+          Tab(height: 44, child: Text('anchor.detail.tab.chats'.tr().toUpperCase())),
+          Tab(height: 44, child: Text('anchor.detail.tab.info'.tr().toUpperCase())),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Live stream surface (video + all overlays) ─────────────────────────────
+
+class _StreamSurface extends StatelessWidget {
+  const _StreamSurface({
+    required this.detailAsync,
+    required this.playback,
+    required this.onFullscreen,
+  });
+
+  final AsyncValue<AnchorDetailModel> detailAsync;
+  final _StreamPlaybackController playback;
+  final VoidCallback onFullscreen;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final height = MediaQuery.sizeOf(context).width * 9 / 16;
+    final detail = detailAsync.valueOrNull;
+
+    return GestureDetector(
+      onTap: playback.toggleControlsVisible,
+      child: SizedBox(
+        height: height,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            detailAsync.when(
+              loading: () => ColoredBox(color: colors.ink2),
+              error: (_, _) => ColoredBox(color: colors.ink2),
+              data: (detail) => _StreamBackground(detail: detail, playback: playback),
+            ),
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0x66000000),
+                    Colors.transparent,
+                    Colors.transparent,
+                    Color(0xEB000000),
+                  ],
+                  stops: [0.0, 0.3, 0.6, 1.0],
+                ),
+              ),
+            ),
+            if (detailAsync.isLoading || (playback.controller != null && !playback.initialized && !playback.hasError))
+              const Center(child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)),
+            if (playback.initialized && playback.buffering)
+              const ColoredBox(
+                color: Colors.black38,
+                child: Center(child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)),
+              ),
+            if (playback.hasError) _StreamErrorOverlay(onRetry: playback.retry),
+            if (detail != null && !playback.hasError && (detail.isLive == 0 || detail.m3u8Url == null))
+              Center(
+                child: Text(
+                  'anchor.detail.offline'.tr(),
+                  style: const TextStyle(color: Colors.white60, fontSize: 14),
+                ),
+              ),
+            AnimatedOpacity(
+              opacity: playback.controlsVisible ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 300),
+              child: IgnorePointer(
+                ignoring: !playback.controlsVisible,
+                child: Center(
+                  child: GestureDetector(
+                    onTap: playback.togglePlayback,
+                    child: Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.5),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: colors.lineStrong),
+                      ),
+                      child: Icon(
+                        playback.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                        color: Colors.white,
+                        size: 26,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 8,
+              left: 8,
+              right: 16,
+              child: Row(
+                children: [
+                  _FrostedIconButton(
+                    onTap: () => context.pop(),
+                    child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 18),
+                  ),
+                  const Spacer(),
+                  if (detail?.isLive == 1) ...[
+                    const SizedBox(width: 10),
+                    const _LivePulseBadge(),
+                    const SizedBox(width: 8),
+                    _FollowerChip(count: detail!.collect),
+                  ],
+                ],
+              ),
+            ),
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: AnimatedOpacity(
+                opacity: playback.controlsVisible ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 300),
+                child: IgnorePointer(
+                  ignoring: !playback.controlsVisible,
+                  child: _FrostedIconButton(
+                    onTap: onFullscreen,
+                    size: 34,
+                    borderRadius: 8,
+                    child: const Icon(Icons.fullscreen_rounded, color: Colors.white, size: 18),
+                  ),
+                ),
+              ),
+            ),
+            if (detail != null)
+              Positioned(bottom: 16, left: 16, right: 16, child: _AnchorVideoStrip(detail: detail)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StreamBackground extends StatelessWidget {
+  const _StreamBackground({required this.detail, required this.playback});
+
+  final AnchorDetailModel detail;
+  final _StreamPlaybackController playback;
+
+  @override
+  Widget build(BuildContext context) {
+    if (playback.initialized && playback.controller != null) {
+      final controller = playback.controller!;
+      return FittedBox(
+        fit: BoxFit.cover,
+        child: SizedBox(
+          width: controller.value.size.width,
+          height: controller.value.size.height,
+          child: VideoPlayer(controller),
+        ),
+      );
+    }
+    return Image.network(
+      detail.cover,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      errorBuilder: (context, url, error) => ColoredBox(color: context.appColors.ink2),
+    );
+  }
+}
+
+class _StreamErrorOverlay extends StatelessWidget {
+  const _StreamErrorOverlay({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Colors.black54,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'anchor.detail.video.error'.tr(),
+              style: const TextStyle(color: Colors.white70, fontSize: 13),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            TextButton(onPressed: onRetry, child: Text('anchor.detail.video.retry'.tr())),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Notice + partner-app banners ────────────────────────────────────────────
+
+class _NoticeBanner extends StatelessWidget {
+  const _NoticeBanner({required this.notice});
+
+  final String notice;
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.appColors;
     return Container(
       height: 34,
@@ -425,7 +472,6 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
       ),
       child: Row(
         children: [
-          // Label
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
             margin: const EdgeInsets.symmetric(vertical: 7),
@@ -438,13 +484,10 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
             ),
             child: Text(
               'anchor.detail.info.notice_banner_label'.tr().toUpperCase(),
-              style: AppTextStyles.mono(
-                9,
-              ).copyWith(color: Colors.white, letterSpacing: 1.4, height: 1),
+              style: AppTextStyles.mono(9).copyWith(color: Colors.white, letterSpacing: 1.4, height: 1),
             ),
           ),
           const SizedBox(width: 10),
-          // Scrolling text
           Expanded(
             child: Marquee(
               text: notice,
@@ -459,8 +502,15 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
       ),
     );
   }
+}
 
-  Widget _buildRefAppBanner(AsyncValue<BannerModel> bannerAsync) {
+class _RefAppBanner extends StatelessWidget {
+  const _RefAppBanner({required this.bannerAsync});
+
+  final AsyncValue<BannerModel> bannerAsync;
+
+  @override
+  Widget build(BuildContext context) {
     return bannerAsync.when(
       loading: () => const SizedBox.shrink(),
       error: (e, st) => const SizedBox.shrink(),
@@ -500,94 +550,88 @@ class _AnchorDetailScreenState extends ConsumerState<AnchorDetailScreen>
       },
     );
   }
+}
 
-  Widget _buildTabBar() {
-    final colors = context.appColors;
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: colors.line, width: 0.5)),
-      ),
-      child: TabBar(
-        controller: _tabController,
-        isScrollable: true,
-        tabAlignment: TabAlignment.center,
-        // Gap-24 between tabs (right-only label padding simulates flex gap)
-        labelPadding: const EdgeInsets.symmetric(horizontal: 12),
-        indicator: UnderlineTabIndicator(
-          borderSide: BorderSide(color: colors.accent, width: 2),
-          insets: EdgeInsets.zero,
-        ),
-        indicatorSize: TabBarIndicatorSize.label,
-        labelStyle: AppTextStyles.display(16, context).copyWith(letterSpacing: 0.08 * 16),
-        unselectedLabelStyle: AppTextStyles.display(16, context).copyWith(letterSpacing: 0.08 * 16),
-        labelColor: colors.text,
-        unselectedLabelColor: colors.text3,
-        dividerColor: Colors.transparent,
-        tabs: [
-          Tab(height: 44, child: Text('anchor.detail.tab.chats'.tr().toUpperCase())),
-          Tab(height: 44, child: Text('anchor.detail.tab.info'.tr().toUpperCase())),
-        ],
-      ),
-    );
-  }
+// ─── Info tab ─────────────────────────────────────────────────────────────
 
-  Widget _buildInfoTab(AnchorDetailModel detail) {
+class _InfoTab extends StatelessWidget {
+  const _InfoTab({required this.detail});
+
+  final AnchorDetailModel detail;
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.appColors;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(22, 20, 22, 16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       children: [
-        // Avatar + name row
-        Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: colors.accent, width: 2),
-              ),
-              child: ClipOval(
-                child: CachedNetworkImage(
-                  imageUrl: detail.avatarUrl,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) =>
-                      Skeletonizer(enabled: true, child: ColoredBox(color: colors.surface2)),
-                  errorBuilder: (context, url, error) => ColoredBox(color: colors.surface2),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    detail.nickname,
-                    style: AppTextStyles.display(18, context).copyWith(color: colors.text),
-                  ),
-                  const SizedBox(height: 3),
-                  Row(
-                    children: [
-                      Icon(Icons.local_fire_department_rounded, color: colors.accentEcho, size: 13),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${detail.collect}',
-                        style: AppTextStyles.mono(11).copyWith(color: colors.text2),
+        Card(
+          elevation: 0,
+          color: colors.surface,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(color: colors.line, width: 0.5),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: colors.accent, width: 2),
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                      child: ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: detail.avatarUrl,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) =>
+                              Skeletonizer(enabled: true, child: ColoredBox(color: colors.surface2)),
+                          errorBuilder: (context, url, error) => ColoredBox(color: colors.surface2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            detail.nickname,
+                            style: AppTextStyles.display(18, context).copyWith(color: colors.text),
+                          ),
+                          const SizedBox(height: 3),
+                          Row(
+                            children: [
+                              Icon(Icons.local_fire_department_rounded, color: colors.accentEcho, size: 13),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${detail.collect}',
+                                style: AppTextStyles.mono(11).copyWith(color: colors.text2),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (detail.isLive == 1) const _LivePulseBadge(),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                Divider(height: 0, color: colors.lineStrong),
+                const SizedBox(height: 16),
+                _InfoRow(label: 'anchor.detail.info.title'.tr(), value: detail.title),
+                const SizedBox(height: 14),
+                _InfoRow(label: 'anchor.detail.info.followers'.tr(), value: '${detail.collect}'),
+              ],
             ),
-            if (detail.isLive == 1) const _LivePulseBadge(),
-          ],
+          ),
         ),
-        const SizedBox(height: 20),
-        Divider(height: 0, color: colors.lineStrong),
-        const SizedBox(height: 18),
-        _InfoRow(label: 'anchor.detail.info.title'.tr(), value: detail.title),
-        const SizedBox(height: 16),
-        _InfoRow(label: 'anchor.detail.info.followers'.tr(), value: '${detail.collect}'),
       ],
     );
   }
@@ -715,7 +759,7 @@ class _FollowerChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.person_outline_outlined, color: Colors.white, size: 11),
+          const Icon(Icons.person_outline_outlined, color: Colors.white, size: 11),
           const SizedBox(width: 4),
           Text(_format(count), style: AppTextStyles.mono(11).copyWith(color: Colors.white)),
         ],
@@ -736,7 +780,6 @@ class _AnchorVideoStrip extends StatelessWidget {
     final colors = context.appColors;
     return Row(
       children: [
-        // Avatar
         Container(
           width: 44,
           height: 44,
@@ -755,7 +798,6 @@ class _AnchorVideoStrip extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 10),
-        // Name + subtitle
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
