@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shenghaotiyu/src/core/config/env_config.dart';
 import 'package:shenghaotiyu/src/core/services/api_client.dart';
-import 'package:shenghaotiyu/src/core/services/token_holder_service.dart';
 import 'package:shenghaotiyu/src/core/utils/logger_interceptor.dart';
 import 'package:shenghaotiyu/src/core/utils/session_expired_interceptor.dart';
 import 'package:shenghaotiyu/src/features/auth/data/auth_storage_service.dart';
@@ -50,39 +49,15 @@ Dio sportsApiService(SportsApiServiceRef ref) {
 
 @Riverpod(keepAlive: true)
 ApiClient apiService(ApiServiceRef ref) {
-  final holder = ref.watch(tokenHolderProvider);
-
   final interceptor = SessionExpiredInterceptor(
-    reLoginCallback: (Dio dio) async {
-      final storage = ref.read(authStorageServiceProvider.notifier);
-      final credentials = await storage.readCredentials();
-      if (credentials == null) return null;
-
-      try {
-        final response = await dio.post(
-          '/auth/login',
-          data: {
-            'telephone': credentials.telephone,
-            'password': credentials.password,
-          },
-          options: Options(extra: {'_skipSessionRetry': true}),
-        );
-        final json = response.data as Map<String, dynamic>;
-        if (json['code'] != 1) return null;
-
-        final token = (json['data'] as Map<String, dynamic>)['token'] as String;
-        holder.value = token;
-        await storage.writeToken(token);
-        return token;
-      } catch (_) {
-        return null;
-      }
-    },
+    // This zb-signed Dio carries no user auth at all (see `ApiClient`'s doc
+    // comment), so there's no credential to silently re-login with here; a
+    // -40001 just falls straight through to onExpiredCallback below.
+    reLoginCallback: (Dio dio) async => null,
     onExpiredCallback: () async {
       final storage = ref.read(authStorageServiceProvider.notifier);
       await storage.deleteToken();
       await storage.deleteCredentials();
-      holder.value = null;
       ref.read(authNotifierProvider.notifier).clearSession();
 
       final context = rootNavigatorKey.currentContext;
@@ -109,5 +84,5 @@ ApiClient apiService(ApiServiceRef ref) {
     },
   );
 
-  return ApiClient(holder, interceptor);
+  return ApiClient(interceptor);
 }

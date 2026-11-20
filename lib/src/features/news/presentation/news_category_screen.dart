@@ -8,6 +8,7 @@ import 'package:shenghaotiyu/src/features/news/presentation/providers/news_provi
 import 'package:shenghaotiyu/src/features/news/presentation/providers/news_section_providers.dart';
 import 'package:shenghaotiyu/src/features/news/presentation/widgets/news_card.dart';
 import 'package:shenghaotiyu/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/shared_widgets/app_back_button.dart';
 
 /// Intermediary screen shown when the user taps "MORE" on a news section.
 /// [title] is the already-translated section label (used in the AppBar).
@@ -86,14 +87,7 @@ class _NewsCategoryScreenState extends ConsumerState<NewsCategoryScreen> {
               padding: const EdgeInsets.fromLTRB(6, 4, 22, 0),
               child: Row(
                 children: [
-                  IconButton(
-                    icon: Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      color: colors.text,
-                      size: 20,
-                    ),
-                    onPressed: () => context.pop(),
-                  ),
+                  const AppBackButton(),
                   const SizedBox(width: 4),
                   Text(
                     widget.title.toUpperCase(),

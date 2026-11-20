@@ -80,7 +80,8 @@
     "league": "League",
     "profile": "Profile",
     "live": "LIVE",
-    "me": "ME"
+    "me": "ME",
+    "community": "Community"
   },
   "news": {
     "header": "The Feed",
@@ -162,7 +163,12 @@
     "retry": "Retry",
     "error": {
       "unexpected": "An unexpected error occurred, please try again"
-    }
+    },
+    "cancel": "Cancel",
+    "empty": "Nothing here yet",
+    "error_generic": "Something went wrong",
+    "got_it": "Got it",
+    "save": "Save"
   },
   "profile": {
     "edit_button": "Edit Profile",
@@ -850,7 +856,9 @@
       "confirm_password_hint": "Confirm password",
       "nickname": "Username",
       "nickname_hint": "Enter username (6-15 alphanumeric characters)",
-      "sms_code": "Verification Code"
+      "sms_code": "Verification Code",
+      "username": "Username",
+      "username_hint": "Enter your username"
     },
     "otp": {
       "send": "Send Code",
@@ -861,7 +869,8 @@
       "password_required": "Please enter your password",
       "nickname_required": "Please enter a nickname",
       "sms_required": "Please enter the verification code",
-      "confirm_password_mismatch": "Passwords do not match"
+      "confirm_password_mismatch": "Passwords do not match",
+      "username_required": "Please enter your username"
     }
   },
   "prediction": {
@@ -1221,6 +1230,92 @@
       "best_streak": "Best Streak",
       "streak": "Streak",
       "correct": "Correct Picks"
+    }
+  },
+  "community": {
+    "tab_title": "Community",
+    "empty": "No posts yet",
+    "no_posts_mine": "You haven't posted anything yet",
+    "no_posts_user": "No posts yet",
+    "no_bookmarks": "No bookmarks yet",
+    "no_comments": "No comments yet",
+    "no_notifications": "No notifications yet",
+    "all_categories": "All",
+    "categories_label": "Categories",
+    "topics_label": "Topics",
+    "create_title": "New Post",
+    "edit_title": "Edit Post",
+    "create_hint": "Share something with the community...",
+    "add_image": "Add image",
+    "add_topic_hint": "Add a hashtag and press enter",
+    "post_button": "Post",
+    "post_created": "Post published",
+    "post_updated": "Post updated",
+    "delete": "Delete",
+    "delete_confirm_title": "Delete this post?",
+    "delete_comment_confirm_title": "Delete this comment?",
+    "edit": "Edit",
+    "report": "Report",
+    "report_title": "Report",
+    "report_reason_spam": "Spam",
+    "report_reason_abuse": "Abuse",
+    "report_reason_misinformation": "Misinformation",
+    "report_reason_inappropriate": "Inappropriate content",
+    "report_reason_other": "Other",
+    "report_detail_hint": "Add more detail (optional)",
+    "report_submit": "Submit report",
+    "report_submitted": "Report submitted",
+    "comment_hint": "Write a comment...",
+    "reply": "Reply",
+    "replying_to": "Replying to {name}",
+    "login_to_comment_suffix": "to join the conversation",
+    "login_to_comment_action": "Log in",
+    "post_detail_title": "Post",
+    "post_deleted": "This post may have been deleted",
+    "follow": "Follow",
+    "following": "Following",
+    "unfollow": "Unfollow",
+    "unfollow_confirm_title": "Unfollow {name}?",
+    "user_not_found": "This user may no longer exist",
+    "posts_count": "{n} posts",
+    "stat_posts": "Posts",
+    "stat_followers": "Followers",
+    "stat_following": "Following",
+    "my_posts": "My Posts",
+    "my_bookmarks": "My Bookmarks",
+    "trending_topics": "Trending Topics",
+    "notifications": "Notifications",
+    "mark_all_read": "Mark all read",
+    "notification_post_liked": "{name} liked your post",
+    "notification_comment_liked": "{name} liked your comment",
+    "notification_post_commented": "{name} commented on your post",
+    "notification_comment_replied": "{name} replied to your comment",
+    "notification_user_followed": "{name} followed you",
+    "notification_user_mentioned": "{name} mentioned you",
+    "notification_post_bookmarked": "{name} bookmarked your post",
+    "search": "Search",
+    "search_hint": "Search posts and people",
+    "search_tab_posts": "Posts",
+    "search_tab_users": "People",
+    "login": {
+      "title": "Community Login",
+      "register_title": "Create Account",
+      "subtitle": "Sign in to post, comment, and follow other members.",
+      "username": "Username",
+      "password": "Password",
+      "name": "Display name",
+      "submit": "Log in",
+      "register": "Create account",
+      "need_account": "Don't have an account? Sign up",
+      "have_account": "Already have an account? Log in",
+      "field_required": "This field is required",
+      "failed_title": "Couldn't sign in"
+    },
+    "relative_time": {
+      "just_now": "Just now",
+      "minutes": "{n}m ago",
+      "hours": "{n}h ago",
+      "days": "{n}d ago"
     }
   }
 }

@@ -5,8 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shenghaotiyu/src/routes/app_routes.dart';
 import 'package:rongcloud_im_wrapper_plugin/rongcloud_im_wrapper_plugin.dart';
-import 'package:shenghaotiyu/src/features/anchor/domain/models/im_token_model.dart';
-import 'package:shenghaotiyu/src/features/anchor/presentation/providers/im_token_providers.dart';
+import 'package:shenghaotiyu/src/core/services/rongcloud_service.dart';
 import 'package:shenghaotiyu/src/features/auth/presentation/providers/auth_notifier.dart';
 
 class AnchorChatsTab extends ConsumerStatefulWidget {
@@ -43,9 +42,9 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
   @override
   void initState() {
     super.initState();
-    // Force a fresh IM token every time this tab is entered.
+    // Force fresh RongCloud credentials every time this tab is entered.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) ref.invalidate(imTokenProvider(widget.anchorId));
+      if (mounted) ref.invalidate(rongCloudCredentialsProvider(widget.anchorId));
     });
   }
 
@@ -82,7 +81,7 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
       _myId = null;
       _myName = null;
     });
-    ref.invalidate(imTokenProvider(widget.anchorId));
+    ref.invalidate(rongCloudCredentialsProvider(widget.anchorId));
   }
 
   /// Flush buffered history messages into [_messages] and append any pending
@@ -101,18 +100,25 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
     _scrollToBottom();
   }
 
-  Future<void> _initChat(ImTokenModel tokenData) async {
+  Future<void> _initChat(({String rcKey, String rcToken}) creds) async {
     if (_engine != null || _connecting) return;
     if (mounted) setState(() => _connecting = true);
 
-    _roomCid = tokenData.cid;
-    _myId = tokenData.id;
-    // Prefer the logged-in user's nickname from auth state over the IM token name
+    // One chatroom per anchor; RongCloud resolves the connecting user's id
+    // from the token itself (see `onConnected`'s `userId` below).
+    _roomCid = widget.anchorId.toString();
     final authUser = ref.read(authNotifierProvider).valueOrNull?.user;
-    _myName = authUser?.nickname ?? tokenData.name;
+    _myName = authUser?.nickname ?? '';
+
+    // rc_token is shaped `<connectToken>@<naviServer>;<statServer>` for this
+    // private RongCloud deployment — passed to connect() as-is below; the
+    // SDK parses the combined form itself and routes to the embedded
+    // nav/stat servers, so there's no need to split it or set
+    // [RCIMIWEngineOptions.naviServer]/[statisticServer] explicitly.
+    final connectToken = creds.rcToken;
 
     final options = RCIMIWEngineOptions.create();
-    _engine = await RCIMIWEngine.create(tokenData.appKey, options);
+    _engine = await RCIMIWEngine.create(creds.rcKey, options);
 
     _engine!.onRemoteMessageRecalled = (RCIMIWMessage? recalled) {
       if (!mounted || recalled?.messageUId == null) return;
@@ -205,10 +211,11 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
         await Future.delayed(const Duration(milliseconds: 800));
         if (!mounted || _engine == null) return;
         await _engine!.connect(
-          tokenData.token,
+          connectToken,
           30,
           callback: RCIMIWConnectCallback(
             onConnected: (int? retryCode, String? userId) async {
+              _myId = userId;
               if (mounted) await onConnectedResult(retryCode);
             },
           ),
@@ -224,10 +231,11 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
     }
 
     await _engine!.connect(
-      tokenData.token,
+      connectToken,
       30,
       callback: RCIMIWConnectCallback(
         onConnected: (int? code, String? userId) async {
+          _myId = userId;
           if (mounted) await onConnectedResult(code);
         },
       ),
@@ -248,8 +256,10 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
       _messages.clear();
       _bufferedMessages.clear();
     });
-    final tokenAsync = ref.read(imTokenProvider(widget.anchorId));
-    tokenAsync.whenData((token) => _initChat(token));
+    final credsAsync = ref.read(rongCloudCredentialsProvider(widget.anchorId));
+    credsAsync.whenData((creds) {
+      if (creds != null) _initChat(creds);
+    });
   }
 
   Future<void> _sendEntryMessage() async {
@@ -365,8 +375,16 @@ class _AnchorChatsTabState extends ConsumerState<AnchorChatsTab>
       if (prevAuth.isAuthenticated != nextAuth.isAuthenticated) _reinitChat();
     });
 
-    ref.listen(imTokenProvider(widget.anchorId), (_, next) {
-      next.whenData((token) => _initChat(token));
+    ref.listen(rongCloudCredentialsProvider(widget.anchorId), (_, next) {
+      next.whenData((creds) {
+        if (creds != null) _initChat(creds);
+      });
+      if (next.hasError && mounted) {
+        setState(() {
+          _connecting = false;
+          _connectError = true;
+        });
+      }
     });
 
     return Column(
@@ -413,18 +431,6 @@ class _ChatStatusBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (connecting || !initialSyncDone) {
-      return Container(
-        width: double.infinity,
-        color: context.appColors.lineStrong,
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Text(
-          'anchor.detail.chats.connecting'.tr(),
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 12, color: context.appColors.text2),
-        ),
-      );
-    }
     if (connectError) {
       return Container(
         width: double.infinity,
@@ -450,6 +456,18 @@ class _ChatStatusBanner extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      );
+    }
+    if (connecting || !initialSyncDone) {
+      return Container(
+        width: double.infinity,
+        color: context.appColors.lineStrong,
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Text(
+          'anchor.detail.chats.connecting'.tr(),
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12, color: context.appColors.text2),
         ),
       );
     }

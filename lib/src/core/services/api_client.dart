@@ -29,19 +29,20 @@ extension ApiClientExceptionX on ApiClientException {
   }
 }
 
-/// Mutable holder for the current auth token.
-/// Updated by AuthNotifier on login/logout; read by _TokenInterceptor.
+/// Mutable holder for the current sports_forum auth token.
+/// Updated by AuthNotifier on login/logout; read by `forum_api_service.dart`.
 class TokenHolder {
   String? value;
 }
 
+/// zb v5 (`EnvConfig.apiUrl`) requests carry no user auth — the endpoints
+/// this client serves (anchor detail, banner, guest IM token) don't need it,
+/// and zb's own login flow was removed when auth moved entirely to
+/// sports_forum. Only the HMAC signing headers below are attached.
 class ApiClient {
   late final Dio httpClient;
 
-  ApiClient(
-    TokenHolder tokenHolder,
-    SessionExpiredInterceptor sessionExpiredInterceptor,
-  ) {
+  ApiClient(SessionExpiredInterceptor sessionExpiredInterceptor) {
     httpClient = Dio(
       BaseOptions(
         baseUrl: EnvConfig.apiUrl,
@@ -51,7 +52,6 @@ class ApiClient {
       ),
     );
 
-    httpClient.interceptors.add(_TokenInterceptor(tokenHolder));
     httpClient.interceptors.add(_SigningInterceptor(EnvConfig.secretKey));
 
     // Provide the Dio instance so the interceptor can retry requests.
@@ -61,21 +61,6 @@ class ApiClient {
     if (kDebugMode) {
       httpClient.interceptors.add(LoggerInterceptor());
     }
-  }
-}
-
-class _TokenInterceptor extends Interceptor {
-  final TokenHolder _holder;
-
-  _TokenInterceptor(this._holder);
-
-  @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    final token = _holder.value;
-    if (token != null && token.isNotEmpty) {
-      options.headers['token'] = token;
-    }
-    handler.next(options);
   }
 }
 

@@ -7,7 +7,19 @@ abstract final class AppRoutes {
   static const anchor = '/anchor';
   static const news = '/news';
   static const league = '/league';
+  static const community = '/community';
   static const profile = '/profile';
+
+  // Community sub-routes (pushed outside shell)
+  static const communityCreate = '/community/create';
+  static const communitySearch = '/community/search';
+  static const communityMyPosts = '/community/my-posts';
+  static const communityBookmarks = '/community/bookmarks';
+  static const communityTopics = '/community/topics';
+  static const communityNotifications = '/community/notifications';
+  static const communityHashtag = '/community/hashtag/:name';
+  static const communityUser = '/community/user/:id';
+  static const communityPostDetail = '/community/:id';
 
   // League sub-routes (pushed outside shell)
   static const leagueCountry = '/league/country/:sport/:countryId';
@@ -108,5 +120,4 @@ abstract final class AppRoutes {
   // Auth
   static const login = '/auth/login';
   static const register = '/auth/register';
-  static const forgotPassword = '/auth/forgot-password';
 }

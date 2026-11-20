@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
+import 'app_back_button.dart';
+
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({
     super.key,
@@ -38,14 +40,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: actions,
       leading:
           leading ??
-          (showBack && context.canPop()
-              ? IconButton(
-                  onPressed: () => context.pop(),
-                  icon: const Icon(Icons.arrow_circle_left_outlined),
-                  iconSize: 24,
-                  padding: EdgeInsets.symmetric(horizontal: 24),
-                )
-              : null),
+          (showBack && context.canPop() ? const Center(child: AppBackButton()) : null),
       bottom: bottom,
     );
   }

@@ -45,6 +45,12 @@ class _AppWrapperState extends ConsumerState<AppWrapper> {
       path: AppRoutes.league,
     ),
     (
+      labelKey: 'nav.community',
+      icon: Icons.forum_outlined,
+      activeIcon: Icons.forum,
+      path: AppRoutes.community,
+    ),
+    (
       labelKey: 'nav.me',
       icon: Icons.person_outline,
       activeIcon: Icons.person,

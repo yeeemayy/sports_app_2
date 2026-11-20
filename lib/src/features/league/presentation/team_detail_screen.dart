@@ -15,6 +15,7 @@ import 'package:shenghaotiyu/src/features/league/domain/models/team_detail_model
 import 'package:shenghaotiyu/src/features/league/presentation/providers/league_providers.dart';
 import 'package:shenghaotiyu/src/features/league/presentation/utils/logo_color.dart';
 import 'package:shenghaotiyu/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/shared_widgets/app_back_button.dart';
 
 class TeamDetailScreen extends ConsumerWidget {
   const TeamDetailScreen({
@@ -340,22 +341,10 @@ class _TeamHeroHeaderState extends ConsumerState<_TeamHeroHeader>
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
               child: Row(
                 children: [
-                  IconButton(
-                    onPressed: () => context.pop(),
-                    icon: const Icon(
-                      Icons.arrow_circle_left_outlined,
-                      color: Colors.white,
-                    ),
-                    iconSize: 24,
-                    padding: EdgeInsets.zero,
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.white.withValues(alpha: 0.15),
-                      side: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.3),
-                        width: 0.5,
-                      ),
-                      shape: const CircleBorder(),
-                    ),
+                  AppBackButton(
+                    iconColor: Colors.white,
+                    backgroundColor: Colors.white.withValues(alpha: 0.15),
+                    borderColor: Colors.white.withValues(alpha: 0.3),
                   ),
                   const Spacer(),
                   if (ref.watch(firebaseUidProvider) case final uid?)
@@ -521,17 +510,11 @@ class _TeamHeroState extends ConsumerState<_TeamHero>
       pinned: true,
       backgroundColor: baseColor,
       automaticallyImplyLeading: false,
-      leading: IconButton(
-        onPressed: () => context.pop(),
-        icon: const Icon(Icons.arrow_circle_left_outlined, color: Colors.white),
-        iconSize: 24,
-        style: IconButton.styleFrom(
+      leading: Center(
+        child: AppBackButton(
+          iconColor: Colors.white,
           backgroundColor: Colors.white.withValues(alpha: 0.15),
-          side: BorderSide(
-            color: Colors.white.withValues(alpha: 0.3),
-            width: 0.5,
-          ),
-          shape: const CircleBorder(),
+          borderColor: Colors.white.withValues(alpha: 0.3),
         ),
       ),
       actions: [

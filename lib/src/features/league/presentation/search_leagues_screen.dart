@@ -10,6 +10,7 @@ import 'package:shenghaotiyu/src/features/league/domain/models/country_model.dar
 import 'package:shenghaotiyu/src/features/league/domain/models/league_item.dart';
 import 'package:shenghaotiyu/src/features/league/presentation/providers/league_providers.dart';
 import 'package:shenghaotiyu/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/shared_widgets/app_back_button.dart';
 
 enum _SearchType { all, leagues, countries }
 
@@ -82,15 +83,7 @@ class _SearchLeaguesScreenState extends ConsumerState<SearchLeaguesScreen> {
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
               child: Row(
                 children: [
-                  IconButton(
-                    onPressed: () => context.pop(),
-                    icon: Icon(
-                      Icons.arrow_circle_left_outlined,
-                      color: context.appColors.text,
-                    ),
-                    iconSize: 24,
-                    padding: EdgeInsets.zero,
-                  ),
+                  const AppBackButton(),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Container(

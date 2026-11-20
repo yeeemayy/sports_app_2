@@ -9,6 +9,7 @@ import 'package:shenghaotiyu/src/features/league/domain/league_sport.dart';
 import 'package:shenghaotiyu/src/features/league/domain/models/country_league_item.dart';
 import 'package:shenghaotiyu/src/features/league/presentation/providers/league_providers.dart';
 import 'package:shenghaotiyu/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/shared_widgets/app_back_button.dart';
 
 class CountryLeaguesScreen extends ConsumerWidget {
   const CountryLeaguesScreen({
@@ -50,15 +51,7 @@ class CountryLeaguesScreen extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(22, 10, 22, 16),
               child: Row(
                 children: [
-                  IconButton(
-                    onPressed: () => context.pop(),
-                    icon: Icon(
-                      Icons.arrow_circle_left_outlined,
-                      color: context.appColors.text,
-                    ),
-                    iconSize: 24,
-                    padding: EdgeInsets.zero,
-                  ),
+                  const AppBackButton(),
                   const SizedBox(width: 14),
                   if (countryLogoUrl != null)
                     ClipOval(

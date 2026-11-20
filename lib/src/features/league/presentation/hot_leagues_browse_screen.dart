@@ -10,6 +10,7 @@ import 'package:shenghaotiyu/src/features/league/domain/league_sport.dart';
 import 'package:shenghaotiyu/src/features/league/domain/models/league_item.dart';
 import 'package:shenghaotiyu/src/features/league/presentation/providers/league_providers.dart';
 import 'package:shenghaotiyu/src/routes/app_routes.dart';
+import 'package:shenghaotiyu/src/shared_widgets/app_back_button.dart';
 
 class HotLeaguesBrowseScreen extends ConsumerStatefulWidget {
   const HotLeaguesBrowseScreen({super.key, this.initialSport});
@@ -58,15 +59,7 @@ class _HotLeaguesBrowseScreenState
               padding: const EdgeInsets.fromLTRB(22, 10, 22, 16),
               child: Row(
                 children: [
-                  IconButton(
-                    onPressed: () => context.pop(),
-                    icon: Icon(
-                      Icons.arrow_circle_left_outlined,
-                      color: context.appColors.text,
-                    ),
-                    iconSize: 24,
-                    padding: EdgeInsets.zero,
-                  ),
+                  const AppBackButton(),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Text(

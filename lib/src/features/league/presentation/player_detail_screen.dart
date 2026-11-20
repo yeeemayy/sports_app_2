@@ -2,7 +2,6 @@ import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
 import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
 import 'package:shenghaotiyu/src/features/league/domain/league_sport.dart';
@@ -10,6 +9,7 @@ import 'package:shenghaotiyu/src/features/league/domain/models/basketball_player
 import 'package:shenghaotiyu/src/features/league/domain/models/football_player_detail.dart';
 import 'package:shenghaotiyu/src/features/league/domain/models/squad_player.dart';
 import 'package:shenghaotiyu/src/features/league/presentation/providers/league_providers.dart';
+import 'package:shenghaotiyu/src/shared_widgets/app_back_button.dart';
 
 class PlayerDetailScreen extends ConsumerWidget {
   const PlayerDetailScreen({
@@ -315,17 +315,11 @@ class _PlayerHero extends StatelessWidget {
       pinned: true,
       backgroundColor: accent,
       automaticallyImplyLeading: false,
-      leading: IconButton(
-        onPressed: () => context.pop(),
-        icon: const Icon(Icons.arrow_circle_left_outlined, color: Colors.white),
-        iconSize: 24,
-        style: IconButton.styleFrom(
+      leading: Center(
+        child: AppBackButton(
+          iconColor: Colors.white,
           backgroundColor: Colors.white.withValues(alpha: 0.15),
-          side: BorderSide(
-            color: Colors.white.withValues(alpha: 0.3),
-            width: 0.5,
-          ),
-          shape: const CircleBorder(),
+          borderColor: Colors.white.withValues(alpha: 0.3),
         ),
       ),
       flexibleSpace: FlexibleSpaceBar(

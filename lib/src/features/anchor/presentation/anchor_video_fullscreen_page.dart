@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
+import 'package:shenghaotiyu/src/shared_widgets/app_back_button.dart';
 
 class AnchorVideoFullscreenPage extends StatefulWidget {
   const AnchorVideoFullscreenPage({super.key, required this.controller});
@@ -106,12 +107,10 @@ class _AnchorVideoFullscreenPageState extends State<AnchorVideoFullscreenPage> {
                       children: [
                         Align(
                           alignment: Alignment.topLeft,
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.arrow_back_ios,
-                              color: Colors.white,
-                            ),
-                            onPressed: _handleExit,
+                          child: AppBackButton(
+                            onTap: _handleExit,
+                            backgroundColor: Colors.black.withValues(alpha: 0.5),
+                            iconColor: Colors.white,
                           ),
                         ),
                         const Spacer(),

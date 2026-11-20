@@ -1,16 +1,22 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:shenghaotiyu/src/core/services/forum_api_service.dart';
 import 'package:shenghaotiyu/src/core/services/token_holder_service.dart';
-import 'package:shenghaotiyu/src/features/auth/data/auth_repository.dart';
 import 'package:shenghaotiyu/src/features/auth/data/auth_storage_service.dart';
-import 'package:shenghaotiyu/src/features/auth/domain/models/user_model.dart';
+import 'package:shenghaotiyu/src/features/community/domain/models/community_post.dart';
 
 part 'auth_notifier.g.dart';
 
 class AuthState {
-  const AuthState({this.token, this.user});
+  const AuthState({this.token, this.user, this.rcKey, this.rcToken});
 
   final String? token;
-  final UserModel? user;
+  final CommunityAuthor? user;
+
+  /// RongCloud IM connect credentials from sports_forum's `/login` response —
+  /// only populated right after a fresh login; a restored session leaves
+  /// these null and `rongcloud_service.dart` falls back to secure storage.
+  final String? rcKey;
+  final String? rcToken;
 
   bool get isAuthenticated => token != null && token!.isNotEmpty;
 }
@@ -21,7 +27,7 @@ class AuthNotifier extends _$AuthNotifier {
   Future<AuthState> build() async {
     final storage = ref.read(authStorageServiceProvider.notifier);
     final tokenHolder = ref.read(tokenHolderProvider);
-    final repo = ref.read(authRepositoryProvider.notifier);
+    final repo = ref.read(communityRepositoryProvider);
 
     final credentials = await storage.readCredentials();
     if (credentials == null) {
@@ -30,40 +36,56 @@ class AuthNotifier extends _$AuthNotifier {
 
     // Re-login with saved credentials to get a fresh token on every app open
     try {
-      final token = await repo.login(
-        telephone: credentials.telephone,
+      final response = await repo.login(
+        username: credentials.username,
         password: credentials.password,
       );
-      tokenHolder.value = token;
-      await storage.writeToken(token);
-      final user = await repo.fetchUser();
-      return AuthState(token: token, user: user);
+      tokenHolder.value = response.token;
+      await storage.writeToken(response.token);
+      await storage.writeRcCredentials(
+        rcKey: response.rcKey,
+        rcToken: response.rcToken,
+      );
+      return AuthState(
+        token: response.token,
+        user: response.user,
+        rcKey: response.rcKey,
+        rcToken: response.rcToken,
+      );
     } catch (_) {
       // Login failed — clear stored session
       await storage.deleteToken();
       await storage.deleteCredentials();
+      await storage.deleteRcCredentials();
       tokenHolder.value = null;
       return const AuthState();
     }
   }
 
-  Future<void> login({
-    required String telephone,
-    required String password,
-  }) async {
+  Future<void> login({required String username, required String password}) async {
     state = const AsyncLoading();
     try {
-      final repo = ref.read(authRepositoryProvider.notifier);
+      final repo = ref.read(communityRepositoryProvider);
       final storage = ref.read(authStorageServiceProvider.notifier);
       final tokenHolder = ref.read(tokenHolderProvider);
 
-      final token = await repo.login(telephone: telephone, password: password);
-      tokenHolder.value = token;
-      await storage.writeToken(token);
-      await storage.writeCredentials(telephone: telephone, password: password);
+      final response = await repo.login(username: username, password: password);
+      tokenHolder.value = response.token;
+      await storage.writeToken(response.token);
+      await storage.writeCredentials(username: username, password: password);
+      await storage.writeRcCredentials(
+        rcKey: response.rcKey,
+        rcToken: response.rcToken,
+      );
 
-      final user = await repo.fetchUser();
-      state = AsyncData(AuthState(token: token, user: user));
+      state = AsyncData(
+        AuthState(
+          token: response.token,
+          user: response.user,
+          rcKey: response.rcKey,
+          rcToken: response.rcToken,
+        ),
+      );
     } catch (e) {
       state = const AsyncData(AuthState());
       rethrow;
@@ -71,28 +93,22 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   Future<void> register({
-    required String nickname,
-    required String telephone,
+    required String username,
     required String password,
-    required String sms,
+    required String name,
   }) async {
     state = const AsyncLoading();
     try {
-      final repo = ref.read(authRepositoryProvider.notifier);
+      final repo = ref.read(communityRepositoryProvider);
       final storage = ref.read(authStorageServiceProvider.notifier);
       final tokenHolder = ref.read(tokenHolderProvider);
 
-      final token = await repo.register(
-        nickname: nickname,
-        telephone: telephone,
-        password: password,
-        sms: sms,
-      );
+      final token = await repo.register(username: username, password: password, name: name);
       tokenHolder.value = token;
       await storage.writeToken(token);
-      await storage.writeCredentials(telephone: telephone, password: password);
+      await storage.writeCredentials(username: username, password: password);
 
-      final user = await repo.fetchUser();
+      final user = await repo.fetchCurrentUser();
       state = AsyncData(AuthState(token: token, user: user));
     } catch (e) {
       state = const AsyncData(AuthState());
@@ -106,22 +122,30 @@ class AuthNotifier extends _$AuthNotifier {
 
     // Best-effort server logout; proceed with local cleanup regardless
     try {
-      await ref.read(authRepositoryProvider.notifier).logout();
+      await ref.read(communityRepositoryProvider).logout();
     } catch (_) {}
 
     tokenHolder.value = null;
     await storage.deleteToken();
     await storage.deleteCredentials();
+    await storage.deleteRcCredentials();
     state = const AsyncData(AuthState());
   }
 
-  Future<void> updateProfile({String? nickname, String? avatarUrl}) async {
-    final repo = ref.read(authRepositoryProvider.notifier);
-    await repo.updateProfile(nickname: nickname, avatarUrl: avatarUrl);
-    final user = await repo.fetchUser();
+  Future<void> updateProfile({String? nickname, String? bio}) async {
+    final repo = ref.read(communityRepositoryProvider);
+    await repo.updateProfile(name: nickname, bio: bio);
+    final user = await repo.fetchCurrentUser();
     final current = state.value;
     if (current != null) {
-      state = AsyncData(AuthState(token: current.token, user: user));
+      state = AsyncData(
+        AuthState(
+          token: current.token,
+          user: user,
+          rcKey: current.rcKey,
+          rcToken: current.rcToken,
+        ),
+      );
     }
   }
 
@@ -129,29 +153,16 @@ class AuthNotifier extends _$AuthNotifier {
     final tokenHolder = ref.read(tokenHolderProvider);
     final storage = ref.read(authStorageServiceProvider.notifier);
 
-    await ref.read(authRepositoryProvider.notifier).deleteAccount();
+    await ref.read(communityRepositoryProvider).deleteAccount();
 
     tokenHolder.value = null;
     await storage.deleteToken();
     await storage.deleteCredentials();
+    await storage.deleteRcCredentials();
     state = const AsyncData(AuthState());
   }
 
   void clearSession() {
     state = const AsyncData(AuthState());
-  }
-
-  Future<void> resetPassword({
-    required String telephone,
-    required String password,
-    required String sms,
-  }) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      await ref
-          .read(authRepositoryProvider.notifier)
-          .resetPassword(telephone: telephone, password: password, sms: sms);
-      return const AuthState();
-    });
   }
 }

@@ -5,7 +5,7 @@ import 'package:shenghaotiyu/src/features/prediction/data/prediction_repository.
 import 'package:shenghaotiyu/src/features/prediction/domain/prediction_model.dart';
 
 final firebaseUidProvider = Provider<String?>(
-  (ref) => ref.watch(authNotifierProvider).valueOrNull?.user?.uid.toString(),
+  (ref) => ref.watch(authNotifierProvider).valueOrNull?.user?.id.toString(),
 );
 
 final predictionRepositoryProvider = Provider<PredictionRepository>(

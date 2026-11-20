@@ -1,8 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
+import 'package:shenghaotiyu/src/shared_widgets/app_back_button.dart';
 
 /// Gradient header shell used by every sport detail screen.
 ///
@@ -121,19 +121,9 @@ class _MatchNavBar extends StatelessWidget {
       child: Row(
         children: [
           // Back button
-          IconButton(
-            onPressed: () => context.pop(),
-            icon: const Icon(
-              Icons.arrow_circle_left_outlined,
-              color: Colors.white,
-            ),
-            iconSize: 24,
-            padding: EdgeInsets.zero,
-            style: IconButton.styleFrom(
-              backgroundColor: Colors.black.withValues(alpha: 0.5),
-              side: BorderSide(color: colors.lineStrong, width: 0.5),
-              shape: const CircleBorder(),
-            ),
+          AppBackButton(
+            iconColor: Colors.white,
+            backgroundColor: Colors.black.withValues(alpha: 0.5),
           ),
 
           // League + date

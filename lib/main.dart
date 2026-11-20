@@ -14,7 +14,9 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:shenghaotiyu/src/core/utils/app_info.dart';
 import 'package:shenghaotiyu/src/core/utils/app_locale.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shenghaotiyu/src/core/services/device_id_service.dart';
 import 'package:shenghaotiyu/src/features/watchlist/data/notification_service.dart';
+import 'package:shenghaotiyu/src/features/watchlist/presentation/providers/watchlist_notifier.dart';
 import 'package:shenghaotiyu/src/providers/theme_provider.dart';
 import 'package:shenghaotiyu/src/routes/app_router.dart';
 
@@ -47,12 +49,14 @@ void main() async {
   await NotificationService().init();
   await NotificationService().requestPermissions();
   final sharedPreferences = await SharedPreferences.getInstance();
+  final deviceId = await DeviceIdService().getOrCreate();
 
   runApp(
     ProviderScope(
       overrides: [
         sharedPreferencesProvider.overrideWithValue(sharedPreferences),
         remoteConfigProvider.overrideWithValue(remoteConfig),
+        deviceIdProvider.overrideWithValue(deviceId),
       ],
       child: EasyLocalization(
         supportedLocales: const [Locale('zh', 'CN'), Locale('en', 'GB')],

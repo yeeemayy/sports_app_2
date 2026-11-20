@@ -7,8 +7,9 @@ import 'package:shenghaotiyu/src/features/anchor/domain/models/im_token_model.da
 
 part 'anchor_api_client.g.dart';
 
-/// Shared client for the anchor-related backend endpoints (detail + IM
-/// auth), which both use the same `{code, msg, data}` envelope.
+/// Client for the anchor-related endpoints (`{code, msg, data}` envelope).
+/// Signed-in chat auth comes from the unified sports_forum login (see
+/// `rongcloud_service.dart`); `fetchImToken` covers the guest fallback.
 class AnchorApiClient {
   AnchorApiClient(this._dio);
 

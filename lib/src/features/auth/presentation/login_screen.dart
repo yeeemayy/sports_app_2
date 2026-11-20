@@ -19,13 +19,13 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _telephoneController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
   void dispose() {
-    _telephoneController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -36,7 +36,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       await ref
           .read(authNotifierProvider.notifier)
           .login(
-            telephone: _telephoneController.text.trim(),
+            username: _usernameController.text.trim(),
             password: _passwordController.text,
           );
       if (mounted) {
@@ -78,10 +78,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 20),
                     LabeledField(
-                      label: 'auth.field.telephone'.tr(),
+                      label: 'auth.field.username'.tr(),
                       child: TextFormField(
-                        controller: _telephoneController,
-                        keyboardType: TextInputType.phone,
+                        controller: _usernameController,
                         style: AppTextStyles.mono(
                           15,
                         ).copyWith(color: scheme.onSurface),
@@ -90,32 +89,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             FocusManager.instance.primaryFocus?.unfocus(),
                         decoration: authInputDecoration(
                           context,
-                          hintText: 'auth.field.telephone_hint'.tr(),
-                          prefixIcon: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 14),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  '+86',
-                                  style: AppTextStyles.mono(
-                                    13,
-                                  ).copyWith(color: scheme.onSurface),
-                                ),
-                                const SizedBox(width: 8),
-                                Container(
-                                  width: 0.5,
-                                  height: 18,
-                                  color: scheme.onSurface.withValues(
-                                    alpha: 0.18,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          hintText: 'auth.field.username_hint'.tr(),
                         ),
                         validator: (v) => v == null || v.trim().isEmpty
-                            ? 'auth.validation.telephone_required'.tr()
+                            ? 'auth.validation.username_required'.tr()
                             : null,
                       ),
                     ),
@@ -150,19 +127,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         validator: (v) => v == null || v.isEmpty
                             ? 'auth.validation.password_required'.tr()
                             : null,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: GestureDetector(
-                        onTap: () => context.push(AppRoutes.forgotPassword),
-                        child: Text(
-                          'auth.login.forgot_password'.tr(),
-                          style: AppTextStyles.mono(
-                            11,
-                          ).copyWith(color: scheme.primary, letterSpacing: 1.2),
-                        ),
                       ),
                     ),
                     const SizedBox(height: 20),

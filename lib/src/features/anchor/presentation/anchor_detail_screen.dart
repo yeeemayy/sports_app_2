@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:go_router/go_router.dart';
 import 'package:marquee/marquee.dart';
 import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
+import 'package:shenghaotiyu/src/shared_widgets/app_back_button.dart';
 import 'package:shenghaotiyu/src/features/home/domain/models/banner_model.dart';
 import 'package:shenghaotiyu/src/features/home/presentation/providers/banner_providers.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -358,9 +358,10 @@ class _StreamSurface extends StatelessWidget {
               right: 16,
               child: Row(
                 children: [
-                  _FrostedIconButton(
-                    onTap: () => context.pop(),
-                    child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 18),
+                  AppBackButton(
+                    backgroundColor: Colors.black.withValues(alpha: 0.5),
+                    iconColor: Colors.white,
+                    iconSize: 18,
                   ),
                   const Spacer(),
                   if (detail?.isLive == 1) ...[

@@ -80,7 +80,8 @@
     "league": "联赛",
     "profile": "个人",
     "live": "直播",
-    "me": "我的"
+    "me": "我的",
+    "community": "社区"
   },
   "news": {
     "header": "热点资讯",
@@ -162,7 +163,12 @@
     "retry": "重试",
     "error": {
       "unexpected": "发生未知错误，请稍后再试"
-    }
+    },
+    "cancel": "取消",
+    "empty": "暂无内容",
+    "error_generic": "出现错误",
+    "got_it": "知道了",
+    "save": "保存"
   },
   "profile": {
     "edit_button": "编辑资料",
@@ -850,7 +856,9 @@
       "confirm_password_hint": "确认密码",
       "nickname": "用户名",
       "nickname_hint": "输入用户名（6-15位数字和字母）",
-      "sms_code": "验证码"
+      "sms_code": "验证码",
+      "username": "账号",
+      "username_hint": "请输入账号"
     },
     "otp": {
       "send": "获取验证码",
@@ -861,7 +869,8 @@
       "password_required": "请输入密码",
       "nickname_required": "请输入昵称",
       "sms_required": "请输入验证码",
-      "confirm_password_mismatch": "两次密码输入不一致"
+      "confirm_password_mismatch": "两次密码输入不一致",
+      "username_required": "请输入账号"
     }
   },
   "prediction": {
@@ -1221,6 +1230,92 @@
       "best_streak": "最佳连胜",
       "streak": "连胜",
       "correct": "准确次数"
+    }
+  },
+  "community": {
+    "tab_title": "社区",
+    "empty": "暂无帖子",
+    "no_posts_mine": "你还没有发布过帖子",
+    "no_posts_user": "暂无帖子",
+    "no_bookmarks": "暂无收藏",
+    "no_comments": "暂无评论",
+    "no_notifications": "暂无通知",
+    "all_categories": "全部",
+    "categories_label": "分类",
+    "topics_label": "话题",
+    "create_title": "发帖",
+    "edit_title": "编辑帖子",
+    "create_hint": "分享一些内容给社区...",
+    "add_image": "添加图片",
+    "add_topic_hint": "添加话题标签后按回车",
+    "post_button": "发布",
+    "post_created": "发布成功",
+    "post_updated": "更新成功",
+    "delete": "删除",
+    "delete_confirm_title": "确定删除这条帖子吗？",
+    "delete_comment_confirm_title": "确定删除这条评论吗？",
+    "edit": "编辑",
+    "report": "举报",
+    "report_title": "举报",
+    "report_reason_spam": "垃圾信息",
+    "report_reason_abuse": "谩骂/骚扰",
+    "report_reason_misinformation": "虚假信息",
+    "report_reason_inappropriate": "不当内容",
+    "report_reason_other": "其他",
+    "report_detail_hint": "补充说明（可选）",
+    "report_submit": "提交举报",
+    "report_submitted": "举报已提交",
+    "comment_hint": "写评论...",
+    "reply": "回复",
+    "replying_to": "回复 {name}",
+    "login_to_comment_suffix": "以加入讨论",
+    "login_to_comment_action": "登录",
+    "post_detail_title": "帖子",
+    "post_deleted": "该帖子可能已被删除",
+    "follow": "关注",
+    "following": "已关注",
+    "unfollow": "取消关注",
+    "unfollow_confirm_title": "确定取消关注 {name} 吗？",
+    "user_not_found": "该用户可能已不存在",
+    "posts_count": "{n} 篇帖子",
+    "stat_posts": "帖子",
+    "stat_followers": "粉丝",
+    "stat_following": "关注",
+    "my_posts": "我的帖子",
+    "my_bookmarks": "我的收藏",
+    "trending_topics": "热门话题",
+    "notifications": "通知",
+    "mark_all_read": "全部标记为已读",
+    "notification_post_liked": "{name} 赞了你的帖子",
+    "notification_comment_liked": "{name} 赞了你的评论",
+    "notification_post_commented": "{name} 评论了你的帖子",
+    "notification_comment_replied": "{name} 回复了你的评论",
+    "notification_user_followed": "{name} 关注了你",
+    "notification_user_mentioned": "{name} 提到了你",
+    "notification_post_bookmarked": "{name} 收藏了你的帖子",
+    "search": "搜索",
+    "search_hint": "搜索帖子和用户",
+    "search_tab_posts": "帖子",
+    "search_tab_users": "用户",
+    "login": {
+      "title": "社区登录",
+      "register_title": "创建账号",
+      "subtitle": "登录后即可发帖、评论和关注其他成员。",
+      "username": "用户名",
+      "password": "密码",
+      "name": "昵称",
+      "submit": "登录",
+      "register": "创建账号",
+      "need_account": "还没有账号？去注册",
+      "have_account": "已有账号？去登录",
+      "field_required": "此项为必填项",
+      "failed_title": "登录失败"
+    },
+    "relative_time": {
+      "just_now": "刚刚",
+      "minutes": "{n}分钟前",
+      "hours": "{n}小时前",
+      "days": "{n}天前"
     }
   }
 }

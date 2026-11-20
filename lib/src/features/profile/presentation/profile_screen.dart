@@ -8,8 +8,8 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:shenghaotiyu/src/core/utils/app_info.dart';
 import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
 import 'package:shenghaotiyu/src/features/auth/data/auth_storage_service.dart';
-import 'package:shenghaotiyu/src/features/auth/domain/models/user_model.dart';
 import 'package:shenghaotiyu/src/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:shenghaotiyu/src/features/community/domain/models/community_post.dart';
 import 'package:shenghaotiyu/src/core/remote_config_provider.dart';
 import 'package:shenghaotiyu/src/providers/theme_provider.dart';
 import 'package:shenghaotiyu/src/routes/app_router.dart';
@@ -425,7 +425,7 @@ class _ProfileHero extends StatelessWidget {
   const _ProfileHero({required this.isAuthenticated, required this.user});
 
   final bool isAuthenticated;
-  final UserModel? user;
+  final CommunityAuthor? user;
 
   @override
   Widget build(BuildContext context) {

@@ -10,4 +10,9 @@ class EnvConfig {
   static String get aiscoreSportUrl => dotenv.get('AISCORE_SPORT');
   static String get newsApiUrl => dotenv.get('NEWS_API_URL');
   static String get appName => dotenv.get('ZY_APP_NAME');
+
+  /// sports_forum's real API — the app's one auth surface (login/register/
+  /// profile) and the Community tab's backing API (posts, comments,
+  /// hashtags, notifications).
+  static String get forumApiUrl => dotenv.get('FORUM_API_URL');
 }

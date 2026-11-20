@@ -15,7 +15,17 @@ import 'package:shenghaotiyu/src/features/event/presentation/ice_hockey_match_de
 import 'package:shenghaotiyu/src/features/event/presentation/table_tennis_match_detail_screen.dart';
 import 'package:shenghaotiyu/src/features/event/presentation/tennis_match_detail_screen.dart';
 import 'package:shenghaotiyu/src/features/event/presentation/volleyball_match_detail_screen.dart';
-import 'package:shenghaotiyu/src/features/auth/presentation/forgot_password_screen.dart';
+import 'package:shenghaotiyu/src/features/community/domain/models/community_post.dart';
+import 'package:shenghaotiyu/src/features/community/presentation/community_bookmarks_screen.dart';
+import 'package:shenghaotiyu/src/features/community/presentation/community_create_post_screen.dart';
+import 'package:shenghaotiyu/src/features/community/presentation/community_hashtag_feed_screen.dart';
+import 'package:shenghaotiyu/src/features/community/presentation/community_list_screen.dart';
+import 'package:shenghaotiyu/src/features/community/presentation/community_my_posts_screen.dart';
+import 'package:shenghaotiyu/src/features/community/presentation/community_notifications_screen.dart';
+import 'package:shenghaotiyu/src/features/community/presentation/community_post_detail_screen.dart';
+import 'package:shenghaotiyu/src/features/community/presentation/community_search_screen.dart';
+import 'package:shenghaotiyu/src/features/community/presentation/community_trending_topics_screen.dart';
+import 'package:shenghaotiyu/src/features/community/presentation/community_user_profile_screen.dart';
 import 'package:shenghaotiyu/src/features/auth/presentation/login_screen.dart';
 import 'package:shenghaotiyu/src/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:shenghaotiyu/src/features/auth/presentation/register_screen.dart';
@@ -140,6 +150,15 @@ GoRouter appRouter(AppRouterRef ref) {
                 path: AppRoutes.league,
                 builder: (BuildContext context, GoRouterState state) =>
                     const LeagueScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: AppRoutes.community,
+                builder: (BuildContext context, GoRouterState state) =>
+                    const CommunityListScreen(),
               ),
             ],
           ),
@@ -359,9 +378,57 @@ GoRouter appRouter(AppRouterRef ref) {
         path: AppRoutes.register,
         builder: (context, state) => const RegisterScreen(),
       ),
+      // ── Community pushed routes ─────────────────────────────────────────
       GoRoute(
-        path: AppRoutes.forgotPassword,
-        builder: (context, state) => const ForgotPasswordScreen(),
+        path: AppRoutes.communityCreate,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) =>
+            CommunityCreatePostScreen(editPost: state.extra as CommunityPost?),
+      ),
+      GoRoute(
+        path: AppRoutes.communitySearch,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const CommunitySearchScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.communityMyPosts,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const CommunityMyPostsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.communityBookmarks,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const CommunityBookmarksScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.communityTopics,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const CommunityTrendingTopicsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.communityNotifications,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const CommunityNotificationsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.communityHashtag,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) =>
+            CommunityHashtagFeedScreen(hashtag: state.pathParameters['name']!),
+      ),
+      GoRoute(
+        path: AppRoutes.communityUser,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => CommunityUserProfileScreen(
+          userId: int.parse(state.pathParameters['id']!),
+          seed: state.extra as CommunityAuthor?,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.communityPostDetail,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) =>
+            CommunityPostDetailScreen(id: int.parse(state.pathParameters['id']!)),
       ),
     ],
   );

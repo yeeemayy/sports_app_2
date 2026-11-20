@@ -8,8 +8,9 @@ import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:shenghaotiyu/src/features/auth/data/auth_repository.dart';
+import 'package:shenghaotiyu/src/core/services/forum_api_service.dart';
 import 'package:shenghaotiyu/src/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:shenghaotiyu/src/shared_widgets/app_back_button.dart';
 import 'package:shenghaotiyu/src/shared_widgets/avatar.dart';
 import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
 import 'package:shenghaotiyu/src/shared_widgets/custom_status_dialog.dart';
@@ -74,18 +75,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _isSaving = true);
     try {
-      final repo = ref.read(authRepositoryProvider.notifier);
-      String? avatarUrl;
+      final repo = ref.read(communityRepositoryProvider);
       if (_pickedImage != null) {
-        avatarUrl = await repo.uploadAvatar(_pickedImage!.path);
-        debugPrint(avatarUrl);
+        await repo.uploadAvatar(File(_pickedImage!.path));
       }
       await ref
           .read(authNotifierProvider.notifier)
-          .updateProfile(
-            nickname: _nicknameController.text.trim(),
-            avatarUrl: avatarUrl,
-          );
+          .updateProfile(nickname: _nicknameController.text.trim());
       if (mounted) {
         await showCustomStatusDialog(
           context: context,
@@ -289,19 +285,7 @@ class _HeaderBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        GestureDetector(
-          onTap: () => context.pop(),
-          child: Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.5),
-              shape: BoxShape.circle,
-              border: Border.all(color: colors.lineStrong, width: 0.5),
-            ),
-            child: Icon(Icons.arrow_back_ios_new_rounded, color: colors.text, size: 16),
-          ),
-        ),
+        const AppBackButton(),
         Expanded(
           child: Center(
             child: Text(

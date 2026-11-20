@@ -4,6 +4,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'im_token_model.freezed.dart';
 part 'im_token_model.g.dart';
 
+/// Guest RongCloud identity handed out by `/auth/im?cid=` to signed-out
+/// viewers (sports_forum's `rc_key`/`rc_token` only exist after `/login`).
 @freezed
 class ImTokenModel with _$ImTokenModel {
   const factory ImTokenModel({

@@ -1,7 +1,6 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:shenghaotiyu/src/core/theme/app_theme.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +8,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:shenghaotiyu/src/extensions/context_extensions.dart';
 import 'package:shenghaotiyu/src/features/news/domain/models/news_detail.dart';
 import 'package:shenghaotiyu/src/features/news/presentation/providers/news_providers.dart';
+import 'package:shenghaotiyu/src/shared_widgets/app_back_button.dart';
 
 class NewsDetailScreen extends ConsumerWidget {
   const NewsDetailScreen({super.key, required this.newsId});
@@ -112,17 +112,10 @@ class NewsDetailScreen extends ConsumerWidget {
               pinned: true,
               elevation: 0,
               surfaceTintColor: Colors.transparent,
-              leading: IconButton(
-                onPressed: () => context.pop(),
-                icon: const Icon(
-                  Icons.arrow_circle_left_outlined,
-                  color: Colors.white,
-                ),
-                iconSize: 24,
-                style: IconButton.styleFrom(
+              leading: Center(
+                child: AppBackButton(
+                  iconColor: Colors.white,
                   backgroundColor: Colors.black.withValues(alpha: 0.5),
-                  side: BorderSide(color: colors.lineStrong, width: 0.5),
-                  shape: const CircleBorder(),
                 ),
               ),
               flexibleSpace: hasImage || isLoading
@@ -239,16 +232,7 @@ class NewsDetailScreen extends ConsumerWidget {
       backgroundColor: colors.ink,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
-      leading: IconButton(
-        onPressed: () => context.pop(),
-        icon: const Icon(Icons.arrow_circle_left_outlined, color: Colors.white),
-        iconSize: 24,
-        style: IconButton.styleFrom(
-          backgroundColor: colors.surface2,
-          side: BorderSide(color: colors.lineStrong, width: 0.5),
-          shape: const CircleBorder(),
-        ),
-      ),
+      leading: Center(child: AppBackButton(backgroundColor: colors.surface2)),
     );
   }
 }

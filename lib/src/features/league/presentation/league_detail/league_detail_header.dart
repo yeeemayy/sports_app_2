@@ -9,6 +9,7 @@ import 'package:shenghaotiyu/src/features/favourites/presentation/providers/favo
 import 'package:shenghaotiyu/src/features/league/domain/league_sport.dart';
 import 'package:shenghaotiyu/src/features/league/domain/models/league_detail_model.dart';
 import 'package:shenghaotiyu/src/features/league/presentation/utils/logo_color.dart';
+import 'package:shenghaotiyu/src/shared_widgets/app_back_button.dart';
 
 const _kHeroHeight = 160.0;
 
@@ -93,22 +94,11 @@ class _LeagueDetailHeaderState extends ConsumerState<LeagueDetailHeader>
           Positioned(
             top: MediaQuery.of(context).padding.top + 12,
             left: 16,
-            child: IconButton(
-              onPressed: widget.onBack,
-              icon: const Icon(
-                Icons.arrow_circle_left_outlined,
-                color: Colors.white,
-              ),
-              iconSize: 24,
-              padding: EdgeInsets.zero,
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.black.withValues(alpha: 0.3),
-                side: BorderSide(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  width: 0.5,
-                ),
-                shape: const CircleBorder(),
-              ),
+            child: AppBackButton(
+              onTap: widget.onBack,
+              iconColor: Colors.white,
+              backgroundColor: Colors.black.withValues(alpha: 0.3),
+              borderColor: Colors.white.withValues(alpha: 0.15),
             ),
           ),
           // Favourite star button
